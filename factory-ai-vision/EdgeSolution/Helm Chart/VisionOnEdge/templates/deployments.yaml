@@ -1,0 +1,383 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginxmodule
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginxmodule
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: nginxmodule
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      {{- with .Values.nginxModule.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nginxModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: nginxmodule
+        image: "intelligentedge/nginxmodule:{{ .Chart.AppVersion }}-amd64"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: {{ .Values.nginxModule.port | default 8181 }}
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webmodule
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: webmodule
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: webmodule
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      {{- with .Values.webModule.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.webModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: webmodule
+        image: "intelligentedge/webmodule:{{ .Chart.AppVersion }}-amd64"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8000
+        env:
+          - name: IOTHUB_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: azure-env-938475
+                key: IOTHUB_CONNECTION_STRING
+          - name: TRAINING_KEY
+            valueFrom:
+              secretKeyRef:
+                name: azure-env-938475
+                key: CUSTOM_VISION_KEY
+          - name: ENDPOINT
+            value: {{ .Values.customVision.endPoint }}
+          - name: DB_NAME
+            value: "vision_on_edge"
+          - name: DB_HOST
+            value: "172.18.0.1"
+          - name: DB_USER
+            value: "vision_on_edge"
+          - name: DB_PASS
+            value: "vision_on_edge"
+          - name: DF_PD_VIDEO_SOURCE
+            value: "opencv"
+          - name: IS_K8S
+            value: "true"
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: inferencemodule
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: inferencemodule
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: inferencemodule
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      {{- with .Values.inferenceModule.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.inferenceModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: inferencemodule
+        image: "intelligentedge/inferencemodule:{{ .Chart.AppVersion }}-amd64"
+        imagePullPolicy: Always
+        {{ if .Values.inferenceModule.cpuLimit }}
+        resources:
+          limits:
+            cpu: {{ .Values.inferenceModule.cpuLimit }}
+        {{ end }}
+        ports:
+        - containerPort: 5000
+        env:
+          - name: IOTHUB_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: azure-env-938475
+                key: IOTHUB_CONNECTION_STRING
+          - name: IOTEDGE_DEVICE_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: azure-env-938475
+                key: IOTEDGE_DEVICE_CONNECTION_STRING
+          - name: IS_OPENCV
+            value: "true"
+          - name: IS_K8S
+            value: "true"
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: predictmodule
+spec:
+  replicas: {{ .Values.predictModule.replicaCount | default 1 }}
+  selector:
+    matchLabels:
+      app: predictmodule
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: predictmodule
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+        {{ if .Values.runtime.accelerator }}
+        {{ if and (or (eq .Values.runtime.accelerator "GPU") (eq .Values.runtime.accelerator "gpu")) (not .Values.runtime.stackEdge) }}
+        "accelerator": nvidia
+        {{ end }}
+        {{ end }}
+      {{- with .Values.predictModule.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.predictModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: predictmodule
+        {{ if .Values.runtime.accelerator }}
+        {{ if or (eq .Values.runtime.accelerator "GPU") (eq .Values.runtime.accelerator "gpu") }}
+        image: "intelligentedge/predictmodule:{{ .Chart.AppVersion }}-gpuamd64"
+        {{ else if or (eq .Values.runtime.accelerator "VPU") (eq .Values.runtime.accelerator "vpu") }}
+        image: "intelligentedge/predictmodule:{{ .Chart.AppVersion }}-vpuamd64"
+        {{ end }}
+        {{ end }}
+        {{ if not .Values.runtime.accelerator }}
+        image: "intelligentedge/predictmodule:{{ .Chart.AppVersion }}-cpuamd64"
+        {{ end }}
+        {{ if .Values.predictModule.cpuLimit }}
+        resources:
+          limits:
+            cpu: {{ .Values.predictModule.cpuLimit }}
+        {{ end }}
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 7777
+        env:
+          - name: IOTHUB_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: azure-env-938475
+                key: IOTHUB_CONNECTION_STRING
+          - name: IS_K8S
+            value: "true"
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cvcapturemodule
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: cvcapturemodule
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: cvcapturemodule
+    spec:
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      {{- with .Values.captureModule.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.captureModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: cvcapturemodule
+        image: "intelligentedge/cameramodule:{{ .Chart.AppVersion }}-amd64"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 9000
+        env:
+          - name: IOTHUB_CONNECTION_STRING
+            valueFrom:
+              secretKeyRef:
+                name: azure-env-938475
+                key: IOTHUB_CONNECTION_STRING
+          - name: IS_K8S
+            value: "true"
+
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: rtspsim
+spec:   
+  replicas: 1
+  selector:
+    matchLabels:
+      app: rtspsim
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: rtspsim
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - rtspsim
+            topologyKey: "kubernetes.io/hostname"
+        {{- with .Values.rtspsimModule.affinity }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      {{- with .Values.rtspsimModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: rtspsim
+        image: "intelligentedge/rtspsimmodule:{{ .Chart.AppVersion }}-amd64"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 554
+        volumeMounts:
+        - name: azure
+          mountPath: /live/mediaServer/media/upload
+      volumes:
+      - name: azure
+        persistentVolumeClaim: 
+            claimName:  pvc-storage-csi
+
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: uploadmodule
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: uploadmodule
+  minReadySeconds: 10
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  template:
+    metadata:
+      labels:
+        app: uploadmodule
+    spec:
+      affinity:
+        podAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchExpressions:
+              - key: app
+                operator: In
+                values:
+                - rtspsim
+            topologyKey: "kubernetes.io/hostname"
+        {{- with .Values.uploadModule.affinity }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      nodeSelector:
+        "beta.kubernetes.io/os": linux
+      {{- with .Values.uploadModule.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+      - name: uploadmodule
+        image: "intelligentedge/uploadmodule:{{ .Chart.AppVersion }}-amd64"
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 7000
+        volumeMounts:
+        - name: azure
+          mountPath: /app/upload
+      volumes:
+      - name: azure
+        persistentVolumeClaim: 
+            claimName:  pvc-storage-csi

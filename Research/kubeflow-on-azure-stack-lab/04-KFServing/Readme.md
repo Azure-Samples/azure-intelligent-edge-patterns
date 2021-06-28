@@ -68,14 +68,53 @@ You would need to manually label your particular namespace with `inferenceservic
 
 You might also need to resolve the access issues, see [Kubernetes documentation](https://kubernetes.io/docs/reference/access-authn-authz/rbac/) or [KFServing Troubleshooting](https://github.com/kubeflow/kfserving/blob/master/docs/DEVELOPER_GUIDE.md#troubleshooting).
 
+---
+
 ## Infrerencing using KFServing
 
-We created separate demos for
+You are free to deploy your own, custom-made `inferenceservice` if you want.
 
- - [KFServing TensorFlow models](tensorflow.md)
- - [KFServing PyTorch models](pytorch.md)
+For that, please see a separate sub-page, [KFServing custom-made inferenceservice](custom/Readme.md)
 
-Here we will walk through a demo for SKLearn.
+It is more common to use models from popular frameworks, for example, [TensorFlow](tensorflow.md),
+[PyTorch](pytorch.md), [ONNX](onnx.md), Triton, XGBoost, or SKLearn. We describe them below.
+
+---
+
+### KFServing TensorFlow models
+
+Please see a separate sub-page, [KFServing TensorFlow models](tensorflow.md)
+
+---
+
+### KFServing PyTorch models
+
+You can validate PyTorch models using PyTorch cli before deploying.
+
+Please see a separate sub-page, [KFServing PyTorch models](pytorch.md)
+ 
+---
+
+### KFServing models saved in ONNX format
+
+ONNX is an ecosystem that could contain models from different frameworks and custom
+action blocks.
+
+Please see a separate sub-page, [KFServing models saved in ONNX format](onnx.md)
+
+---
+
+### KFServing using Triton
+
+Triton is a high-performance inferencing server from NVIDIA
+
+Please see a separate sub-page, [KFServing using Triton](triton/Readme.md)
+
+---
+
+### KFServing model SKLearn Iris model
+
+Let us walk through a demo for SKLearn, which is similar for other ML frameworks.
 
 To create KFServing inference service, you can try a sample from [kfserving repository](https://github.com/kubeflow/kfserving):
 
@@ -195,6 +234,7 @@ See https://github.com/kubeflow/kfserving for more details.
 - [https://www.kubeflow.org/docs/components/serving/kfserving/](https://www.kubeflow.org/docs/components/serving/kfserving/)
 - [Kafka Event Source](https://github.com/knative/eventing-contrib/tree/master/kafka/source)
 - [knative client](https://github.com/knative/client)
+- https://developer.nvidia.com/nvidia-triton-inference-server
 
 ---
 

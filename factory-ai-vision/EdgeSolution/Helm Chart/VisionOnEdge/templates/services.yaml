@@ -1,0 +1,82 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nginxmodule
+spec:
+  type: LoadBalancer
+  ports:
+  - port: {{.Values.nginxModule.port | default 8181}}
+  selector:
+    app: nginxmodule
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: webmodule
+spec:
+  ports:
+  - port: 8000
+  selector:
+    app: webmodule
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: inferencemodule
+spec:
+  ports:
+  - port: 5000
+  selector:
+    app: inferencemodule
+  
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: predictmodule
+spec:
+  ports:
+  - port: 7777
+  selector:
+    app: predictmodule
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: cvcapturemodule
+spec:
+  ports:
+  - port: 9000
+  selector:
+    app: cvcapturemodule
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: rtspsim
+spec:
+  ports:
+  - port: 554
+  selector:
+    app: rtspsim
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: uploadmodule
+spec:
+  ports:
+  - port: 7000
+  selector:
+    app: uploadmodule

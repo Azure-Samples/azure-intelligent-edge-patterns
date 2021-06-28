@@ -1,0 +1,17 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.deployment.name }}-service
+  labels:
+    svc: {{ .Values.deployment.name }}-service
+spec:
+  ports:
+  {{- range $key, $value := .Values.service.ports }}
+    - name: {{ $key }}
+      protocol: TCP
+      port: {{ $value }}
+  {{- end }} 
+  selector:
+    app: {{ .Values.deployment.name }}-deployment
+  type: {{ .Values.service.type }}
+

@@ -227,4 +227,6 @@ See `tensorflow_web_infer.py` for example of how to pick the right index and get
 - https://www.tensorflow.org/tfx/serving/api_rest
 - https://www.tensorflow.org/tfx/tutorials/serving/rest_simple
 
+---
+
 [Back](Readme.md)

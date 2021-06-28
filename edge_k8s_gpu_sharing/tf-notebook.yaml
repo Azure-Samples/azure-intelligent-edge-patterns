@@ -1,0 +1,61 @@
+#
+# To use(!!!token for connection is in the logs):
+#  
+#   $ kubectl create -f .\tf-notebook.yaml -n myasetest1
+#   $ kubectl port-forward tf-notebook 8888:8888 -n myasetest1
+#   $ kubectl logs -f tf-notebook -n myasetest1
+#
+# For troubleshooting these could be useful:
+#  
+#   $ kubectl get service -n myasetest1
+#   $ kubectl get pods -n myasetest1
+#   $ kubectl describe pod <your pod name> -n myasetest1
+#
+#  Open browser on http://127.0.0.1:8888 , it will ask for the tocken,
+#  or cut/paste the connection link with the token from the logs
+#   $ kubectl logs -f tf-notebook -n myasetest1
+#   ...
+#       Or copy and paste one of these URLs:
+#        http://tf-notebook:8888/?token=c3eef2cc5044695641177a89bdb0a8d473e9f6f9e26451bf
+#     or http://127.0.0.1:8888/?token=c3eef2cc5044695641177a89bdb0a8d473e9f6f9e26451bf
+#   ...
+#
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: tf-notebook
+  labels:
+    app: tf-notebook
+spec:
+  type: NodePort
+  ports:
+  - port: 80
+    name: http
+    targetPort: 8888
+    nodePort: 30001
+  selector:
+    app: tf-notebook
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: tf-notebook
+  labels:
+    app: tf-notebook
+spec:
+  securityContext:
+    fsGroup: 0
+  containers:
+  - name: tf-notebook
+    image: tensorflow/tensorflow:latest-gpu-jupyter
+    resources:
+      limits:
+        #nvidia.com/gpu: 1
+    ports:
+    - containerPort: 8888
+      name: notebook
+    env:
+    - name: NVIDIA_VISIBLE_DEVICES
+      value: "0"

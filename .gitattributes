@@ -1,0 +1,10 @@
+
+# Git Settings for remote-patient-monitoring-edge-demo directory
+
+remote-patient-monitoring-edge-demo/**/* text=auto
+
+# Force the following filetypes to have unix eols
+remote-patient-monitoring-edge-demo/**/*.sh text eol=lf
+
+# Force the following filetypes to have Windows eols
+remote-patient-monitoring-edge-demo/**/*.ps1 text eol=crlf

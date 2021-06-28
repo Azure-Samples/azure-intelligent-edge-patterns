@@ -132,17 +132,32 @@ Download the `kfctl` from [Kubeflow releases](https://github.com/kubeflow/kfctl/
 
     $ mkdir kubeflow
     $ cd kubeflow/
+
+There could be some version nuances, we are giving you v1.1 and v1.2-rc, but for the very latest,
+or required by your application or operaor, see [Kubeflow website](https://www.kubeflow.org/)
+
+v1.1:
+
     $ wget https://github.com/kubeflow/kfctl/releases/download/v1.1.0/kfctl_v1.1.0-0-ga776281_linux.tar.gz
     ...
     ‘kfctl_v1.1.0-0-gf9edb9b_linux.tar.gz’ saved [31630869/31630869]
-
     $ tar -xvf kfctl_v1.1.0-0-gf7edb9b_linux.tar.gz
+    $ export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.1-branch/kfdef/kfctl_k8s_istio.v1.1.0.yaml"
+
+v1.2-rc:
+
+    $ wget https://github.com/kubeflow/kfctl/releases/download/v1.2-rc.2/kfctl_v1.2-rc.2-0-g1316754_linux.tar.gz
+    ...
+    ‘kfctl_v1.2-rc.2-0-g1316754_linux.tar.gz’ saved [31630869/31630869]
+    $ tar -xvf kfctl_v1.2-rc.2-0-g1316754_linux.tar.gz
+    $ export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.2-branch/kfdef/kfctl_k8s_istio.v1.2.0.yaml"
+
+The rest of configuration is the same, and you are encouraged to pick a unique name for your cluster(instead `sandboxASkf`):
 
     $ export PATH=$PATH:~/kubeflow/
     $ export KF_NAME=sandboxASkf
     $ export BASE_DIR=/opt/
     $ export KF_DIR=${BASE_DIR}/${KF_NAME}
-    $ export CONFIG_URI="https://raw.githubusercontent.com/kubeflow/manifests/v1.1-branch/kfdef/kfctl_k8s_istio.v1.1.0.yaml"
     
 Generate and deploy Kubeflow:
 
