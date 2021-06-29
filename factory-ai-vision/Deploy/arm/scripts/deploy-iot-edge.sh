@@ -97,7 +97,7 @@ rm -rf ${REPO_OUTPUT_DIR}
 rm -f archive.zip
 
 #wget --quiet "https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/EdgeSolution/archive.zip"
-wget --quiet "https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/feat/lva-to-ava/factory-ai-vision/EdgeSolution/archive.zip"
+wget --quiet "https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/OVMS-integration/factory-ai-vision/EdgeSolution/archive.zip"
 
 unzip -q archive.zip -d ${REPO_OUTPUT_DIR}
 rm -f archive.zip
