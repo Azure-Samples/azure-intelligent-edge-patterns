@@ -1,12 +1,14 @@
 | description                                                                                                                                                                                                                          | products                                                               | page_type       | description                     |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | --------------- | ------------------------------- |
-| This is an easy-to-use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop. | - Azure Stack<br/> -Custom Vision<br/>-Onnxruntime<br/>-azure-iot-edge<br/>-AKS/ASK-HCI | sample solution | -json<br>-python<br>-javascript<br>-go<br>-helm |
+| This is an easy-to-use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop. | - azure Stack<br/> -Custom Vision<br/>-Onnxruntime<br/>-azure-iot-edge<br/>-AVA Pipeline <br/>*RTSP Source <br/>*HTTP/GRPC Extension   | sample solution | -json<br>-python<br>-javascript |
 
 # Vision on Edge Solution
 
-This is a solution showing how to deploy a Custom Vision model to Azure IoT Edge devices and AKS/AKS-HCI(beta) and get a Vision-based Machine learning solution up and running in a single day. You can define your location, camera and set up objects to detect example: any manufacturing parts, defective parts, etc. While keeping your video footage private, lowering your bandwidth costs, and even running everything offline. We use onnxruntime to accelerate your models on edge device using OpenVino for CPU and TensorRT for Nvidia GPU and Arm64 GPU. This solution is capable of processing multiple cameras with Microsoft LVA and OpenCV.
+This is a solution showing how to deploy a Custom Vision model to Azure IoT edge device and get Machine learning solution up and running in a single day.
+You can define your location, camera and set up objects to detect example: any manufacturing parts, defected parts, etc. while keeping your video footage private, lowering your badnwidth costs and even running everything offline. We use onnxruntime to acclerate your models on edge device using Open Vino for CPU and TensorRT for Nvidia GPU and Arm64 GPU. This solution is capable of processing multiple cameras with Microsoft AVA and openCV.
 
-Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see a brief introduction in action and understand how the value is delievered:
+Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief introduction in action and understand how the value is delivered:
+
 [![video](https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/linker/factory-ai-vision/assets/Ignite42021.jpg)](https://www.youtube.com/watch?v=17UW6veK7SA)
 
 ## Product
@@ -20,6 +22,7 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see a bri
 - OpenVINO/cpu <br/>
 - TensorRT for Nvidia/gpu <br/>
 - Arm64/cpu <br/>
+- AVA Pipeline: Learn more [here](https://azure.microsoft.com/en-us/products/video-analyzer/)
 
 <!-- # Prerequiste -->
 
@@ -94,9 +97,9 @@ Check out the architecture below to see how Vision on Edge uses various services
 
 # Architecture
 
-### LVA Module (Recommended)
+### AVA Module (Recommended)
 
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/newarch1.png)
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/AVAarch.png)
 
 ### OpenCV Module
 
@@ -125,9 +128,10 @@ Please refer to this tutorial to follow the [instruction](Tutorial/Shell-install
 
 ### Option 2: Azure ARM Template
 
-please follow the document to follow instruction  https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/linker/factory-ai-vision/Tutorial/Tutorial_ARM_TemplateDeployment.md
+please follow the document to follow instruction  https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/Tutorial_ARM_TemplateDeployment.md
 
-[![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flinkernetworks%2Fazure-intelligent-edge-patterns%2Fdevelop%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
+[![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fkaka-lin%2Fazure-intelligent-edge-patterns%2F385a9cc070517db69ee7c2f2a34597923fe78c99%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
+
 
 
 ### Option 3: Deploy by Visual studio
@@ -182,7 +186,7 @@ To learn more about this development environment, check out [this tutorial](http
 
 - Please fill in your credentials and rename it as `.env`, vscode will use this file to set the environment variables
 
-- Choose a deployement template that suites your Edge device.
+- Choose a deployment template that suites your Edge device.
 
   - For Azure Stack Edge =>
     `deployment.ase.gpu.template.json`
@@ -282,4 +286,24 @@ You may turn off the telemetry as described in the repository or clicking settin
 corner. Our privacy statement is located at [https://go.microsoft.com/fwlink/?LinkID=824704](https://go.microsoft.com/fwlink/?LinkID=824704)
 . You can learn more about data collection and use in the help documentation and our privacy
 statement. Your use of the software operates as your consent to these practices.
+
+# Troubleshooting
+
+If you are running into issues, please check following for assistant:
+
+1. Ensure your setup is good
+   1. On CPU make sure this work: [https://azuremarketplace.microsoft.com/en-us/marketplace/apps/azure-iot.simulated-temperature-sensor?tab=Overview](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/azure-iot.simulated-temperature-sensor?tab=Overview)
+   2. On GPU make sure this work:
+      1. Quick test : run below command this will try to access nvidia gpu inside docker
+         - `sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi`
+      2. Long test :: deploy below from marketplace on your iot edge device and make sure it works
+         [https://azuremarketplace.microsoft.com/en-us/marketplace/apps/intelligent-edge.gpureferencemodule?tab=Overview](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/intelligent-edge.gpureferencemodule?tab=Overview)
+2. If this is the first time you deploy the container to your edge, you might need to wait for more than 10 mins. You can use ssh to connect to your edge and try sudo docker ps., then you should see following 2 containers running:
+   YOUR_CONTAINER_REGISTRY_NAME/inferencemodule:x.x.xx-cpuamd64 (or gpu)
+   YOUR_CONTAINER_REGISTRY_NAME/webmodule:x.x.xx-cpuamd64
+
+   If you don’t see above, the containers aren't downloaded successfully yet
+
+3. If the inference & visionweb modules exist but still cannot see the page in 8181 port, check whether 8181 port on your edge is opened.
+4. If you can visit the website (in 8181 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened.
 

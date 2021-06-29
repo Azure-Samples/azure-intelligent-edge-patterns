@@ -62,8 +62,10 @@ class Part(models.Model):
         Returns:
             int:
         """
+        from ..images.models import Image
         try:
-            return self.image_set.filter(uploaded=False, manual_checked=True).count()
+            # return self.image_set.filter(uploaded=False, manual_checked=True).count()
+            return Image.objects.filter(uploaded=False, part_ids__contains='"{}"'.format(str(self.id)), manual_checked=True).count()
         except AttributeError:
             return 0
 
