@@ -22,6 +22,15 @@ from invoke import gm
 from scenarios import DangerZone, DefeatDetection, Detection, PartCounter, PartDetection, ShelfZone, CountingZone, QueueZone
 from utility import draw_label, get_file_zip, is_edge, normalize_rtsp
 
+# for grpc
+import grpc
+import datetime
+from tensorflow import make_tensor_proto, make_ndarray
+from tensorflow_serving.apis import predict_pb2
+from tensorflow_serving.apis import prediction_service_pb2_grpc
+from ovms_utils import load_classes, postprocess
+from yolo_utils import yolo_eval
+
 DETECTION_TYPE_NOTHING = "nothing"
 DETECTION_TYPE_SUCCESS = "success"
 DETECTION_TYPE_UNIDENTIFIED = "unidentified"
@@ -496,6 +505,7 @@ class Stream:
             f4 = BytesIO(str_encode)
             f5 = BufferedReader(f4)
             s = time.time()
+            logger.warning('request prediction from OVMS, yolov3 model')
             res = requests.post(self.model.endpoint, data=f5)
             inf_time = time.time() - s
             logger.warning(res.json())
@@ -610,6 +620,152 @@ class Stream:
         self.average_inference_time = (
             1 / 16 * inf_time_ms + 15 / 16 * self.average_inference_time
         )
+
+    def predict_grpc(self, image, stub):
+
+        width = self.IMG_WIDTH
+        ratio = self.IMG_WIDTH / image.shape[1]
+        height = int(image.shape[0] * ratio + 0.000001)
+        if height >= self.IMG_HEIGHT:
+            height = self.IMG_HEIGHT
+            ratio = self.IMG_HEIGHT / image.shape[0]
+            width = int(image.shape[1] * ratio + 0.000001)
+
+        s = time.time()
+        detectedObjects = self.ovms_score(stub, image)
+        inf_time = time.time() - s
+        predictions = lva_to_customvision_format(detectedObjects)
+
+        # check whether it's the tag we want
+        predictions = list(
+            p for p in predictions if p["tagName"] in self.model.parts)
+
+        # check whether it's inside aoi (if has)
+        if self.has_aoi:
+            _predictions = []
+            for p in predictions:
+                (x1, y1), (x2, y2) = parse_bbox(p, width, height)
+                if is_inside_aoi(x1, y1, x2, y2, self.aoi_info):
+                    _predictions.append(p)
+            predictions = _predictions
+
+        # update detection status before filter out by threshold
+        self.update_detection_status(predictions)
+
+        if self.is_retrain:
+            self.process_retrain_image(predictions, image)
+
+        # check whether it's larger than threshold
+        predictions = list(
+            p for p in predictions if p["probability"] >= self.threshold)
+
+        # update last_prediction_count
+        _last_prediction_count = {}
+        for p in predictions:
+            tag = p["tagName"]
+            if tag not in _last_prediction_count:
+                _last_prediction_count[tag] = 1
+            else:
+                _last_prediction_count[tag] += 1
+        self.last_prediction_count = _last_prediction_count
+
+        # update the buffer
+        # no need to copy since resize already did it
+        self.last_img = image
+        self.last_prediction = predictions
+
+        # FIXME support more scenarios
+        # Update Tracker / Scenario
+        _detections = []
+        for prediction in predictions:
+            tag = prediction["tagName"]
+            # if prediction['probability'] > 0.5:
+            (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
+            _detections.append(
+                Detection(tag, x1, y1, x2, y2, prediction["probability"])
+            )
+        if self.scenario:
+            update_ret = self.scenario.update(_detections)
+            if self.get_mode() in ['ES', 'DD', 'PC', 'TCC', 'CQA']:
+                self.counter = update_ret[0]
+
+        self.draw_img()
+
+        if self.scenario:
+            if (self.get_mode() in ["ES", "TCC", "CQA"] and self.use_zone == True) or (self.get_mode() in ['DD', 'PD', 'PC'] and self.use_line == True):
+                self.scenario.draw_counter(self.last_drawn_img)
+            if self.get_mode() == "ESA":
+                self.scenario.draw_counter(self.last_drawn_img)
+            if self.get_mode() == "DD":
+                self.scenario.draw_objs(self.last_drawn_img)
+            if self.get_mode() == 'PD' and self.use_tracker is True:
+                self.scenario.draw_objs(self.last_drawn_img)
+
+        if self.iothub_is_send:
+            if self.get_mode() in ["ES", "ESA", "TCC", "CQA"]:
+                if self.scenario.has_new_event:
+                    self.process_send_message_to_iothub(predictions)
+            else:
+                self.process_send_message_to_iothub(predictions)
+
+        if self.send_video_to_cloud:
+            if self.get_mode() in ["ES", "ESA", "TCC", "CQA"]:
+                if self.scenario.has_new_event:
+                    self.precess_send_signal_to_lva()
+            else:
+                self.precess_send_signal_to_lva()
+
+        # update avg inference time (moving avg)
+        inf_time_ms = inf_time * 1000
+        self.average_inference_time = (
+            1 / 16 * inf_time_ms + 15 / 16 * self.average_inference_time
+        )
+
+    def ovms_score(self, stub, image):
+        model_name = "yolov3"
+        input_layer = "inputs"
+        output_layers = [
+            "detector/yolo-v3/Conv_14/BiasAdd/YoloRegion",
+            "detector/yolo-v3/Conv_22/BiasAdd/YoloRegion",
+            "detector/yolo-v3/Conv_6/BiasAdd/YoloRegion"
+        ]
+        class_names = load_classes("model_data/coco.names")
+        results = {}
+
+        print("Start processing:")
+        print(f"\tModel name: {model_name}")
+
+        image = np.array(image, dtype=np.float32)
+        image = cv2.resize(image, (416, 416))
+        image = image.transpose(2, 0, 1).reshape(1, 3, 416, 416)
+
+        request = predict_pb2.PredictRequest()
+        request.model_spec.name = model_name
+        request.inputs[input_layer].CopyFrom(
+            make_tensor_proto(image, shape=(image.shape)))
+
+        # result includes a dictionary with all model outputs
+        result = stub.Predict(request, 10.0)
+
+        yolo_outputs = [[], [], []]
+        for output_layer in output_layers:
+            output = make_ndarray(result.outputs[output_layer])
+            output_numpy = np.array(output)
+            anchor_size = output_numpy.shape[2]
+            output_numpy = output_numpy.transpose(0, 2, 3, 1).reshape(
+                1, anchor_size, anchor_size, 3, 85)
+            yolo_outputs[int((anchor_size / 13) / 2)] = output_numpy
+
+        scores, boxes, classes = yolo_eval(
+            yolo_outputs,
+            classes=80,
+            score_threshold=0.5,
+            iou_threshold=0.3
+        )
+
+        results = postprocess(boxes, scores, classes, class_names)
+
+        return results
 
     def process_retrain_image(self, predictions, img):
         for prediction in predictions:

@@ -17,6 +17,8 @@ import media_pb2
 from exception_handler import PrintGetExceptionDetails
 from shared_memory import SharedMemoryManager
 
+from tensorflow_serving.apis import prediction_service_pb2_grpc
+
 # Get debug flag from env variable (Returns None if not set)
 # Set this environment variables in the IoTEdge Deployment manifest to activate debugging.
 # DEBUG = os.getenv('DEBUG')
@@ -72,6 +74,7 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
         # Thread safe shared resource among all clients
         # self._tYoloV3 = model
         self.stream_manager = stream_manager
+        self.ovms = True
 
     # Debug method for dumping received images with analysis results
 
@@ -315,18 +318,26 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                 stream = self.stream_manager.get_stream_by_id(instance_id)
                 predictions = []
                 print("[INFO] Stream not ready yet", flush=True)
+            elif not stub:
+                channel = grpc.insecure_channel('ovms-server:9010')
+                stub = prediction_service_pb2_grpc.PredictionServiceStub(
+                    channel)
             else:
                 try:
-                    # s2 = time.time()
-                    stream.predict(cvImage)
-                    predictions = stream.last_prediction
-                    # e2 = time.time() - s2
-                    # logging.info('Inference time: {0}'.format(e2))
-                    # total_time.append(e2)
-                    # logging.info(
-                    #    '***** avg. Inference time *****: {0}'.format(np.mean(total_time)))
-                    # logging.info(
-                    #    '***** std. Inference time *****: {0}'.format(np.std(total_time)))
+                    if self.ovms:
+                        stream.predict_grpc(cvImage, stub)
+                        predictions = stream.last_prediction
+                    else:
+                        # s2 = time.time()
+                        stream.predict(cvImage)
+                        predictions = stream.last_prediction
+                        # e2 = time.time() - s2
+                        # logging.info('Inference time: {0}'.format(e2))
+                        # total_time.append(e2)
+                        # logging.info(
+                        #    '***** avg. Inference time *****: {0}'.format(np.mean(total_time)))
+                        # logging.info(
+                        #    '***** std. Inference time *****: {0}'.format(np.std(total_time)))
                 except:
                     print("[ERROR] Unexpected error:",
                           sys.exc_info(), flush=True)
