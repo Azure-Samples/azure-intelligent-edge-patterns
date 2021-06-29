@@ -1,3 +1,8 @@
 -r ./base.txt
 # cpu arm not installable package
 opencv-python==4.4.0.44
+# for ovms
+grpcio==1.36.1
+grpcio-tools==1.36.1
+tensorflow==2.3.0
+tensorflow-serving-api==2.3.0

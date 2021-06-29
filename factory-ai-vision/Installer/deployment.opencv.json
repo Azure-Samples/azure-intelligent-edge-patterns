@@ -147,7 +147,7 @@
             "restartPolicy": "always",
             "settings": {
               "image": "intelligentedge/ovms-server:0.27.2-<platform>",
-              "createOptions": "{\"ExposedPorts\":{\"9000/tcp\":{}},\"Cmd\":[\"/ovms/bin/ovms --model_path /models/yolov3 --model_name yolov3 --port 9000\"],\"Entrypoint\":[\"sh\",\"-c\"],\"HostConfig\":{\"PortBindings\":{\"9000/tcp\":[{\"HostIp\":\"\",\"HostPort\":\"9000\"}]},\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}}},\"Labels\":{\"com.docker.compose.project\":\"yolov3-ovms-iotedge\",\"com.docker.compose.service\":\"ovms-server\",\"com.docker.compose.oneoff\":\"False\",\"com.docker.compose.container-number\":\"1\",\"com.docker.compose.version\":\"1.24.0\",\"com."
+              "createOptions": "{\"ExposedPorts\":{\"9010/tcp\":{}},\"Cmd\":[\"/ovms/bin/ovms --model_path /models/yolov3 --model_name yolov3 --port 9010\"],\"Entrypoint\":[\"sh\",\"-c\"],\"HostConfig\":{\"PortBindings\":{\"9000/tcp\":[{\"HostIp\":\"\",\"HostPort\":\"9000\"}]},\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}}},\"Labels\":{\"com.docker.compose.project\":\"yolov3-ovms-iotedge\",\"com.docker.compose.service\":\"ovms-server\",\"com.docker.compose.oneoff\":\"False\",\"com.docker.compose.container-number\":\"1\",\"com.docker.compose.version\":\"1.24.0\",\"com."
             }
           },
           "ovms-app": {

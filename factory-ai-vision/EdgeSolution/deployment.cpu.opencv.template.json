@@ -327,7 +327,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "registry.hub.docker.com/kakalin/ovms-server:0.0.1-amd64",
+              "image": "${MODULES.OVMSServerModule}",
               "createOptions": {
                 "ExposedPorts": {
                   "9010/tcp": {}
@@ -373,7 +373,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "registry.hub.docker.com/kakalin/ovms-app:0.0.1-amd64",
+              "image": "${MODULES.OVMSAdaptorModule}",
               "createOptions": {
                 "ExposedPorts": {
                   "5010/tcp": {}
