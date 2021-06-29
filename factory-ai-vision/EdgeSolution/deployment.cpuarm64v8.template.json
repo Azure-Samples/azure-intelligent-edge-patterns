@@ -276,10 +276,10 @@
               "image": "${MODULES.OVMSServerModule}",
               "createOptions": {
                 "ExposedPorts": {
-                  "9000/tcp": {}
+                  "9010/tcp": {}
                 },
                 "Cmd": [
-                  "/ovms/bin/ovms --model_path /models/yolov3 --model_name yolov3 --port 9000"
+                  "/ovms/bin/ovms --model_path /models/yolov3 --model_name yolov3 --port 9010"
                 ],
                 "Entrypoint": [
                   "sh",
@@ -290,7 +290,7 @@
                     "9000/tcp": [
                       {
                         "HostIp": "",
-                        "HostPort": "9000"
+                        "HostPort": "9010"
                       }
                     ]
                   },

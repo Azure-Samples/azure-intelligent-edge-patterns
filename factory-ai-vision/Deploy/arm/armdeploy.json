@@ -177,7 +177,7 @@
                 "autoUpgradeMinorVersion": true,
                 "settings": {
                   "fileUris": [
-                    "https://raw.githubusercontent.com/kaka-lin/azure-intelligent-edge-patterns/feat/lva-to-ava/factory-ai-vision/Deploy/arm/scripts/prepare-device.sh"
+                    "https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/OVMS-integration/factory-ai-vision/Deploy/arm/scripts/prepare-device.sh"
                   ],
                   "commandToExecute": "[concat('./prepare-device.sh ')]"
                 }
@@ -315,7 +315,7 @@
               "properties": {
                 "forceUpdateTag": "1",
                 "azCliVersion": "2.9.1",
-                "primaryScriptUri": "https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/feat/lva-to-ava/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
+                "primaryScriptUri": "https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/OVMS-integration/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
                 "supportingScriptUris": [],
                 "environmentVariables": [
                   {
