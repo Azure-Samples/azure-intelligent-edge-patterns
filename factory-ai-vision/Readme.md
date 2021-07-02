@@ -44,7 +44,7 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief
   * [Hardware](#hardware)
   * [Services](#services)
 - [Architecture](#architecture)
-    + [AVA Module (Recommended)](#ava-module--recommended-)
+    + [AVA Module (Recommended)](#ava-module-recommended)
     + [OpenCV Module](#opencv-module)
 - [Get Started: Vision on Edge Installer](#get-started-vision-on-edge-installer)
   * [For Azure IoT Edge](#for-azure-iot-edge-devices-recommended)
