@@ -44,7 +44,7 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief
   * [Hardware](#hardware)
   * [Services](#services)
 - [Architecture](#architecture)
-    + [LVA Module (Recommended)](#lva-module--recommended-)
+    + [AVA Module (Recommended)](#ava-module--recommended-)
     + [OpenCV Module](#opencv-module)
 - [Get Started: Vision on Edge Installer](#get-started-vision-on-edge-installer)
   * [For Azure IoT Edge](#for-azure-iot-edge-devices-recommended)
@@ -86,7 +86,7 @@ or
  
 ### NOTE:This solution is only supported on linux based Azure IoT edge devices
 
-Vision on Edge(VoE) also uses/requires a few Azure services for its various capabilities. Some of these services will be automatically deployed for you (during VoE installation) while others may need you to pre-deploy them before installing VoE. Please follow the VoE installation paths discussed below for more information.
+Vision on Edge (VoE) also uses/requires a few Azure services for its various capabilities. Some of these services will be automatically deployed for you (during VoE installation) while others may need you to pre-deploy them before installing VoE. Please follow the VoE installation paths discussed below for more information.
 
 ## Services
 
