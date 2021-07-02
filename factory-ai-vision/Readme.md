@@ -5,7 +5,7 @@
 # Vision on Edge Solution
 
 This is a solution showing how to deploy a Custom Vision model to Azure IoT edge device and get Machine learning solution up and running in a single day.
-You can define your location, camera and set up objects to detect example: any manufacturing parts, defected parts, etc. while keeping your video footage private, lowering your badnwidth costs and even running everything offline. We use onnxruntime to acclerate your models on edge device using Open Vino for CPU and TensorRT for Nvidia GPU and Arm64 GPU. This solution is capable of processing multiple cameras with Microsoft AVA and openCV.
+You can define your location, camera and set up objects to detect example: any manufacturing parts, defected parts, etc. while keeping your video footage private, lowering your badnwidth costs and even running everything offline. We use onnxruntime to acclerate your models on edge device using Open Vino for CPU and TensorRT for Nvidia GPU and Arm64 GPU. This solution is capable of processing multiple cameras with Microsoft AVA and OpenCV.
 
 Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief introduction in action and understand how the value is delivered:
 
@@ -92,7 +92,7 @@ Vision on Edge (VoE) also uses/requires a few Azure services for its various cap
 
 Check out the architecture below to see how Vision on Edge uses various services to function. Depending on your deployment target VoE will need the following Azure services as prerequisites:
 
-- IoT Edge Devices: Azure Custom Vision + IoT Hub + Azure Media Services (For LVA deployment (recommended))
+- IoT Edge Devices: Azure Custom Vision + IoT Hub + Azure Video Analyzer (recommended)
 - Kubernetes (AKS-HCI): Azure Custom Vision + IoT Hub
 
 # Architecture
