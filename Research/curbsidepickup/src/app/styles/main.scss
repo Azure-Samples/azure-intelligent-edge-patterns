@@ -1,0 +1,97 @@
+@import './References';
+
+$ms-presence-invisible: #8a8886;
+$parking-spot-id: #dddddd;
+
+html {
+    scroll-behavior: smooth;
+}
+
+body {
+    margin-bottom: 4rem;
+}
+
+header {
+    margin: 1em 1em;
+    #logo img {
+        width: 108px;
+        height: 20px;
+    }
+}
+
+#main {
+
+    div[data-template] {
+        display: none;
+    }
+
+    margin: 0 1rem;
+
+    #layout {
+        display: flex;
+    }
+
+    #parking-lot {
+        flex-grow: 2;
+        display: flex;
+        flex-wrap: wrap;
+
+        .parking-spot {
+            // order: 5;
+            flex-shrink: 30;
+            flex-basis: 20%;
+
+            box-shadow: $ms-depth-shadow-4;
+            margin-top: 1rem;
+            margin-right: 1rem;
+            padding: 1rem;
+            height: 18rem;
+
+            i {
+                color: $ms-presence-invisible;
+                width: 1.5rem;
+                font-size: 1vw;
+            }
+
+            .no-vehicle {
+                font-size: 2rem;
+                color: $ms-presence-invisible;
+            }
+
+            .parking-spot-id {
+                color: $parking-spot-id;
+                display: block;
+                float: right;
+                position: relative;
+                top: 0;
+                right: 0;
+            }
+
+            .customer {
+                font-size: 1.2rem;
+                white-space: nowrap;
+            }
+
+            .license-plate {
+                font-size: 1rem;
+            }
+
+            .vehicle-image img {
+                width: 180px;
+                margin: 1rem 0rem;
+            }
+
+            ul.delivery {
+                list-style-type: none;
+                margin: 0;
+                padding: 0;
+                display: inline-table;
+                font-size: 1rem;
+            }
+
+            &:hover {
+                background-color: #eeeeee;
+            }
+        }
+    }
+}

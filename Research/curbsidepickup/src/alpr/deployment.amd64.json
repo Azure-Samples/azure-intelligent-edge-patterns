@@ -1,0 +1,89 @@
+{
+    "modulesContent": {
+        "$edgeAgent": {
+            "properties.desired": {
+                "runtime": {
+                    "settings": {
+                        "minDockerVersion": "v1.25",
+                        "registryCredentials": {
+                            "mhregistry:55000": {
+                                "username": "mhlva01contreg",
+                                "password":"lPAd7o3eSDQs=QZbmX3ajI3v65dGlO/K",
+                                "address":"mhregistry:55000"
+                            }                            
+                        }
+                    },
+                    "type": "docker"
+                },
+                "schemaVersion": "1.0",
+                "systemModules": {
+                    "edgeAgent": {
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+                            "createOptions": ""
+                        },
+                        "type": "docker"
+                    },
+                    "edgeHub": {
+                        "settings": {
+                            "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+                            "createOptions": "{\"User\":\"root\",\"HostConfig\":{\"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}]}}}"
+                        },
+                        "type": "docker",
+                        "status": "running",
+                        "restartPolicy": "always"
+                    }
+                },
+                "modules": {
+                    "mediaEdge": {
+                        "version": "1.0",
+                        "type": "docker",
+                        "status": "running",
+                        "restartPolicy": "always",
+                        "settings": {
+                            "image": "marketplace.azurecr.io/azure-media-services-preview/official/media_edge:1.3-linux-x64",
+                            "createOptions": "{\"HostConfig\": {\"LogConfig\":{\"Config\": {\"max-size\": \"10m\",\"max-file\": \"10\"}}}}"
+                        },
+                        "env": {
+                            "EnableDiagnosticLogging": {
+                                "value": "True"
+                            },
+                            "IotEdgeArchiverSegmentManifestSeconds": {
+                                "value": "30"
+                            }
+                        }
+                    },
+                    "mhlva01aimodule": {
+                        "version": "1.0",
+                        "type": "docker",
+                        "status": "running",
+                        "restartPolicy": "always",
+                        "settings": {
+                            "image": "mhregistry:55000/mhlva01aimodule:v0.1.14",
+                            "createOptions": "{\"HostConfig\":{\"runtime\": \"nvidia\", \"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}], \"5001/tcp\":[{\"HostPort\":\"5001\"}]}, \"DeviceCgroupRules\":[\"c 189:* rwm\"],\"Binds\":[\"/dev/bus/usb:/dev/bus/usb\",  \"/home/athena/lva_output/:/var/media/\", \"/tmp/aix_debug_cam:/debug_path\"],\"Privileged\":true, \"LogConfig\":{\"Config\": {\"max-size\": \"100m\",\"max-file\": \"10\"}}}}"
+                        }
+                    }
+                }
+            }
+        },
+        "$edgeHub": {
+            "properties.desired": {
+                "routes": {
+                    "route": "FROM /messages/* INTO $upstream"
+                },
+                "schemaVersion": "1.0",
+                "storeAndForwardConfiguration": {
+                    "timeToLiveSecs": 7200
+                }
+            }
+        },
+        "mediaEdge": {
+            "properties.desired": {
+                "mediaGraph": "{ \"sources\": [ { \"$type\": \"Microsoft.Media.MediaGraphRtspSource\", \"name\": \"rtspSource\", \"url\": \"rtsp://192.168.254.60/axis-media/media.amp\", \"credentials\": { \"username\": \"athena\", \"password\": \"Python3rocks\" } } ], \"processors\": [ { \"$type\": \"Microsoft.Media.MediaGraphFrameRateFilterProcessor\", \"name\": \"frameRateFilter\", \"inputs\": [ \"rtspSource\" ], \"maximumFps\": 7 }, { \"$type\": \"Microsoft.Media.MediaGraphFrameInferenceHttpProxyProcessor\", \"name\": \"frameInferenceProcessor\", \"inputs\": [ \"frameRateFilter\" ], \"image\": { \"format\": \"jpeg\" }, \"endPoint\": { \"$type\": \"Microsoft.Media.Endpoint\", \"url\": \"http://mhlva01aimodule:5001/score\", \"validationOptions\": { \"IgnoreHostname\": false, \"IgnoreSignature\": false }, \"trustedCertificates\": { \"$type\": \"Microsoft.Media.MediaGraphPemCertificateList\", \"certificates\": [ \"cert1\", \"cert2\" ] }, \"credentials\": { \"$type\": \"Microsoft.Media.MediaGraphCredentialsCustomHttpHeader\", \"headerName\": \"Authorization\", \"headerValue\": \"Bearer...\" } } } ], \"sinks\": [ { \"$type\": \"Microsoft.Media.MediaGraphIoTHubSink\", \"name\": \"iotHubSink\", \"inputs\": [ \"frameInferenceProcessor\" ], \"queueName\": \"$iotSinkQueueName$\" } ] }"
+            }
+          },
+        "mhlva01aimodule": {
+            "properties.desired": {}
+        }
+    }
+}
