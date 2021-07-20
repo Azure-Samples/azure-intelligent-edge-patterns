@@ -83,8 +83,9 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     logger.info("is_partial %s", is_partial)
 
     # Get project objects
-    project_obj = Project.objects.get(pk=project_id)
+    project_obj_template = Project.objects.get(pk=project_id)
 
+    project_obj = Project.objects.create(setting=project_obj_template.setting, is_demo=False)
     # Check Training_Key, Endpoint
     if not project_obj.setting.is_trainer_valid:
         raise SettingCustomVisionAccessFailed
@@ -113,7 +114,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     for tag in tags:
         logger.info("Creating Part %s: %s %s", counter, tag.name, tag.description)
         part_obj, created = Part.objects.update_or_create(
-            project_id=project_id,
+            project_id=project_obj.id,
             name=tag.name,
             description=tag.description if tag.description else "",
             customvision_id=tag.id,
@@ -144,7 +145,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
                 part=part_obj,
                 remote_url=img.original_image_uri,
                 customvision_id=img.id,
-                project_id=project_id,
+                project_id=project_obj.id,
                 uploaded=True,
                 manual_checked=True,
             )
@@ -218,7 +219,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
                 img_counter += 1
             for region in img.regions:
                 part_objs = Part.objects.filter(
-                    name=region.tag_name, project_id=project_id
+                    name=region.tag_name, project_id=project_obj.id
                 )
                 if not part_objs.exists():
                     continue
