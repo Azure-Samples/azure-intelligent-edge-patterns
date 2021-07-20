@@ -171,6 +171,8 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
     (trainingProjects, scenarios) => {
       const relatedScenario = scenarios.find((e) => e.trainingProject === trainingProjectId);
 
+      console.log('relatedScenario', relatedScenario);
+
       return trainingProjects
         .filter((t) => !t.isDemo || t.id === relatedScenario?.trainingProject)
         .map((e) => ({
@@ -181,6 +183,4 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
   );
 
 export const trainingProjectIsPredictionModelFactory = () =>
-  createSelector(selectAllTrainingProjects, (entities) =>
-    entities.filter((project) => project.isPredicationModel),
-  );
+  createSelector(selectAllTrainingProjects, (entities) => entities.filter((project) => !project.isDemo));

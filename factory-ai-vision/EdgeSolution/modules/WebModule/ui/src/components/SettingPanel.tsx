@@ -25,7 +25,7 @@ import {
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
-import { useLocation } from 'react-router-dom';
+// import { useLocation } from 'react-router-dom';
 
 import { State } from 'RootStateType';
 import {
@@ -88,12 +88,14 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   const isCollectingData = useSelector((state: State) => state.setting.isCollectData);
   const error = useSelector((state: State) => state.setting.error);
 
-  const location = useLocation();
+  // const location = useLocation();
   const dispatch = useDispatch();
 
   const onSave = async () => {
     try {
       await dispatch(thunkPostSetting());
+
+      onDismiss();
     } catch (e) {
       alert(e);
     }
@@ -202,7 +204,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
               trigger={<PrimaryButton text="Save" disabled={dontNeedUpdateOrSave} />}
             />
           </Stack.Item>
-          {showProjectDropdown && (
+          {/* {showProjectDropdown && (
             <>
               <Dropdown
                 className={textFieldClass}
@@ -231,7 +233,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
                 {loading && <Spinner label="loading" />}
               </Stack>
             </>
-          )}
+          )} */}
           <Toggle
             label="Allow sending usage data"
             styles={{ root: { paddingTop: 50 } }}

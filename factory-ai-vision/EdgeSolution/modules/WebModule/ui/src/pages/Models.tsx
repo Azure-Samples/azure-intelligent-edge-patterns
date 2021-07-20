@@ -1,14 +1,16 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { CommandBar, ICommandBarItemProps, getTheme, Stack, Breadcrumb } from '@fluentui/react';
 import { useBoolean } from '@uifabric/react-hooks';
 
 import ModelComponent from '../components/Models/Model';
 import AddModelPanel, { PanelMode } from '../components/Models/AddModelPanel';
+import ModelPanel from '../components/Models/AddPanel';
 
 const theme = getTheme();
 
 export const Models = () => {
   const [isPanelOpen, { setTrue: handlePanelOpen, setFalse: handlePanelDissmiss }] = useBoolean(false);
+  const [isOpen, setIsOpen] = useState(false);
 
   const commandBarItems: ICommandBarItemProps[] = useMemo(
     () => [
@@ -19,6 +21,14 @@ export const Models = () => {
           iconName: 'Add',
         },
         onClick: handlePanelOpen,
+      },
+      {
+        key: 'addBtn',
+        text: 'Add',
+        iconProps: {
+          iconName: 'Add',
+        },
+        onClick: () => setIsOpen(true),
       },
     ],
     [handlePanelOpen],
@@ -37,6 +47,7 @@ export const Models = () => {
         </Stack>
       </Stack>
       <AddModelPanel isOpen={isPanelOpen} onDissmiss={handlePanelDissmiss} mode={PanelMode.Create} />
+      <ModelPanel isOpen={isOpen} mode={PanelMode.Create} onDissmiss={() => setIsOpen(false)} />
     </>
   );
 };
