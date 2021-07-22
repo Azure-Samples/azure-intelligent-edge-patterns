@@ -15,6 +15,7 @@ enum Url {
 
   MODELS = '/models',
   MODELS_DETAIL = '/models/detail',
+  MODELS_OBJECTS = '/models/detail/objects',
 
   DEPLOYMENT = '/deployment',
 }

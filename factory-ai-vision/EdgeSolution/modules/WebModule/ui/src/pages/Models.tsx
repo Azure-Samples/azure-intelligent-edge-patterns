@@ -14,14 +14,14 @@ export const Models = () => {
 
   const commandBarItems: ICommandBarItemProps[] = useMemo(
     () => [
-      {
-        key: 'addBtn',
-        text: 'Add',
-        iconProps: {
-          iconName: 'Add',
-        },
-        onClick: handlePanelOpen,
-      },
+      // {
+      //   key: 'addBtn',
+      //   text: 'Add',
+      //   iconProps: {
+      //     iconName: 'Add',
+      //   },
+      //   onClick: handlePanelOpen,
+      // },
       {
         key: 'addBtn',
         text: 'Add',
@@ -31,7 +31,7 @@ export const Models = () => {
         onClick: () => setIsOpen(true),
       },
     ],
-    [handlePanelOpen],
+    [],
   );
 
   return (

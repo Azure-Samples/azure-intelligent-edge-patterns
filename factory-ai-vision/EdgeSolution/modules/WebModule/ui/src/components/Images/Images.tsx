@@ -92,7 +92,13 @@ const useKeepAlive = (isAlive) => {
   );
 };
 
-export const Images: React.FC = () => {
+interface Props {
+  selectedProject: number;
+}
+
+export const Images: React.FC<Props> = (props) => {
+  const { selectedProject } = props;
+
   const [isCaptureDialgOpen, { setTrue: openCaptureDialog, setFalse: closeCaptureDialog }] = useBoolean(
     false,
   );
@@ -182,10 +188,10 @@ export const Images: React.FC = () => {
   );
 
   useEffect(() => {
-    dispatch(getImages({ freezeRelabelImgs: true }));
+    dispatch(getImages({ freezeRelabelImgs: true, selectedProject: selectedProject }));
     // We need part info for image list items
     dispatch(getParts());
-  }, [dispatch]);
+  }, [dispatch, selectedProject]);
 
   useKeepAlive(relabelImages.length > 0);
 

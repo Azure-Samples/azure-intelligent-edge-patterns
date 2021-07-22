@@ -36,6 +36,18 @@ export const postPart = createWrappedAsync<any, Omit<Part, 'id' | 'trainingProje
   },
 );
 
+export const postPartByProject = createWrappedAsync<
+  any,
+  {
+    data: Pick<Part, 'name' | 'description'>;
+    project: number;
+  }
+>('parts/post', async ({ data, project }) => {
+  // const trainingProject = getState().trainingProject.nonDemo[0];
+  const response = await Axios.post(`/api/parts/`, { ...data, project: project });
+  return { ...response.data, trainingProject: response.data.project };
+});
+
 export const patchPart = createWrappedAsync<
   any,
   { data: { name: string; description: string }; id: number },

@@ -1,7 +1,7 @@
 /* eslint react/display-name: "off" */
 
 import React, { useEffect } from 'react';
-import * as R from 'ramda';
+import { isEmpty, compose } from 'ramda';
 import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 import { DetailsList, CheckboxVisibility } from '@fluentui/react';
@@ -13,6 +13,7 @@ import {
 } from '../../store/trainingProjectSlice';
 
 import { Url } from '../../enums';
+import { ModelType } from './type';
 
 import { EmptyAddIcon } from '../EmptyAddIcon';
 
@@ -35,6 +36,17 @@ const BaseModel: React.FC<ModelsProps> = ({ trainingProject }) => {
     <DetailsList
       columns={[
         { key: 'name', minWidth: 0, name: 'Name', fieldName: 'name' },
+        {
+          key: 'type',
+          minWidth: 150,
+          maxWidth: 100,
+          name: 'type',
+          fieldName: '',
+          onRender: (item: TrainingProjectType) => {
+            if (!item.predictionUri) return ModelType.Custom;
+            return ModelType.Own;
+          },
+        },
         { key: 'predictionUri', minWidth: 200, maxWidth: 200, name: 'Uri', fieldName: 'predictionUri' },
         {
           key: 'predictionHeader',
@@ -51,7 +63,7 @@ const BaseModel: React.FC<ModelsProps> = ({ trainingProject }) => {
   );
 };
 
-export default R.compose(
+export default compose(
   (BaseComponent: React.ComponentType<ModelsProps>): React.FC<PassingProps> => (props) => {
     const { onAddModelClick } = props;
 
@@ -64,7 +76,7 @@ export default R.compose(
       dispatch(getTrainingProject(true));
     }, [dispatch]);
 
-    if (R.isEmpty(trainingProjectIsPredictionModel)) {
+    if (isEmpty(trainingProjectIsPredictionModel)) {
       return (
         <EmptyAddIcon
           subTitle="Add preexisting models"

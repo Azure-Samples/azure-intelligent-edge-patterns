@@ -81,7 +81,7 @@ export const relabelImageSelector = createSelector(
 
 export const selectNonDemoPart = createSelector(
   [selectAllParts, selectNonDemoProject],
-  (parts, [nonDemoProject]) => parts.filter((p) => p.trainingProject === nonDemoProject.id),
+  (parts, [nonDemoProject]) => parts,
 );
 
 export const partsImagesSelectorFactory = createSelector(
@@ -94,3 +94,6 @@ export const partsImagesSelectorFactory = createSelector(
         .filter((part) => part),
     })),
 );
+
+export const selectProjectPartsFactory = (projectId) =>
+  createSelector([selectAllParts], (parts) => parts.filter((part) => part.trainingProject === projectId));

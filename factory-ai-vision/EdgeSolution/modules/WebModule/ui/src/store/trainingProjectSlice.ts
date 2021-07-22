@@ -175,6 +175,7 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
 
       return trainingProjects
         .filter((t) => !t.isDemo || t.id === relatedScenario?.trainingProject)
+        .filter((t) => t.id !== 9)
         .map((e) => ({
           key: e.id,
           text: e.name,
@@ -183,4 +184,6 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
   );
 
 export const trainingProjectIsPredictionModelFactory = () =>
-  createSelector(selectAllTrainingProjects, (entities) => entities.filter((project) => !project.isDemo));
+  createSelector(selectAllTrainingProjects, (entities) =>
+    entities.filter((project) => !project.isDemo).filter((project) => project.id !== 9),
+  );

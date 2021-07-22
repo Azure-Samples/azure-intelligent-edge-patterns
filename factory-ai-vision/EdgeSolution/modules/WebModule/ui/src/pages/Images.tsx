@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
 import { useSelector } from 'react-redux';
-import { Dropdown, IDropdownOption } from '@fluentui/react';
+import { Dropdown, IDropdownOption, Stack } from '@fluentui/react';
 
 // import { selectNonDemoProject, pullCVProjects } from '../store/trainingProjectSlice';
-import { State as RootState } from 'RootStateType';
-import { selectAllTrainingProjects } from '../store/trainingProjectSlice';
+// import { State as RootState } from 'RootStateType';
+import { trainingProjectIsPredictionModelFactory } from '../store/trainingProjectSlice';
 
 import { Images as ImagesComponent } from '../components/Images/Images';
+import { EmptyAddIcon } from '../components/EmptyAddIcon';
 
 export const Images: React.FC = () => {
-  const projects = useSelector((state: RootState) => selectAllTrainingProjects(state));
+  const trainingProjectIsPredictionModelSelector = trainingProjectIsPredictionModelFactory();
+  const trainingProjectIsPredictionModel = useSelector(trainingProjectIsPredictionModelSelector);
 
-  console.log('projects', projects);
+  console.log('trainingProjectIsPredictionModel', trainingProjectIsPredictionModel);
 
-  const [selectedProject, setSelectedProject] = useState<Number>(0);
+  const [selectedProject, setSelectedProject] = useState<number>(0);
 
   console.log('selectedProject', selectedProject);
 
-  const projectsOptions: IDropdownOption[] = projects.map(({ id, name }) => ({
+  const projectsOptions: IDropdownOption[] = trainingProjectIsPredictionModel.map(({ id, name }) => ({
     key: id,
     text: name,
   }));
@@ -25,13 +27,21 @@ export const Images: React.FC = () => {
   return (
     <>
       {!selectedProject ? (
-        <Dropdown
-          label="Selected Project"
-          options={projectsOptions}
-          onChange={(_, option: IDropdownOption) => setSelectedProject(option.key as number)}
-        />
+        <Stack styles={{ root: { height: '100%' } }}>
+          <EmptyAddIcon
+            title="Select Model"
+            subTitle=""
+            node={
+              <Dropdown
+                styles={{ dropdown: { width: '400px' } }}
+                options={projectsOptions}
+                onChange={(_, option: IDropdownOption) => setSelectedProject(option.key as number)}
+              />
+            }
+          />
+        </Stack>
       ) : (
-        <ImagesComponent />
+        <ImagesComponent selectedProject={selectedProject} />
       )}
     </>
   );

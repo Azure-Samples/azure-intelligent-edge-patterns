@@ -158,39 +158,49 @@ const Scene: FC<SceneProps> = ({
         >
           <Image image={image} />
           {!isLoading &&
-            annotations.map((annotation, i) => (
-              <Group key={i}>
-                <RemoveBoxButton
-                  imageSize={imageSize}
-                  visible={!isDragging && workState !== WorkState.Creating && i === selectedAnnotationIndex}
-                  label={annotation.label}
-                  scale={scale.current}
-                  changeCursorState={changeCursorState}
-                  removeBox={removeBox}
-                />
-                <Box2d
-                  workState={workState}
-                  onSelect={onSelect}
-                  annotation={annotation}
-                  scale={scale.current}
-                  annotationIndex={i}
-                  selected={i === selectedAnnotationIndex}
-                  dispatch={dispatch}
-                  changeCursorState={changeCursorState}
-                />
-                <LabelText
-                  x={annotation.label.x1}
-                  y={
-                    annotation.label.y1 < 20 / scale.current
-                      ? annotation.label.y1
-                      : annotation.label.y1 - 30 / scale.current
-                  }
-                  fontSize={20 / scale.current}
-                  text={annotation.part && parts.find((part) => part.id === annotation.part).name}
-                  padding={5 / scale.current}
-                />
-              </Group>
-            ))}
+            annotations.map((annotation, i) => {
+              console.log('annotation.part', annotation.part);
+              console.log(
+                'annotation.part && parts.find((part) => part.id === annotation.part).name',
+                parts,
+                annotation.part,
+                // parts.find((part) => part.id === annotation.part),
+              );
+
+              return (
+                <Group key={i}>
+                  <RemoveBoxButton
+                    imageSize={imageSize}
+                    visible={!isDragging && workState !== WorkState.Creating && i === selectedAnnotationIndex}
+                    label={annotation.label}
+                    scale={scale.current}
+                    changeCursorState={changeCursorState}
+                    removeBox={removeBox}
+                  />
+                  <Box2d
+                    workState={workState}
+                    onSelect={onSelect}
+                    annotation={annotation}
+                    scale={scale.current}
+                    annotationIndex={i}
+                    selected={i === selectedAnnotationIndex}
+                    dispatch={dispatch}
+                    changeCursorState={changeCursorState}
+                  />
+                  <LabelText
+                    x={annotation.label.x1}
+                    y={
+                      annotation.label.y1 < 20 / scale.current
+                        ? annotation.label.y1
+                        : annotation.label.y1 - 30 / scale.current
+                    }
+                    fontSize={20 / scale.current}
+                    text={annotation.part && parts.find((part) => part.id === annotation.part).name}
+                    padding={5 / scale.current}
+                  />
+                </Group>
+              );
+            })}
           {isLoading && (
             <KonvaText
               x={imageSize.width / 2 - 50}

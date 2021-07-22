@@ -55,6 +55,7 @@ const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
     camera: response.camera,
     uploaded: response.uploaded,
     manualChecked: response.manual_checked,
+    project: response.project,
   };
 };
 
@@ -101,11 +102,11 @@ const normalizeImages = R.compose(normalizeImagesAndLabelByNormalizr, serializeL
 // Async Thunk Actions
 export const getImages = createWrappedAsync<
   ReturnType<typeof normalizeImages>['entities'],
-  { freezeRelabelImgs: boolean },
+  { freezeRelabelImgs: boolean; selectedProject?: number },
   // TODO Use the type State will cause annotationSlice/addOriginEntitiesReducer encounter own annotation referencing
   // issue. Should define the type State manually instead of getting it from return type.
   { state: any }
->('images/get', async ({ freezeRelabelImgs }, { getState }) => {
+>('images/get', async ({ freezeRelabelImgs, selectedProject }, { getState }) => {
   if (freezeRelabelImgs) {
     /**
      * Call keep_alive can freeze the relabel images
@@ -114,7 +115,13 @@ export const getImages = createWrappedAsync<
     const nonDemoProjectId = getState().trainingProject.nonDemo[0];
     await Axios.post(`/api/projects/${nonDemoProjectId}/relabel_keep_alive/`);
   }
-  const response = await Axios.get(`/api/images/`);
+
+  let url = '/api/images/';
+  if (selectedProject) {
+    url = url + `?project=${selectedProject}`;
+  }
+
+  const response = await Axios.get(url);
   return normalizeImages(response.data).entities;
 });
 

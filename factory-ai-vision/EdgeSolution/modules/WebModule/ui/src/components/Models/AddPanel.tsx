@@ -18,7 +18,10 @@ import * as R from 'ramda';
 import { useSelector, useDispatch } from 'react-redux';
 
 // import { thunkPostCustomProject } from '../../store/project/projectActions';
-import { createCustomProject, updateCustomProject } from '../../store/trainingProjectSlice';
+import {
+  createCustomProject,
+  // updateCustomProject
+} from '../../store/trainingProjectSlice';
 import { State as RootState } from 'RootStateType';
 import { selectNonDemoProject, pullCVProjects } from '../../store/trainingProjectSlice';
 
@@ -67,7 +70,7 @@ const initialForm: CustomFormType = {
 const uploadIcon: IIconProps = { iconName: 'Upload' };
 
 const AddModelPanel: React.FC<Props> = (props) => {
-  const { isOpen, initialValue = initialForm, mode, onDissmiss } = props;
+  const { isOpen, initialValue = initialForm, onDissmiss } = props;
 
   const customVisionProjectOptions = useSelector((state: RootState) =>
     state.setting.cvProjects.map((e) => ({ key: e.id, text: e.name })),
@@ -126,7 +129,7 @@ const AddModelPanel: React.FC<Props> = (props) => {
     setIsLoading(false);
     onDissmiss();
     setFormData(initialValue);
-  }, [dispatch, formData, mode, onDissmiss, validate]);
+  }, [dispatch, formData, onDissmiss, validate, initialValue]);
 
   const onLoadModel = useCallback(async () => {
     setIsLoading(true);
@@ -135,10 +138,9 @@ const AddModelPanel: React.FC<Props> = (props) => {
       pullCVProjects({ selectedCustomvisionId: selectedCustomVisionId, loadFullImages: isFullImages }),
     );
 
-    window.location.reload();
-
     setIsLoading(false);
-  }, [dispatch, selectedCustomVisionId, isFullImages]);
+    onDissmiss();
+  }, [dispatch, selectedCustomVisionId, isFullImages, onDissmiss]);
 
   const onChange = (key: keyof CustomFormType, newValue: string | boolean) => {
     setErrorMsg('');
