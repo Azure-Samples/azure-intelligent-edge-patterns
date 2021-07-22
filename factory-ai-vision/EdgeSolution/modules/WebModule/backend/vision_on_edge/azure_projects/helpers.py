@@ -15,15 +15,17 @@ def create_default_objects():
     logger.info("Create/update a default project.")
     setting_obj = Setting.objects.first()
     project_obj = Project.objects.filter(is_demo=False, setting=setting_obj).first()
-    setattr(project_obj, "prediction_uri", prediction_module_url())
-    project_obj.save()
-    # Project.objects.update_or_create(
-    #     is_demo=False,
-    #     setting=setting_obj,
-    #     defaults={
-    #         "prediction_uri": prediction_module_url(),
-    #     },
-    # )
+    if project_obj:
+        setattr(project_obj, "prediction_uri", prediction_module_url())
+        project_obj.save()
+    else:
+        Project.objects.update_or_create(
+            is_demo=False,
+            setting=setting_obj,
+            defaults={
+                "prediction_uri": prediction_module_url(),
+            },
+        )
 
 
 def create_demo_objects():
