@@ -22,6 +22,12 @@ from invoke import gm
 from scenarios import DangerZone, DefeatDetection, Detection, PartCounter, PartDetection, ShelfZone, CountingZone, QueueZone
 from utility import draw_label, get_file_zip, is_edge, normalize_rtsp
 
+import grpc
+from tensorflow import make_tensor_proto, make_ndarray
+
+from tensorflow_serving.apis import predict_pb2
+from tensorflow_serving.apis import prediction_service_pb2_grpc
+
 DETECTION_TYPE_NOTHING = "nothing"
 DETECTION_TYPE_SUCCESS = "success"
 DETECTION_TYPE_UNIDENTIFIED = "unidentified"
@@ -142,6 +148,7 @@ class Stream:
         # self.start_zmq()
         self.is_benchmark = False
         self.use_tracker = False
+        self.stub = None
 
     def set_is_benchmark(self, is_benchmark):
         self.is_benchmark = is_benchmark
@@ -208,7 +215,7 @@ class Stream:
 
     def restart_cam(self):
 
-        print("[INFO] Restarting Cam", flush=True)
+        logger.warning("[INFO] Restarting Cam", flush=True)
 
         # cam = cv2.VideoCapture(normalize_rtsp(self.cam_source))
 
@@ -274,7 +281,7 @@ class Stream:
             self.scenario_type = self.model.detection_mode
 
         elif detection_mode == "PC":
-            print("[INFO] Line INFO", line_info, flush=True)
+            logger.warning("[INFO] Line INFO", line_info, flush=True)
             self.scenario = PartCounter()
             self.scenario_type = self.model.detection_mode
             try:
@@ -289,24 +296,24 @@ class Stream:
                         x2 = int(lines[i]["label"][1]["x"])
                         y2 = int(lines[i]["label"][1]["y"])
                         line_id = str(lines[i]['order'])
-                        print("        line:", x1, y1,
+                        logger.warning("        line:", x1, y1,
                               x2, y2, line_id, flush=True)
                         lines_to_set.append([x1, y1, x2, y2, line_id])
                     self.scenario.set_line(lines_to_set)
-                    print("Upading Line:", flush=True)
-                    print("    use_line:", self.use_line, flush=True)
+                    logger.warning("Upading Line:", flush=True)
+                    logger.warning("    use_line:", self.use_line, flush=True)
                 else:
-                    print("Upading Line:", flush=True)
-                    print("    use_line:", self.use_line, flush=True)
+                    logger.warning("Upading Line:", flush=True)
+                    logger.warning("    use_line:", self.use_line, flush=True)
 
             except:
                 self.use_line = False
-                print("Upading Line[*]:", flush=True)
-                print("    use_line   :", False, flush=True)
+                logger.warning("Upading Line[*]:", flush=True)
+                logger.warning("    use_line   :", False, flush=True)
 
         elif detection_mode in ["ES", "ESA", "TCC", "CQA"]:
             class_obj = [DangerZone, ShelfZone, CountingZone, QueueZone]
-            print("[INFO] Zone INFO", zone_info, flush=True)
+            logger.warning("[INFO] Zone INFO", zone_info, flush=True)
             self.scenario = class_obj[["ES", "ESA",
                                        "TCC", "CQA"].index(detection_mode)]()
             self.scenario_type = self.model.detection_mode
@@ -317,8 +324,8 @@ class Stream:
                 self.use_zone = zone_info["useDangerZone"]
                 zones = zone_info["dangerZones"]
                 _zones = []
-                print("Upading Line:", flush=True)
-                print("    use_zone:", self.use_zone, flush=True)
+                logger.warning("Upading Line:", flush=True)
+                logger.warning("    use_zone:", self.use_zone, flush=True)
                 # for zone in zones:
                 #     x1 = int(zone["label"]["x1"])
                 #     y1 = int(zone["label"]["y1"])
@@ -326,17 +333,17 @@ class Stream:
                 #     y2 = int(zone["label"]["y2"])
                 #     zone_id = str(zone['order'])
                 #     _zones.append([x1, y1, x2, y2, zone_id])
-                #     print("     zone:", x1, y1, x2, y2, flush=True)
+                #     logger.warning("     zone:", x1, y1, x2, y2, flush=True)
                 # self.scenario.set_zones(_zones)
                 self.scenario.set_zones(zones)
 
             except:
                 self.use_zone = False
-                print("Upading Zone[*]:", flush=True)
-                print("    use_zone   :", False, flush=True)
+                logger.warning("Upading Zone[*]:", flush=True)
+                logger.warning("    use_zone   :", False, flush=True)
 
         elif detection_mode == "DD":
-            print("[INFO] Line INFO", line_info, flush=True)
+            logger.warning("[INFO] Line INFO", line_info, flush=True)
             self.scenario = DefeatDetection()
             self.scenario_type = self.model.detection_mode
             # FIXME
@@ -352,17 +359,17 @@ class Stream:
                     x2 = int(lines[0]["label"][1]["x"])
                     y2 = int(lines[0]["label"][1]["y"])
                     self.scenario.set_line(x1, y1, x2, y2)
-                    print("Upading Line:", flush=True)
-                    print("    use_line:", self.use_line, flush=True)
-                    print("        line:", x1, y1, x2, y2, flush=True)
+                    logger.warning("Upading Line:", flush=True)
+                    logger.warning("    use_line:", self.use_line, flush=True)
+                    logger.warning("        line:", x1, y1, x2, y2, flush=True)
                 else:
-                    print("Upading Line:", flush=True)
-                    print("    use_line:", self.use_line, flush=True)
+                    logger.warning("Upading Line:", flush=True)
+                    logger.warning("    use_line:", self.use_line, flush=True)
 
             except:
                 self.use_line = False
-                print("Upading Line[*]:", flush=True)
-                print("    use_line   :", False, flush=True)
+                logger.warning("Upading Line[*]:", flush=True)
+                logger.warning("    use_line   :", False, flush=True)
 
         else:
             self.scenario = None
@@ -506,6 +513,84 @@ class Stream:
                 logger.warning('No inference result')
                 predictions = []
             logger.warning('request prediction time: {}'.format(inf_time))
+        elif 'ovmsdag' in self.model.endpoint.lower():
+            args = {}
+            args["grpc_address"] = "ovmsdag"
+            args["grpc_port"] = 9111
+            args["pipeline_name"] = "find_face_images"
+            args["image_width"] = 600
+            args["image_height"] = 400
+            args["image_input_name"] = "image"
+            args["image_input_path"] = "./img/images-6.jpg"
+            args["input_image_layout"] = "NHWC"
+
+            if not self.stub:
+                address = "{}:{}".format(args['grpc_address'],args['grpc_port'])
+                MAX_MESSAGE_LENGTH = 1024 * 1024 * 1024
+                channel = grpc.insecure_channel(address,
+                    options=[
+                        ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
+                        ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH),
+                    ])
+
+                stub = prediction_service_pb2_grpc.PredictionServiceStub(channel)
+            request = predict_pb2.PredictRequest()
+            request.model_spec.name = args['pipeline_name']
+
+            img = image.astype(np.float32)
+            img = cv2.resize(img, (600, 400))
+            target_shape = (img.shape[0], img.shape[1])
+            img = img.reshape(1,target_shape[0],target_shape[1],3)
+            request.inputs['image'].CopyFrom(make_tensor_proto(img, shape=img.shape))
+
+            try:
+                response = stub.Predict(request, 30.0)
+            except grpc.RpcError as err:
+                if err.code() == grpc.StatusCode.ABORTED:
+                    logger.warning('No face has been found in the image')
+                    return
+                else:
+                    raise err
+            people = []
+
+            for name in response.outputs:
+                logger.warning(f"Output: name[{name}]")
+                tensor_proto = response.outputs[name]
+                output_nd = make_ndarray(tensor_proto)
+                logger.warning(f"    numpy => shape[{output_nd.shape}] data[{output_nd.dtype}]")
+
+                if name == 'ages':
+                    people = update_people_ages(output_nd, people)
+                if name == 'genders':
+                    people = update_people_genders(output_nd, people)
+                if name == 'emotions':
+                    people = update_people_emotions(output_nd, people)
+                if name == 'face_coordinates':
+                    people = update_people_coordinate(output_nd, people)
+
+            h, w, _ = img.shape
+            for person in people:
+                x1, y1, x2, y2 = person['coordinate']
+                x1 = int(x1 * w)
+                x2 = int(x2 * w)
+                y1 = int(y1 * h)
+                y2 = int(y2 * h)
+                cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 255), 3)
+                font = cv2.FONT_HERSHEY_SIMPLEX
+                fontScale = 0.5
+                color = (0, 255, 255)
+                thickness = 1
+                text = person['gender'] + ' / ' + str(person['age']) + '/' + person['emotion']
+                cv2.putText(img, text, (x1, y1-10), font,
+                            fontScale, color, thickness, cv2.LINE_AA)
+
+
+            self.last_prediction_count = len(people)
+            self.last_img = image
+            self.last_prediction = people
+            self.last_drawn_img = img
+            return
+
         else:
             # for yolo enpoint testing
             resized_image = cv2.resize(image, (416, 416))
@@ -523,7 +608,7 @@ class Stream:
                 logger.warning('No inference result')
                 predictions = []
             logger.warning('request prediction time: {}'.format(inf_time))
-        # print('predictions', predictions, flush=True)
+        # logger.warning('predictions', predictions, flush=True)
         # self.mutex.release()
 
         # check whether it's the tag we want
@@ -615,7 +700,7 @@ class Stream:
         for prediction in predictions:
             if self.last_upload_time + UPLOAD_INTERVAL < time.time():
                 confidence = prediction["probability"]
-                print(
+                logger.warning(
                     "comparing...",
                     self.confidence_min,
                     confidence,
@@ -623,7 +708,7 @@ class Stream:
                     flush=True,
                 )
                 if self.confidence_min <= confidence <= self.confidence_max:
-                    print("preparing...", flush=True)
+                    logger.warning("preparing...", flush=True)
                     # prepare the data to send
                     tag = prediction["tagName"]
                     height, width = img.shape[0], img.shape[1]
@@ -842,10 +927,10 @@ def send_message_to_iothub(predictions):
             else:
                 iot.send_message_to_output(json.dumps(predictions), "metrics")
         except:
-            print("[ERROR] Failed to send message to iothub", flush=True)
-        print("[INFO] sending metrics to iothub", flush=True)
+            logger.warning("[ERROR] Failed to send message to iothub", flush=True)
+        logger.warning("[INFO] sending metrics to iothub", flush=True)
     else:
-        # print('[METRICS]', json.dumps(predictions_to_send))
+        # logger.warning('[METRICS]', json.dumps(predictions_to_send))
         pass
 
 
@@ -857,15 +942,15 @@ def send_message_to_lva(cam_id):
             msg.custom_properties["eventTarget"] = target
             iot.send_message_to_output(msg, "InferenceToLVA")
         except:
-            print("[ERROR] Failed to send signal to LVA", flush=True)
-        print("[INFO] sending signal to LVA", flush=True)
+            logger.warning("[ERROR] Failed to send signal to LVA", flush=True)
+        logger.warning("[INFO] sending signal to LVA", flush=True)
     else:
-        # print('[INFO] Cannot detect IoT module')
+        # logger.warning('[INFO] Cannot detect IoT module')
         pass
 
 
 def send_retrain_image_to_webmodule(jpg, tag, labels, confidence, cam_id):
-    print("[INFO] Sending Image to relabeling", tag, flush=True)
+    logger.warning("[INFO] Sending Image to relabeling", tag, flush=True)
     try:
         # requests.post('http://'+web_module_url()+'/api/relabel', data={
         res = requests.post(
@@ -882,7 +967,7 @@ def send_retrain_image_to_webmodule(jpg, tag, labels, confidence, cam_id):
             },
         )
     except:
-        print("[ERROR] Failed to update image for relabeling", flush=True)
+        logger.warning("[ERROR] Failed to update image for relabeling", flush=True)
 
 
 def lva_to_customvision_format(predictions):
@@ -904,3 +989,47 @@ def lva_to_customvision_format(predictions):
             }
         )
     return(results)
+
+
+def update_people_ages(output_nd, people):
+    for i in range(output_nd.shape[0]):
+        age = int(output_nd[i,0,0,0,0] * 100)
+        if len(people) < i + 1:
+            people.append({'age': age})
+        else:
+            people[i].update({'age': age})
+    return people
+
+def update_people_genders(output_nd, people):
+    for i in range(output_nd.shape[0]):
+        gender = 'male' if output_nd[i,0,0,0,0] < output_nd[i,0,1,0,0] else 'female'
+        if len(people) < i + 1:
+            people.append({'gender': gender})
+        else:
+            people[i].update({'gender': gender})
+    return people
+
+def update_people_emotions(output_nd, people):
+    emotion_names = {
+        0: 'neutral',
+        1: 'happy',
+        2: 'sad',
+        3: 'surprised',
+        4: 'angry'
+    }
+    for i in range(output_nd.shape[0]):
+        emotion_id = np.argmax(output_nd[i,0,:,0,0])
+        emotion = emotion_names[emotion_id]
+        if len(people) < i + 1:
+            people.append({'emotion': emotion})
+        else:
+            people[i].update({'emotion': emotion})
+    return people
+
+def update_people_coordinate(output_nd, people):
+    for i in range(output_nd.shape[0]):
+        if len(people) < i + 1:
+            people.append({'coordinate': output_nd[i,0,:]})
+        else:
+            people[i].update({'coordinate': output_nd[i,0,:]})
+    return people
