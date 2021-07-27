@@ -537,14 +537,17 @@ class Stream:
             request = predict_pb2.PredictRequest()
             request.model_spec.name = args['pipeline_name']
 
-            img = image.astype(np.float32)
+            self.last_img = image
+            img = self.last_img.copy()
+            img = img.astype(np.float32)
             img = cv2.resize(img, (600, 400))
             target_shape = (img.shape[0], img.shape[1])
             img = img.reshape(1,target_shape[0],target_shape[1],3)
             request.inputs['image'].CopyFrom(make_tensor_proto(img, shape=img.shape))
 
             try:
-                response = stub.Predict(request, 30.0)
+                result_future = stub.Predict.future(request, 30.0)
+                response = result_future.result()
             except grpc.RpcError as err:
                 if err.code() == grpc.StatusCode.ABORTED:
                     logger.warning('No face has been found in the image')
@@ -569,6 +572,7 @@ class Stream:
                     people = update_people_coordinate(output_nd, people)
 
             _, h, w, _ = img.shape
+            img = self.last_img.copy()
             for person in people:
                 x1, y1, x2, y2 = person['coordinate']
                 x1 = int(x1 * w)
@@ -586,9 +590,9 @@ class Stream:
 
 
             self.last_prediction_count = len(people)
-            self.last_img = image
             self.last_prediction = people
             self.last_drawn_img = img
+            self.last_update = time.time()
             return
 
         else:
