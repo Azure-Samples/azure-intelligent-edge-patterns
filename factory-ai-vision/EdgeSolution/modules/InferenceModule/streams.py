@@ -571,8 +571,8 @@ class Stream:
                 if name == 'face_coordinates':
                     people = update_people_coordinate(output_nd, people)
 
-            _, h, w, _ = img.shape
             img = self.last_img.copy()
+            h, w, _ = img.shape
             for person in people:
                 x1, y1, x2, y2 = person['coordinate']
                 x1 = int(x1 * w)
