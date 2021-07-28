@@ -24,19 +24,6 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief
 - Arm64/cpu <br/>
 - AVA Pipeline: Learn more [here](https://azure.microsoft.com/en-us/products/video-analyzer/)
 
-<!-- # Prerequiste -->
-
-<!--## Hardware
-
-<!--You need to have one of the following:
-
-<!-- - **Azure Stack Edge**
-  or
-- **Simulated Azure IoT Edge device** (such as a PC): Set up Azure IoT Edge [instructions on Linux](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) and use the amd64 tags. A test x64 deployment manifest is already available.
-  - For running on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
-  - For running on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 Ubuntu VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
-
-<!-- ### NOTE:This solution is only supported on linux based Azure IoT edge devices -->
 
 # Table of Content
 
@@ -47,7 +34,7 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief
     + [AVA Module (Recommended)](#ava-module-recommended)
     + [OpenCV Module](#opencv-module)
 - [Get Started: Vision on Edge Installer](#get-started-vision-on-edge-installer)
-  * [For Azure IoT Edge](#for-azure-iot-edge-devices-recommended)
+  * [For Azure IoT Edge](#for-azure-iotedge-devices-recommended)
     + [Option 1: Azure Shell Installer](#option-1-azure-shell-installer-recommended)
       - [Prerequisite](#prerequisite)
       - [Get Started](#get-started)
@@ -55,16 +42,15 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief
     + [Option 3: Deploy by Visual studio](#option-3-deploy-by-visual-studio)
       - [Prerequisites](#prerequisites-1)
       - [Get Started](#get-started-1)
-    + [Troubleshooting](#troubleshooting)
-    + [Upload your own video to be processed](#upload-your-own-video-to-be-processed)
-  * [For Kubernetes (AKS/AKS-HCI)(Beta)](#for-kubernetes-aksaks-hcibeta)
+  * [For Kubernetes (AKS/AKS-HCI/ASE K8s)(Beta)](#for-kubernetes-aksaks-hciase-k8sbeta)
     + [Option 1: VoE Helm Chart (Recommended)](#option-1-voe-helm-chart-recommended)
     + [Option 2: Static Kubernetes YAML](#option-2-static-kubernetes-yaml)
       - [AKS](#aks)
 - [Other Tutorials](#other-tutorials)
-  * [Video Tutorials](#video-tutorial)
+  * [Video Tutorials](#video-tutorials)
+  * [Upload your own video to be processed](#upload-your-own-video-to-be-processed)
+- [Troubleshooting](#troubleshooting)
 - [Privacy Notice](#privacy-notice)
-
 
 # Prerequisites
 
@@ -84,7 +70,7 @@ or
   - For running on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
   - For running on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 Ubuntu VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
  
-### NOTE:This solution is only supported on linux based Azure IoT edge devices
+#### NOTE: This solution is only supported on Linux based Azure IoTEdge devices. Kubernetes deployment is currently in Beta and is through our [Helm Chart](#option-1-voe-helm-chart-recommended).
 
 Vision on Edge (VoE) also uses/requires a few Azure services for its various capabilities. Some of these services will be automatically deployed for you (during VoE installation) while others may need you to pre-deploy them before installing VoE. Please follow the VoE installation paths discussed below for more information.
 
@@ -92,7 +78,7 @@ Vision on Edge (VoE) also uses/requires a few Azure services for its various cap
 
 Check out the architecture below to see how Vision on Edge uses various services to function. Depending on your deployment target VoE will need the following Azure services as prerequisites:
 
-- IoT Edge Devices: Azure Custom Vision + IoT Hub + Azure Video Analyzer (recommended)
+- IoTEdge Devices: Azure Custom Vision + IoT Hub + Azure Video Analyzer (Recommended). Only VM deployment is supported.
 - Kubernetes (AKS-HCI): Azure Custom Vision + IoT Hub
 
 # Architecture
@@ -113,29 +99,21 @@ WebModule https://documenter.getpostman.com/view/13850891/TVsoHAQT <br/>
 
 # Get Started: Vision on Edge Installer
 
-## For Azure IoT Edge Devices (Recommended)
+## For Azure IoTEdge Devices (Recommended)
+
+**Follow our IoTEdge deployment options only for VM based deployments. For Kubernetes deployments please follow [this](#option-1-voe-helm-chart-recommended).**
 
 ### Option 1: Azure Shell Installer (Recommended)
 
-#### Prerequisite:
-
-**Azure Media Service**, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
-
-
-#### Get Started:
-
-Please refer to this tutorial to follow the [instruction](Tutorial/Shell-installer-Tutorial.md) on how to install from Azure shell
+Please follow the [instructions given here](Tutorial/Shell-installer-Tutorial.md) to install VoE using Azure Shell.
 
 ### Option 2: Azure ARM Template
 
-please follow the document to follow instruction  https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/Tutorial_ARM_TemplateDeployment.md
-
 [![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flinkernetworks%2Fazure-intelligent-edge-patterns%2FOVMS-integration%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
 
-
+Please follow [the following document](Tutorial/Tutorial_ARM_TemplateDeployment.md) to learn more about our Azure ARM deployment.
 
 ### Option 3: Deploy by Visual studio
-
 
 
 #### Prerequisites:
@@ -225,31 +203,7 @@ To learn more about this development environment, check out [this tutorial](http
 
 - Please wait until all 6 are running. Open your browser and connect [http://YOUR_DEVICE_IP:8181](http://YOUR_DEVICE_IP:8181)
 
-### Troubleshooting
-
-If you are running into issues, please check following for assistnat:
-
-1. Ensure your setup is good
-   1. On CPU make sure this work: [https://azuremarketplace.microsoft.com/en-us/marketplace/apps/azure-iot.simulated-temperature-sensor?tab=Overview](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/azure-iot.simulated-temperature-sensor?tab=Overview)
-   2. On GPU make sure this work:
-      1. Quick test : run below command this will try to access nvidia gpu inside docker
-         - `sudo docker run --runtime=nvidia --rm nvidia/cuda nvidia-smi`
-      2. Long test :: deploy below from marketplace on your iot edge device and make sure it works
-         [https://azuremarketplace.microsoft.com/en-us/marketplace/apps/intelligent-edge.gpureferencemodule?tab=Overview](https://azuremarketplace.microsoft.com/en-us/marketplace/apps/intelligent-edge.gpureferencemodule?tab=Overview)
-2. If this is the first time you deploy the container to your edge, you might need to wait for more than 10 mins. You can use ssh to connect to your edge and try sudo docker ps., then you should see following 2 containers running:
-   YOUR_CONTAINER_REGISTRY_NAME/inferencemodule:x.x.xx-cpuamd64 (or gpu)
-   YOUR_CONTAINER_REGISTRY_NAME/webmodule:x.x.xx-cpuamd64
-
-   If you don’t see above, the conatiners aren't downloaded successfully yet
-
-3. If the inference & visionweb modules exist but still cannot see the page in 8181 port, check whether 8181 port on your edge is opened.
-4. If you can visit the website (in 8181 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened.
-
-### Upload your own video to be processed
-
-If you don't have camera devices to connect to your VoE deployment, you can use your own videos by uploading them to your edge device. Please follow the instruction [here](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/UploadVideo.md).
-
-## For Kubernetes (AKS/AKS-HCI)(Beta)
+## For Kubernetes (AKS/AKS-HCI/ASE K8s)(Beta)
 
 ### Option 1: VoE Helm Chart (Recommended)
 
@@ -277,15 +231,9 @@ Please follow the [instructions here](Tutorial/AKS_deploy.md) to deploy to AKS.
 
 - Tutorial 5: Advance capabilities setting [https://youtu.be/Bv7wxfFEdtI]
 
+## Upload your own video to be processed
 
-# Privacy Notice
-
-The software may collect information about your use of the software and send it to Microsoft.
-Microsoft may use this information to provide services and improve our products and services.
-You may turn off the telemetry as described in the repository or clicking settings on top right
-corner. Our privacy statement is located at [https://go.microsoft.com/fwlink/?LinkID=824704](https://go.microsoft.com/fwlink/?LinkID=824704)
-. You can learn more about data collection and use in the help documentation and our privacy
-statement. Your use of the software operates as your consent to these practices.
+If you don't have camera devices to connect to your VoE deployment, you can use your own videos by uploading them to your edge device. Please follow the instruction [here](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/UploadVideo.md).
 
 
 # Troubleshooting
@@ -308,3 +256,12 @@ If you are running into issues, please check following for assistant:
 3. If the inference & visionweb modules exist but still cannot see the page in 8181 port, check whether 8181 port on your edge is opened.
 4. If you can visit the website (in 8181 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened.
 
+
+# Privacy Notice
+
+The software may collect information about your use of the software and send it to Microsoft.
+Microsoft may use this information to provide services and improve our products and services.
+You may turn off the telemetry as described in the repository or clicking settings on top right
+corner. Our privacy statement is located at [https://go.microsoft.com/fwlink/?LinkID=824704](https://go.microsoft.com/fwlink/?LinkID=824704)
+. You can learn more about data collection and use in the help documentation and our privacy
+statement. Your use of the software operates as your consent to these practices.
