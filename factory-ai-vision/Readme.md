@@ -36,8 +36,6 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief
 - [Get Started: Vision on Edge Installer](#get-started-vision-on-edge-installer)
   * [For Azure IoT Edge](#for-azure-iotedge-devices-recommended)
     + [Option 1: Azure Shell Installer](#option-1-azure-shell-installer-recommended)
-      - [Prerequisite](#prerequisite)
-      - [Get Started](#get-started)
     + [Option 2: Azure ARM Template](#option-2-azure-arm-template)
     + [Option 3: Deploy by Visual studio](#option-3-deploy-by-visual-studio)
       - [Prerequisites](#prerequisites-1)
