@@ -47,7 +47,7 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief
     + [AVA Module (Recommended)](#ava-module-recommended)
     + [OpenCV Module](#opencv-module)
 - [Get Started: Vision on Edge Installer](#get-started-vision-on-edge-installer)
-  * [For Azure IoT Edge](#for-azure-iot-edge-devices-recommended)
+  * [For Azure IoT Edge](#for-azure-iotedge-devices-recommended)
     + [Option 1: Azure Shell Installer](#option-1-azure-shell-installer-recommended)
       - [Prerequisite](#prerequisite)
       - [Get Started](#get-started)
@@ -55,16 +55,15 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief
     + [Option 3: Deploy by Visual studio](#option-3-deploy-by-visual-studio)
       - [Prerequisites](#prerequisites-1)
       - [Get Started](#get-started-1)
-    + [Troubleshooting](#troubleshooting)
-    + [Upload your own video to be processed](#upload-your-own-video-to-be-processed)
-  * [For Kubernetes (AKS/AKS-HCI)(Beta)](#for-kubernetes-aksaks-hcibeta)
+  * [For Kubernetes (AKS/AKS-HCI/ASE K8s)(Beta)](#for-kubernetes-aksaks-hciase-k8sbeta)
     + [Option 1: VoE Helm Chart (Recommended)](#option-1-voe-helm-chart-recommended)
     + [Option 2: Static Kubernetes YAML](#option-2-static-kubernetes-yaml)
       - [AKS](#aks)
 - [Other Tutorials](#other-tutorials)
-  * [Video Tutorials](#video-tutorial)
+  * [Video Tutorials](#video-tutorials)
+  * [Upload your own video to be processed](#upload-your-own-video-to-be-processed)
+- [Troubleshooting](#troubleshooting)
 - [Privacy Notice](#privacy-notice)
-
 
 # Prerequisites
 
@@ -84,7 +83,7 @@ or
   - For running on CPU : A x64 ubuntu machine with docker + Azure Iot edge working
   - For running on GPU : Azure Stack Edge OR Azure/Azure Stack Hub NCv2 Ubuntu VM with Nvidia Docker + Nvidia driver + Azure Iot Edge
  
-### NOTE:This solution is only supported on linux based Azure IoT edge devices
+### NOTE:This solution is only supported on Linux VM based Azure IoTEdge devices
 
 Vision on Edge (VoE) also uses/requires a few Azure services for its various capabilities. Some of these services will be automatically deployed for you (during VoE installation) while others may need you to pre-deploy them before installing VoE. Please follow the VoE installation paths discussed below for more information.
 
@@ -92,7 +91,7 @@ Vision on Edge (VoE) also uses/requires a few Azure services for its various cap
 
 Check out the architecture below to see how Vision on Edge uses various services to function. Depending on your deployment target VoE will need the following Azure services as prerequisites:
 
-- IoT Edge Devices: Azure Custom Vision + IoT Hub + Azure Video Analyzer (recommended)
+- IoTEdge Devices: Azure Custom Vision + IoT Hub + Azure Video Analyzer (Recommended). Only VM deployment is supported.
 - Kubernetes (AKS-HCI): Azure Custom Vision + IoT Hub
 
 # Architecture
@@ -113,7 +112,9 @@ WebModule https://documenter.getpostman.com/view/13850891/TVsoHAQT <br/>
 
 # Get Started: Vision on Edge Installer
 
-## For Azure IoT Edge Devices (Recommended)
+## For Azure IoTEdge Devices (Recommended)
+
+**Follow our IoTEdge deployment options only for VM based deployments. For Kubernetes deployemnts please follow [this](#option-1-voe-helm-chart-recommended).**
 
 ### Option 1: Azure Shell Installer (Recommended)
 
@@ -245,11 +246,8 @@ If you are running into issues, please check following for assistnat:
 3. If the inference & visionweb modules exist but still cannot see the page in 8181 port, check whether 8181 port on your edge is opened.
 4. If you can visit the website (in 8181 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened.
 
-### Upload your own video to be processed
 
-If you don't have camera devices to connect to your VoE deployment, you can use your own videos by uploading them to your edge device. Please follow the instruction [here](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/UploadVideo.md).
-
-## For Kubernetes (AKS/AKS-HCI)(Beta)
+## For Kubernetes (AKS/AKS-HCI/ASE K8s)(Beta)
 
 ### Option 1: VoE Helm Chart (Recommended)
 
@@ -277,15 +275,9 @@ Please follow the [instructions here](Tutorial/AKS_deploy.md) to deploy to AKS.
 
 - Tutorial 5: Advance capabilities setting [https://youtu.be/Bv7wxfFEdtI]
 
+## Upload your own video to be processed
 
-# Privacy Notice
-
-The software may collect information about your use of the software and send it to Microsoft.
-Microsoft may use this information to provide services and improve our products and services.
-You may turn off the telemetry as described in the repository or clicking settings on top right
-corner. Our privacy statement is located at [https://go.microsoft.com/fwlink/?LinkID=824704](https://go.microsoft.com/fwlink/?LinkID=824704)
-. You can learn more about data collection and use in the help documentation and our privacy
-statement. Your use of the software operates as your consent to these practices.
+If you don't have camera devices to connect to your VoE deployment, you can use your own videos by uploading them to your edge device. Please follow the instruction [here](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/UploadVideo.md).
 
 
 # Troubleshooting
@@ -308,3 +300,12 @@ If you are running into issues, please check following for assistant:
 3. If the inference & visionweb modules exist but still cannot see the page in 8181 port, check whether 8181 port on your edge is opened.
 4. If you can visit the website (in 8181 port) but not see the inference result video after clicking configuration in the Part Identification page, please check whether your edge's 5000 port is opened.
 
+
+# Privacy Notice
+
+The software may collect information about your use of the software and send it to Microsoft.
+Microsoft may use this information to provide services and improve our products and services.
+You may turn off the telemetry as described in the repository or clicking settings on top right
+corner. Our privacy statement is located at [https://go.microsoft.com/fwlink/?LinkID=824704](https://go.microsoft.com/fwlink/?LinkID=824704)
+. You can learn more about data collection and use in the help documentation and our privacy
+statement. Your use of the software operates as your consent to these practices.
