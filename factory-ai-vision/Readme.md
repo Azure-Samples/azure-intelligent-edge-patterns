@@ -25,7 +25,7 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief
 - AVA Pipeline: Learn more [here](https://azure.microsoft.com/en-us/products/video-analyzer/)
 
 
-# Table of Content
+# Table of Contents
 
 - [Prerequisites](#prerequisites)
   * [Hardware](#hardware)
