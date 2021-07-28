@@ -96,7 +96,9 @@ ENV_PATH="${MANIFEST_PATH}/.env"
 rm -rf ${REPO_OUTPUT_DIR}
 rm -f archive.zip
 
-wget --quiet "https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/EdgeSolution/archive.zip"
+#wget --quiet "https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/EdgeSolution/archive.zip"
+wget --quiet "https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/feat/lva-to-ava/factory-ai-vision/EdgeSolution/archive.zip"
+
 unzip -q archive.zip -d ${REPO_OUTPUT_DIR}
 rm -f archive.zip
 cp ${ENV_TEMPLATE_PATH} ${ENV_PATH}
@@ -110,10 +112,8 @@ CUSTOM_VISION_TRAINING_KEY=$(az cognitiveservices account keys list --name ${CUS
 CUSTOM_VISION_ENDPOINT=$(az cognitiveservices account show --name ${CUSTOMVISION_NAME} -g ${RESOURCE_GROUP} | jq ".properties.endpoint")
 SUBSCRIPTION_ID=$(az account show | jq ".id")
 TENANT_ID=$(az account show | jq ".tenantId")
-AMS_SP_SECRET="\"${AMS_SP_SECRET}\""
-AMS_SP_ID="\"${AMS_SP_NAME}\""
-AMS_NAME="\"${AMS_NAME}\""
-AMS_RESOURCE_GROUP="\"${AMS_RESOURCE_GREOUP}\""
+AVA_EDGE_TOKEN="\"${AVA_EDGE_TOKEN}\""
+RESOURCE_GROUP="\"${RESOURCE_GREOUP}\""
 
 printf "\n%60s\n" " " | tr ' ' '-'
 echo "$(info) Generating .env at: ${ENV_PATH}"
@@ -123,11 +123,9 @@ sed -i -e "s|^CONTAINER_REGISTRY_USERNAME=.*$|CONTAINER_REGISTRY_USERNAME=\"${CO
 sed -i -e "s|^CONTAINER_REGISTRY_PASSWORD=.*$|CONTAINER_REGISTRY_PASSWORD=\"${CONTAINER_REGISTRY_PASSWORD}\"|g" ${ENV_PATH}
 sed -i -e "s|^IOTHUB_CONNECTION_STRING=.*$|IOTHUB_CONNECTION_STRING=${IOTHUB_CONNECTION_STRING}|g" ${ENV_PATH}
 sed -i -e "s/^SUBSCRIPTION_ID=.*$/SUBSCRIPTION_ID=${SUBSCRIPTION_ID}/g" ${ENV_PATH}
-sed -i -e "s/^RESOURCE_GROUP=.*$/RESOURCE_GROUP=\"${AMS_RESOURCE_GROUP}\"/g" ${ENV_PATH}
+sed -i -e "s/^RESOURCE_GROUP=.*$/RESOURCE_GROUP=\"${RESOURCE_GROUP}}\"/g" ${ENV_PATH}
 sed -i -e "s/^TENANT_ID=.*$/TENANT_ID=${TENANT_ID}/g" ${ENV_PATH}
-sed -i -e "s/^SERVICE_NAME=.*$/SERVICE_NAME=${AMS_NAME}/g" ${ENV_PATH}
-sed -i -e "s/^SERVICE_PRINCIPAL_APP_ID=.*$/SERVICE_PRINCIPAL_APP_ID=${AMS_SP_ID}/g" ${ENV_PATH}
-sed -i -e "s/^SERVICE_PRINCIPAL_SECRET=.*$/SERVICE_PRINCIPAL_SECRET=${AMS_SP_SECRET}/g" ${ENV_PATH}
+sed -i -e "s/^AVA_PROVISIONING_TOKEN=.*$/AVA_PROVISIONING_TOKEN=${AVA_EDGE_TOKEN}/g" ${ENV_PATH}
 sed -i -e "s|^CUSTOM_VISION_ENDPOINT=.*$|CUSTOM_VISION_ENDPOINT=${CUSTOM_VISION_ENDPOINT}|g" ${ENV_PATH}
 sed -i -e "s/^CUSTOM_VISION_TRAINING_KEY.*$/CUSTOM_VISION_TRAINING_KEY=${CUSTOM_VISION_TRAINING_KEY}/g" ${ENV_PATH}
 sed -i -e "s/^LVA_MODE.*$/LVA_MODE=\"${VIDEO_CAPTURE_MODULE}\"/g" ${ENV_PATH}
@@ -165,6 +163,8 @@ fi
 
 if [ "$VIDEO_CAPTURE_MODULE" == "opencv" ]; then
     MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_NAME}.opencv"
+elif [ "$VIDEO_CAPTURE_MODULE" == "ava" ]; then
+    MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_NAME}.ava"
 fi
 
 MANIFEST_TEMPLATE_NAME="${MANIFEST_TEMPLATE_NAME}.template.json"

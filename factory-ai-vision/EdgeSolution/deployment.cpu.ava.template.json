@@ -107,9 +107,6 @@
               },
               "DBPASS": {
                 "value": "vision_on_edge"
-              },
-              "DF_PD_VIDEO_SOURCE": {
-                "value": "opencv"
               }
             },
             "settings": {
@@ -145,9 +142,6 @@
               },
               "LVA_MODE": {
                 "value": "$LVA_MODE"
-              },
-              "IS_OPENCV": {
-                "value": "true"
               }
             },
             "settings": {
@@ -171,9 +165,15 @@
                       {
                         "HostPort": "5558"
                       }
+                    ],
+                    "44000/tcp": [
+                      {
+                        "HostPort": "44000"
+                      }
                     ]
                   },
-                  "runtime": "nvidia"
+                  "IpcMode": "host",
+                  "runtime": "runc"
                 }
               }
             }
@@ -192,7 +192,7 @@
               }
             },
             "settings": {
-              "image": "${MODULES.PredictModule.gpuamd64}",
+              "image": "${MODULES.PredictModule.cpuamd64}",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {
@@ -210,23 +210,18 @@
                     ]
                   },
                   "IpcMode": "host",
-                  "runtime": "nvidia"
+                  "runtime": "runc"
                 }
               }
             }
           },
-          "cvcapturemodule": {
-            "version": "1.0",
+          "avaedge": {
+            "version": "1.1",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
-            "env": {
-              "IOTHUB_CONNECTION_STRING": {
-                "value": "$IOTHUB_CONNECTION_STRING"
-              }
-            },
             "settings": {
-              "image": "${MODULES.CVCaptureModule.amd64}",
+              "image": "mcr.microsoft.com/media/video-analyzer:1",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {
@@ -236,19 +231,7 @@
                       "max-file": "10"
                     }
                   },
-                  "PortBindings": {
-                    "9000/tcp": [
-                      {
-                        "HostPort": "9000"
-                      }
-                    ],
-                    "5559/tcp": [
-                      {
-                        "HostPort": "5559"
-                      }
-                    ]
-                  },
-                  "runtime": "runc"
+                  "IpcMode": "host"
                 }
               }
             }
@@ -321,33 +304,15 @@
               }
             }
           },
-          "ovms-server": {
+          "yolov4module": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "docker.io/kakalin/ovms-server",
+              "image": "registry.hub.docker.com/ronpai/yolov4-tflite-tiny",
               "createOptions": {
-                "ExposedPorts": {
-                  "9000/tcp": {}
-                },
-                "Cmd": [
-                  "/ovms/bin/ovms --model_path /models/yolov3 --model_name yolov3 --port 9000"
-                ],
-                "Entrypoint": [
-                  "sh",
-                  "-c"
-                ],
                 "HostConfig": {
-                  "PortBindings": {
-                    "9000/tcp": [
-                      {
-                        "HostIp": "",
-                        "HostPort": "9000"
-                      }
-                    ]
-                  },
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -355,56 +320,6 @@
                       "max-file": "10"
                     }
                   }
-                },
-                "Labels": {
-                  "com.docker.compose.project": "yolov3-ovms-iotedge",
-                  "com.docker.compose.service": "ovms-server",
-                  "com.docker.compose.oneoff": "False",
-                  "com.docker.compose.container-number": "1",
-                  "com.docker.compose.version": "1.24.0",
-                  "com.docker.compose.config-hash": "7f09e8165c07b4b5d43b0d9ac09a06a4062a31da2ae1e43997ee8e0f4a90fcfd"
-                }
-              }
-            }
-          },
-          "ovms-app": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "settings": {
-              "image": "docker.io/kakalin/ovms-app",
-              "createOptions": {
-                "ExposedPorts": {
-                  "5010/tcp": {}
-                },
-                "Env": [
-                  "PYTHONUNBUFFERED=1"
-                ],
-                "HostConfig": {
-                  "PortBindings": {
-                    "5010/tcp": [
-                      {
-                        "HostIp": "",
-                        "HostPort": "5010"
-                      }
-                    ]
-                  },
-                  "LogConfig": {
-                    "Type": "",
-                    "Config": {
-                      "max-size": "10m",
-                      "max-file": "10"
-                    }
-                  }
-                },
-                "Labels": {
-                  "com.docker.compose.project": "yolov3-ovms-iotedge",
-                  "com.docker.compose.service": "ovms-app",
-                  "com.docker.compose.oneoff": "False",
-                  "com.docker.compose.container-number": "1",
-                  "com.docker.compose.version": "1.24.0",
-                  "com.docker.compose.config-hash": "dcdef0702a8e26d7c244eb1fc29534413b8822c98e1db982a604609a5b2e8c1a"
                 }
               }
             }
@@ -429,6 +344,18 @@
     },
     "VisionSampleModule": {
       "properties.desired": {}
+    },
+    "avaedge": {
+      "properties.desired": {
+        "ProvisioningToken": "$AVA_PROVISIONING_TOKEN",
+        "ApplicationDataDirectory": "/var/lib/videoanalyzer",
+        "DiagnosticsEventsOutputName": "diagnostics",
+        "OperationalEventsOutputName": "operational",
+        "LogLevel": "information",
+        "LogCategories": "Application,Events",
+        "AllowUnsecuredEndpoints": true,
+        "TelemetryOptOut": false
+      }
     }
   }
 }
