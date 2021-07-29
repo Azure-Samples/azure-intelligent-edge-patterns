@@ -13,11 +13,7 @@ export const Images: React.FC = () => {
   const trainingProjectIsPredictionModelSelector = trainingProjectIsPredictionModelFactory();
   const trainingProjectIsPredictionModel = useSelector(trainingProjectIsPredictionModelSelector);
 
-  console.log('trainingProjectIsPredictionModel', trainingProjectIsPredictionModel);
-
   const [selectedProject, setSelectedProject] = useState<number>(0);
-
-  console.log('selectedProject', selectedProject);
 
   const projectsOptions: IDropdownOption[] = trainingProjectIsPredictionModel.map(({ id, name }) => ({
     key: id,

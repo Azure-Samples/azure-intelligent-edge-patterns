@@ -111,7 +111,7 @@ const AddModelPanel: React.FC<AddModelPanelProps> = ({
 
     setLoading(true);
     if (mode === PanelMode.Create) {
-      await dispatch(createCustomProject(formData));
+      // await dispatch(createCustomProject(formData));
     } else {
       await dispatch(updateCustomProject(formData));
     }

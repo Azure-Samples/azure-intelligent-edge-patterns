@@ -43,8 +43,8 @@ const BaseModel: React.FC<ModelsProps> = ({ trainingProject }) => {
           name: 'type',
           fieldName: '',
           onRender: (item: TrainingProjectType) => {
-            if (!item.predictionUri) return ModelType.Custom;
-            return ModelType.Own;
+            if (!item.predictionUri) return '';
+            return '';
           },
         },
         { key: 'predictionUri', minWidth: 200, maxWidth: 200, name: 'Uri', fieldName: 'predictionUri' },

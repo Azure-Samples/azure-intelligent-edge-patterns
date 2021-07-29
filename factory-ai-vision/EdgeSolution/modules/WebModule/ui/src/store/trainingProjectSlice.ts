@@ -24,6 +24,14 @@ export type TrainingProject = {
   predictionHeader: string;
 };
 
+export type CreatOwnModelPayload = {
+  is_prediction_module: boolean;
+  name: string;
+  labels: string;
+  prediction_uri: string;
+  prediction_header: string;
+};
+
 const normalize = (e) => ({
   id: e.id,
   name: e.name,
@@ -100,12 +108,10 @@ const extractConvertCustomProject = (project) => {
   };
 };
 
-export const createCustomProject = createWrappedAsync<any, any, { state: State }>(
+export const createCustomProject = createWrappedAsync<any, CreatOwnModelPayload, { state: State }>(
   'trainingSlice/createNewCustom',
-  async (project) => {
-    const data = extractConvertCustomProject(project);
-
-    const response = await Axios.post(`/api/projects`, data);
+  async (payload) => {
+    const response = await Axios.post(`/api/projects`, payload);
     return normalize(response.data);
   },
 );
@@ -170,8 +176,6 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
     [selectAllTrainingProjects, (state: State) => state.scenario],
     (trainingProjects, scenarios) => {
       const relatedScenario = scenarios.find((e) => e.trainingProject === trainingProjectId);
-
-      console.log('relatedScenario', relatedScenario);
 
       return trainingProjects
         .filter((t) => !t.isDemo || t.id === relatedScenario?.trainingProject)
