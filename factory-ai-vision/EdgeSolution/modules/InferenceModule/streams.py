@@ -215,7 +215,7 @@ class Stream:
 
     def restart_cam(self):
 
-        logger.warning("[INFO] Restarting Cam", flush=True)
+        logger.warning("[INFO] Restarting Cam" )
 
         # cam = cv2.VideoCapture(normalize_rtsp(self.cam_source))
 
@@ -281,7 +281,7 @@ class Stream:
             self.scenario_type = self.model.detection_mode
 
         elif detection_mode == "PC":
-            logger.warning("[INFO] Line INFO", line_info, flush=True)
+            logger.warning("[INFO] Line INFO", line_info )
             self.scenario = PartCounter()
             self.scenario_type = self.model.detection_mode
             try:
@@ -297,23 +297,23 @@ class Stream:
                         y2 = int(lines[i]["label"][1]["y"])
                         line_id = str(lines[i]['order'])
                         logger.warning("        line:", x1, y1,
-                              x2, y2, line_id, flush=True)
+                              x2, y2, line_id )
                         lines_to_set.append([x1, y1, x2, y2, line_id])
                     self.scenario.set_line(lines_to_set)
-                    logger.warning("Upading Line:", flush=True)
-                    logger.warning("    use_line:", self.use_line, flush=True)
+                    logger.warning("Upading Line:" )
+                    logger.warning("    use_line:", self.use_line )
                 else:
-                    logger.warning("Upading Line:", flush=True)
-                    logger.warning("    use_line:", self.use_line, flush=True)
+                    logger.warning("Upading Line:" )
+                    logger.warning("    use_line:", self.use_line )
 
             except:
                 self.use_line = False
-                logger.warning("Upading Line[*]:", flush=True)
-                logger.warning("    use_line   :", False, flush=True)
+                logger.warning("Upading Line[*]:" )
+                logger.warning("    use_line   :", False )
 
         elif detection_mode in ["ES", "ESA", "TCC", "CQA"]:
             class_obj = [DangerZone, ShelfZone, CountingZone, QueueZone]
-            logger.warning("[INFO] Zone INFO", zone_info, flush=True)
+            logger.warning("[INFO] Zone INFO", zone_info )
             self.scenario = class_obj[["ES", "ESA",
                                        "TCC", "CQA"].index(detection_mode)]()
             self.scenario_type = self.model.detection_mode
@@ -324,8 +324,8 @@ class Stream:
                 self.use_zone = zone_info["useDangerZone"]
                 zones = zone_info["dangerZones"]
                 _zones = []
-                logger.warning("Upading Line:", flush=True)
-                logger.warning("    use_zone:", self.use_zone, flush=True)
+                logger.warning("Upading Line:" )
+                logger.warning("    use_zone:", self.use_zone )
                 # for zone in zones:
                 #     x1 = int(zone["label"]["x1"])
                 #     y1 = int(zone["label"]["y1"])
@@ -333,17 +333,17 @@ class Stream:
                 #     y2 = int(zone["label"]["y2"])
                 #     zone_id = str(zone['order'])
                 #     _zones.append([x1, y1, x2, y2, zone_id])
-                #     logger.warning("     zone:", x1, y1, x2, y2, flush=True)
+                #     logger.warning("     zone:", x1, y1, x2, y2 )
                 # self.scenario.set_zones(_zones)
                 self.scenario.set_zones(zones)
 
             except:
                 self.use_zone = False
-                logger.warning("Upading Zone[*]:", flush=True)
-                logger.warning("    use_zone   :", False, flush=True)
+                logger.warning("Upading Zone[*]:" )
+                logger.warning("    use_zone   :", False )
 
         elif detection_mode == "DD":
-            logger.warning("[INFO] Line INFO", line_info, flush=True)
+            logger.warning("[INFO] Line INFO", line_info )
             self.scenario = DefeatDetection()
             self.scenario_type = self.model.detection_mode
             # FIXME
@@ -359,17 +359,17 @@ class Stream:
                     x2 = int(lines[0]["label"][1]["x"])
                     y2 = int(lines[0]["label"][1]["y"])
                     self.scenario.set_line(x1, y1, x2, y2)
-                    logger.warning("Upading Line:", flush=True)
-                    logger.warning("    use_line:", self.use_line, flush=True)
-                    logger.warning("        line:", x1, y1, x2, y2, flush=True)
+                    logger.warning("Upading Line:" )
+                    logger.warning("    use_line:", self.use_line )
+                    logger.warning("        line:", x1, y1, x2, y2 )
                 else:
-                    logger.warning("Upading Line:", flush=True)
-                    logger.warning("    use_line:", self.use_line, flush=True)
+                    logger.warning("Upading Line:" )
+                    logger.warning("    use_line:", self.use_line )
 
             except:
                 self.use_line = False
-                logger.warning("Upading Line[*]:", flush=True)
-                logger.warning("    use_line   :", False, flush=True)
+                logger.warning("Upading Line[*]:" )
+                logger.warning("    use_line   :", False )
 
         else:
             self.scenario = None
@@ -488,7 +488,7 @@ class Stream:
             image = cv2.resize(image, (width, height))
             data = image.tobytes()
             res = requests.post(self.model.endpoint, data=data)
-            logger.warning(res.json())
+            # logger.warning(res.json())
             if res.json()[1] == 200:
                 lva_prediction = json.loads(res.json()[0])['inferences']
                 inf_time = json.loads(res.json()[0])['inf_time']
@@ -505,7 +505,7 @@ class Stream:
             s = time.time()
             res = requests.post(self.model.endpoint, data=f5)
             inf_time = time.time() - s
-            logger.warning(res.json())
+            # logger.warning(res.json())
             if res.status_code == 200:
                 lva_prediction = res.json()['inferences']
                 predictions = lva_to_customvision_format(lva_prediction)
@@ -612,7 +612,7 @@ class Stream:
                 logger.warning('No inference result')
                 predictions = []
             logger.warning('request prediction time: {}'.format(inf_time))
-        # logger.warning('predictions', predictions, flush=True)
+        # logger.warning('predictions', predictions )
         # self.mutex.release()
 
         # check whether it's the tag we want
@@ -708,11 +708,10 @@ class Stream:
                     "comparing...",
                     self.confidence_min,
                     confidence,
-                    self.confidence_max,
-                    flush=True,
+                    self.confidence_max
                 )
                 if self.confidence_min <= confidence <= self.confidence_max:
-                    logger.warning("preparing...", flush=True)
+                    logger.warning("preparing..." )
                     # prepare the data to send
                     tag = prediction["tagName"]
                     height, width = img.shape[0], img.shape[1]
@@ -931,8 +930,8 @@ def send_message_to_iothub(predictions):
             else:
                 iot.send_message_to_output(json.dumps(predictions), "metrics")
         except:
-            logger.warning("[ERROR] Failed to send message to iothub", flush=True)
-        logger.warning("[INFO] sending metrics to iothub", flush=True)
+            logger.warning("[ERROR] Failed to send message to iothub" )
+        logger.warning("[INFO] sending metrics to iothub" )
     else:
         # logger.warning('[METRICS]', json.dumps(predictions_to_send))
         pass
@@ -946,15 +945,15 @@ def send_message_to_lva(cam_id):
             msg.custom_properties["eventTarget"] = target
             iot.send_message_to_output(msg, "InferenceToLVA")
         except:
-            logger.warning("[ERROR] Failed to send signal to LVA", flush=True)
-        logger.warning("[INFO] sending signal to LVA", flush=True)
+            logger.warning("[ERROR] Failed to send signal to LVA" )
+        logger.warning("[INFO] sending signal to LVA" )
     else:
         # logger.warning('[INFO] Cannot detect IoT module')
         pass
 
 
 def send_retrain_image_to_webmodule(jpg, tag, labels, confidence, cam_id):
-    logger.warning("[INFO] Sending Image to relabeling", tag, flush=True)
+    logger.warning("[INFO] Sending Image to relabeling", tag )
     try:
         # requests.post('http://'+web_module_url()+'/api/relabel', data={
         res = requests.post(
@@ -971,7 +970,7 @@ def send_retrain_image_to_webmodule(jpg, tag, labels, confidence, cam_id):
             },
         )
     except:
-        logger.warning("[ERROR] Failed to update image for relabeling", flush=True)
+        logger.warning("[ERROR] Failed to update image for relabeling" )
 
 
 def lva_to_customvision_format(predictions):
