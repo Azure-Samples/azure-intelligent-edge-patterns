@@ -40,6 +40,7 @@ class Stream:
         self.last_img = None
         self.last_update = None
         self.last_send = None
+        self.edge = '960'
 
         self.zmq_sender = sender
         self.start_http()
@@ -48,7 +49,7 @@ class Stream:
     def start_http(self):
         def _new_streaming(self):
             cnt = 0
-            endpoint = self.endpoint + "/predict?camera_id=" + self.cam_id
+            endpoint = self.endpoint + " /predict_opencv?camera_id=" + self.cam_id + '&edge=' + self.edge
             if self.cam_source == "0":
                 self.cam = cv2.VideoCapture(0)
             else:
@@ -71,6 +72,7 @@ class Stream:
                         height = self.IMG_HEIGHT
                         ratio = self.IMG_HEIGHT / img.shape[0]
                         width = int(img.shape[1] * ratio + 0.000001)
+                        self.edge = '540'
 
                     img = cv2.resize(img, (width, height))
 
@@ -86,7 +88,6 @@ class Stream:
             self.cam.release()
 
         def run_send(self):
-            endpoint = self.endpoint + "/predict?camera_id=" + self.cam_id
             cnt = 0
             while self.cam_is_alive:
                 if self.last_img is None:
@@ -107,6 +108,7 @@ class Stream:
                     )
                 # data = cv2.imencode(".jpg", self.last_img)[1].tobytes()
                 data = self.last_img.tobytes()
+                endpoint = self.endpoint + " /predict_opencv?camera_id=" + self.cam_id + '&edge=' + self.edge
                 res = requests.post(endpoint, data=data)
                 self.last_send = self.last_update
                 time.sleep(1 / self.fps)
