@@ -115,7 +115,7 @@ export const Models = () => {
 
   return (
     <>
-      <Stack styles={{ root: { height: '100%', padding: '32px 16px' } }}>
+      <Stack styles={{ root: { height: '100%', padding: '32px 16px', overflowY: 'auto' } }}>
         <Label styles={{ root: { fontSize: '18px', lineHeight: '24px' } }}>Models</Label>
         <Stack tokens={{ childrenGap: '65px' }}>
           <CommandBar styles={{ root: { marginTop: '24px' } }} items={newCommandBarItems} />
