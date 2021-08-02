@@ -30,22 +30,26 @@ class HttpInferenceEngine:
             logger.error("Unexpected error: %s", sys.exc_info())
 
         results = []
-        for prediction in predictions:
-            tag_name = prediction["tagName"]
-            confidence = prediction["probability"]
-            box = {
-                "l": prediction["boundingBox"]["left"],
-                "t": prediction["boundingBox"]["top"],
-                "w": prediction["boundingBox"]["width"],
-                "h": prediction["boundingBox"]["height"],
-            }
-            results.append(
-                {
-                    "type": "entity",
-                    "entity": {
-                        "tag": {"value": tag_name, "confidence": confidence},
-                        "box": box,
-                    },
+        if 'ovmsdag' in stream.model.endpoint:
+            for person in predictions:
+                results.append({'Age':person['age'], 'Gender':person['gender'], 'Emotion':person['emotion']})
+        else:
+            for prediction in predictions:
+                tag_name = prediction["tagName"]
+                confidence = prediction["probability"]
+                box = {
+                    "l": prediction["boundingBox"]["left"],
+                    "t": prediction["boundingBox"]["top"],
+                    "w": prediction["boundingBox"]["width"],
+                    "h": prediction["boundingBox"]["height"],
                 }
-            )
+                results.append(
+                    {
+                        "type": "entity",
+                        "entity": {
+                            "tag": {"value": tag_name, "confidence": confidence},
+                            "box": box,
+                        },
+                    }
+                )
         return results

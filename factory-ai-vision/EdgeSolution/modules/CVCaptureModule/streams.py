@@ -49,7 +49,7 @@ class Stream:
     def start_http(self):
         def _new_streaming(self):
             cnt = 0
-            endpoint = self.endpoint + " /predict_opencv?camera_id=" + self.cam_id + '&edge=' + self.edge
+            endpoint = self.endpoint + "/predict_opencv?camera_id=" + self.cam_id + '&edge=' + self.edge
             if self.cam_source == "0":
                 self.cam = cv2.VideoCapture(0)
             else:
@@ -108,7 +108,7 @@ class Stream:
                     )
                 # data = cv2.imencode(".jpg", self.last_img)[1].tobytes()
                 data = self.last_img.tobytes()
-                endpoint = self.endpoint + " /predict_opencv?camera_id=" + self.cam_id + '&edge=' + self.edge
+                endpoint = self.endpoint + "/predict_opencv?camera_id=" + self.cam_id + '&edge=' + self.edge
                 res = requests.post(endpoint, data=data)
                 self.last_send = self.last_update
                 time.sleep(1 / self.fps)

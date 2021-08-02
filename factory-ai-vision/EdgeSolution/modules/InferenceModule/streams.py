@@ -281,7 +281,7 @@ class Stream:
             self.scenario_type = self.model.detection_mode
 
         elif detection_mode == "PC":
-            logger.warning("[INFO] Line INFO", line_info )
+            logger.warning("[INFO] Line INFO: {}".format(line_info) )
             self.scenario = PartCounter()
             self.scenario_type = self.model.detection_mode
             try:
@@ -301,10 +301,10 @@ class Stream:
                         lines_to_set.append([x1, y1, x2, y2, line_id])
                     self.scenario.set_line(lines_to_set)
                     logger.warning("Upading Line:" )
-                    logger.warning("    use_line:", self.use_line )
+                    logger.warning("    use_line: {}", self.use_line )
                 else:
                     logger.warning("Upading Line:" )
-                    logger.warning("    use_line:", self.use_line )
+                    logger.warning("    use_line: {}", self.use_line )
 
             except:
                 self.use_line = False
@@ -343,7 +343,7 @@ class Stream:
                 logger.warning("    use_zone   :", False )
 
         elif detection_mode == "DD":
-            logger.warning("[INFO] Line INFO", line_info )
+            logger.warning("[INFO] : {}".format(line_info) )
             self.scenario = DefeatDetection()
             self.scenario_type = self.model.detection_mode
             # FIXME
@@ -360,16 +360,16 @@ class Stream:
                     y2 = int(lines[0]["label"][1]["y"])
                     self.scenario.set_line(x1, y1, x2, y2)
                     logger.warning("Upading Line:" )
-                    logger.warning("    use_line:", self.use_line )
-                    logger.warning("        line:", x1, y1, x2, y2 )
+                    logger.warning("    use_line: {}".format(self.use_line) )
+                    logger.warning("        line: {} {} {} {}".format(x1, y1, x2, y2) )
                 else:
                     logger.warning("Upading Line:" )
-                    logger.warning("    use_line:", self.use_line )
+                    logger.warning("    use_line: {}".format(self.use_line) )
 
             except:
                 self.use_line = False
                 logger.warning("Upading Line[*]:" )
-                logger.warning("    use_line   :", False )
+                logger.warning("    use_line   : {}".format(False) )
 
         else:
             self.scenario = None
