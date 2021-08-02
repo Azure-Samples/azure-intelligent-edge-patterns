@@ -160,7 +160,10 @@ export default compose(
             >
               Create a custom model with Microsoft Custom Vision, browse Intel’s library of models, or upload
               your own. Manage them all in one place.{' '}
-              <Link href="azure-intelligent-edge-patterns/factory-ai-vision at master · Azure-Samples/azure-intelligent-edge-patterns (github.com)">
+              <Link
+                target="_blank"
+                href="https://github.com/Azure-Samples/azure-intelligent-edge-patterns/tree/master/factory-ai-vision"
+              >
                 Learn more
               </Link>
             </Text>
@@ -194,7 +197,10 @@ export default compose(
 
                 {model.type === 'ovms' && (
                   <Stack styles={{ root: { marginTop: '7px' } }}>
-                    <Link href="https://docs.openvinotoolkit.org/latest/omz_models_group_intel.html">
+                    <Link
+                      target="_blank"
+                      href="https://docs.openvinotoolkit.org/latest/omz_models_group_intel.html"
+                    >
                       <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 5 }}>
                         <Text>Intel</Text>
                         <Icon styles={{ root: { color: '#0078D4' } }} iconName="OpenInNewWindow" />

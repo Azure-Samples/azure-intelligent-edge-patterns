@@ -164,9 +164,10 @@ const AddModelPanel: React.FC<Props> = (props) => {
       <Stack tokens={{ childrenGap: '10px' }}>
         <AddPanelManagement
           errorMsg={errorMsg}
-          onChange={onChange}
           modelType={modelType}
           formData={formData}
+          onResetErrorMsg={() => setErrorMsg('')}
+          onChange={onChange}
           onAddTag={onAddTag}
           onRemoveTag={onRemoveTag}
           isExistingProject={isExistingProject}

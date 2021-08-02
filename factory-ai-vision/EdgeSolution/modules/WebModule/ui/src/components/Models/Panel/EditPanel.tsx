@@ -122,7 +122,7 @@ const EditPanel: React.FC<Props> = (props) => {
             <Stack>
               <Label styles={{ root: classes.itemTitle }}>Name</Label>
               <Stack>
-                <Link href="https://docs.openvinotoolkit.org/latest/omz_models_group_intel.html">
+                <Link>
                   <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 5 }}>
                     <Text>{project.name}</Text>
                     <Icon styles={{ root: { color: '#0078D4' } }} iconName="OpenInNewWindow" />
@@ -133,7 +133,7 @@ const EditPanel: React.FC<Props> = (props) => {
             <Stack>
               <Label styles={{ root: classes.itemTitle }}>Images</Label>
               <Stack>
-                <Link href="https://docs.openvinotoolkit.org/latest/omz_models_group_intel.html">
+                <Link>
                   <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 5 }}>
                     <Text>Placeholder</Text>
                     <Icon styles={{ root: { color: '#0078D4' } }} iconName="OpenInNewWindow" />

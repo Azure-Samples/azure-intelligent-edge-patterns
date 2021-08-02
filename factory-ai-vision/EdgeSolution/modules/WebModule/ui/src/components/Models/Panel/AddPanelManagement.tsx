@@ -30,6 +30,7 @@ interface Props {
   onRemoveTag: (idx: number) => void;
   isExistingProject: boolean;
   onChangeExistingProject: () => void;
+  onResetErrorMsg: () => void;
 }
 
 const toBase64 = (file) =>
@@ -63,6 +64,7 @@ const AddPanelManagement: React.FC<Props> = (props) => {
     onChange,
     onAddTag,
     onRemoveTag,
+    onResetErrorMsg,
   } = props;
 
   const classes = getClasses();
@@ -109,8 +111,9 @@ const AddPanelManagement: React.FC<Props> = (props) => {
   );
 
   const onChangeTag = useCallback((newValue: string) => {
+    onResetErrorMsg();
     setTag(newValue);
-  }, []);
+  }, [onResetErrorMsg]);
 
   const onTagAdd = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -141,10 +144,20 @@ const AddPanelManagement: React.FC<Props> = (props) => {
           <Text styles={{ root: classes.item }}>{modelType === 'custom' ? 'True' : 'False'}</Text>
         </Stack>
         {modelType === 'ovms' && (
-          <Stack>
-            <Label styles={{ root: classes.itemTitle }}>Category</Label>
-            <Text styles={{ root: classes.item }}>Category</Text>
-          </Stack>
+          <>
+            <Stack>
+              <Label styles={{ root: classes.itemTitle }}>Category</Label>
+              <Text styles={{ root: classes.item }}>Object Detector</Text>
+            </Stack>
+            <Stack tokens={{ childrenGap: 5 }}>
+              <Label styles={{ root: classes.itemTitle }}>Object / Tags</Label>
+              <Stack horizontal tokens={{ childrenGap: '5px' }} wrap>
+                {['demo1', 'demo2'].map((tag, id) => (
+                  <Tag id={id} text={tag} />
+                ))}
+              </Stack>
+            </Stack>
+          </>
         )}
         {/* <Stack>
                <Label styles={{ root: classes.itemTitle }}>Object / Tags</Label>

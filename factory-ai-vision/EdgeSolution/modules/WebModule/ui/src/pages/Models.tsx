@@ -89,7 +89,13 @@ export const Models = () => {
       iconProps: {
         iconName: 'NavigateExternalInline',
       },
-      onClick: () => {},
+      onClick: () => {
+        const win = window.open(
+          'https://github.com/Azure-Samples/azure-intelligent-edge-patterns/tree/master/factory-ai-vision',
+          '_blank',
+        );
+        win.focus();
+      },
     },
     {
       key: 'help',
