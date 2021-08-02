@@ -28,6 +28,8 @@ interface Props {
   onChange: (key: keyof CreateFormType, newValue: string | boolean | string[]) => void;
   onAddTag: (tag: string) => void;
   onRemoveTag: (idx: number) => void;
+  isExistingProject: boolean;
+  onChangeExistingProject: () => void;
 }
 
 const toBase64 = (file) =>
@@ -45,13 +47,23 @@ const getClasses = () =>
     },
     itemTitle: { fontSize: '13px', lineHeight: '18px', color: '#605E5C' },
     item: { fontSize: '13px', lineHeight: '18px', color: '#000' },
+    tip: { fontSize: '14px', lineHeight: '20px', color: '#605E5C' },
     tagsWrapper: {
       marginTop: '20px',
     },
   });
 
 const AddPanelManagement: React.FC<Props> = (props) => {
-  const { modelType, formData, onChange, errorMsg, onAddTag, onRemoveTag } = props;
+  const {
+    modelType,
+    formData,
+    errorMsg,
+    isExistingProject,
+    onChangeExistingProject,
+    onChange,
+    onAddTag,
+    onRemoveTag,
+  } = props;
 
   const classes = getClasses();
 
@@ -60,7 +72,7 @@ const AddPanelManagement: React.FC<Props> = (props) => {
   );
 
   const [fileName, setFileName] = useState('');
-  const [isExisting, setIsExisting] = useState(false);
+  // const [isExisting, setIsExisting] = useState(false);
   const [tag, setTag] = useState('');
 
   const fileRef = useRef(null);
@@ -110,11 +122,12 @@ const AddPanelManagement: React.FC<Props> = (props) => {
     [tag, onAddTag],
   );
 
-  const onCategoryChange = useCallback((_, option?: IDropdownOption) => {
-    onChange('category', option!.key as string);
-  }, []);
-
-  // const onDeleteTag = useCallback((id: number) => {}, [tag, onAddTag]);
+  const onCategoryChange = useCallback(
+    (_, option?: IDropdownOption) => {
+      onChange('category', option!.key as string);
+    },
+    [onChange],
+  );
 
   return (
     <>
@@ -141,7 +154,7 @@ const AddPanelManagement: React.FC<Props> = (props) => {
                  ))}
                </Stack>
              </Stack> */}
-        {isExisting ? (
+        {isExistingProject ? (
           <Dropdown
             label="Project"
             required
@@ -149,6 +162,7 @@ const AddPanelManagement: React.FC<Props> = (props) => {
             onChange={onProjectDropdownChange}
             selectedKey={formData.selectedCustomVisionId}
             calloutProps={{ calloutMaxHeight: 300 }}
+            errorMessage={errorMsg}
           />
         ) : (
           <TextField
@@ -160,33 +174,41 @@ const AddPanelManagement: React.FC<Props> = (props) => {
         )}
         {modelType === 'custom' && (
           <>
-            <Link onClick={() => setIsExisting(true)}>Create from existing project &gt;</Link>
+            <Link onClick={onChangeExistingProject}>
+              {isExistingProject ? 'Create new model >' : 'Create from existing project >'}
+            </Link>
             <Dropdown
               label="Type"
               options={categoryOptions}
               selectedKey={formData.category}
-              disabled={isExisting}
+              disabled={isExistingProject}
               onChange={onCategoryChange}
             />
           </>
         )}
-        {modelType === 'custom' && !isExisting && (
-          <>
+        {modelType === 'custom' && !isExistingProject && (
+          <Stack>
             <TextField
               label="Objects/Tags"
               required
               value={tag}
               onChange={(_, newValue) => onChangeTag(newValue)}
               onKeyPress={onTagAdd}
+              errorMessage={errorMsg}
             />
             {
-              <Stack horizontal wrap tokens={{ childrenGap: 5 }}>
-                {formData.tags.map((tag, id) => (
-                  <Tag id={id} text={tag} isDelete onDelete={onRemoveTag} />
-                ))}
+              <Stack>
+                {formData.tags.length < 2 && (
+                  <Text styles={{ root: classes.tip }}>Add at least 2 tags to Save</Text>
+                )}
+                <Stack horizontal wrap styles={{ root: { marginTop: '5px' } }} tokens={{ childrenGap: 8 }}>
+                  {formData.tags.map((tag, id) => (
+                    <Tag key={id} id={id} text={tag} isDelete onDelete={onRemoveTag} />
+                  ))}
+                </Stack>
               </Stack>
             }
-          </>
+          </Stack>
         )}
         {modelType === 'own' && (
           <>
@@ -219,137 +241,6 @@ const AddPanelManagement: React.FC<Props> = (props) => {
       </Stack>
     </>
   );
-
-  // switch (modelType) {
-  //   case 'custom':
-  //     return (
-  //       <>
-  //         <Stack styles={{ root: classes.itemWrapper }} tokens={{ childrenGap: 16 }}>
-  //           <Stack>
-  //             <Label styles={{ root: classes.itemTitle }}>Source</Label>
-  //             <Text styles={{ root: classes.item }}>{getSource('custom')}</Text>
-  //           </Stack>
-  //           <Stack>
-  //             <Label styles={{ root: classes.itemTitle }}>Trainable</Label>
-  //             <Text styles={{ root: classes.item }}>True</Text>
-  //           </Stack>
-  //         </Stack>
-  //         <TextField
-  //           label="Name"
-  //           required
-  //           errorMessage={isEmpty(formData.name) && errorMsg}
-  //           onChange={(_, newValue) => onChange('name', newValue)}
-  //         />
-  //         <Dropdown
-  //           label="Project"
-  //           required
-  //           options={customVisionProjectOptions}
-  //           onChange={onProjectDropdownChange}
-  //           selectedKey={formData.selectedCustomVisionId}
-  //           calloutProps={{ calloutMaxHeight: 300 }}
-  //         />
-  //         <Dropdown label="Type" options={typeOptions} selectedKey={'custom' as ModelType} disabled />
-  //         <Dropdown
-  //           label="Category"
-  //           options={categoryOptions}
-  //           selectedKey={'Object Detection' as CategoryType}
-  //           disabled
-  //         />
-  //         <TextField label="Objects/Tags" required onChange={(_, newValue) => onChange('name', newValue)} />
-  //         {/* <CreateProjectDialog /> */}
-  //         {/* <Checkbox checked={isFullImages} label="Load Full Images" onChange={onLoadFullImgChange} />
-  //         <WarningDialog
-  //           open={isLoadingImages}
-  //           contentText={
-  //             <Text variant="large">Depends on the number of images, loading full images takes time</Text>
-  //           }
-  //           onConfirm={() => {
-  //             setIsFullImages(true);
-  //             setIsLoadingImages(false);
-  //           }}
-  //           onCancel={() => setIsLoadingImages(false)}
-  //         /> */}
-  //         {/* <Stack horizontal tokens={{ childrenGap: 10 }}>
-  //         <PrimaryButton text="Load" disabled={isLoading} onClick={onLoadModel} />
-  //         {isLoading && <Spinner label="loading" />}
-  //       </Stack> */}
-  //       </>
-  //     );
-  //   case 'ovms':
-  //     return (
-  //       <>
-  //         <Stack styles={{ root: classes.itemWrapper }} tokens={{ childrenGap: 16 }}>
-  //           <Stack>
-  //             <Label styles={{ root: classes.itemTitle }}>Source</Label>
-  //             <Text styles={{ root: classes.item }}>{getSource('ovms')}</Text>
-  //           </Stack>
-  //           <Stack>
-  //             <Label styles={{ root: classes.itemTitle }}>Trainable</Label>
-  //             <Text styles={{ root: classes.item }}>False</Text>
-  //           </Stack>
-  //           <Stack>
-  //             <Label styles={{ root: classes.itemTitle }}>Category</Label>
-  //             <Text styles={{ root: classes.item }}>Category</Text>
-  //           </Stack>
-  //           {/* <Stack>
-  //             <Label styles={{ root: classes.itemTitle }}>Object / Tags</Label>
-  //             <Stack horizontal wrap>
-  //               {parts.map((part, id) => (
-  //                 <Tag id={id} text={part.name} />
-  //               ))}
-  //             </Stack>
-  //           </Stack> */}
-  //         </Stack>
-  //         <TextField
-  //           label="Name"
-  //           required
-  //           errorMessage={isEmpty(formData.name) && errorMsg}
-  //           onChange={(_, newValue) => onChange('name', newValue)}
-  //         />
-  //       </>
-  //     );
-  //   case 'own':
-  //     return (
-  //       <>
-  //         <Stack styles={{ root: classes.itemWrapper }} tokens={{ childrenGap: 16 }}>
-  //           <Stack>
-  //             <Label styles={{ root: classes.itemTitle }}>Source</Label>
-  //             <Text styles={{ root: classes.item }}>{getSource('own')}</Text>
-  //           </Stack>
-  //           <Stack>
-  //             <Label styles={{ root: classes.itemTitle }}>Trainable</Label>
-  //             <Text styles={{ root: classes.item }}>False</Text>
-  //           </Stack>
-  //         </Stack>
-  //         <TextField
-  //           label="Name"
-  //           required
-  //           errorMessage={isEmpty(formData.name) && errorMsg}
-  //           onChange={(_, newValue) => onChange('name', newValue)}
-  //         />
-  //         <TextField
-  //           label="Endpoint"
-  //           value={formData.endPoint}
-  //           errorMessage={isEmpty(formData.endPoint) && errorMsg}
-  //           onChange={(_, newValue) => onChange('endPoint', newValue)}
-  //           required
-  //         />
-  //         <Stack styles={{ root: { padding: '5px 0', display: 'block' } }}>
-  //           <Label>Labels</Label>
-  //           <DefaultButton
-  //             text="Upload"
-  //             iconProps={{ iconName: 'Upload' }}
-  //             label="Labels"
-  //             onClick={onUploadClick}
-  //           />
-  //           {fileName && <Label>{fileName}</Label>}
-  //           <input ref={fileRef} type="file" onChange={onUpload} accept=".txt" style={{ display: 'none' }} />
-  //         </Stack>
-  //       </>
-  //     );
-  //   default:
-  //     break;
-  // }
 };
 
 export default AddPanelManagement;

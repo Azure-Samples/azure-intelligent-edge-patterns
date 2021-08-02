@@ -94,6 +94,25 @@ export const createNewTrainingProject = createWrappedAsync<any, string, { state:
 
     dispatch(refreshTrainingProject());
 
+    console.log('createNewTrainingProject', response.data);
+
+    return normalize(response.data);
+  },
+);
+
+export const createCustomVisionProjectAndModel = createWrappedAsync<any, string, { state: State }>(
+  'trainingSlice/createNew',
+  async (name, { getState, dispatch }) => {
+    const [nonDemoProject] = getState().trainingProject.nonDemo;
+    const response = await Axios.get(`/api/projects/${nonDemoProject}/reset_project?project_name=${name}`);
+
+    // dispatch(refreshTrainingProject());
+    dispatch(
+      pullCVProjects({ selectedCustomvisionId: response.data.customvision_id, loadFullImages: false }),
+    );
+
+    console.log('createNewTrainingProject', response.data);
+
     return normalize(response.data);
   },
 );

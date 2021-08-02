@@ -10,6 +10,7 @@ import {
   mergeStyleSets,
   Text,
   Link,
+  Icon,
 } from '@fluentui/react';
 import { assocPath } from 'ramda';
 import { useDispatch } from 'react-redux';
@@ -117,10 +118,30 @@ const EditPanel: React.FC<Props> = (props) => {
           <Text styles={{ root: classes.item }}>{modelType === 'custom' ? 'True' : 'False'}</Text>
         </Stack>
         {project.customVisionId && (
-          <Stack>
-            <Label styles={{ root: classes.itemTitle }}>Name</Label>
-            <Link styles={{ root: classes.itemLink }}>{project.name}</Link>
-          </Stack>
+          <>
+            <Stack>
+              <Label styles={{ root: classes.itemTitle }}>Name</Label>
+              <Stack>
+                <Link href="https://docs.openvinotoolkit.org/latest/omz_models_group_intel.html">
+                  <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 5 }}>
+                    <Text>{project.name}</Text>
+                    <Icon styles={{ root: { color: '#0078D4' } }} iconName="OpenInNewWindow" />
+                  </Stack>
+                </Link>
+              </Stack>
+            </Stack>
+            <Stack>
+              <Label styles={{ root: classes.itemTitle }}>Images</Label>
+              <Stack>
+                <Link href="https://docs.openvinotoolkit.org/latest/omz_models_group_intel.html">
+                  <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 5 }}>
+                    <Text>Placeholder</Text>
+                    <Icon styles={{ root: { color: '#0078D4' } }} iconName="OpenInNewWindow" />
+                  </Stack>
+                </Link>
+              </Stack>
+            </Stack>
+          </>
         )}
         {modelType !== 'custom' && (
           <Stack>
@@ -136,6 +157,7 @@ const EditPanel: React.FC<Props> = (props) => {
       <Stack styles={{ root: classes.tagsWrapper }} tokens={{ childrenGap: '10px' }}>
         <TextField
           label="Objects/Tags"
+          value={localTag}
           onChange={(_, newValue) => setLocalTag(newValue)}
           onKeyPress={onTagAdd}
         />

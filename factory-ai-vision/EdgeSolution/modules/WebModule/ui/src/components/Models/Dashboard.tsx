@@ -13,6 +13,7 @@ import {
   Label,
   Text,
   Link,
+  Icon,
 } from '@fluentui/react';
 
 import {
@@ -92,7 +93,7 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
           </Stack>
         )}
       </Stack>
-      <Stack tokens={{ childrenGap: '16' }}>
+      {/* <Stack tokens={{ childrenGap: '16' }}>
         <CommandBar
           items={commandBarItems2}
           styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
@@ -104,7 +105,7 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
             ))}
           </Stack>
         )}
-      </Stack>
+      </Stack> */}
     </Stack>
   );
 };
@@ -123,13 +124,13 @@ const NEW_MODELS = [
     subTitle: 'Choose from an existing library of models populated by Intel OpenVino.',
     type: 'ovms' as ModelType,
   },
-  {
-    imagePath: '/icons/ownModel.png',
-    title: 'Create Custom',
-    subTitle:
-      'Use Microsoft’s Custom Vision to create your own model by training tag association with an image dataset.',
-    type: 'own' as ModelType,
-  },
+  // {
+  //   imagePath: '/icons/ownModel.png',
+  //   title: 'Create Custom',
+  //   subTitle:
+  //     'Use Microsoft’s Custom Vision to create your own model by training tag association with an image dataset.',
+  //   type: 'own' as ModelType,
+  // },
 ];
 
 export default compose(
@@ -158,7 +159,10 @@ export default compose(
               }}
             >
               Create a custom model with Microsoft Custom Vision, browse Intel’s library of models, or upload
-              your own. Manage them all in one place. <Link href="">Learn more</Link>
+              your own. Manage them all in one place.{' '}
+              <Link href="azure-intelligent-edge-patterns/factory-ai-vision at master · Azure-Samples/azure-intelligent-edge-patterns (github.com)">
+                Learn more
+              </Link>
             </Text>
           </Stack>
           <Stack
@@ -189,8 +193,13 @@ export default compose(
                 />
 
                 {model.type === 'ovms' && (
-                  <Stack styles={{ root: { marginTop: '7px', fontSize: '13px', lineHeight: '18px' } }}>
-                    <Link href="">Intel</Link>
+                  <Stack styles={{ root: { marginTop: '7px' } }}>
+                    <Link href="https://docs.openvinotoolkit.org/latest/omz_models_group_intel.html">
+                      <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 5 }}>
+                        <Text>Intel</Text>
+                        <Icon styles={{ root: { color: '#0078D4' } }} iconName="OpenInNewWindow" />
+                      </Stack>
+                    </Link>
                   </Stack>
                 )}
               </div>

@@ -7,7 +7,8 @@ import {
   pullCVProjects,
   CreatOwnModelPayload,
   createCustomProject,
-  createNewTrainingProject,
+  // createNewTrainingProject,
+  createCustomVisionProjectAndModel,
 } from '../../../store/trainingProjectSlice';
 import { CreateFormType } from '../type';
 
@@ -39,56 +40,62 @@ const getAddOwnModelPayload = (formData: CreateFormType): CreatOwnModelPayload =
   prediction_header: '',
 });
 
+const isValid = (isExisting: boolean, formData: CreateFormType): boolean => {
+  if (isExisting && formData.selectedCustomVisionId === '') return false;
+  if (!isExisting && (formData.name === '' || formData.tags.length < 2)) return false;
+  return true;
+};
+
 const AddModelPanel: React.FC<Props> = (props) => {
   const { isOpen, initialValue = initialForm, modelType, onDissmiss } = props;
 
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState<CreateFormType>(initialValue);
+  const [isExistingProject, setIsExistingProject] = useState(false);
 
   const dispatch = useDispatch();
 
-  const validate = useCallback(() => {
-    let hasError = false;
+  const onClosePanel = useCallback(() => {
+    setIsExistingProject(false);
+    setFormData(initialValue);
+    onDissmiss();
+    setErrorMsg('');
+  }, [initialValue, onDissmiss]);
 
-    ['name', 'endPoint'].forEach((key) => {
-      if (!formData[key]) {
-        hasError = true;
-      }
-    });
-
-    return hasError;
-  }, [formData]);
-
-  const onCreateModel = useCallback(async () => {
-    if (validate()) {
+  const onCreateOwnModel = useCallback(async () => {
+    if (formData.name === '' || formData.endPoint === '') {
       setErrorMsg('This field is required');
       return;
     }
     setIsLoading(true);
 
     await dispatch(createCustomProject(getAddOwnModelPayload(formData)));
+
     setIsLoading(false);
-    onDissmiss();
-    setFormData(initialValue);
-  }, [dispatch, formData, onDissmiss, validate, initialValue]);
+    onClosePanel();
+  }, [dispatch, formData, onClosePanel]);
 
   const onCreateCustomVisionProject = useCallback(async () => {
+    if (formData.name === '' || formData.tags.length < 2) {
+      setErrorMsg('This field is required');
+      return;
+    }
+
     setIsLoading(true);
 
-    await dispatch(
-      // pullCVProjects({
-      //   selectedCustomvisionId: formData.selectedCustomVisionId,
-      //   loadFullImages: false,
-      // }),
-      createNewTrainingProject(formData.name),
-    );
+    await dispatch(createCustomVisionProjectAndModel(formData.name));
 
     setIsLoading(false);
-    onDissmiss();
-  }, [dispatch, formData, onDissmiss]);
+    onClosePanel();
+  }, [dispatch, formData, onClosePanel]);
 
-  const onLoadModel = useCallback(async () => {
+  const onLoadExistingModel = useCallback(async () => {
+    if (formData.selectedCustomVisionId === '') {
+      setErrorMsg('This field is required');
+      return;
+    }
+
     setIsLoading(true);
 
     await dispatch(
@@ -99,8 +106,8 @@ const AddModelPanel: React.FC<Props> = (props) => {
     );
 
     setIsLoading(false);
-    onDissmiss();
-  }, [dispatch, formData, onDissmiss]);
+    onClosePanel();
+  }, [dispatch, formData, onClosePanel]);
 
   const onAddOvmsModel = useCallback(() => {
     console.log('onAddOvmsModel');
@@ -116,28 +123,39 @@ const AddModelPanel: React.FC<Props> = (props) => {
     setFormData((prev) => ({ ...prev, tags: [...prev.tags, tag] }));
   }, []);
 
-  const onRemoveTag = useCallback((idx) => {
-    setFormData((prev) => ({ ...prev, tags: [...prev.tags].slice(idx, 1) }));
-  }, []);
+  const onRemoveTag = useCallback(
+    (idx) => {
+      const newTags = [...formData.tags];
+      newTags.splice(idx, 1);
+
+      setFormData((prev) => ({ ...prev, tags: newTags }));
+    },
+    [formData],
+  );
+
+  console.log('formData', formData);
+  console.log('isAddModelValid(formData)', !isValid(isExistingProject, formData));
 
   return (
     <Panel
       isOpen={isOpen}
-      onDismiss={onDissmiss}
+      onDismiss={onClosePanel}
       hasCloseButton
       headerText="New Model"
       onRenderFooterContent={() => (
         <Stack tokens={{ childrenGap: 10 }} horizontal>
           {modelType === 'custom' && (
             <PrimaryButton
-              onClick={formData.name === '' ? onLoadModel : onCreateCustomVisionProject}
+              onClick={isExistingProject ? onLoadExistingModel : onCreateCustomVisionProject}
               disabled={isLoading}
               text="Add"
             />
           )}
           {modelType === 'ovms' && <PrimaryButton onClick={onAddOvmsModel} disabled={isLoading} text="Add" />}
-          {modelType === 'own' && <PrimaryButton onClick={onCreateModel} disabled={isLoading} text="Add" />}
-          <DefaultButton onClick={onDissmiss}>Cancel</DefaultButton>
+          {modelType === 'own' && (
+            <PrimaryButton onClick={onCreateOwnModel} disabled={isLoading} text="Add" />
+          )}
+          <DefaultButton onClick={onClosePanel}>Cancel</DefaultButton>
         </Stack>
       )}
       isFooterAtBottom={true}
@@ -151,6 +169,11 @@ const AddModelPanel: React.FC<Props> = (props) => {
           formData={formData}
           onAddTag={onAddTag}
           onRemoveTag={onRemoveTag}
+          isExistingProject={isExistingProject}
+          onChangeExistingProject={() => {
+            setErrorMsg('');
+            setIsExistingProject((prev) => !prev);
+          }}
         />
       </Stack>
     </Panel>

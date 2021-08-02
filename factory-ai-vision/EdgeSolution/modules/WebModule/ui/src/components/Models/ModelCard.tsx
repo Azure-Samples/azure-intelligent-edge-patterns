@@ -100,6 +100,7 @@ const ModelCard: React.FC<Props> = (props) => {
         },
       }),
     );
+    setIsOpenDialog(false);
   }, [dispatch, history, project]);
 
   return (
