@@ -7,6 +7,7 @@ import {
   IContextualMenuProps,
   IconButton,
   PrimaryButton,
+  Text,
 } from '@fluentui/react';
 
 import Tag from './Tag';
@@ -86,6 +87,7 @@ const getClasses = () =>
     },
     titleContainer: { borderBottom: '1px solid rgba(0, 0, 0, 0.13)', width: '100%' },
     titleWrapper: { padding: '10px 12px' },
+    titleType: { fontSize: '12px', lineHeight: '16px', color: '#605E5C' },
     deleteIcon: {
       padding: '10px',
       marginRight: '12px',
@@ -144,6 +146,7 @@ const IntelOvmsDashboard = () => {
                   {/* <Icon iconName="ModelingView" className={classes.cardIcon} /> */}
                   <Stack styles={{ root: classes.titleWrapper }}>
                     <Label>{card.name}</Label>
+                    <Text styles={{ root: classes.titleType }}>{card.type}</Text>
                   </Stack>
                   <Stack horizontalAlign="center" verticalAlign="center">
                     <IconButton
@@ -166,9 +169,11 @@ const IntelOvmsDashboard = () => {
                 >
                   By Intel
                 </Label>
-                <Label styles={{ root: { fontSize: '13px', lineHeight: '18px', marginBottom: '10px' } }}>
-                  Trainable
-                </Label>
+                {card.createdAt && (
+                  <Label styles={{ root: { fontSize: '13px', lineHeight: '18px', marginBottom: '10px' } }}>
+                    {`Updated: ${card.createdAt}`}
+                  </Label>
+                )}
                 <Stack horizontal tokens={{ childrenGap: '5px' }} wrap>
                   {card.tags
                     .filter((_, i) => i < 3)
