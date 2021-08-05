@@ -85,11 +85,6 @@ const AddPanelManagement: React.FC<Props> = (props) => {
   //   { key: 'ovms', text: 'Ovms Model' },
   // ];
 
-  const categoryOptions: IDropdownOption[] = [
-    { key: 'object', text: 'Object Detection' },
-    { key: 'classification', text: 'Classification' },
-  ];
-
   const onProjectDropdownChange = (_, option: IDropdownOption) => {
     onChange('selectedCustomVisionId', option.key as string);
   };
@@ -110,10 +105,13 @@ const AddPanelManagement: React.FC<Props> = (props) => {
     [onChange],
   );
 
-  const onChangeTag = useCallback((newValue: string) => {
-    onResetErrorMsg();
-    setTag(newValue);
-  }, [onResetErrorMsg]);
+  const onChangeTag = useCallback(
+    (newValue: string) => {
+      onResetErrorMsg();
+      setTag(newValue);
+    },
+    [onResetErrorMsg],
+  );
 
   const onTagAdd = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -185,7 +183,7 @@ const AddPanelManagement: React.FC<Props> = (props) => {
             onChange={(_, newValue) => onChange('name', newValue)}
           />
         )}
-        {modelType === 'custom' && (
+        {/* {modelType === 'custom' && (
           <>
             <Link onClick={onChangeExistingProject}>
               {isExistingProject ? 'Create new model >' : 'Create from existing project >'}
@@ -198,7 +196,7 @@ const AddPanelManagement: React.FC<Props> = (props) => {
               onChange={onCategoryChange}
             />
           </>
-        )}
+        )} */}
         {modelType === 'custom' && !isExistingProject && (
           <Stack>
             <TextField

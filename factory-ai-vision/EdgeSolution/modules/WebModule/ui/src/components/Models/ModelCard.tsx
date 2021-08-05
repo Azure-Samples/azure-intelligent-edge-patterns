@@ -105,7 +105,7 @@ const ModelCard: React.FC<Props> = (props) => {
 
   return (
     <>
-      <Stack className={classes.root}>
+      <Stack className={classes.root} onClick={() => setIsEdit(true)}>
         <Stack horizontal>
           <img style={{ height: '60px', width: '60px' }} src="/icons/modelCard.png" alt="icon" />
           <Stack horizontal horizontalAlign="space-between" styles={{ root: classes.titleContainer }}>
@@ -132,7 +132,7 @@ const ModelCard: React.FC<Props> = (props) => {
               },
             }}
           >
-            {project.customVisionId !== '' && 'by  Microsoft Cognitive Services'}
+            {project.customVisionId !== '' && 'By Microsoft Custom Vision'}
           </Label>
           {project.customVisionId !== '' && (
             <Label styles={{ root: { fontSize: '13px', lineHeight: '18px', marginBottom: '10px' } }}>
@@ -167,20 +167,12 @@ const ModelCard: React.FC<Props> = (props) => {
         hidden={!isOpenDialog}
         onDismiss={() => setIsOpenDialog(false)}
       >
-        {/* <ProgressIndicator barHeight={loading ? 2 : 0} /> */}
-        {/* <TextField onChange={onTextChange} disabled={loading} data-testid="location-input" /> */}
         <DialogFooter styles={{ actionsRight: { textAlign: 'left' } }}>
           <PrimaryButton text="Delete" onClick={onDeleteModel} />
           <DefaultButton text="Cancel" onClick={() => setIsOpenDialog(false)} />
         </DialogFooter>
       </Dialog>
-      <EditPanel
-        modelType="custom"
-        project={project}
-        parts={parts}
-        isOpen={isEdit}
-        onDissmiss={() => setIsEdit(false)}
-      />
+      <EditPanel project={project} parts={parts} isOpen={isEdit} onDissmiss={() => setIsEdit(false)} />
     </>
   );
 };

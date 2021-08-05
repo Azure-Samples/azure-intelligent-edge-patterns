@@ -15,6 +15,7 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import Axios from 'axios';
 import { useBoolean } from '@uifabric/react-hooks';
+import { useParams } from 'react-router-dom';
 
 import { State } from 'RootStateType';
 import { postImages, getImages, selectAllImages } from '../../store/imageSlice';
@@ -92,12 +93,12 @@ const useKeepAlive = (isAlive) => {
   );
 };
 
-interface Props {
-  selectedProject: number;
-}
+// interface Props {
+//   selectedProject: number;
+// }
 
-export const Images: React.FC<Props> = (props) => {
-  const { selectedProject } = props;
+export const Images: React.FC = () => {
+  const { id } = useParams<{ id: string }>();
 
   const [isCaptureDialgOpen, { setTrue: openCaptureDialog, setFalse: closeCaptureDialog }] = useBoolean(
     false,
@@ -188,10 +189,10 @@ export const Images: React.FC<Props> = (props) => {
   );
 
   useEffect(() => {
-    dispatch(getImages({ freezeRelabelImgs: true, selectedProject: selectedProject }));
+    dispatch(getImages({ freezeRelabelImgs: true, selectedProject: parseInt(id, 10) }));
     // We need part info for image list items
     dispatch(getParts());
-  }, [dispatch, selectedProject]);
+  }, [dispatch, id]);
 
   useKeepAlive(relabelImages.length > 0);
 
