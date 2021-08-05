@@ -20,8 +20,7 @@ import { isEmpty } from 'ramda';
 import { State as RootState } from 'RootStateType';
 import {
   pullCVProjects,
-  CreatOwnModelPayload,
-  createCustomVisionProjectAndModel,
+  createCustomVisionProject,
   getSelectedProjectInfo,
   onEmptySelectedProjectInfo,
 } from '../../../store/trainingProjectSlice';
@@ -108,7 +107,13 @@ const AddModelPanel: React.FC<Props> = (props) => {
 
     setIsLoading(true);
 
-    await dispatch(createCustomVisionProjectAndModel(formData.name));
+    await dispatch(
+      createCustomVisionProject({
+        name: formData.name,
+        project_type: formData.type,
+        tags: formData.tags,
+      }),
+    );
 
     setIsLoading(false);
     onClosePanel();

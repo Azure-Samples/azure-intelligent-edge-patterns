@@ -32,6 +32,12 @@ export type CreatOwnModelPayload = {
   prediction_header: string;
 };
 
+export type createCustomVisionProjectPayload = {
+  name: string;
+  tags: string[];
+  project_type: string;
+};
+
 const normalize = (e) => ({
   id: e.id,
   name: e.name,
@@ -126,6 +132,16 @@ const extractConvertCustomProject = (project) => {
     prediction_header: project.header,
   };
 };
+
+export const createCustomVisionProject = createWrappedAsync<any, createCustomVisionProjectPayload>(
+  'trainingSlice/createCustomVisionProject',
+  async (payload, { dispatch }) => {
+    const response = await Axios.post(`/api/projects/9/create_cv_project/`, payload);
+
+    dispatch(refreshTrainingProject());
+    dispatch(getParts());
+  },
+);
 
 export const createCustomProject = createWrappedAsync<any, CreatOwnModelPayload, { state: State }>(
   'trainingSlice/createNewCustom',
