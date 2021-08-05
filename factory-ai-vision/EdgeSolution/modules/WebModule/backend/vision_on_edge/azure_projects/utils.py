@@ -12,8 +12,9 @@ from configs.general_configs import PRINT_THREAD
 
 from ..azure_app_insight.utils import get_app_insight_logger
 from ..azure_parts.models import Part
-from ..azure_parts.utils import batch_upload_parts_to_customvision
+from ..azure_parts.utils import batch_upload_parts_to_customvision, upload_part_to_customvision_helper
 from ..azure_settings.exceptions import SettingCustomVisionAccessFailed
+from ..azure_settings.models import Setting
 from ..azure_training_status import progress
 from ..azure_training_status.utils import upcreate_training_status
 from ..images.models import Image
@@ -66,6 +67,36 @@ def update_app_insight_counter(
     except Exception:
         logger.exception("update_app_insight_counter occur unexcepted error")
         raise
+
+def create_cv_project_helper(name: str, tags = None, project_type: str = None):
+    setting_obj = Setting.objects.first()
+    project_obj = Project.objects.create(name=name, setting=setting_obj, is_demo=False)
+
+    logger.info("Creating Parts:")
+    for tag in tags:
+        logger.info("Creating Part: %s",tag)
+        part_obj, created = Part.objects.update_or_create(
+            project_id=project_obj.id,
+            name=tag,
+            description="",
+        )
+
+        # Make sure part is created
+        if not created:
+            logger.exception("%s not created", tag)
+            continue
+        logger.info("Create Part: %s Success!", tag)
+
+    logger.info("Creating CV project:")
+    project_obj.create_project(project_type=project_type)
+
+    logger.info("Uploading tags to CV project:")
+    part_ids = [part.id for part in Part.objects.filter(project=project_obj)]
+    has_new_parts = batch_upload_parts_to_customvision(
+        project_id=project_obj.id, part_ids=part_ids, tags_dict={}
+    )
+    return(project_obj)
+
 
 
 def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial: bool):

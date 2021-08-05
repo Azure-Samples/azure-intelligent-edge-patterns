@@ -190,17 +190,22 @@ class Project(models.Model):
             logger.exception("dequeue_iteration error")
             raise
 
-    def create_project(self):
+    def create_project(self, project_type: str = None):
         """create_project.
 
         Create a project on CustomVision.
         """
-        logger.info("Creating obj detection project")
+        logger.info("Creating {} project".format(project_type))
 
         try:
             if not self.name:
                 self.name = "VisionOnEdge-" + datetime.datetime.utcnow().isoformat()
-            project = self.setting.create_project(project_name=self.name)
+            if project_type:
+                obj_detection_domain = next(domain for domain in self.setting.get_trainer_obj().get_domains() if domain.type == project_type and domain.name == "General (compact)")
+                project = self.setting.create_project(project_name=self.name, domain_id=obj_detection_domain.id)
+            else:
+                project = self.setting.create_project(project_name=self.name)
+
             self.customvision_id = project.id
             self.name = project.name
             update_fields = ["customvision_id", "name"]
