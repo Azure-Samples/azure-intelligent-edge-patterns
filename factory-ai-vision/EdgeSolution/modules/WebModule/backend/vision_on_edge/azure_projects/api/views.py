@@ -26,13 +26,14 @@ from ...general.api.serializers import (
 from ...general.shortcuts import drf_get_object_or_404
 from ..exceptions import ProjectWithoutSettingError
 from ..models import Project, Task
-from ..utils import TRAINING_MANAGER, pull_cv_project_helper, create_cv_project_helper
+from ..utils import TRAINING_MANAGER, pull_cv_project_helper, create_cv_project_helper, update_tags_helper
 from .serializers import (
     IterationPerformanceSerializer,
     ProjectPerformanesSerializer,
     ProjectSerializer,
     TaskSerializer,
     CreateCVProjectSerializer,
+    UpdateTagSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -187,6 +188,20 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             project_obj = create_cv_project_helper(name=serializer.validated_data["name"], tags=serializer.validated_data["tags"], project_type=serializer.validated_data["project_type"])
             serializer = ProjectSerializer(project_obj)
             return Response(serializer.data)
+        except CustomVisionErrorException:
+            raise SettingCustomVisionAccessFailed
+
+    @action(detail=True, methods=["post"])
+    def update_tags(self, request, pk=None) -> Response:
+        """update cv/django parts"""
+        queryset = self.get_queryset()
+        project_obj = drf_get_object_or_404(queryset, pk=pk)
+        serializer = UpdateTagSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+
+        try:
+            project_obj = update_tags_helper(project_id=project_obj.id, tags=serializer.validated_data["tags"])
+            return Response({"status": "ok"})
         except CustomVisionErrorException:
             raise SettingCustomVisionAccessFailed
 

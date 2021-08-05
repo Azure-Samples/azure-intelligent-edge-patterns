@@ -97,6 +97,49 @@ def create_cv_project_helper(name: str, tags = None, project_type: str = None):
     )
     return(project_obj)
 
+def update_tags_helper(project_id, tags=None):
+    project_obj = Project.objects.get(pk=project_id)
+    parts = Part.objects.filter(project=project_obj)
+    part_names = [part.name for part in parts]
+    part_ids = [part.id for part in parts]
+
+    to_add = []
+    to_delete = []
+    for tag in tags:
+        if tag not in part_names:
+            to_add.append(tag)
+    
+    for part in parts:
+        if part.name not in tags:
+            to_delete.append(part.id)
+
+    logger.info("Creating Parts:")
+    for tag in to_add:
+        logger.info("Creating Part: %s",tag)
+        part_obj, created = Part.objects.update_or_create(
+            project_id=project_obj.id,
+            name=tag,
+            description="",
+        )
+
+        # Make sure part is created
+        if not created:
+            logger.exception("%s not created", tag)
+            continue
+        logger.info("Create Part: %s Success!", tag)
+
+    logger.info("Uploading tags to CV project:")
+    part_ids = [part.id for part in Part.objects.filter(project=project_obj)]
+    has_new_parts = batch_upload_parts_to_customvision(
+        project_id=project_obj.id, part_ids=part_ids, tags_dict={}
+    )
+
+    # delete part
+    for part_id in to_delete:
+        Part.objects.filter(pk=part_id).delete()
+
+
+    
 
 
 def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial: bool):
