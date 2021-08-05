@@ -15,7 +15,7 @@ import {
 import { useDispatch } from 'react-redux';
 import { useHistory, generatePath } from 'react-router-dom';
 
-import { TrainingProject } from '../../../store/trainingProjectSlice';
+import { TrainingProject, updateCustomVisionProjectTags } from '../../../store/trainingProjectSlice';
 import { Part } from '../../../store/partSlice';
 import { Url } from '../../../enums';
 
@@ -71,16 +71,6 @@ const EditPanel: React.FC<Props> = (props) => {
     [localTag, localTags],
   );
 
-  const onRemoveTag = useCallback(
-    (idx: number) => {
-      const newTags = [...localTags];
-      newTags.splice(idx, 1);
-
-      setLocalTags(newTags);
-    },
-    [localTags],
-  );
-
   const onLinkClick = useCallback(() => {
     history.push(
       generatePath(Url.IMAGES_DETAIL, {
@@ -89,10 +79,14 @@ const EditPanel: React.FC<Props> = (props) => {
     );
   }, [history, project]);
 
-  const onSaveModelClick = useCallback(() => {
-    console.log('project', project.id);
-    console.log('localTags', localTags);
-  }, [project, localTags]);
+  const onSaveModelClick = useCallback(async () => {
+    setIsLoading(true);
+
+    await dispatch(updateCustomVisionProjectTags({ id: project.id.toString(), tags: localTags }));
+
+    setIsLoading(false);
+    onDissmiss();
+  }, [dispatch, project, localTags]);
 
   return (
     <Panel
@@ -102,7 +96,7 @@ const EditPanel: React.FC<Props> = (props) => {
       headerText="Edit Model"
       onRenderFooterContent={() => (
         <Stack tokens={{ childrenGap: 10 }} horizontal>
-          <PrimaryButton onClick={onSaveModelClick} text="Save" />
+          <PrimaryButton onClick={onSaveModelClick} text="Save" disabled={isLoading} />
           <DefaultButton onClick={onDissmiss}>Cancel</DefaultButton>
         </Stack>
       )}
@@ -158,7 +152,7 @@ const EditPanel: React.FC<Props> = (props) => {
         />
         <Stack horizontal tokens={{ childrenGap: '8px' }} wrap>
           {localTags.map((part, id) => (
-            <Tag key={id} id={id} text={part} isDelete onDelete={onRemoveTag} />
+            <Tag key={id} id={id} text={part} />
           ))}
         </Stack>
       </Stack>

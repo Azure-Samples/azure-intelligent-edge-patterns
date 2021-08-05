@@ -13,6 +13,7 @@ import {
 } from './shared/DemoSliceUtils';
 import { createWrappedAsync } from './shared/createWrappedAsync';
 import { getParts } from './partSlice';
+import { thunkGetAllCvProjects } from './setting/settingAction';
 
 export type TrainingProject = {
   id: number;
@@ -36,6 +37,11 @@ export type createCustomVisionProjectPayload = {
   name: string;
   tags: string[];
   project_type: string;
+};
+
+export type updateCustomVisionProjectTagsPayload = {
+  id: string;
+  tags: string[];
 };
 
 const normalize = (e) => ({
@@ -136,12 +142,26 @@ const extractConvertCustomProject = (project) => {
 export const createCustomVisionProject = createWrappedAsync<any, createCustomVisionProjectPayload>(
   'trainingSlice/createCustomVisionProject',
   async (payload, { dispatch }) => {
-    const response = await Axios.post(`/api/projects/9/create_cv_project/`, payload);
+    await Axios.post(`/api/projects/9/create_cv_project/`, payload);
 
     dispatch(refreshTrainingProject());
     dispatch(getParts());
+    dispatch(thunkGetAllCvProjects());
   },
 );
+
+export const updateCustomVisionProjectTags = createWrappedAsync<
+  any,
+  updateCustomVisionProjectTagsPayload,
+  { state: State }
+>('trainingSlice/updateCustomVisionTags', async ({ id, tags }, { dispatch }) => {
+  const response = await Axios.post(`/api/projects/${id}/update_tags`, { tags });
+
+  console.log('createNewTrainingProject', response.data);
+
+  dispatch(getParts());
+  dispatch(refreshTrainingProject());
+});
 
 export const createCustomProject = createWrappedAsync<any, CreatOwnModelPayload, { state: State }>(
   'trainingSlice/createNewCustom',

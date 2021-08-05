@@ -141,7 +141,7 @@ const ModelCard: React.FC<Props> = (props) => {
           )}
           <Stack horizontal tokens={{ childrenGap: '5px' }} wrap>
             {parts
-              .filter((_, i) => i < 3)
+              .filter((_, i) => i < CARD_PART_LIMIT)
               .map((part, id) => (
                 <Tag key={id} id={id} text={part.name} />
               ))}

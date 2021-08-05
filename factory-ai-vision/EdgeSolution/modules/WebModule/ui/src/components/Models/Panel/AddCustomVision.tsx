@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Panel,
   Stack,
@@ -193,9 +193,6 @@ const AddModelPanel: React.FC<Props> = (props) => {
     },
     [localTag, onAddTag, formData],
   );
-
-  console.log('formData', formData);
-  console.log('isAddModelValid(formData)', !isValid(isExistingProject, formData));
 
   return (
     <Panel
