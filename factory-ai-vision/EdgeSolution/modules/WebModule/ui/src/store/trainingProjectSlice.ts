@@ -156,12 +156,33 @@ export const deleteCustomProject = createWrappedAsync<any, { id: number; resolve
   },
 );
 
+export const getSelectedProjectInfo = createWrappedAsync<any, string, { state: State }>(
+  'trainingSlice/GetSelectedProjectInfo',
+  async (id, { getState }) => {
+    const settingId = getState().setting.current.id;
+    // await Axios.delete(`/api/settings/9/project_info?customvision_id=${id}`);
+    const response = await Axios.get(`/api/settings/${settingId}/project_info?customvision_id=${id}`);
+
+    return response.data;
+  },
+);
+
 const entityAdapter = createEntityAdapter<TrainingProject>();
 
 const slice = createSlice({
   name: 'trainingSlice',
   initialState: getInitialDemoState(entityAdapter.getInitialState()),
-  reducers: {},
+  reducers: {
+    onEmptySelectedProjectInfo: (state) => ({
+      ...state,
+      selectedProjectInfo: null,
+    }),
+    // closeLabelingPage: (state) => ({
+    //   ...state,
+    //   imageIds: [],
+    //   selectedImageId: null,
+    // }),
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getTrainingProject.fulfilled, entityAdapter.setAll)
@@ -170,6 +191,11 @@ const slice = createSlice({
       .addCase(createCustomProject.fulfilled, entityAdapter.upsertOne)
       .addCase(updateCustomProject.fulfilled, entityAdapter.upsertOne)
       .addCase(deleteCustomProject.fulfilled, entityAdapter.removeOne)
+      .addCase(getSelectedProjectInfo.fulfilled, (state, action) => {
+        const { payload } = action;
+
+        state.selectedProjectInfo = payload;
+      })
       .addMatcher(isCRDAction, insertDemoFields);
   },
 });
@@ -182,6 +208,7 @@ export const {
   selectById: selectTrainingProjectById,
   selectEntities: selectTrainingProjectEntities,
 } = entityAdapter.getSelectors((state: State) => state.trainingProject);
+export const { onEmptySelectedProjectInfo } = slice.actions;
 
 export const selectNonDemoProject = getNonDemoSelector('trainingProject', selectTrainingProjectEntities);
 

@@ -12,13 +12,15 @@ import {
   Link,
   Icon,
 } from '@fluentui/react';
-import { assocPath } from 'ramda';
+// import { assocPath } from 'ramda';
 import { useDispatch } from 'react-redux';
+import { useHistory, generatePath } from 'react-router-dom';
 
 import { CreatOwnModelPayload, TrainingProject } from '../../../store/trainingProjectSlice';
 import { Part } from '../../../store/partSlice';
 import { CreateFormType } from '../type';
 import { getSource } from '../utils';
+import { Url } from '../../../enums';
 
 import Tag from '../Tag';
 
@@ -61,6 +63,7 @@ const EditPanel: React.FC<Props> = (props) => {
   const [localTags, setLocalTags] = useState<string[]>([]);
 
   const dispatch = useDispatch();
+  const history = useHistory();
   const classes = getClasses();
 
   useEffect(() => {
@@ -87,6 +90,14 @@ const EditPanel: React.FC<Props> = (props) => {
     [localTags],
   );
 
+  const onLinkClick = useCallback(() => {
+    history.push(
+      generatePath(Url.IMAGES_DETAIL, {
+        id: project.id,
+      }),
+    );
+  }, [history,]);
+
   return (
     <Panel
       isOpen={isOpen}
@@ -95,12 +106,6 @@ const EditPanel: React.FC<Props> = (props) => {
       headerText="Edit Model"
       onRenderFooterContent={() => (
         <Stack tokens={{ childrenGap: 10 }} horizontal>
-          {/* {selectedType === 'custom' && (
-            <PrimaryButton onClick={onLoadModel} disabled={isLoading} text="Load" />
-          )}
-          {selectedType === 'own' && (
-            <PrimaryButton onClick={onCreateModel} disabled={isLoading} text="Add" />
-          )} */}
           <PrimaryButton onClick={() => {}} text="Save" />
           <DefaultButton onClick={onDissmiss}>Cancel</DefaultButton>
         </Stack>
@@ -122,7 +127,7 @@ const EditPanel: React.FC<Props> = (props) => {
             <Stack>
               <Label styles={{ root: classes.itemTitle }}>Name</Label>
               <Stack>
-                <Link>
+                <Link target="_blank" href={`https://www.customvision.ai/projects/${project.customVisionId}#/manage`}>
                   <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 5 }}>
                     <Text>{project.name}</Text>
                     <Icon styles={{ root: { color: '#0078D4' } }} iconName="OpenInNewWindow" />
@@ -133,7 +138,7 @@ const EditPanel: React.FC<Props> = (props) => {
             <Stack>
               <Label styles={{ root: classes.itemTitle }}>Images</Label>
               <Stack>
-                <Link>
+                <Link onClick={onLinkClick}>
                   <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 5 }}>
                     <Text>Placeholder</Text>
                     <Icon styles={{ root: { color: '#0078D4' } }} iconName="OpenInNewWindow" />

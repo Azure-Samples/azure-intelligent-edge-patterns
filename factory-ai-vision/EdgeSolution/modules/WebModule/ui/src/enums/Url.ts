@@ -6,6 +6,7 @@ enum Url {
   HOME_CUSTOMIZE = '/home/customize',
 
   IMAGES = '/images',
+  IMAGES_DETAIL = '/images/:id',
 
   PARTS = '/parts',
   PARTS_DETAIL = '/parts/detail',
