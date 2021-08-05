@@ -86,7 +86,7 @@ const getClasses = () =>
       },
     },
     titleContainer: { borderBottom: '1px solid rgba(0, 0, 0, 0.13)', width: '100%' },
-    titleWrapper: { padding: '10px 12px' },
+    titleWrapper: { padding: '7px 12px' },
     titleType: { fontSize: '12px', lineHeight: '16px', color: '#605E5C' },
     deleteIcon: {
       padding: '10px',

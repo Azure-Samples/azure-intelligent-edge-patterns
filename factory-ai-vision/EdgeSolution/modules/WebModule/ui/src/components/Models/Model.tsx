@@ -55,8 +55,8 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
 
   const history = useHistory();
 
-  const cvProject = trainingProject.filter((project) => project.predictionUri === '');
-  const ownProject = trainingProject.filter((project) => project.predictionUri !== '');
+  const projectList = trainingProject.filter((project) => project.customVisionId !== '');
+  // const ownProject = trainingProject.filter((project) => project.predictionUri !== '');
 
   const commandBarItems: ICommandBarItemProps[] = useMemo(
     () => [
@@ -75,8 +75,8 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
       {
         key: 'addBtn',
         text: 'Your Models',
-        iconProps: isOwnProject ? openIcon : closeIcon,
-        onClick: () => setIsOwnProject((prev) => !prev),
+        iconProps: isCVProjectClick ? openIcon : closeIcon,
+        onClick: () => setIsCVProjectClick((prev) => !prev),
       },
     ],
     [isOwnProject],
@@ -86,15 +86,17 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
     <Stack tokens={{ childrenGap: '40' }}>
       <Stack tokens={{ childrenGap: '16' }}>
         {/* <ActionButton text="Public Models" /> */}
-        {/* <CommandBar
-          items={commandBarItems}
+        <CommandBar
+          items={commandBarItems2}
           styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
-        /> */}
-        <Stack horizontal tokens={{ childrenGap: '10px' }}>
-          {cvProject.map((project, i) => (
-            <ModelCard key={i} project={project} />
-          ))}
-        </Stack>
+        />
+        {isCVProjectClick && (
+          <Stack horizontal tokens={{ childrenGap: '10px' }}>
+            {projectList.map((project, i) => (
+              <ModelCard key={i} project={project} />
+            ))}
+          </Stack>
+        )}
       </Stack>
       {/* <Stack tokens={{ childrenGap: '16' }}>
         <CommandBar
