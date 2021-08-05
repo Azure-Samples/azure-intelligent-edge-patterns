@@ -167,20 +167,12 @@ const ModelCard: React.FC<Props> = (props) => {
         hidden={!isOpenDialog}
         onDismiss={() => setIsOpenDialog(false)}
       >
-        {/* <ProgressIndicator barHeight={loading ? 2 : 0} /> */}
-        {/* <TextField onChange={onTextChange} disabled={loading} data-testid="location-input" /> */}
         <DialogFooter styles={{ actionsRight: { textAlign: 'left' } }}>
           <PrimaryButton text="Delete" onClick={onDeleteModel} />
           <DefaultButton text="Cancel" onClick={() => setIsOpenDialog(false)} />
         </DialogFooter>
       </Dialog>
-      <EditPanel
-        modelType="custom"
-        project={project}
-        parts={parts}
-        isOpen={isEdit}
-        onDissmiss={() => setIsEdit(false)}
-      />
+      <EditPanel project={project} parts={parts} isOpen={isEdit} onDissmiss={() => setIsEdit(false)} />
     </>
   );
 };

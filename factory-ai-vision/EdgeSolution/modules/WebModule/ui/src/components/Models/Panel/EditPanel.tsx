@@ -12,25 +12,19 @@ import {
   Link,
   Icon,
 } from '@fluentui/react';
-// import { assocPath } from 'ramda';
 import { useDispatch } from 'react-redux';
 import { useHistory, generatePath } from 'react-router-dom';
 
-import { CreatOwnModelPayload, TrainingProject } from '../../../store/trainingProjectSlice';
+import { TrainingProject } from '../../../store/trainingProjectSlice';
 import { Part } from '../../../store/partSlice';
-import { CreateFormType } from '../type';
-import { getSource } from '../utils';
 import { Url } from '../../../enums';
 
 import Tag from '../Tag';
-
-type ModelType = 'custom' | 'own' | 'ovms';
 
 type Props = {
   isOpen: boolean;
   project: TrainingProject;
   parts: Part[];
-  modelType: ModelType;
   onDissmiss: () => void;
 };
 
@@ -47,20 +41,12 @@ const getClasses = () =>
     },
   });
 
-const initialForm: CreateFormType = {
-  name: '',
-  endPoint: '',
-  labels: '',
-  selectedCustomVisionId: '',
-  tags: [],
-  category: 'object',
-};
-
 const EditPanel: React.FC<Props> = (props) => {
-  const { isOpen, project, parts, modelType, onDissmiss } = props;
+  const { isOpen, project, parts, onDissmiss } = props;
 
   const [localTag, setLocalTag] = useState('');
   const [localTags, setLocalTags] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -73,11 +59,16 @@ const EditPanel: React.FC<Props> = (props) => {
   const onTagAdd = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === 'Enter' && localTag !== '') {
+        if (localTags.find((tag) => tag === localTag)) {
+          setLocalTag('');
+          return;
+        }
+
         setLocalTags((prev) => [...prev, localTag]);
         setLocalTag('');
       }
     },
-    [localTag],
+    [localTag, localTags],
   );
 
   const onRemoveTag = useCallback(
@@ -98,6 +89,11 @@ const EditPanel: React.FC<Props> = (props) => {
     );
   }, [history, project]);
 
+  const onSaveModelClick = useCallback(() => {
+    console.log('project', project.id);
+    console.log('localTags', localTags);
+  }, [project, localTags]);
+
   return (
     <Panel
       isOpen={isOpen}
@@ -106,21 +102,21 @@ const EditPanel: React.FC<Props> = (props) => {
       headerText="Edit Model"
       onRenderFooterContent={() => (
         <Stack tokens={{ childrenGap: 10 }} horizontal>
-          <PrimaryButton onClick={() => {}} text="Save" />
+          <PrimaryButton onClick={onSaveModelClick} text="Save" />
           <DefaultButton onClick={onDissmiss}>Cancel</DefaultButton>
         </Stack>
       )}
       isFooterAtBottom={true}
     >
-      {/* <ProgressIndicator progressHidden={!isLoading} /> */}
+      <ProgressIndicator progressHidden={!isLoading} />
       <Stack styles={{ root: classes.itemWrapper }} tokens={{ childrenGap: 16 }}>
         <Stack>
           <Label styles={{ root: classes.itemTitle }}>Source</Label>
-          <Text styles={{ root: classes.item }}>{getSource(modelType)}</Text>
+          <Text styles={{ root: classes.item }}>Microsoft Custom Vision</Text>
         </Stack>
         <Stack>
           <Label styles={{ root: classes.itemTitle }}>Trainable</Label>
-          <Text styles={{ root: classes.item }}>{modelType === 'custom' ? 'True' : 'False'}</Text>
+          <Text styles={{ root: classes.item }}>True</Text>
         </Stack>
         {project.customVisionId && (
           <>
@@ -151,16 +147,6 @@ const EditPanel: React.FC<Props> = (props) => {
             </Stack>
           </>
         )}
-        {modelType !== 'custom' && (
-          <Stack>
-            <Label styles={{ root: classes.itemTitle }}>Object / Tags</Label>
-            <Stack horizontal wrap>
-              {parts.map((part, id) => (
-                <Tag id={id} text={part.name} />
-              ))}
-            </Stack>
-          </Stack>
-        )}
       </Stack>
       <Stack styles={{ root: classes.tagsWrapper }} tokens={{ childrenGap: '10px' }}>
         <TextField
@@ -168,6 +154,7 @@ const EditPanel: React.FC<Props> = (props) => {
           value={localTag}
           onChange={(_, newValue) => setLocalTag(newValue)}
           onKeyPress={onTagAdd}
+          required
         />
         <Stack horizontal tokens={{ childrenGap: '8px' }} wrap>
           {localTags.map((part, id) => (
