@@ -135,8 +135,8 @@ def update_tags_helper(project_id, tags=None):
     )
 
     # delete part
-    for part_id in to_delete:
-        Part.objects.filter(pk=part_id).delete()
+    # for part_id in to_delete:
+    #     Part.objects.filter(pk=part_id).delete()
 
 
     
