@@ -96,7 +96,7 @@ const EditPanel: React.FC<Props> = (props) => {
         id: project.id,
       }),
     );
-  }, [history,]);
+  }, [history, project]);
 
   return (
     <Panel
@@ -127,7 +127,10 @@ const EditPanel: React.FC<Props> = (props) => {
             <Stack>
               <Label styles={{ root: classes.itemTitle }}>Name</Label>
               <Stack>
-                <Link target="_blank" href={`https://www.customvision.ai/projects/${project.customVisionId}#/manage`}>
+                <Link
+                  target="_blank"
+                  href={`https://www.customvision.ai/projects/${project.customVisionId}#/manage`}
+                >
                   <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 5 }}>
                     <Text>{project.name}</Text>
                     <Icon styles={{ root: { color: '#0078D4' } }} iconName="OpenInNewWindow" />

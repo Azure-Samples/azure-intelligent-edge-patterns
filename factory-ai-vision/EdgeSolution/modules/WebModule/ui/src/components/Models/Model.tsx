@@ -79,7 +79,7 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
         onClick: () => setIsCVProjectClick((prev) => !prev),
       },
     ],
-    [isOwnProject],
+    [isCVProjectClick],
   );
 
   return (
