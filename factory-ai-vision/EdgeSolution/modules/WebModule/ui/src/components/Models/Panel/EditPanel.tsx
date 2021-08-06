@@ -86,7 +86,7 @@ const EditPanel: React.FC<Props> = (props) => {
 
     setIsLoading(false);
     onDissmiss();
-  }, [dispatch, project, localTags]);
+  }, [dispatch, project, localTags, onDissmiss]);
 
   return (
     <Panel
