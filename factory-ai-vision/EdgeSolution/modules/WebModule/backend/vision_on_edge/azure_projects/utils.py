@@ -174,7 +174,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
 
     # Invalid CustomVision Project ID handled by exception
     project_obj.name = trainer.get_project(project_id=customvision_project_id).name
-    project.project_type = trainer.get_domain(trainer.get_project(customvision_project_id).settings.domain_id).type
+    project_obj.project_type = trainer.get_domain(trainer.get_project(customvision_project_id).settings.domain_id).type
     project_obj.customvision_id = customvision_project_id
     project_obj.save()
 
