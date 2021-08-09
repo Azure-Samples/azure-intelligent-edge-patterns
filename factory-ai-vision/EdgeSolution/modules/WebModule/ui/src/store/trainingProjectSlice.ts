@@ -15,6 +15,8 @@ import { createWrappedAsync } from './shared/createWrappedAsync';
 import { getParts } from './partSlice';
 import { thunkGetAllCvProjects } from './setting/settingAction';
 
+type TrainingProjectCategory = 'customvision';
+
 export type TrainingProject = {
   id: number;
   name: string;
@@ -23,6 +25,8 @@ export type TrainingProject = {
   isPredicationModel: boolean;
   predictionUri: string;
   predictionHeader: string;
+  category: TrainingProjectCategory;
+  project_type: 'ObjectDetection' | 'Classification';
 };
 
 export type CreatOwnModelPayload = {
@@ -52,6 +56,8 @@ const normalize = (e) => ({
   isPredicationModel: e.is_prediction_module,
   predictionUri: e.prediction_uri,
   predictionHeader: e.prediction_header,
+  category: e.category,
+  projectType: e.project_type,
 });
 
 export const getTrainingProject = createWrappedAsync<any, boolean, { state: State }>(

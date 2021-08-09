@@ -181,8 +181,6 @@ const AddModelPanel: React.FC<Props> = (props) => {
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === 'Enter' && localTag !== '') {
         if (formData.tags.find((tag) => tag === localTag)) {
-          console.log('localTag', localTag);
-
           setLocalTag('');
           return;
         }

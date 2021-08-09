@@ -117,9 +117,6 @@ const AddModelPanel: React.FC<Props> = (props) => {
     [onChange],
   );
 
-  console.log('formData', formData);
-  console.log('isAddModelValid(formData)', !isValid(formData));
-
   return (
     <Panel
       isOpen={isOpen}

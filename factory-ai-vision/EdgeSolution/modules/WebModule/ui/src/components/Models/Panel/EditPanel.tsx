@@ -71,6 +71,16 @@ const EditPanel: React.FC<Props> = (props) => {
     [localTag, localTags],
   );
 
+  const onRemoveTag = useCallback(
+    (idx: number) => {
+      const newTags = [...localTags];
+      newTags.splice(idx, 1);
+
+      setLocalTags(newTags);
+    },
+    [localTags],
+  );
+
   const onLinkClick = useCallback(() => {
     history.push(
       generatePath(Url.IMAGES_DETAIL, {
@@ -152,7 +162,7 @@ const EditPanel: React.FC<Props> = (props) => {
         />
         <Stack horizontal tokens={{ childrenGap: '8px' }} wrap>
           {localTags.map((part, id) => (
-            <Tag key={id} id={id} text={part} />
+            <Tag key={id} id={id} text={part} isDelete onDelete={onRemoveTag} />
           ))}
         </Stack>
       </Stack>
