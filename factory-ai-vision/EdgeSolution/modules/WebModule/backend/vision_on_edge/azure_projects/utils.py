@@ -70,7 +70,7 @@ def update_app_insight_counter(
 
 def create_cv_project_helper(name: str, tags = None, project_type: str = None):
     setting_obj = Setting.objects.first()
-    project_obj = Project.objects.create(name=name, setting=setting_obj, is_demo=False)
+    project_obj = Project.objects.create(name=name, setting=setting_obj, is_demo=False, project_type=project_type, category="customvision")
 
     logger.info("Creating Parts:")
     for tag in tags:
@@ -159,7 +159,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     # Get project objects
     project_obj_template = Project.objects.get(pk=project_id)
 
-    project_obj = Project.objects.create(setting=project_obj_template.setting, is_demo=False)
+    project_obj = Project.objects.create(setting=project_obj_template.setting, is_demo=False, category="customvision")
     # Check Training_Key, Endpoint
     if not project_obj.setting.is_trainer_valid:
         raise SettingCustomVisionAccessFailed
@@ -174,6 +174,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
 
     # Invalid CustomVision Project ID handled by exception
     project_obj.name = trainer.get_project(project_id=customvision_project_id).name
+    project.project_type = trainer.get_domain(trainer.get_project(customvision_project_id).settings.domain_id).type
     project_obj.customvision_id = customvision_project_id
     project_obj.save()
 
