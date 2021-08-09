@@ -136,7 +136,7 @@ def update_tags_helper(project_id, tags=None):
 
     # delete part
     for part_id in to_delete:
-        part_obj = Part.objects.filter(pk=part_id)
+        part_obj = Part.objects.filter(pk=part_id).first()
         part_obj.delete_on_customvision = True
         part_obj.delete()
 
