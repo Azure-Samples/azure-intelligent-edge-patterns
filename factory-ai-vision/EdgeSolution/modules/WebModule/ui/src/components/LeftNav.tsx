@@ -51,6 +51,15 @@ const navLinks: INavLink[] = [
     },
   },
   {
+    name: 'Cascades',
+    url: Url.CASCADES,
+    iconProps: {
+      imageProps: {
+        src: '/icons/models.svg',
+      },
+    },
+  },
+  {
     name: 'Deployment',
     url: Url.DEPLOYMENT,
     iconProps: {
