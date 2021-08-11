@@ -17,6 +17,7 @@ import { DeploymentPage } from '../pages/Deployment';
 import { Models } from '../pages/Models';
 import { ModelDetail } from '../pages/ModelDetail';
 import ImageDetail from '../pages/ImageDetail';
+import Cascades from '../pages/Cascades';
 
 export const RootRouter: FC = () => {
   const projectHasConfiged = useSelector((state: State) => state.project.status !== Status.None);
@@ -24,6 +25,7 @@ export const RootRouter: FC = () => {
   return (
     <Switch>
       <Route path={Url.DEPLOYMENT} component={DeploymentPage} />
+      <Route path={Url.CASCADES} component={Cascades} />
       <Route path={Url.MODELS_DETAIL} component={ModelDetail} />
       <Route path={Url.MODELS} component={Models} />
       <Route path={Url.CAMERAS_DETAIL} component={CameraDetails} />
