@@ -1,6 +1,7 @@
 """App helpers
 """
 import logging
+import json
 
 from ..azure_iot.utils import prediction_module_url, yolo_module_url
 from ..azure_settings.constants import DEFAULT_SETTING_NAME
@@ -124,5 +125,129 @@ def create_demo_objects():
             "is_demo": True,
             "download_uri": "scenario_models/6",
             "prediction_uri": "ovms-app:5010/score",
+        },
+    )
+
+    # =============================================
+    # Cascade Demo Nodes                        ===
+    # =============================================
+
+    # face detection
+    inputs = [
+        {
+            "name": "image",
+            "width": 300,
+            "height": 300,
+            "data_type": "FP32",
+            "dims": ["B", "C", "H", "W"],
+            "color_format": "BGR",
+        }
+    ]
+    outputs = [
+        {
+            "name": "bounding_box",
+            "dims": [1, 1, "N", ["I", "L", "Conf", "x_min", "y_min", "x_max", "x_min"]]
+        }
+    ]
+    block_inputs = json.dumps(inputs)
+    block_outputs = json.dumps(outputs)
+    Project.objects.update_or_create(
+        name="face-detection-retail-0004",
+        defaults={
+            "is_cascade": True,
+            "block_inputs": block_inputs,
+            "block_outputs": block_outputs,
+        },
+    )
+
+    # emotion recognition
+    inputs = [
+        {
+            "name": "image",
+            "width": 64,
+            "height": 64,
+            "data_type": "FP32",
+            "dims": ["B", "C", "H", "W"],
+            "color_format": "BGR",
+        }
+    ]
+    outputs = [
+        {
+            "name": "classification",
+            "dims": ["B", ["P"], 1, 1]
+        }
+    ]
+    block_inputs = json.dumps(inputs)
+    block_outputs = json.dumps(outputs)
+    Project.objects.update_or_create(
+        name="emotions-recognition-retail-0003",
+        defaults={
+            "is_cascade": True,
+            "block_inputs": block_inputs,
+            "block_outputs": block_outputs,
+        },
+    )
+
+    # age/gender recognition
+    inputs = [
+        {
+            "name": "image",
+            "width": 64,
+            "height": 64,
+            "data_type": "FP32",
+            "dims": ["B", "C", "H", "W"],
+            "color_format": "BGR",
+        }
+    ]
+    outputs = [
+        {
+            "name": "classification",
+            "dims": ["N", 1, "V", 1]
+        },
+        {
+            "name": "classification",
+            "dims": ["N", 1, ["P"], 1]
+        }
+    ]
+    block_inputs = json.dumps(inputs)
+    block_outputs = json.dumps(outputs)
+    Project.objects.update_or_create(
+        name="age-gender-recognition-retail-0013",
+        defaults={
+            "is_cascade": True,
+            "block_inputs": block_inputs,
+            "block_outputs": block_outputs,
+        },
+    )
+
+    # Crop
+    inputs = [
+        {   
+            "name": "image",
+            "width": 64,
+            "height": 64,
+            "data_type": "FP32",
+            "dims": ["B", "C", "H", "W"],
+            "color_format": "BGR",
+        },
+    ]
+    outputs = [
+        {   
+            "name": "image",
+            "width": 64,
+            "height": 64,
+            "data_type": "FP32",
+            "dims": ["B", "C", "H", "W"],
+            "color_format": "BGR",
+        },
+    ]
+    block_inputs = json.dumps(inputs)
+    block_outputs = json.dumps(outputs)
+    Project.objects.update_or_create(
+        name="Crop",
+        defaults={
+            "is_cascade": True,
+            "block_inputs": block_inputs,
+            "block_outputs": block_outputs,
         },
     )

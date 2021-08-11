@@ -59,6 +59,10 @@ class Project(models.Model):
     project_type = models.CharField(max_length=1000, null=True, blank=True, default="")
     category = models.CharField(max_length=1000, null=True, blank=True, default="")
 
+    is_cascade = models.BooleanField(default=False)
+    block_inputs = models.CharField(max_length=2000, null=True, blank=True, default="")
+    block_outputs = models.CharField(max_length=2000, null=True, blank=True, default="")
+
     def __repr__(self):
         return self.name.__repr__()
 
