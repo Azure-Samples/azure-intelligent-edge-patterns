@@ -60,6 +60,7 @@ class Project(models.Model):
     category = models.CharField(max_length=1000, null=True, blank=True, default="")
 
     is_cascade = models.BooleanField(default=False)
+    node_type = models.CharField(max_length=1000, null=True, blank=True, default="")
     block_inputs = models.CharField(max_length=2000, null=True, blank=True, default="")
     block_outputs = models.CharField(max_length=2000, null=True, blank=True, default="")
 
