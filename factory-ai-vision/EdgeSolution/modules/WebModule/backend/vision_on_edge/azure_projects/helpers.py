@@ -155,6 +155,7 @@ def create_demo_objects():
         name="face-detection-retail-0004",
         defaults={
             "is_cascade": True,
+            "node_type": "model",
             "block_inputs": block_inputs,
             "block_outputs": block_outputs,
         },
@@ -183,6 +184,7 @@ def create_demo_objects():
         name="emotions-recognition-retail-0003",
         defaults={
             "is_cascade": True,
+            "node_type": "model",
             "block_inputs": block_inputs,
             "block_outputs": block_outputs,
         },
@@ -215,6 +217,7 @@ def create_demo_objects():
         name="age-gender-recognition-retail-0013",
         defaults={
             "is_cascade": True,
+            "node_type": "model",
             "block_inputs": block_inputs,
             "block_outputs": block_outputs,
         },
@@ -247,7 +250,19 @@ def create_demo_objects():
         name="Crop",
         defaults={
             "is_cascade": True,
+            "node_type": "custom",
             "block_inputs": block_inputs,
             "block_outputs": block_outputs,
+        },
+    )
+
+    # export node
+    Project.objects.update_or_create(
+        name="Export",
+        defaults={
+            "is_cascade": True,
+            "node_type": "export",
+            "block_inputs": "",
+            "block_outputs": "",
         },
     )
