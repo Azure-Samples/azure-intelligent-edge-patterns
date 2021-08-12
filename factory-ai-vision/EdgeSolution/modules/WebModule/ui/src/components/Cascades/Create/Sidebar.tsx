@@ -11,6 +11,12 @@ import ModelSideBar from './Sidebar/Model';
 import TransformSidleBar from './Sidebar/Transform';
 import ExportSideBar from './Sidebar/Export';
 
+interface Props {
+  trainingProjectList: TrainingProject[];
+  // transformList: TrainingProject[];
+  // exportList: TrainingProject[];
+}
+
 const getClasses = () =>
   mergeStyleSets({
     root: {},
@@ -19,11 +25,17 @@ const getClasses = () =>
     manageModels: { marginTop: '25px' },
   });
 
-export default () => {
-  const trainingProjectIsPredictionModelSelector = trainingProjectIsPredictionModelFactory();
-  const modelList = useSelector(trainingProjectIsPredictionModelSelector);
+export default (props: Props) => {
+  const { trainingProjectList } = props;
 
-  console.log('modelList', modelList);
+  // const trainingProjectIsPredictionModelSelector = trainingProjectIsPredictionModelFactory();
+  // const modelList = useSelector(trainingProjectIsPredictionModelSelector);
+
+  const modelList = trainingProjectList.filter((project) => project.node_type === 'model');
+  const transformList = trainingProjectList.filter((project) => project.node_type === 'custom');
+  const exportList = trainingProjectList.filter((project) => project.node_type === 'export');
+
+  // console.log('modelList', modelList);
 
   const [isModelOpen, setIsModelOpen] = useState(false);
   const [isTransformOpen, setIsTransformOpen] = useState(false);
@@ -74,7 +86,7 @@ export default () => {
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
               {modelList.map((model, id) => (
-                <ModelSideBar key={id} model={model} />
+                <ModelSideBar key={id} model={model} type="model" />
               ))}
             </Stack>
             <Link styles={{ root: classes.manageModels }}>Manage Models</Link>
@@ -88,9 +100,13 @@ export default () => {
           <ActionButton text="Transform" onClick={() => setIsTransformOpen((prev) => !prev)} />
         </Stack>
         {isTransformOpen && (
-          <Stack tokens={{ childrenGap: 16 }}>
-            <TransformSidleBar />
-          </Stack>
+          <div>
+            <Stack tokens={{ childrenGap: 16 }}>
+              {transformList.map((transform, id) => (
+                <ModelSideBar key={id} model={transform} type="custom" />
+              ))}
+            </Stack>
+          </div>
         )}
       </Stack>
 
@@ -100,9 +116,13 @@ export default () => {
           <ActionButton text="Export" onClick={() => setIsExportOpen((prev) => !prev)} />
         </Stack>
         {isExportOpen && (
-          <Stack tokens={{ childrenGap: 16 }}>
-            <ExportSideBar />
-          </Stack>
+          <div>
+            <Stack tokens={{ childrenGap: 16 }}>
+              {exportList.map((model, id) => (
+                <ModelSideBar key={id} model={model} type="export" />
+              ))}
+            </Stack>
+          </div>
         )}
       </Stack>
       {/* <div className="dndnode output" onDragStart={(event) => onDragTransform(event, 'model')} draggable>

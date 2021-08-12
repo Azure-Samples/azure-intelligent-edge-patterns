@@ -13,12 +13,20 @@ import {
 import { TrainingProject } from '../../../../store/trainingProjectSlice';
 import { getClasses } from './style';
 
+type CascadeType = 'model' | 'custom' | 'export';
 interface Props {
   model: TrainingProject;
+  type: CascadeType;
 }
 
+const getImage = (type: CascadeType) => {
+  if (type === 'model') return '/icons/modelCard.png';
+  if (type === 'custom') return '/icons/transformCard.png';
+  if (type === 'export') return '/icons/exportCard.png';
+};
+
 const Model = (props: Props) => {
-  const { model } = props;
+  const { model, type } = props;
 
   const classes = getClasses();
 
@@ -47,12 +55,12 @@ const Model = (props: Props) => {
 
   return (
     <Stack
-      onDragStart={(event) => onDragStart(event, 'model', model.id)}
+      onDragStart={(event) => onDragStart(event, type, model.id)}
       draggable
       styles={{ root: classes.root }}
     >
       <Stack horizontal>
-        <img style={{ height: '60px', width: '60px' }} src="/icons/modelCard.png" alt="icon" />
+        <img style={{ height: '60px', width: '60px' }} src={getImage(type)} alt="icon" />
         <Stack styles={{ root: classes.titleWrapper }} horizontal horizontalAlign="space-between">
           <Stack>
             <Label styles={{ root: classes.title }}>{model.name}</Label>
@@ -68,7 +76,9 @@ const Model = (props: Props) => {
         </Stack>
       </Stack>
       <Stack styles={{ root: classes.bottomWrapper }}>
-        <Label styles={{ root: classes.smallLabel }}>By Microsoft Cognitive Services</Label>
+        {type === 'model' && (
+          <Label styles={{ root: classes.smallLabel }}>By Microsoft Cognitive Services</Label>
+        )}
         <Link styles={{ root: classes.addLabel }}>add</Link>
       </Stack>
     </Stack>
