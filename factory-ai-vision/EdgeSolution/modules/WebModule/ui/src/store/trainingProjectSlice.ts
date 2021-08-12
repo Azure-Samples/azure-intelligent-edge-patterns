@@ -17,6 +17,20 @@ import { thunkGetAllCvProjects } from './setting/settingAction';
 
 type TrainingProjectCategory = 'customvision';
 
+type Input = {
+  name: string;
+  width: number;
+  height: number;
+  data_type: string;
+  dims: string[];
+  color_format: string;
+};
+
+type Output = {
+  name: string;
+  dims: string[];
+};
+
 export type TrainingProject = {
   id: number;
   name: string;
@@ -26,7 +40,11 @@ export type TrainingProject = {
   predictionUri: string;
   predictionHeader: string;
   category: TrainingProjectCategory;
-  projectType: 'ObjectDetection' | 'Classification';
+  projectType: string;
+  isCascade: boolean;
+  block_inputs: Input[];
+  block_outputs: Output[];
+  node_type: string;
 };
 
 export type CreatOwnModelPayload = {
@@ -58,6 +76,10 @@ const normalize = (e) => ({
   predictionHeader: e.prediction_header,
   category: e.category,
   projectType: e.project_type,
+  isCascade: e.is_cascade,
+  block_inputs: e.block_inputs === '' ? [] : JSON.parse(e.block_inputs),
+  block_outputs: e.block_outputs === '' ? [] : JSON.parse(e.block_outputs),
+  node_type: e.node_type,
 });
 
 export const getTrainingProject = createWrappedAsync<any, boolean, { state: State }>(
@@ -278,4 +300,9 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
 export const trainingProjectIsPredictionModelFactory = () =>
   createSelector(selectAllTrainingProjects, (entities) =>
     entities.filter((project) => !project.isDemo).filter((project) => project.id !== 9),
+  );
+
+export const trainingProjectIsCascadesFactory = () =>
+  createSelector(selectAllTrainingProjects, (entities) =>
+    entities.filter((project) => !project.isDemo).filter((project) => project.isCascade),
   );

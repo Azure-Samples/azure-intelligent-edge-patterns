@@ -1,11 +1,14 @@
 import React, { useState, useRef } from 'react';
 import ReactFlow, { ReactFlowProvider, addEdge, removeElements, Controls, Handle } from 'react-flow-renderer';
 import { Stack, Text, Icon } from '@fluentui/react';
+import { useSelector } from 'react-redux';
+
+import { trainingProjectIsCascadesFactory } from '../../../store/trainingProjectSlice';
 
 import './dnd.css';
 
 import Sidebar from './Sidebar';
-import ModelNode from './Node/ModelNode';
+import Node from './Node/Node';
 import TransformNode from './Node/TransformNode';
 import ExportCard from './Node/ExportNode';
 import CustomEdge from './CustomEdge';
@@ -26,8 +29,8 @@ const getId = () => `dndnode_${id++}`;
 const isValidConnection = (connection) => {
   console.log('connection', connection);
 
-  // return connection.target === 'dndnode_2';
-  return true;
+  return connection.target === 'dndnode_2';
+  // return true;
 };
 
 // const nodeTypes = ;
@@ -37,6 +40,9 @@ const edgeTypes = {
 };
 
 const DnDFlow = () => {
+  const trainingProjectIsPredictionModelSelector = trainingProjectIsCascadesFactory();
+  const trainingProjectList = useSelector(trainingProjectIsPredictionModelSelector);
+
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [elements, setElements] = useState(initialElements);
@@ -106,7 +112,7 @@ const DnDFlow = () => {
   return (
     <div className="dndflow">
       <ReactFlowProvider>
-        <Sidebar />
+        <Sidebar trainingProjectList={trainingProjectList} />
         <div className="reactflow-wrapper" ref={reactFlowWrapper}>
           <ReactFlow
             elements={elements}
@@ -122,12 +128,15 @@ const DnDFlow = () => {
                   />
                 </>
               ),
-              model: ({ data }) => {
+              model: ({ data, isConnectable }) => {
+                console.log('isConnectable', isConnectable);
+
                 const { id } = data;
 
                 return (
                   <>
-                    <Handle
+                    <Node modelId={id} type="model" setElements={setElements} />
+                    {/* <Handle
                       // @ts-ignore
                       position="top"
                       type="target"
@@ -142,11 +151,10 @@ const DnDFlow = () => {
                           return addEdge({ ...params, type: 'customEdge' }, els);
                         });
                       }}
-                    />
-                    <ModelNode modelId={id} />
+                    /> */}
                     {/*
                     // @ts-ignore */}
-                    <Handle
+                    {/* <Handle
                       type="source"
                       // @ts-ignore
                       position="bottom"
@@ -162,46 +170,20 @@ const DnDFlow = () => {
                           return addEdge({ ...params, type: 'customEdge' }, els);
                         });
                       }}
-                    />
+                    /> */}
                   </>
                 );
               },
-              transform: () => (
-                <>
-                  {/*
-                    // @ts-ignore */}
-                  <Handle
-                    type="target"
-                    // @ts-ignore
-                    position="top"
-                    // @ts-ignore
-                    onConnect={(params) => setElements((els) => addEdge(params, els))}
-                  />
-                  <TransformNode />
-                  {/*
-                    // @ts-ignore */}
-                  <Handle
-                    type="source"
-                    // @ts-ignore
-                    position="bottom"
-                    // @ts-ignore
-                    onConnect={(params) => setElements((els) => addEdge(params, els))}
-                  />
-                </>
-              ),
-              export: () => (
-                <>
-                  {/*
-                    // @ts-ignore */}
-                  <Handle
-                    type="target"
-                    // @ts-ignore
-                    position="top" // @ts-ignore
-                    onConnect={(params) => setElements((els) => addEdge(params, els))}
-                  />
-                  <ExportCard />
-                </>
-              ),
+              custom: ({ data, isConnectable }) => {
+                const { id } = data;
+
+                return <Node modelId={id} type="custom" setElements={setElements} />;
+              },
+              export: ({ data, isConnectable }) => {
+                const { id } = data;
+
+                return <Node modelId={id} type="export" setElements={setElements} />;
+              },
             }}
             edgeTypes={edgeTypes}
             // onConnect={onConnect}
