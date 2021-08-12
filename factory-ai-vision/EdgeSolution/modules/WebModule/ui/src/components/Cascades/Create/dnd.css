@@ -6,10 +6,10 @@
 
 .dndflow aside {
   border-right: 1px solid #eee;
-  padding: 15px 0;
   font-size: 12px;
   background: #fff;
-  overflow-y: 'auto';
+  height: 730px;
+  overflow-y: auto;
 }
 
 .dndflow aside > * {
