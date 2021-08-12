@@ -6,6 +6,7 @@ from __future__ import absolute_import, unicode_literals
 import datetime
 import logging
 from distutils.util import strtobool
+import json
 
 from azure.cognitiveservices.vision.customvision.training.models import (
     CustomVisionErrorException,
@@ -14,9 +15,10 @@ from django.utils import timezone
 from drf_yasg2 import openapi
 from drf_yasg2.utils import swagger_auto_schema
 from filters.mixins import FiltersMixin
-from rest_framework import filters, viewsets
+from rest_framework import filters, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+
 
 from ...azure_settings.exceptions import SettingCustomVisionAccessFailed
 from ...general.api.serializers import (
@@ -35,6 +37,8 @@ from .serializers import (
     CreateCVProjectSerializer,
     UpdateTagSerializer,
 )
+from ..ovms_config_utils import create_config
+
 
 logger = logging.getLogger(__name__)
 
@@ -259,6 +263,27 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         project_obj.is_trainable(raise_exception=True)
         TRAINING_MANAGER.add(project_id=pk)
         return Response({"status": "ok"})
+
+    @action(detail=True, methods=["post"])
+    def get_default_ovms_model(self, request, pk=None) -> Response:
+        """get default ovms model"""
+        queryset = self.get_queryset()
+        project_obj = drf_get_object_or_404(queryset, pk=pk)
+        
+        self.model_name = request.data['model_name']
+        config = create_config(self.model_name)
+        response_data = {}
+
+        if config:
+            response_data = {
+                "model_name": self.model_name,
+                "type": "ovms",
+                "url": "ovms-server:9010"
+            }
+            return Response(response_data, status=status.HTTP_200_OK)
+        else:
+            response_data = {"status": "Model Dose Not Exist"}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
 
 
 class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
