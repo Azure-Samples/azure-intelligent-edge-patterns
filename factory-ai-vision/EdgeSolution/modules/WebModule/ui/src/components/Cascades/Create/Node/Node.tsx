@@ -23,6 +23,8 @@ const getClasses = () =>
       backgroundColor: '#FFF',
     },
     nodeWrapper: { padding: '10px 12px', width: '220px' },
+    title: { fontSize: '14px', lineHeight: '20px' },
+    label: { fontSize: '14px', lineHeight: '20px', color: '#605E5C' },
     controlBtn: {
       padding: '10px',
       marginRight: '12px',
@@ -99,8 +101,8 @@ const ModelCard = (props: Props) => {
       <Stack horizontal styles={{ root: classes.node }}>
         <img style={{ height: '60px', width: '60px' }} src={getImage(type)} alt="icon" />
         <Stack styles={{ root: classes.nodeWrapper }}>
-          <Text>{model.name}</Text>
-          {type === 'export' ? <Text>Export</Text> : <Text>{model.projectType}</Text>}
+          <Text styles={{ root: classes.title }}>{model.name}</Text>
+          <Text styles={{ root: classes.label }}>{type === 'export' ? 'Export' : model.projectType}</Text>
         </Stack>
         <Stack verticalAlign="center">
           <IconButton

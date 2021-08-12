@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Stack, ActionButton, Icon, Link, mergeStyleSets } from '@fluentui/react';
+import { Stack, ActionButton, Icon, Link, mergeStyleSets, SearchBox } from '@fluentui/react';
 import { useSelector } from 'react-redux';
 
 import {
@@ -21,7 +21,7 @@ const getClasses = () =>
   mergeStyleSets({
     root: {},
     sidebarWrapper: { borderBottom: '1px solid #C8C6C4', padding: '0 16px 10px' },
-
+    searchBox: { width: '180px', marginTop: '20px' },
     manageModels: { marginTop: '25px' },
   });
 
@@ -50,37 +50,26 @@ export default (props: Props) => {
   //   event.dataTransfer.effectAllowed = 'move';
   // }, []);
 
-  const onDragTransform = useCallback((event, nodeType) => {
-    event.dataTransfer.setData('application/reactflow', nodeType);
-    event.dataTransfer.setData('cardCategory', 'transform');
-    event.dataTransfer.effectAllowed = 'move';
-  }, []);
-
-  const onDragExport = useCallback((event, nodeType) => {
-    event.dataTransfer.setData('application/reactflow', nodeType);
-    event.dataTransfer.setData('cardCategory', 'export');
-    event.dataTransfer.effectAllowed = 'move';
-  }, []);
-
   return (
-    <aside>
-      {/* <div className="description">You can drag these nodes to the pane on the right.</div> */}
-      {/* <div className="dndnode input" onDragStart={(event) => onDragStart(event, 'input')} draggable>
-        Input Node
-      </div>
-      <div className="dndnode" onDragStart={(event) => onDragStart(event, 'default')} draggable>
-        Default Node
-      </div>
-      <div className="dndnode output" onDragStart={(event) => onDragStart(event, 'output')} draggable>
-        Output Node
-      </div>
-      <div className="dndnode output" onDragStart={(event) => onDragStart(event, 'output')} draggable>
-        Output Node
-      </div> */}
+    <aside
+      style={{
+        borderRight: '1px solid #eee',
+        background: '#fff',
+        height: '730px',
+        overflowY: 'auto',
+      }}
+    >
       <Stack styles={{ root: classes.sidebarWrapper }}>
+        <SearchBox styles={{ root: classes.searchBox }} placeholder="Search" />
+
         <Stack horizontal verticalAlign="center">
           <Icon iconName={isModelOpen ? 'ChevronDown' : 'ChevronUp'} />
-          <ActionButton text="Models" onClick={() => setIsModelOpen((prev) => !prev)} />
+
+          <ActionButton
+            text="Models"
+            iconProps={{ iconName: 'ModelingView' }}
+            onClick={() => setIsModelOpen((prev) => !prev)}
+          />
         </Stack>
         {isModelOpen && (
           <div>
@@ -96,8 +85,12 @@ export default (props: Props) => {
 
       <Stack styles={{ root: classes.sidebarWrapper }}>
         <Stack horizontal verticalAlign="center">
-          <Icon iconName={isModelOpen ? 'ChevronDown' : 'ChevronUp'} />
-          <ActionButton text="Transform" onClick={() => setIsTransformOpen((prev) => !prev)} />
+          <Icon iconName={isTransformOpen ? 'ChevronDown' : 'ChevronUp'} />
+          <ActionButton
+            text="Transform"
+            iconProps={{ iconName: 'TransitionEffect' }}
+            onClick={() => setIsTransformOpen((prev) => !prev)}
+          />
         </Stack>
         {isTransformOpen && (
           <div>
@@ -112,8 +105,12 @@ export default (props: Props) => {
 
       <Stack styles={{ root: classes.sidebarWrapper }}>
         <Stack horizontal verticalAlign="center">
-          <Icon iconName={isModelOpen ? 'ChevronDown' : 'ChevronUp'} />
-          <ActionButton text="Export" onClick={() => setIsExportOpen((prev) => !prev)} />
+          <Icon iconName={isExportOpen ? 'ChevronDown' : 'ChevronUp'} />
+          <ActionButton
+            text="Export"
+            iconProps={{ iconName: 'CloudImportExport' }}
+            onClick={() => setIsExportOpen((prev) => !prev)}
+          />
         </Stack>
         {isExportOpen && (
           <div>
