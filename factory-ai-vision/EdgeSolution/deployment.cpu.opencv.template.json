@@ -115,7 +115,13 @@
             "settings": {
               "image": "${MODULES.WebModule}",
               "createOptions": {
+                "Volumes": {
+                  "/workspace": {}
+                },
                 "HostConfig": {
+                  "Binds": [
+                    "/var/workspace:/workspace:rw"
+                  ],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -321,7 +327,7 @@
               }
             }
           },
-          "ovms-server": {
+          "ovmsmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -340,13 +346,12 @@
                   "sh",
                   "-c"
                 ],
+                "Volumes": {
+                  "/workspace": {}
+                },
                 "HostConfig": {
-                  "Mounts": [
-                    {
-                      "Target": "/workspace",
-                      "Source": "/workspace",
-                      "Type": "volume"
-                    }
+                  "Binds": [
+                    "/var/workspace:/workspace:rw"
                   ],
                   "PortBindings": {
                     "9010/tcp": [

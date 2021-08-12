@@ -42,7 +42,7 @@ emotion_recognition_config = {
 
 
 def create_config(model_name):
-    config_file = "config.json"
+    config_file = "/workspace/config.json"
     config = {}
 
     if model_name == "face_detection":
