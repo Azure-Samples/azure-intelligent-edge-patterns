@@ -159,7 +159,8 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     logger.info("is_partial %s", is_partial)
 
     # Get project objects
-    project_obj_template = Project.objects.get(pk=project_id)
+    #TODO need to resolve hard-coded pk=14
+    project_obj_template = Project.objects.get(pk=14)
 
     project_obj = Project.objects.create(setting=project_obj_template.setting, is_demo=False, category="customvision")
     # Check Training_Key, Endpoint
