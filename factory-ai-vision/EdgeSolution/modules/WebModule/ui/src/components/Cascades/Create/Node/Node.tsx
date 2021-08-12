@@ -99,7 +99,12 @@ const ModelCard = (props: Props) => {
         />
       )}
       <Stack horizontal styles={{ root: classes.node }}>
-        <img style={{ height: '60px', width: '60px' }} src={getImage(type)} alt="icon" />
+        <img
+          style={{ height: '60px', width: '60px' }}
+          src={getImage(type)}
+          alt="icon"
+          onDragStart={(e) => e.preventDefault()}
+        />
         <Stack styles={{ root: classes.nodeWrapper }}>
           <Text styles={{ root: classes.title }}>{model.name}</Text>
           <Text styles={{ root: classes.label }}>{type === 'export' ? 'Export' : model.projectType}</Text>

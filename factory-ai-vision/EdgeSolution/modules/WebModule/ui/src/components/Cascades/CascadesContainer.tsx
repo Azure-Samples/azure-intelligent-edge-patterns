@@ -9,22 +9,46 @@ import {
   CommandBar,
   PrimaryButton,
   Text,
+  IBreadcrumbItem,
+  Breadcrumb,
+  mergeStyleSets,
 } from '@fluentui/react';
-import { Route, Switch, useHistory } from 'react-router-dom';
+import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 
 import { Url } from '../../enums';
 
 import Cascades from './Cascades';
 import CascadeCreate from './Create/Create';
 
-const CascadesContainer = () => {
-  const [localCascades, setLocalCascades] = useState([]);
+const getClasses = () =>
+  mergeStyleSets({
+    breadcrumb: {
+      paddingLeft: '16px',
+      '& div, button': {
+        fontSize: '14px',
+        lineHeight: '20px',
+        color: '#0078D4',
+      },
+    },
+  });
 
+const CascadesContainer = () => {
   const history = useHistory();
+
+  const isMatchCreationRoute = useRouteMatch(Url.CASCADES_CREATE);
+  const classes = getClasses();
+
+  console.log('isMatchCreationRoute', isMatchCreationRoute);
 
   const onCreateCascades = useCallback(() => {
     history.push(Url.CASCADES_CREATE);
   }, [history]);
+
+  const breadCrumbItems: IBreadcrumbItem[] = [
+    { text: 'Home', key: 'home', onClick: () => history.push(Url.HOME) },
+    { text: 'Cascades', key: 'Cascades', onClick: () => history.push(Url.CASCADES) },
+    { text: '', key: 'new' },
+  ];
 
   const commandBarItems: ICommandBarItemProps[] = [
     {
@@ -101,10 +125,15 @@ const CascadesContainer = () => {
   return (
     <Stack
       styles={{
-        root: { height: '100%', overflowY: 'auto', padding: '32px 0' },
+        root: {
+          height: '100%',
+          overflowY: 'auto',
+          padding: isMatchCreationRoute ? '0 0' : '32px 0',
+        },
       }}
     >
-      <Label styles={{ root: { fontSize: '18px', lineHeight: '24px' } }}>Cascade</Label>
+      {isMatchCreationRoute && <Breadcrumb items={breadCrumbItems} styles={{ root: classes.breadcrumb }} />}
+      <Label styles={{ root: { fontSize: '18px', lineHeight: '24px', paddingLeft: '24px' } }}>Cascade</Label>
       <CommandBar styles={{ root: { marginTop: '24px' } }} items={commandBarItems} />
       <Switch>
         <Route exact path={Url.CASCADES_CREATE} render={() => <CascadeCreate />} />
