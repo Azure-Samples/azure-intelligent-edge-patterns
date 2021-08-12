@@ -1,6 +1,5 @@
 import React, { useState, useRef } from 'react';
 import ReactFlow, { ReactFlowProvider, addEdge, removeElements, Controls, Handle } from 'react-flow-renderer';
-import { Stack, Text, Icon } from '@fluentui/react';
 import { useSelector } from 'react-redux';
 
 import { trainingProjectIsCascadesFactory } from '../../../store/trainingProjectSlice';
@@ -17,7 +16,7 @@ const initialElements = [
     id: '1',
     type: 'initial',
     data: {},
-    position: { x: 250, y: 5 },
+    position: { x: 350, y: 50 },
   },
 ];
 
@@ -74,9 +73,7 @@ const DnDFlow = () => {
     const type = event.dataTransfer.getData('application/reactflow');
     const id = event.dataTransfer.getData('id');
 
-    console.log('type', type);
-    // console.log('cardCategory', cardCategory);
-    // console.log('content', content);
+    // console.log('type', type);
 
     const position = reactFlowInstance.project({
       x: event.clientX - reactFlowBounds.left,
@@ -91,19 +88,13 @@ const DnDFlow = () => {
       data: {
         id,
       },
-      // style: {
-      //   padding: 0,
-      //   width: '300px',
-      //   boxShadow: '0px 0.3px 0.9px rgba(0, 0, 0, 0.1), 0px 1.6px 3.6px rgba(0, 0, 0, 0.13)',
-      //   border: 'none',
-      // },
     };
 
     // @ts-ignore
     setElements((es) => es.concat(newNode));
   };
 
-  console.log('elements', elements);
+  // console.log('elements', elements);
 
   // const onConnect = (params) => setElements((els) => addEdge(params, els));
 
@@ -121,14 +112,13 @@ const DnDFlow = () => {
                   <Handle
                     type="source"
                     // @ts-ignore
-                    position="bottom" // @ts-ignore
+                    position="bottom"
+                    // @ts-ignore
                     onConnect={(params) => setElements((els) => addEdge(params, els))}
                   />
                 </>
               ),
               model: ({ data, isConnectable }) => {
-                console.log('isConnectable', isConnectable);
-
                 const { id } = data;
 
                 return (
@@ -141,25 +131,6 @@ const DnDFlow = () => {
                       isValidConnection={isValidConnection}
                       onConnect={(params) => {
                         console.log('model params target', params);
-
-                        // @ts-ignore
-                        setElements((els) => {
-                          console.log('model els', els);
-
-                          return addEdge({ ...params, type: 'customEdge' }, els);
-                        });
-                      }}
-                    /> */}
-                    {/*
-                    // @ts-ignore */}
-                    {/* <Handle
-                      type="source"
-                      // @ts-ignore
-                      position="bottom"
-                      isValidConnection={isValidConnection}
-                      // @ts-ignore
-                      onConnect={(params) => {
-                        console.log('model params source', params);
 
                         // @ts-ignore
                         setElements((els) => {
