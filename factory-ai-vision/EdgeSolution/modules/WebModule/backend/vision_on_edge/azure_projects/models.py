@@ -60,9 +60,14 @@ class Project(models.Model):
     category = models.CharField(max_length=1000, null=True, blank=True, default="")
 
     is_cascade = models.BooleanField(default=False)
-    node_type = models.CharField(max_length=1000, null=True, blank=True, default="")
-    block_inputs = models.CharField(max_length=2000, null=True, blank=True, default="")
-    block_outputs = models.CharField(max_length=2000, null=True, blank=True, default="")
+    type = models.CharField(max_length=1000, null=True, blank=True, default="")
+    inputs = models.CharField(max_length=2000, null=True, blank=True, default="")
+    outputs = models.CharField(max_length=2000, null=True, blank=True, default="")
+    combined = models.CharField(max_length=50, null=True, blank=True, default="")
+    params = models.CharField(max_length=2000, null=True, blank=True, default="")
+    demultiply_count = models.IntegerField(blank=True, null=True)
+    openvino_library_name = models.CharField(max_length=1000, null=True, blank=True, default="")
+    openvino_model_name = models.CharField(max_length=1000, null=True, blank=True, default="")
 
     def __repr__(self):
         return self.name.__repr__()
