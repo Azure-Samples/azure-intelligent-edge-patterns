@@ -340,10 +340,7 @@
                   "8010/tcp": {}
                 },
                 "Cmd": [
-                  "/ovms/bin/ovms",
-                  "--config_path /workspace/config.json",
-                  "--port 9010",
-                  "--rest_port 8010"
+                  "/ovms/bin/ovms --config_path /workspace/config.json --port 9010 --rest_port 8010"
                 ],
                 "Entrypoint": [
                   "sh",
