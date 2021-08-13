@@ -131,138 +131,277 @@ def create_demo_objects():
     # =============================================
     # Cascade Demo Nodes                        ===
     # =============================================
-
-    # face detection
-    inputs = [
+    
+    # source
+    outputs_ = [
         {
             "name": "image",
-            "width": 300,
-            "height": 300,
-            "data_type": "FP32",
-            "dims": ["B", "C", "H", "W"],
-            "color_format": "BGR",
+            "metadata": {
+                "type": "image",
+                "shape": [1, 3, 416, 416],
+                "layout": ["N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
         }
     ]
-    outputs = [
-        {
-            "name": "bounding_box",
-            "dims": [1, 1, "N", ["I", "L", "Conf", "x_min", "y_min", "x_max", "x_min"]]
-        }
-    ]
-    block_inputs = json.dumps(inputs)
-    block_outputs = json.dumps(outputs)
+
+    outputs = json.dumps(outputs_)
     Project.objects.update_or_create(
-        name="face-detection-retail-0004",
+        name="request",
         defaults={
             "is_cascade": True,
-            "node_type": "model",
-            "block_inputs": block_inputs,
-            "block_outputs": block_outputs,
+            "type": "source",
+            "inputs": "",
+            "outputs": outputs,
+        },
+    )
+    # face detection
+    inputs_ = [
+        {
+            "name": "data",
+            "metadata": {
+                "type": "image",    
+                "shape": [1, 3, 416, 416],
+                "layout": ["N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
+        }
+    ]
+    outputs_ = [
+        {
+            "name": "detection_out",
+            "metadata": {
+                "type": "bounding_box",
+                "shape": [1, 1, 200, 7],
+                "layout": [1, 1, "B", "F"],
+            }
+        }
+    ]
+    inputs = json.dumps(inputs_)
+    outputs = json.dumps(outputs_)
+    Project.objects.update_or_create(
+        name="face_detection",
+        defaults={
+            "is_cascade": True,
+            "type": "openvino_model",
+            "openvino_model_name": "face-detecton-retail-0004",
+            "inputs": inputs,
+            "outputs": outputs,
         },
     )
 
     # emotion recognition
-    inputs = [
+    inputs_ = [
         {
-            "name": "image",
-            "width": 64,
-            "height": 64,
-            "data_type": "FP32",
-            "dims": ["B", "C", "H", "W"],
-            "color_format": "BGR",
+            "name": "data",
+            "metadata": {
+                "type": "image",
+                "shape": [1, 3, 64, 64],
+                "layout": ["N", "H", "W", "C"],
+            }
         }
     ]
-    outputs = [
+    outputs_ = [
         {
-            "name": "classification",
-            "dims": ["B", ["P"], 1, 1]
+            "name": "prob_emotion",
+            "metadata": {
+                "type": "classification",
+                "shape": [1, 5, 1, 1],
+                "layout": [1, "C", 1, 1],
+            }
         }
     ]
-    block_inputs = json.dumps(inputs)
-    block_outputs = json.dumps(outputs)
+    inputs = json.dumps(inputs_)
+    outputs = json.dumps(outputs_)
     Project.objects.update_or_create(
-        name="emotions-recognition-retail-0003",
+        name="emotion_recognition",
         defaults={
             "is_cascade": True,
-            "node_type": "model",
-            "block_inputs": block_inputs,
-            "block_outputs": block_outputs,
+            "type": "openvino_model",
+            "openvino_model_name": "emotions-recognition-retail-0003",
+            "inputs": inputs,
+            "outputs": outputs,
         },
     )
 
     # age/gender recognition
-    inputs = [
+    inputs_ = [
         {
-            "name": "image",
-            "width": 64,
-            "height": 64,
-            "data_type": "FP32",
-            "dims": ["B", "C", "H", "W"],
-            "color_format": "BGR",
+            "name": "data",
+            "metadata": {
+                "type": "image",
+                "shape": [1, 3, 64, 64],
+                "layout": ["N", "H", "W", "C"],
+            }
         }
     ]
-    outputs = [
+    outputs_ = [
         {
-            "name": "classification",
-            "dims": ["N", 1, "V", 1]
+            "name": "age_conv3",
+            "metadata": {
+                "type": "regression",
+                "shape": [1, 1, 1, 1],
+                "layout": [1, 1, 1, 1],
+            }
         },
         {
-            "name": "classification",
-            "dims": ["N", 1, ["P"], 1]
+            "name": "prob",
+            "metadata": {
+                "type": "classfication",
+                "shape": [1, 2, 1, 1],
+                "layout": [1, "P", 1, 1],
+            }
         }
     ]
-    block_inputs = json.dumps(inputs)
-    block_outputs = json.dumps(outputs)
+    inputs = json.dumps(inputs_)
+    outputs = json.dumps(outputs_)
     Project.objects.update_or_create(
-        name="age-gender-recognition-retail-0013",
+        name="age_gender_recognition",
         defaults={
             "is_cascade": True,
-            "node_type": "model",
-            "block_inputs": block_inputs,
-            "block_outputs": block_outputs,
+            "type": "openvino_model",
+            "openvino_model_name": "age-gender-recognition-retail-0013",
+            "inputs": inputs,
+            "outputs": outputs,
         },
     )
 
     # Crop
-    inputs = [
-        {   
-            "name": "image",
-            "width": 64,
-            "height": 64,
-            "data_type": "FP32",
-            "dims": ["B", "C", "H", "W"],
-            "color_format": "BGR",
+    inputs_ = [
+        {
+            "name": "data",
+            "metadata": {
+                "type": "image",
+                "shape": [1, 3, 416, 416],
+                "layout": ["N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
         },
+        {
+            "name": "detection",
+            "metadata": {
+                "type": "bounding_box",
+                "shape": [1, 1, 200, 7],
+                "layout": [1, 1, "B", "F"],
+            }
+        }
     ]
-    outputs = [
-        {   
-            "name": "image",
-            "width": 64,
-            "height": 64,
-            "data_type": "FP32",
-            "dims": ["B", "C", "H", "W"],
-            "color_format": "BGR",
+    outputs_ = [
+        {
+            "name": "images",
+            "metadata": {
+                "type": "image",
+                "shape": [-1, 1, 3, 64, 64],
+                "layout": ["B", "N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
         },
+        {
+            "name": "coordinates",
+            "metadata": {
+                "type": "bounding_box",
+                "shape": [-1, 1, 1, 200, 7],
+                "layout": ["B", 1, 1, "B", "F"],
+            }
+        },
+        {
+            "name": "confidences",
+            "metadata": {
+                "type": "regression",
+                "shape": [-1, 1, 1, 1, 1],
+                "layout": ["B", 1, 1, "B", "F"],
+            }
+        }
     ]
-    block_inputs = json.dumps(inputs)
-    block_outputs = json.dumps(outputs)
+    inputs = json.dumps(inputs_)
+    outputs = json.dumps(outputs_)
     Project.objects.update_or_create(
-        name="Crop",
+        name="crop",
         defaults={
             "is_cascade": True,
-            "node_type": "custom",
-            "block_inputs": block_inputs,
-            "block_outputs": block_outputs,
+            "type": "openvino_library",
+            "openvino_library_name": "libcustom_node_model_zoo_intel_object_detection.so",
+            "inputs": inputs,
+            "outputs": outputs,
+            "demultiply_count": 0,
+            "params": json.dumps({
+                "original_image_width": "600",
+                "original_image_height": "400",
+                "target_image_width": "64",
+                "target_image_height": "64",
+                "original_image_layout": "NHWC",
+                "target_image_layout": "NHWC",
+                "convert_to_gray_scale": "false",
+                "max_output_batch": "100",
+                "confidence_threshold": "0.7",
+                "debug": "true"
+            }),
         },
     )
 
-    # export node
+    # sink*5
     Project.objects.update_or_create(
-        name="Export",
+        name="face_images",
         defaults={
-            "is_cascade": True,
-            "node_type": "export",
-            "block_inputs": "",
-            "block_outputs": "",
+            "type": "sink",
+            "combined": "true",
+            "inputs": json.dumps([
+                {"name": "face_images"}
+            ])
+        },
+    )
+
+    Project.objects.update_or_create(
+        name="face_coordinates",
+        defaults={
+            "type": "sink",
+            "combined": "true",
+            "inputs": json.dumps([
+                {"name": "data"}
+            ])
+        },
+    )
+
+    Project.objects.update_or_create(
+        name="confidence_levels",
+        defaults={
+            "type": "sink",
+            "combined": "true",
+            "inputs": json.dumps([
+                {"name": "data"}
+            ])
+        },
+    )
+
+    Project.objects.update_or_create(
+        name="ages",
+        defaults={
+            "type": "sink",
+            "combined": "true",
+            "inputs": json.dumps([
+                {"name": "data"}
+            ])
+        },
+    )
+
+    Project.objects.update_or_create(
+        name="genders",
+        defaults={
+            "type": "sink",
+            "combined": "true",
+            "inputs": json.dumps([
+                {"name": "data"}
+            ])
+        },
+    )
+
+    Project.objects.update_or_create(
+        name="emotions",
+        defaults={
+            "type": "sink",
+            "combined": "true",
+            "inputs": json.dumps([
+                {"name": "data"}
+            ])
         },
     )
