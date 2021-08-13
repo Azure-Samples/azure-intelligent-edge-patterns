@@ -1,17 +1,17 @@
+import os
+import glob
 import json
-
+import configparser
 
 face_detection_config = {
-    "model_config_list": [
-        {
-            "config": {
-                "name": "face_detection",
-                "base_path": "/workspace/face-detection-retail-0004/",
-                "shape": "(1,3,400,600)",
-                "layout": "NHWC"
-            }
+    "model_config_list": [{
+        "config": {
+            "name": "face_detection",
+            "base_path": "/workspace/face-detection-retail-0004/",
+            "shape": "(1,3,400,600)",
+            "layout": "NHWC"
         }
-    ]
+    }]
 }
 
 age_gender_recognition_config = {
@@ -28,16 +28,14 @@ age_gender_recognition_config = {
 }
 
 emotion_recognition_config = {
-    "model_config_list": [
-        {
-            "config": {
-                "name": "emotion_recognition",
-                "base_path": "/workspace/emotion-recognition-retail-0003/",
-                "shape": "(1,3,64,64)",
-                "layout": "NHWC"
-            }
+    "model_config_list": [{
+        "config": {
+            "name": "emotion_recognition",
+            "base_path": "/workspace/emotion-recognition-retail-0003/",
+            "shape": "(1,3,64,64)",
+            "layout": "NHWC"
         }
-    ]
+    }]
 }
 
 
@@ -53,9 +51,55 @@ def create_config(model_name):
         config = emotion_recognition_config
     else:
         return config
-    
+
     configObj = json.dumps(config)
     with open(config_file, 'w') as f:
         f.write(configObj)
-    
+
     return config
+
+
+def read_classes(classes_path):
+    with open(classes_path) as f:
+        class_names = f.readlines()
+    class_names = [c.strip() for c in class_names]
+    return class_names
+
+
+def get_model_info():
+    parser = configparser.ConfigParser()
+
+    model_path = '/workspace'
+    model_list = []
+    model_infos = {}
+    for model in os.listdir(model_path):
+        model_name = ' '.join(c.capitalize() for c in model.split('-'))
+
+        if glob.glob(model + '/1/*.xml'):
+            model_type_file = glob.glob(model + '/1/config.ini')
+            parser.read(model_type_file)
+            model_type = parser['model']['type']
+            description_title = parser['description']['title']
+            description_content = parser['description']['content']
+            description_image_url = parser['description']['imageURL']
+
+            class_file = glob.glob(model + '/1/classes.*')
+            if class_file:
+                classes = read_classes(class_file[0])
+            else:
+                classes = []
+
+            model_infos = {
+                'model_name': model_name,
+                'model_type': model_type,
+                'classes': classes,
+                'description_title': description_title,
+                'description_content': description_content,
+                'description_image_url': description_image_url
+            }
+        else:
+            continue
+
+        model_list.append(model_infos)
+
+    return model_list
