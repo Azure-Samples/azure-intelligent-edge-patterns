@@ -15,6 +15,7 @@ import { useHistory } from 'react-router-dom';
 // import AddPanel from '../components/Models/Panel/AddPanel';
 import Model from './Model';
 import { getParts } from '../../store/partSlice';
+import { getIntelOvmsProjectList } from '../../store/IntelOvmsProjectSlice';
 import AddCustomVision from './Panel/AddCustomVision';
 import IntelOvmsDashboard from './IntelOvmsDashboard';
 
@@ -41,6 +42,7 @@ const ModelContainer = () => {
 
   useEffect(() => {
     dispatch(getParts());
+    dispatch(getIntelOvmsProjectList());
   }, [dispatch]);
 
   const newCommandBarItems: ICommandBarItemProps[] = [
