@@ -1,5 +1,16 @@
-import React, { useState, useRef } from 'react';
-import ReactFlow, { ReactFlowProvider, addEdge, removeElements, Controls, Handle } from 'react-flow-renderer';
+import React, { useState, useRef, useCallback } from 'react';
+import ReactFlow, {
+  ReactFlowProvider,
+  addEdge,
+  removeElements,
+  Controls,
+  Handle,
+  getConnectedEdges,
+  isNode,
+  isEdge,
+  Node,
+  Edge,
+} from 'react-flow-renderer';
 import { useSelector } from 'react-redux';
 
 import { trainingProjectIsCascadesFactory } from '../../../store/trainingProjectSlice';
@@ -7,21 +18,17 @@ import { trainingProjectIsCascadesFactory } from '../../../store/trainingProject
 import './dnd.css';
 
 import Sidebar from './Sidebar';
-import Node from './Node/Node';
+import NodeCard from './Node/Node';
 import CustomEdge from './CustomEdge';
 import InitialNode from './Node/InitialNode';
 
-const initialElements = [
-  {
-    id: '1',
-    type: 'initial',
-    data: {},
-    position: { x: 350, y: 50 },
-  },
-];
+interface Props {
+  elements: (Node | Edge)[];
+  setElements: React.Dispatch<React.SetStateAction<(Node<any> | Edge<any>)[]>>;
+}
 
-let id = 0;
-const getId = () => `dndnode_${id++}`;
+let id = 1;
+const getNodeId = () => `${id++}`;
 
 const isValidConnection = (connection) => {
   console.log('connection', connection);
@@ -36,13 +43,16 @@ const edgeTypes = {
   customEdge: CustomEdge,
 };
 
-const DnDFlow = () => {
+const DnDFlow = (props: Props) => {
+  const { elements, setElements } = props;
+
   const trainingProjectIsPredictionModelSelector = trainingProjectIsCascadesFactory();
   const trainingProjectList = useSelector(trainingProjectIsPredictionModelSelector);
 
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
-  const [elements, setElements] = useState(initialElements);
+  // const [elements, setElements] = useState<(Node | Edge)[]>(initialElements);
+
   // @ts-ignore
   const onConnect = (params) => {
     console.log('params', params);
@@ -81,7 +91,7 @@ const DnDFlow = () => {
     });
 
     const newNode = {
-      id: getId(),
+      id: getNodeId(),
       type,
       position,
       // category: cardCategory,
@@ -94,7 +104,18 @@ const DnDFlow = () => {
     setElements((es) => es.concat(newNode));
   };
 
-  // console.log('elements', elements);
+  const onDeleteNode = useCallback((nodeId: string) => {
+    setElements((prev) => {
+      const noRemoveNodes = prev.filter((ele) => isNode(ele)).filter((ele) => ele.id !== nodeId) as Node[];
+
+      const allEdges = prev.filter((ele) => isEdge(ele)) as Edge[];
+      const noRemoveEdges = allEdges.filter((edge) => ![edge.target, edge.source].includes(nodeId));
+
+      return [...noRemoveNodes, ...noRemoveEdges];
+    });
+  }, []);
+
+  console.log('elements', elements);
 
   // const onConnect = (params) => setElements((els) => addEdge(params, els));
 
@@ -118,40 +139,53 @@ const DnDFlow = () => {
                   />
                 </>
               ),
-              model: ({ data, isConnectable }) => {
-                const { id } = data;
+              model: (node) => {
+                const {
+                  id,
+                  data: { id: modelId },
+                } = node;
 
                 return (
-                  <>
-                    <Node modelId={id} type="model" setElements={setElements} />
-                    {/* <Handle
-                      // @ts-ignore
-                      position="top"
-                      type="target"
-                      isValidConnection={isValidConnection}
-                      onConnect={(params) => {
-                        console.log('model params target', params);
-
-                        // @ts-ignore
-                        setElements((els) => {
-                          console.log('model els', els);
-
-                          return addEdge({ ...params, type: 'customEdge' }, els);
-                        });
-                      }}
-                    /> */}
-                  </>
+                  <NodeCard
+                    modelId={modelId}
+                    type="model"
+                    setElements={setElements}
+                    onDelete={() => onDeleteNode(id)}
+                  />
                 );
               },
-              custom: ({ data, isConnectable }) => {
-                const { id } = data;
+              custom: (node) => {
+                console.log('custom', node);
 
-                return <Node modelId={id} type="custom" setElements={setElements} />;
+                const {
+                  id,
+                  data: { id: modelId },
+                } = node;
+
+                return (
+                  <NodeCard
+                    modelId={modelId}
+                    type="custom"
+                    setElements={setElements}
+                    onDelete={() => onDeleteNode(id)}
+                  />
+                );
               },
-              export: ({ data, isConnectable }) => {
-                const { id } = data;
+              export: (node) => {
+                console.log('export', node);
+                const {
+                  id,
+                  data: { id: modelId },
+                } = node;
 
-                return <Node modelId={id} type="export" setElements={setElements} />;
+                return (
+                  <NodeCard
+                    modelId={modelId}
+                    type="export"
+                    setElements={setElements}
+                    onDelete={() => onDeleteNode(id)}
+                  />
+                );
               },
             }}
             edgeTypes={edgeTypes}

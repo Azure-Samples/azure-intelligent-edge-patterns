@@ -1,24 +1,34 @@
 import React, { useState, useCallback } from 'react';
 import {
   Stack,
-  ActionButton,
-  Icon,
-  Link,
   ICommandBarItemProps,
   Label,
   CommandBar,
-  PrimaryButton,
-  Text,
   IBreadcrumbItem,
   Breadcrumb,
   mergeStyleSets,
+  Modal,
+  TextField,
+  PrimaryButton,
+  DefaultButton,
+  IconButton,
 } from '@fluentui/react';
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
+import { Node, Edge } from 'react-flow-renderer';
 
 import { Url } from '../../enums';
 
 import Cascades from './Cascades';
 import CascadeCreate from './Create/Create';
+
+const initialElements = [
+  {
+    id: '0',
+    type: 'initial',
+    data: {},
+    position: { x: 350, y: 50 },
+  },
+];
 
 const getClasses = () =>
   mergeStyleSets({
@@ -30,10 +40,17 @@ const getClasses = () =>
         color: '#0078D4',
       },
     },
+    model: {
+      padding: '10px',
+    },
   });
 
 const CascadesContainer = () => {
   const history = useHistory();
+
+  const [elements, setElements] = useState<(Node | Edge)[]>(initialElements);
+  const [defaultName, setDefaultName] = useState('Default Cascade');
+  const [isPopup, setIsPopup] = useState(false);
 
   const isMatchCreationRoute = useRouteMatch(Url.CASCADES_CREATE);
   const classes = getClasses();
@@ -44,6 +61,14 @@ const CascadesContainer = () => {
     history.push(Url.CASCADES_CREATE);
   }, [history]);
 
+  const onSaveCascades = useCallback(() => {
+    console.log('onSaveCascades', elements);
+  }, []);
+
+  const onSaveCascadeName = useCallback(() => {
+    setIsPopup(false)
+  }, [])
+
   const breadCrumbItems: IBreadcrumbItem[] = [
     { text: 'Home', key: 'home', onClick: () => history.push(Url.HOME) },
     { text: 'Cascades', key: 'Cascades', onClick: () => history.push(Url.CASCADES) },
@@ -53,19 +78,12 @@ const CascadesContainer = () => {
   const commandBarItems: ICommandBarItemProps[] = [
     {
       key: 'addBtn',
-      text: 'Create Cascade',
+      text: isMatchCreationRoute ? 'Add' : 'Create Cascade',
       iconProps: {
         iconName: 'Add',
       },
-      onClick: () => onCreateCascades(),
+      onClick: () => (isMatchCreationRoute ? onSaveCascades() : onCreateCascades()),
     },
-    // {
-    //   key: 'saveBtn',
-    //   text: 'Save',
-    //   iconProps: {
-    //     iconName: 'Save',
-    //   },
-    // },
     {
       key: 'refresh',
       text: 'Refresh',
@@ -123,23 +141,58 @@ const CascadesContainer = () => {
   ];
 
   return (
-    <Stack
-      styles={{
-        root: {
-          height: '100%',
-          overflowY: 'auto',
-          padding: isMatchCreationRoute ? '0 0' : '32px 0',
-        },
-      }}
-    >
-      {isMatchCreationRoute && <Breadcrumb items={breadCrumbItems} styles={{ root: classes.breadcrumb }} />}
-      <Label styles={{ root: { fontSize: '18px', lineHeight: '24px', paddingLeft: '24px' } }}>Cascade</Label>
-      <CommandBar styles={{ root: { marginTop: '24px' } }} items={commandBarItems} />
-      <Switch>
-        <Route exact path={Url.CASCADES_CREATE} render={() => <CascadeCreate />} />
-        <Route exact path={Url.CASCADES} render={() => <Cascades onCreateCascades={onCreateCascades} />} />
-      </Switch>
-    </Stack>
+    <>
+      <Stack
+        styles={{
+          root: {
+            height: '100%',
+            overflowY: 'auto',
+            padding: isMatchCreationRoute ? '0 0' : '32px 0',
+          },
+        }}
+      >
+        {isMatchCreationRoute && <Breadcrumb items={breadCrumbItems} styles={{ root: classes.breadcrumb }} />}
+        {isMatchCreationRoute ? (
+          <Label
+            styles={{ root: { fontSize: '18px', lineHeight: '24px', paddingLeft: '24px' } }}
+            onClick={() => setIsPopup(true)}
+          >
+            {defaultName}
+          </Label>
+        ) : (
+          <Label styles={{ root: { fontSize: '18px', lineHeight: '24px', paddingLeft: '24px' } }}>
+            Cascade
+          </Label>
+        )}
+        <CommandBar styles={{ root: { marginTop: '24px' } }} items={commandBarItems} />
+        <Switch>
+          <Route
+            exact
+            path={Url.CASCADES_CREATE}
+            render={() => <CascadeCreate elements={elements} setElements={setElements} />}
+          />
+          <Route exact path={Url.CASCADES} render={() => <Cascades onCreateCascades={onCreateCascades} />} />
+        </Switch>
+      </Stack>
+      {isPopup && (
+        <Modal isOpen={true} onDismiss={() => setIsPopup(false)} styles={{ main: classes.model }}>
+          <Stack horizontalAlign="end">
+            <IconButton iconProps={{ iconName: 'Cancel' }} onClick={() => setIsPopup(false)} />
+          </Stack>
+          <Stack tokens={{ childrenGap: 15 }}>
+            <TextField
+              label="Input Cascade Name"
+              value={defaultName}
+              onChange={(_, value: string) => setDefaultName(value)}
+            />
+            <Stack horizontal>
+              <PrimaryButton onClick={onSaveCascadeName} >Save</PrimaryButton>
+              <DefaultButton>Cancel</DefaultButton>
+            </Stack>
+          </Stack>
+        </Modal>
+      )}
+    </>
   );
 };
 

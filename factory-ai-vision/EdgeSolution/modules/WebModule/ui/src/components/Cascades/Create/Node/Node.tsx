@@ -11,6 +11,7 @@ interface Props {
   modelId: string;
   type: CascadeType;
   setElements: any;
+  onDelete: () => void;
 }
 
 const getClasses = () =>
@@ -51,8 +52,8 @@ const getHandlePointer = (length: number, id) => {
   return 150;
 };
 
-const ModelCard = (props: Props) => {
-  const { modelId, type, setElements } = props;
+const NodeCard = (props: Props) => {
+  const { modelId, type, setElements, onDelete } = props;
 
   const model = useSelector((state: RootState) => selectTrainingProjectById(state, modelId));
 
@@ -70,7 +71,7 @@ const ModelCard = (props: Props) => {
         key: 'delete',
         text: 'Delete',
         iconProps: { iconName: 'Delete' },
-        // onClick: () => setIsOpenDialog(true),
+        onClick: () => onDelete(),
       },
     ],
   };
@@ -150,4 +151,4 @@ const ModelCard = (props: Props) => {
   );
 };
 
-export default memo(ModelCard);
+export default memo(NodeCard);
