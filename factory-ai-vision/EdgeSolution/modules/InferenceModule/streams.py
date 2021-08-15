@@ -22,11 +22,14 @@ from invoke import gm
 from scenarios import DangerZone, DefeatDetection, Detection, PartCounter, PartDetection, ShelfZone, CountingZone, QueueZone
 from utility import draw_label, get_file_zip, is_edge, normalize_rtsp
 
+# for grpc
 import grpc
+import datetime
 from tensorflow import make_tensor_proto, make_ndarray
-
 from tensorflow_serving.apis import predict_pb2
 from tensorflow_serving.apis import prediction_service_pb2_grpc
+from ovms_utils import load_classes, postprocess
+from yolo_utils import yolo_eval
 
 DETECTION_TYPE_NOTHING = "nothing"
 DETECTION_TYPE_SUCCESS = "success"
@@ -157,8 +160,8 @@ class Stream:
         gm.invoke_graph_instance_deactivate(self.cam_id)
 
     def _set(self, rtspUrl, frameRate, recording_duration):
-        gm.invoke_instance_set(self.lva_mode, self.cam_id,
-                               rtspUrl, frameRate, recording_duration)
+        gm.invoke_instance_set(self.lva_mode, self.cam_id, rtspUrl, frameRate,
+                               recording_duration)
 
     def _start(self):
         gm.invoke_graph_instance_activate(self.cam_id)
@@ -189,24 +192,20 @@ class Stream:
                     continue
                 cnt += 1
                 if cnt % 30 == 1:
-                    logging.info(
-                        "send through channel {}".format(
-                            bytes(self.cam_id, "utf-8"))
-                    )
+                    logging.info("send through channel {}".format(
+                        bytes(self.cam_id, "utf-8")))
                 # self.mutex.acquire()
                 # FIXME may find a better way to deal with encoding
-                self.zmq_sender.send_multipart(
-                    [
-                        bytes(self.cam_id, "utf-8"),
-                        cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes(),
-                    ]
-                )
+                self.zmq_sender.send_multipart([
+                    bytes(self.cam_id, "utf-8"),
+                    cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes(),
+                ])
                 self.last_send = self.last_update
                 # self.mutex.release()
                 # FIXME need to fine tune this value
                 time.sleep(0.03)
 
-        threading.Thread(target=run, args=(self,)).start()
+        threading.Thread(target=run, args=(self, )).start()
 
     def get_scenario_metrics(self):
         if self.scenario:
@@ -215,7 +214,7 @@ class Stream:
 
     def restart_cam(self):
 
-        logger.warning("[INFO] Restarting Cam" )
+        logger.warning("[INFO] Restarting Cam")
 
         # cam = cv2.VideoCapture(normalize_rtsp(self.cam_source))
 
@@ -246,12 +245,10 @@ class Stream:
 
         # if self.cam_type == cam_type and self.cam_source == cam_source:
         #    return
-        if (
-            self.cam_source != cam_source
-            or round(self.frameRate) != round(frameRate)
-            or self.lva_mode != lva_mode
-            or self.recording_duration != recording_duration
-        ):
+        if (self.cam_source != cam_source
+                or round(self.frameRate) != round(frameRate)
+                or self.lva_mode != lva_mode
+                or self.recording_duration != recording_duration):
             self.cam_source = cam_source
             self.frameRate = frameRate
             self.lva_mode = lva_mode
@@ -264,11 +261,11 @@ class Stream:
                     "fps": self.frameRate,
                     "endpoint": "http://inferencemodule:5000",
                 }
-                res = requests.post(
-                    "http://cvcapturemodule:9000/streams", json=data)
+                res = requests.post("http://cvcapturemodule:9000/streams",
+                                    json=data)
             else:
-                self._update_instance(
-                    normalize_rtsp(cam_source), str(frameRate), str(recording_duration))
+                self._update_instance(normalize_rtsp(cam_source),
+                                      str(frameRate), str(recording_duration))
 
         self.name = cam_name
         self.has_aoi = has_aoi
@@ -281,7 +278,7 @@ class Stream:
             self.scenario_type = self.model.detection_mode
 
         elif detection_mode == "PC":
-            logger.warning("[INFO] Line INFO: {}".format(line_info) )
+            logger.warning("[INFO] Line INFO: {}".format(line_info))
             self.scenario = PartCounter()
             self.scenario_type = self.model.detection_mode
             try:
@@ -296,26 +293,26 @@ class Stream:
                         x2 = int(lines[i]["label"][1]["x"])
                         y2 = int(lines[i]["label"][1]["y"])
                         line_id = str(lines[i]['order'])
-                        logger.warning("        line:", x1, y1,
-                              x2, y2, line_id )
+                        logger.warning("        line:", x1, y1, x2, y2,
+                                       line_id)
                         lines_to_set.append([x1, y1, x2, y2, line_id])
                     self.scenario.set_line(lines_to_set)
-                    logger.warning("Upading Line:" )
-                    logger.warning("    use_line: {}", self.use_line )
+                    logger.warning("Upading Line:")
+                    logger.warning("    use_line: {}", self.use_line)
                 else:
-                    logger.warning("Upading Line:" )
-                    logger.warning("    use_line: {}", self.use_line )
+                    logger.warning("Upading Line:")
+                    logger.warning("    use_line: {}", self.use_line)
 
             except:
                 self.use_line = False
-                logger.warning("Upading Line[*]:" )
-                logger.warning("    use_line   :", False )
+                logger.warning("Upading Line[*]:")
+                logger.warning("    use_line   :", False)
 
         elif detection_mode in ["ES", "ESA", "TCC", "CQA"]:
             class_obj = [DangerZone, ShelfZone, CountingZone, QueueZone]
-            logger.warning("[INFO] Zone INFO", zone_info )
-            self.scenario = class_obj[["ES", "ESA",
-                                       "TCC", "CQA"].index(detection_mode)]()
+            logger.warning("[INFO] Zone INFO", zone_info)
+            self.scenario = class_obj[["ES", "ESA", "TCC",
+                                       "CQA"].index(detection_mode)]()
             self.scenario_type = self.model.detection_mode
             # FIXME
             self.scenario.set_targets(self.model.parts)
@@ -324,8 +321,8 @@ class Stream:
                 self.use_zone = zone_info["useDangerZone"]
                 zones = zone_info["dangerZones"]
                 _zones = []
-                logger.warning("Upading Line:" )
-                logger.warning("    use_zone:", self.use_zone )
+                logger.warning("Upading Line:")
+                logger.warning("    use_zone:", self.use_zone)
                 # for zone in zones:
                 #     x1 = int(zone["label"]["x1"])
                 #     y1 = int(zone["label"]["y1"])
@@ -339,11 +336,11 @@ class Stream:
 
             except:
                 self.use_zone = False
-                logger.warning("Upading Zone[*]:" )
-                logger.warning("    use_zone   :", False )
+                logger.warning("Upading Zone[*]:")
+                logger.warning("    use_zone   :", False)
 
         elif detection_mode == "DD":
-            logger.warning("[INFO] : {}".format(line_info) )
+            logger.warning("[INFO] : {}".format(line_info))
             self.scenario = DefeatDetection()
             self.scenario_type = self.model.detection_mode
             # FIXME
@@ -359,17 +356,18 @@ class Stream:
                     x2 = int(lines[0]["label"][1]["x"])
                     y2 = int(lines[0]["label"][1]["y"])
                     self.scenario.set_line(x1, y1, x2, y2)
-                    logger.warning("Upading Line:" )
-                    logger.warning("    use_line: {}".format(self.use_line) )
-                    logger.warning("        line: {} {} {} {}".format(x1, y1, x2, y2) )
+                    logger.warning("Upading Line:")
+                    logger.warning("    use_line: {}".format(self.use_line))
+                    logger.warning("        line: {} {} {} {}".format(
+                        x1, y1, x2, y2))
                 else:
-                    logger.warning("Upading Line:" )
-                    logger.warning("    use_line: {}".format(self.use_line) )
+                    logger.warning("Upading Line:")
+                    logger.warning("    use_line: {}".format(self.use_line))
 
             except:
                 self.use_line = False
-                logger.warning("Upading Line[*]:" )
-                logger.warning("    use_line   : {}".format(False) )
+                logger.warning("Upading Line[*]:")
+                logger.warning("    use_line   : {}".format(False))
 
         else:
             self.scenario = None
@@ -421,14 +419,11 @@ class Stream:
             self._set(rtspUrl, frameRate, recording_duration)
             self._start()
         logger.info(
-            "Instance {} updated, rtsp = {}, frameRate = {}, recording_duration = {}".format(
-                self.cam_id, rtspUrl, frameRate, recording_duration
-            )
-        )
+            "Instance {} updated, rtsp = {}, frameRate = {}, recording_duration = {}"
+            .format(self.cam_id, rtspUrl, frameRate, recording_duration))
 
-    def update_retrain_parameters(
-        self, is_retrain, confidence_min, confidence_max, max_images
-    ):
+    def update_retrain_parameters(self, is_retrain, confidence_min,
+                                  confidence_max, max_images):
         self.is_retrain = is_retrain
         self.max_images = max_images
         # FIMXE may need to move it to other place
@@ -464,9 +459,8 @@ class Stream:
 
         if IS_OPENCV == "true":
             logger.info("get CVModule")
-            res = requests.get(
-                "http://cvcapturemodule:9000/delete_stream/" + self.cam_id
-            )
+            res = requests.get("http://cvcapturemodule:9000/delete_stream/" +
+                               self.cam_id)
         else:
             gm.invoke_graph_instance_deactivate(self.cam_id)
         logger.info("Deactivate stream {}".format(self.cam_id))
@@ -525,15 +519,19 @@ class Stream:
             args["input_image_layout"] = "NHWC"
 
             if not self.stub:
-                address = "{}:{}".format(args['grpc_address'],args['grpc_port'])
+                address = "{}:{}".format(args['grpc_address'],
+                                         args['grpc_port'])
                 MAX_MESSAGE_LENGTH = 1024 * 1024 * 1024
-                channel = grpc.insecure_channel(address,
+                channel = grpc.insecure_channel(
+                    address,
                     options=[
                         ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
-                        ('grpc.max_receive_message_length', MAX_MESSAGE_LENGTH),
+                        ('grpc.max_receive_message_length',
+                         MAX_MESSAGE_LENGTH),
                     ])
 
-                stub = prediction_service_pb2_grpc.PredictionServiceStub(channel)
+                stub = prediction_service_pb2_grpc.PredictionServiceStub(
+                    channel)
             request = predict_pb2.PredictRequest()
             request.model_spec.name = args['pipeline_name']
 
@@ -542,8 +540,9 @@ class Stream:
             img = img.astype(np.float32)
             img = cv2.resize(img, (600, 400))
             target_shape = (img.shape[0], img.shape[1])
-            img = img.reshape(1,target_shape[0],target_shape[1],3)
-            request.inputs['image'].CopyFrom(make_tensor_proto(img, shape=img.shape))
+            img = img.reshape(1, target_shape[0], target_shape[1], 3)
+            request.inputs['image'].CopyFrom(
+                make_tensor_proto(img, shape=img.shape))
 
             try:
                 result_future = stub.Predict.future(request, 30.0)
@@ -560,7 +559,9 @@ class Stream:
                 logger.warning(f"Output: name[{name}]")
                 tensor_proto = response.outputs[name]
                 output_nd = make_ndarray(tensor_proto)
-                logger.warning(f"    numpy => shape[{output_nd.shape}] data[{output_nd.dtype}]")
+                logger.warning(
+                    f"    numpy => shape[{output_nd.shape}] data[{output_nd.dtype}]"
+                )
 
                 if name == 'ages':
                     people = update_people_ages(output_nd, people)
@@ -584,10 +585,10 @@ class Stream:
                 fontScale = 0.5
                 color = (0, 255, 255)
                 thickness = 1
-                text = person['gender'] + ' / ' + str(person['age']) + '/' + person['emotion']
-                cv2.putText(img, text, (x1, y1-10), font,
-                            fontScale, color, thickness, cv2.LINE_AA)
-
+                text = person['gender'] + ' / ' + str(
+                    person['age']) + '/' + person['emotion']
+                cv2.putText(img, text, (x1, y1 - 10), font, fontScale, color,
+                            thickness, cv2.LINE_AA)
 
             self.last_prediction_count = len(people)
             self.last_prediction = people
@@ -616,8 +617,8 @@ class Stream:
         # self.mutex.release()
 
         # check whether it's the tag we want
-        predictions = list(
-            p for p in predictions if p["tagName"] in self.model.parts)
+        predictions = list(p for p in predictions
+                           if p["tagName"] in self.model.parts)
 
         # check whether it's inside aoi (if has)
         if self.has_aoi:
@@ -635,8 +636,8 @@ class Stream:
             self.process_retrain_image(predictions, image)
 
         # check whether it's larger than threshold
-        predictions = list(
-            p for p in predictions if p["probability"] >= self.threshold)
+        predictions = list(p for p in predictions
+                           if p["probability"] >= self.threshold)
 
         # update last_prediction_count
         _last_prediction_count = {}
@@ -661,8 +662,7 @@ class Stream:
             # if prediction['probability'] > 0.5:
             (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
             _detections.append(
-                Detection(tag, x1, y1, x2, y2, prediction["probability"])
-            )
+                Detection(tag, x1, y1, x2, y2, prediction["probability"]))
         if self.scenario:
             update_ret = self.scenario.update(_detections)
             if self.get_mode() in ['ES', 'DD', 'PC', 'TCC', 'CQA']:
@@ -671,7 +671,9 @@ class Stream:
         self.draw_img()
 
         if self.scenario:
-            if (self.get_mode() in ["ES", "TCC", "CQA"] and self.use_zone == True) or (self.get_mode() in ['DD', 'PD', 'PC'] and self.use_line == True):
+            if (self.get_mode() in ["ES", "TCC", "CQA"] and self.use_zone
+                    == True) or (self.get_mode() in ['DD', 'PD', 'PC']
+                                 and self.use_line == True):
                 self.scenario.draw_counter(self.last_drawn_img)
             if self.get_mode() == "ESA":
                 self.scenario.draw_counter(self.last_drawn_img)
@@ -696,45 +698,188 @@ class Stream:
 
         # update avg inference time (moving avg)
         inf_time_ms = inf_time * 1000
-        self.average_inference_time = (
-            1 / 16 * inf_time_ms + 15 / 16 * self.average_inference_time
-        )
+        self.average_inference_time = (1 / 16 * inf_time_ms +
+                                       15 / 16 * self.average_inference_time)
+
+    def predict_grpc(self, image, stub):
+
+        width = self.IMG_WIDTH
+        ratio = self.IMG_WIDTH / image.shape[1]
+        height = int(image.shape[0] * ratio + 0.000001)
+        if height >= self.IMG_HEIGHT:
+            height = self.IMG_HEIGHT
+            ratio = self.IMG_HEIGHT / image.shape[0]
+            width = int(image.shape[1] * ratio + 0.000001)
+
+        s = time.time()
+        detectedObjects = self.ovms_score(stub, image)
+        inf_time = time.time() - s
+        predictions = lva_to_customvision_format(detectedObjects)
+
+        # check whether it's the tag we want
+        predictions = list(p for p in predictions
+                           if p["tagName"] in self.model.parts)
+
+        # check whether it's inside aoi (if has)
+        if self.has_aoi:
+            _predictions = []
+            for p in predictions:
+                (x1, y1), (x2, y2) = parse_bbox(p, width, height)
+                if is_inside_aoi(x1, y1, x2, y2, self.aoi_info):
+                    _predictions.append(p)
+            predictions = _predictions
+
+        # update detection status before filter out by threshold
+        self.update_detection_status(predictions)
+
+        if self.is_retrain:
+            self.process_retrain_image(predictions, image)
+
+        # check whether it's larger than threshold
+        predictions = list(p for p in predictions
+                           if p["probability"] >= self.threshold)
+
+        # update last_prediction_count
+        _last_prediction_count = {}
+        for p in predictions:
+            tag = p["tagName"]
+            if tag not in _last_prediction_count:
+                _last_prediction_count[tag] = 1
+            else:
+                _last_prediction_count[tag] += 1
+        self.last_prediction_count = _last_prediction_count
+
+        # update the buffer
+        # no need to copy since resize already did it
+        self.last_img = image
+        self.last_prediction = predictions
+
+        # FIXME support more scenarios
+        # Update Tracker / Scenario
+        _detections = []
+        for prediction in predictions:
+            tag = prediction["tagName"]
+            # if prediction['probability'] > 0.5:
+            (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
+            _detections.append(
+                Detection(tag, x1, y1, x2, y2, prediction["probability"]))
+        if self.scenario:
+            update_ret = self.scenario.update(_detections)
+            if self.get_mode() in ['ES', 'DD', 'PC', 'TCC', 'CQA']:
+                self.counter = update_ret[0]
+
+        self.draw_img()
+
+        if self.scenario:
+            if (self.get_mode() in ["ES", "TCC", "CQA"] and self.use_zone
+                    == True) or (self.get_mode() in ['DD', 'PD', 'PC']
+                                 and self.use_line == True):
+                self.scenario.draw_counter(self.last_drawn_img)
+            if self.get_mode() == "ESA":
+                self.scenario.draw_counter(self.last_drawn_img)
+            if self.get_mode() == "DD":
+                self.scenario.draw_objs(self.last_drawn_img)
+            if self.get_mode() == 'PD' and self.use_tracker is True:
+                self.scenario.draw_objs(self.last_drawn_img)
+
+        if self.iothub_is_send:
+            if self.get_mode() in ["ES", "ESA", "TCC", "CQA"]:
+                if self.scenario.has_new_event:
+                    self.process_send_message_to_iothub(predictions)
+            else:
+                self.process_send_message_to_iothub(predictions)
+
+        if self.send_video_to_cloud:
+            if self.get_mode() in ["ES", "ESA", "TCC", "CQA"]:
+                if self.scenario.has_new_event:
+                    self.precess_send_signal_to_lva()
+            else:
+                self.precess_send_signal_to_lva()
+
+        # update avg inference time (moving avg)
+        inf_time_ms = inf_time * 1000
+        self.average_inference_time = (1 / 16 * inf_time_ms +
+                                       15 / 16 * self.average_inference_time)
+
+    def ovms_score(self, stub, image):
+        model_name = "yolov3"
+        input_layer = "inputs"
+        output_layers = [
+            "detector/yolo-v3/Conv_14/BiasAdd/YoloRegion",
+            "detector/yolo-v3/Conv_22/BiasAdd/YoloRegion",
+            "detector/yolo-v3/Conv_6/BiasAdd/YoloRegion"
+        ]
+        class_names = load_classes("model_data/coco.names")
+        results = {}
+
+        print("Start processing:")
+        print(f"\tModel name: {model_name}")
+
+        image = np.array(image, dtype=np.float32)
+        image = cv2.resize(image, (416, 416))
+        image = image.transpose(2, 0, 1).reshape(1, 3, 416, 416)
+
+        request = predict_pb2.PredictRequest()
+        request.model_spec.name = model_name
+        request.inputs[input_layer].CopyFrom(
+            make_tensor_proto(image, shape=(image.shape)))
+
+        # result includes a dictionary with all model outputs
+        result = stub.Predict(request, 10.0)
+
+        yolo_outputs = [[], [], []]
+        for output_layer in output_layers:
+            output = make_ndarray(result.outputs[output_layer])
+            output_numpy = np.array(output)
+            anchor_size = output_numpy.shape[2]
+            output_numpy = output_numpy.transpose(0, 2, 3, 1).reshape(
+                1, anchor_size, anchor_size, 3, 85)
+            yolo_outputs[int((anchor_size / 13) / 2)] = output_numpy
+
+        scores, boxes, classes = yolo_eval(yolo_outputs,
+                                           classes=80,
+                                           score_threshold=0.5,
+                                           iou_threshold=0.3)
+
+        results = postprocess(boxes, scores, classes, class_names)
+
+        return results
 
     def process_retrain_image(self, predictions, img):
         for prediction in predictions:
             if self.last_upload_time + UPLOAD_INTERVAL < time.time():
                 confidence = prediction["probability"]
-                logger.warning(
-                    "comparing...",
-                    self.confidence_min,
-                    confidence,
-                    self.confidence_max
-                )
+                logger.warning("comparing...", self.confidence_min, confidence,
+                               self.confidence_max)
                 if self.confidence_min <= confidence <= self.confidence_max:
-                    logger.warning("preparing..." )
+                    logger.warning("preparing...")
                     # prepare the data to send
                     tag = prediction["tagName"]
                     height, width = img.shape[0], img.shape[1]
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                    labels = json.dumps(
-                        [{"x1": x1, "x2": x2, "y1": y1, "y2": y2}])
+                    labels = json.dumps([{
+                        "x1": x1,
+                        "x2": x2,
+                        "y1": y1,
+                        "y2": y2
+                    }])
                     jpg = cv2.imencode(".jpg", img)[1].tobytes()
 
-                    send_retrain_image_to_webmodule(
-                        jpg, tag, labels, confidence, self.cam_id
-                    )
+                    send_retrain_image_to_webmodule(jpg, tag, labels,
+                                                    confidence, self.cam_id)
 
                     self.last_upload_time = time.time()
                     break
 
     def process_send_message_to_iothub(self, predictions):
         if self.iothub_last_send_time + self.iothub_interval < time.time():
-            predictions = list(
-                p for p in predictions if p["probability"] >= self.threshold
-            )
+            predictions = list(p for p in predictions
+                               if p["probability"] >= self.threshold)
             if len(predictions) > 0:
-                message_body = {'camera_name': self.name,
-                                'inferences': predictions}
+                message_body = {
+                    'camera_name': self.name,
+                    'inferences': predictions
+                }
                 if self.get_mode() in ['ES', 'DD', 'PC', 'TCC', 'CQA']:
                     message_body['count'] = self.counter
                 send_message_to_iothub(message_body)
@@ -744,10 +889,9 @@ class Stream:
         if self.lva_last_send_time + self.lva_interval < time.time():
             to_send = False
             for p in self.last_prediction:
-                if (
-                    p["tagName"] in self.send_video_to_cloud_parts
-                    and p["probability"] >= self.send_video_to_cloud_threshold
-                ):
+                if (p["tagName"] in self.send_video_to_cloud_parts
+                        and p["probability"] >=
+                        self.send_video_to_cloud_threshold):
                     to_send = True
             logger.warning('********** precess send signal to lva **********')
             logger.warning('********** precess send signal to lva **********')
@@ -783,8 +927,8 @@ class Stream:
             for prediction in predictions:
                 if prediction["probability"] > self.threshold:
                     (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-                    cv2.rectangle(img, (x1, max(y1, 15)),
-                                  (x2, y2), (255, 255, 255), 1)
+                    cv2.rectangle(img, (x1, max(y1, 15)), (x2, y2),
+                                  (255, 255, 255), 1)
                     draw_confidence_level(img, prediction)
 
         self.last_drawn_img = img
@@ -802,19 +946,19 @@ class Stream:
         self.last_display_keep_alive = time.time()
 
     def display_is_alive(self):
-        return self.last_display_keep_alive + DISPLAY_KEEP_ALIVE_THRESHOLD > time.time()
+        return self.last_display_keep_alive + DISPLAY_KEEP_ALIVE_THRESHOLD > time.time(
+        )
 
     def gen(self):
         while self.cam_is_alive and self.display_is_alive():
             if self.last_drawn_img is not None and self.last_update > self.last_send:
                 self.last_send = self.last_update
                 jpg = cv2.imencode(".jpg", self.last_drawn_img)[1].tobytes()
-                logger.warning(
-                    '===== sneding jpg to browser, size: {}'.format(len(jpg)))
-                yield (
-                    b"--frame\r\n" b"Content-Type: image/jpeg\r\n\r\n" + jpg + b"\r\n"
-                )
-                time.sleep(1/self.frameRate)
+                logger.warning('===== sneding jpg to browser, size: {}'.format(
+                    len(jpg)))
+                yield (b"--frame\r\n"
+                       b"Content-Type: image/jpeg\r\n\r\n" + jpg + b"\r\n")
+                time.sleep(1 / self.frameRate)
             else:
                 time.sleep(0.04)
 
@@ -868,13 +1012,10 @@ def is_inside_aoi(x1, y1, x2, y2, aoi_info):
         label = aoi_area["label"]
 
         if aoi_area["type"] == "BBox":
-            if (
-                (label["x1"] <= x1 <= label["x2"]) or (
-                    label["x1"] <= x2 <= label["x2"])
-            ) and (
-                (label["y1"] <= y1 <= label["y2"]) or (
-                    label["y1"] <= y2 <= label["y2"])
-            ):
+            if ((label["x1"] <= x1 <= label["x2"]) or
+                (label["x1"] <= x2 <= label["x2"])) and (
+                    (label["y1"] <= y1 <= label["y2"]) or
+                    (label["y1"] <= y2 <= label["y2"])):
                 return True
 
         elif aoi_area["type"] == "Polygon":
@@ -930,8 +1071,8 @@ def send_message_to_iothub(predictions):
             else:
                 iot.send_message_to_output(json.dumps(predictions), "metrics")
         except:
-            logger.warning("[ERROR] Failed to send message to iothub" )
-        logger.warning("[INFO] sending metrics to iothub" )
+            logger.warning("[ERROR] Failed to send message to iothub")
+        logger.warning("[INFO] sending metrics to iothub")
     else:
         # logger.warning('[METRICS]', json.dumps(predictions_to_send))
         pass
@@ -945,21 +1086,20 @@ def send_message_to_lva(cam_id):
             msg.custom_properties["eventTarget"] = target
             iot.send_message_to_output(msg, "InferenceToLVA")
         except:
-            logger.warning("[ERROR] Failed to send signal to LVA" )
-        logger.warning("[INFO] sending signal to LVA" )
+            logger.warning("[ERROR] Failed to send signal to LVA")
+        logger.warning("[INFO] sending signal to LVA")
     else:
         # logger.warning('[INFO] Cannot detect IoT module')
         pass
 
 
 def send_retrain_image_to_webmodule(jpg, tag, labels, confidence, cam_id):
-    logger.warning("[INFO] Sending Image to relabeling", tag )
+    logger.warning("[INFO] Sending Image to relabeling", tag)
     try:
         # requests.post('http://'+web_module_url()+'/api/relabel', data={
         res = requests.post(
-            "http://"
-            + web_module_url()
-            + "/api/part_detections/1/upload_relabel_image/",
+            "http://" + web_module_url() +
+            "/api/part_detections/1/upload_relabel_image/",
             data={
                 "confidence": confidence,
                 "labels": labels,
@@ -970,7 +1110,7 @@ def send_retrain_image_to_webmodule(jpg, tag, labels, confidence, cam_id):
             },
         )
     except:
-        logger.warning("[ERROR] Failed to update image for relabeling" )
+        logger.warning("[ERROR] Failed to update image for relabeling")
 
 
 def lva_to_customvision_format(predictions):
@@ -984,33 +1124,35 @@ def lva_to_customvision_format(predictions):
             "width": float(prediction['entity']['box']['w']),
             "height": float(prediction['entity']['box']['h']),
         }
-        results.append(
-            {
-                "tagName": tagName,
-                "probability": probability,
-                "boundingBox": boundingBox,
-            }
-        )
-    return(results)
+        results.append({
+            "tagName": tagName,
+            "probability": probability,
+            "boundingBox": boundingBox,
+        })
+    return (results)
 
 
 def update_people_ages(output_nd, people):
     for i in range(output_nd.shape[0]):
-        age = int(output_nd[i,0,0,0,0] * 100)
+        age = int(output_nd[i, 0, 0, 0, 0] * 100)
         if len(people) < i + 1:
             people.append({'age': age})
         else:
             people[i].update({'age': age})
     return people
 
+
 def update_people_genders(output_nd, people):
     for i in range(output_nd.shape[0]):
-        gender = 'male' if output_nd[i,0,0,0,0] < output_nd[i,0,1,0,0] else 'female'
+        gender = 'male' if output_nd[i, 0, 0, 0,
+                                     0] < output_nd[i, 0, 1, 0,
+                                                    0] else 'female'
         if len(people) < i + 1:
             people.append({'gender': gender})
         else:
             people[i].update({'gender': gender})
     return people
+
 
 def update_people_emotions(output_nd, people):
     emotion_names = {
@@ -1021,7 +1163,7 @@ def update_people_emotions(output_nd, people):
         4: 'angry'
     }
     for i in range(output_nd.shape[0]):
-        emotion_id = np.argmax(output_nd[i,0,:,0,0])
+        emotion_id = np.argmax(output_nd[i, 0, :, 0, 0])
         emotion = emotion_names[emotion_id]
         if len(people) < i + 1:
             people.append({'emotion': emotion})
@@ -1029,10 +1171,11 @@ def update_people_emotions(output_nd, people):
             people[i].update({'emotion': emotion})
     return people
 
+
 def update_people_coordinate(output_nd, people):
     for i in range(output_nd.shape[0]):
         if len(people) < i + 1:
-            people.append({'coordinate': output_nd[i,0,:]})
+            people.append({'coordinate': output_nd[i, 0, :]})
         else:
-            people[i].update({'coordinate': output_nd[i,0,:]})
+            people[i].update({'coordinate': output_nd[i, 0, :]})
     return people
