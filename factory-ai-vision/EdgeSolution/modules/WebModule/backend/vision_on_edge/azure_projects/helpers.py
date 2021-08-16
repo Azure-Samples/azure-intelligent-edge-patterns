@@ -343,6 +343,7 @@ def create_demo_objects():
     Project.objects.update_or_create(
         name="face_images",
         defaults={
+            "is_cascade": True,
             "type": "sink",
             "combined": "true",
             "inputs": json.dumps([
@@ -354,6 +355,7 @@ def create_demo_objects():
     Project.objects.update_or_create(
         name="face_coordinates",
         defaults={
+            "is_cascade": True,
             "type": "sink",
             "combined": "true",
             "inputs": json.dumps([
@@ -365,6 +367,7 @@ def create_demo_objects():
     Project.objects.update_or_create(
         name="confidence_levels",
         defaults={
+            "is_cascade": True,
             "type": "sink",
             "combined": "true",
             "inputs": json.dumps([
@@ -376,6 +379,7 @@ def create_demo_objects():
     Project.objects.update_or_create(
         name="ages",
         defaults={
+            "is_cascade": True,
             "type": "sink",
             "combined": "true",
             "inputs": json.dumps([
@@ -387,6 +391,7 @@ def create_demo_objects():
     Project.objects.update_or_create(
         name="genders",
         defaults={
+            "is_cascade": True,
             "type": "sink",
             "combined": "true",
             "inputs": json.dumps([
@@ -398,6 +403,7 @@ def create_demo_objects():
     Project.objects.update_or_create(
         name="emotions",
         defaults={
+            "is_cascade": True,
             "type": "sink",
             "combined": "true",
             "inputs": json.dumps([
