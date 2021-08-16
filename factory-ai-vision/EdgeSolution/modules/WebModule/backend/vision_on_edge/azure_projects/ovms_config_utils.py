@@ -75,8 +75,9 @@ def get_model_info():
     for model in os.listdir(model_path):
         model_name = ' '.join(c.capitalize() for c in model.split('-'))
 
-        if glob.glob(model + '/1/*.xml'):
-            model_type_file = glob.glob(model + '/1/config.ini')
+        if glob.glob('{}/{}/1/*.xml'.format(model_path, model)):
+            cur_path = '{}/{}/1/'.format(model_path, model)
+            model_type_file = glob.glob('{}/config.ini'.format(cur_path))
             parser.read(model_type_file)
             model_type = parser['model']['type']
             description_title = parser['description']['title']
