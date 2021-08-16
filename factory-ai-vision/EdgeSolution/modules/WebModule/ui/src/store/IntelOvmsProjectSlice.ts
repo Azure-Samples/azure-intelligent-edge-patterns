@@ -10,12 +10,17 @@ export type Location = {
 
 const locationsAdapter = createEntityAdapter<Location>();
 
-export const getIntelOvmsProjectList = createWrappedAsync('Intel/getIntelProjectList', async () => {
-  const response = await Axios.get(`/api/get_default_ovms_model`);
-  console.log('response', response);
+export const getIntelOvmsProjectList = createWrappedAsync<any, undefined, { state: State }>(
+  'Intel/getIntelProjectList',
+  async (_, { getState }) => {
+    const [nonDemoProject] = getState().trainingProject.nonDemo;
 
-  return response.data;
-});
+    const response = await Axios.get(`/api/projects/${nonDemoProject}/get_default_ovms_model`);
+    console.log('response', response);
+
+    return response.data;
+  },
+);
 
 export const postLocation = createWrappedAsync(
   'locations/post',
