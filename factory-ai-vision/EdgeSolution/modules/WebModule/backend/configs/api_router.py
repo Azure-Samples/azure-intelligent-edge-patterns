@@ -12,6 +12,7 @@ from vision_on_edge.azure_part_detections.api import views as part_detection_vie
 from vision_on_edge.azure_parts.api import views as azure_part_views
 from vision_on_edge.azure_pd_deploy_status.api import views as azure_deploy_status_views
 from vision_on_edge.azure_projects.api import views as azure_projects_views
+from vision_on_edge.azure_cascades.api import views as azure_cascades_views
 from vision_on_edge.azure_settings.api import views as azure_setting_views
 from vision_on_edge.azure_training_status.api import (
     views as azure_training_status_views,
@@ -42,6 +43,7 @@ router.register("part_detection_scenarios", part_detection_views.PDScenarioViewS
 router.register("part_detections", part_detection_views.PartDetectionViewSet)
 router.register("parts", azure_part_views.PartViewSet)
 router.register("projects", azure_projects_views.ProjectViewSet)
+router.register("cascades", azure_cascades_views.CascadeViewSet)
 router.register("settings", azure_setting_views.SettingViewSet)
 router.register("training_status", azure_training_status_views.TrainingStatusViewSet)
 
