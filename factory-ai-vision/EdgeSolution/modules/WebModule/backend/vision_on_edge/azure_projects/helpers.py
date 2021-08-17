@@ -269,7 +269,7 @@ def create_demo_objects():
     # Crop
     inputs_ = [
         {
-            "name": "data",
+            "name": "image",
             "metadata": {
                 "type": "image",
                 "shape": [1, 3, 416, 416],
