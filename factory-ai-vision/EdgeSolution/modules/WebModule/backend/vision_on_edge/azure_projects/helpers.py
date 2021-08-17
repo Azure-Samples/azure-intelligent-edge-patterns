@@ -325,8 +325,8 @@ def create_demo_objects():
             "outputs": outputs,
             "demultiply_count": 0,
             "params": json.dumps({
-                "original_image_width": "600",
-                "original_image_height": "400",
+                "original_image_width": "416",
+                "original_image_height": "416",
                 "target_image_width": "64",
                 "target_image_height": "64",
                 "original_image_layout": "NHWC",
