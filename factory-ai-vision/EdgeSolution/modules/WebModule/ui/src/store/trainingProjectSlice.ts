@@ -17,19 +17,24 @@ import { thunkGetAllCvProjects } from './setting/settingAction';
 
 type TrainingProjectCategory = 'customvision';
 
+export type Metadata = {
+  type: string;
+  shape: string[];
+  layout: string[];
+  color_format: string;
+};
+
 type Input = {
   name: string;
-  width: number;
-  height: number;
-  data_type: string;
-  dims: string[];
-  color_format: string;
+  metadata: Metadata;
 };
 
 type Output = {
   name: string;
-  dims: string[];
+  metadata: Metadata;
 };
+
+export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink';
 
 export type TrainingProject = {
   id: number;
@@ -42,9 +47,14 @@ export type TrainingProject = {
   category: TrainingProjectCategory;
   projectType: string;
   isCascade: boolean;
-  block_inputs: Input[];
-  block_outputs: Output[];
-  node_type: string;
+  inputs: Input[];
+  outputs: Output[];
+  node_type: NodeType;
+  demultiply_count: number;
+  combined: string;
+  params: string;
+  openvino_library_name: string;
+  openvino_model_name: string;
 };
 
 export type CreatOwnModelPayload = {
@@ -77,9 +87,14 @@ const normalize = (e) => ({
   category: e.category,
   projectType: e.project_type,
   isCascade: e.is_cascade,
-  block_inputs: e.block_inputs === '' ? [] : JSON.parse(e.block_inputs),
-  block_outputs: e.block_outputs === '' ? [] : JSON.parse(e.block_outputs),
-  node_type: e.node_type,
+  inputs: e.inputs === '' ? [] : JSON.parse(e.inputs),
+  outputs: e.outputs === '' ? [] : JSON.parse(e.outputs),
+  node_type: e.type,
+  demultiply_count: e.demultiply_count,
+  combined: e.combined,
+  params: e.params === '' ? '' : JSON.parse(e.params),
+  openvino_library_name: e.openvino_library_name,
+  openvino_model_name: e.openvino_model_name,
 });
 
 export const getTrainingProject = createWrappedAsync<any, boolean, { state: State }>(
@@ -305,4 +320,9 @@ export const trainingProjectIsPredictionModelFactory = () =>
 export const trainingProjectIsCascadesFactory = () =>
   createSelector(selectAllTrainingProjects, (entities) =>
     entities.filter((project) => !project.isDemo).filter((project) => project.isCascade),
+  );
+
+export const trainingProjectIsSourceNodeFactory = () =>
+  createSelector(selectAllTrainingProjects, (entities) =>
+    entities.find((project) => !project.isDemo && project.isCascade && project.node_type === 'source'),
   );

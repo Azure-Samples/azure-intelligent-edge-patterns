@@ -13,22 +13,23 @@ import ReactFlow, {
 } from 'react-flow-renderer';
 import { useSelector } from 'react-redux';
 
-import { trainingProjectIsCascadesFactory } from '../../../store/trainingProjectSlice';
+import { trainingProjectIsCascadesFactory, TrainingProject } from '../../../store/trainingProjectSlice';
 
 import './dnd.css';
 
 import Sidebar from './Sidebar';
 import NodeCard from './Node/Node';
 import CustomEdge from './CustomEdge';
-import InitialNode from './Node/InitialNode';
+import InitialNode from './Node/SourceNode';
 
 interface Props {
   elements: (Node | Edge)[];
   setElements: React.Dispatch<React.SetStateAction<(Node<any> | Edge<any>)[]>>;
+  modelList: TrainingProject[];
 }
 
 let id = 1;
-const getNodeId = () => `${id++}`;
+const getNodeId = (modeId: string) => `${id++}_${modeId}`;
 
 const isValidConnection = (connection) => {
   console.log('connection', connection);
@@ -44,10 +45,12 @@ const edgeTypes = {
 };
 
 const DnDFlow = (props: Props) => {
-  const { elements, setElements } = props;
+  const { elements, setElements, modelList } = props;
 
-  const trainingProjectIsPredictionModelSelector = trainingProjectIsCascadesFactory();
-  const trainingProjectList = useSelector(trainingProjectIsPredictionModelSelector);
+  // const trainingProjectIsPredictionModelSelector = trainingProjectIsCascadesFactory();
+  const trainingProjectList = useSelector(trainingProjectIsCascadesFactory());
+
+  console.log('trainingProjectList', trainingProjectList);
 
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
@@ -64,6 +67,7 @@ const DnDFlow = (props: Props) => {
       return addEdge(params, els);
     });
   };
+
   // const onConnect = (params) =>
   //   setElements((els) => addEdge({ ...params, type: 'buttonedge' }, els));
   // @ts-ignore
@@ -91,7 +95,7 @@ const DnDFlow = (props: Props) => {
     });
 
     const newNode = {
-      id: getNodeId(),
+      id: getNodeId(id),
       type,
       position,
       // category: cardCategory,
@@ -127,34 +131,25 @@ const DnDFlow = (props: Props) => {
           <ReactFlow
             elements={elements}
             nodeTypes={{
-              initial: () => (
-                <>
-                  <InitialNode />
-                  <Handle
-                    type="source"
-                    // @ts-ignore
-                    position="bottom"
-                    // @ts-ignore
-                    onConnect={(params) => setElements((els) => addEdge(params, els))}
-                  />
-                </>
-              ),
-              model: (node) => {
-                const {
-                  id,
-                  data: { id: modelId },
-                } = node;
+              source: (node) => {
+                const { id } = node;
+
+                return <InitialNode id={id} setElements={setElements} modelList={modelList} />;
+              },
+              openvino_model: (node) => {
+                const { id } = node;
 
                 return (
                   <NodeCard
-                    modelId={modelId}
-                    type="model"
+                    id={id}
+                    modelList={modelList}
+                    type="openvino_model"
                     setElements={setElements}
                     onDelete={() => onDeleteNode(id)}
                   />
                 );
               },
-              custom: (node) => {
+              openvino_library: (node) => {
                 console.log('custom', node);
 
                 const {
@@ -164,14 +159,15 @@ const DnDFlow = (props: Props) => {
 
                 return (
                   <NodeCard
-                    modelId={modelId}
-                    type="custom"
+                    id={id}
+                    modelList={modelList}
+                    type="openvino_library"
                     setElements={setElements}
                     onDelete={() => onDeleteNode(id)}
                   />
                 );
               },
-              export: (node) => {
+              sink: (node) => {
                 console.log('export', node);
                 const {
                   id,
@@ -180,8 +176,9 @@ const DnDFlow = (props: Props) => {
 
                 return (
                   <NodeCard
-                    modelId={modelId}
-                    type="export"
+                    id={id}
+                    modelList={modelList}
+                    type="sink"
                     setElements={setElements}
                     onDelete={() => onDeleteNode(id)}
                   />
