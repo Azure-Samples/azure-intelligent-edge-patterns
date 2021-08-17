@@ -184,7 +184,7 @@ def create_demo_objects():
         defaults={
             "is_cascade": True,
             "type": "openvino_model",
-            "openvino_model_name": "face-detecton-retail-0004",
+            "openvino_model_name": "face-detection-retail-0004",
             "inputs": inputs,
             "outputs": outputs,
         },
