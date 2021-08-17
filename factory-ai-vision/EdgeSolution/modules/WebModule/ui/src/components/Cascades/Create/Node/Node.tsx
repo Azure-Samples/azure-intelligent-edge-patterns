@@ -1,17 +1,17 @@
 import React, { memo } from 'react';
 import { Stack, Text, IContextualMenuProps, IconButton, mergeStyleSets } from '@fluentui/react';
-import { useSelector } from 'react-redux';
-import { Handle, addEdge } from 'react-flow-renderer';
+import { Handle, addEdge, Connection } from 'react-flow-renderer';
 
-import { selectTrainingProjectById } from '../../../../store/trainingProjectSlice';
-import { State as RootState } from 'RootStateType';
+import { NodeType, TrainingProject } from '../../../../store/trainingProjectSlice';
+import { getSourceMetadata, getTargetMetadata, isValidConnection } from './utils';
+import { getModel } from '../../utils';
 
-type CascadeType = 'model' | 'custom' | 'export';
 interface Props {
-  modelId: string;
-  type: CascadeType;
+  id: string;
+  type: NodeType;
   setElements: any;
   onDelete: () => void;
+  modelList: TrainingProject[];
 }
 
 const getClasses = () =>
@@ -39,10 +39,10 @@ const getClasses = () =>
     },
   });
 
-const getImage = (type: CascadeType) => {
-  if (type === 'model') return '/icons/modelCard.png';
-  if (type === 'custom') return '/icons/transformCard.png';
-  if (type === 'export') return '/icons/exportCard.png';
+const getNodeImage = (type: NodeType) => {
+  if (type === 'openvino_model') return '/icons/modelCard.png';
+  if (type === 'openvino_library') return '/icons/transformCard.png';
+  if (type === 'sink') return '/icons/exportCard.png';
 };
 
 const getHandlePointer = (length: number, id) => {
@@ -53,11 +53,13 @@ const getHandlePointer = (length: number, id) => {
 };
 
 const NodeCard = (props: Props) => {
-  const { modelId, type, setElements, onDelete } = props;
+  const { id, type, setElements, onDelete, modelList } = props;
 
-  const model = useSelector((state: RootState) => selectTrainingProjectById(state, modelId));
+  // const model = useSelector((state: RootState) => selectTrainingProjectById(state, modelId));
 
   const classes = getClasses();
+
+  const selectedModel = getModel(id, modelList);
 
   const menuProps: IContextualMenuProps = {
     items: [
@@ -78,20 +80,30 @@ const NodeCard = (props: Props) => {
 
   return (
     <>
-      {model.block_inputs.map((input, id) => (
+      {type !== 'sink' &&
+        selectedModel.inputs.map((_, id) => (
+          <Handle
+            key={id}
+            id={`${id}`}
+            // @ts-ignore
+            position="top"
+            type="target"
+            style={{ left: getHandlePointer(selectedModel.inputs.length, id) }}
+            onConnect={(params) => setElements((els) => addEdge(params, els))}
+            isConnectable={true}
+            isValidConnection={(connection: Connection) => {
+              console.log('connection', connection);
+
+              return isValidConnection(
+                getSourceMetadata(connection, getModel(connection.source, modelList)),
+                getTargetMetadata(connection, selectedModel),
+              );
+            }}
+          />
+        ))}
+      {type === 'sink' && (
         <Handle
-          key={id}
-          id={id.toString()}
-          // @ts-ignore
-          position="top"
-          type="target"
-          style={{ left: getHandlePointer(model.block_inputs.length, id) }}
-          onConnect={(params) => setElements((els) => addEdge(params, els))}
-        />
-      ))}
-      {type === 'export' && (
-        <Handle
-          id={model.id.toString()}
+          id={`0`}
           // @ts-ignore
           position="top"
           type="target"
@@ -102,13 +114,15 @@ const NodeCard = (props: Props) => {
       <Stack horizontal styles={{ root: classes.node }}>
         <img
           style={{ height: '60px', width: '60px' }}
-          src={getImage(type)}
+          src={getNodeImage(type)}
           alt="icon"
           onDragStart={(e) => e.preventDefault()}
         />
         <Stack styles={{ root: classes.nodeWrapper }}>
-          <Text styles={{ root: classes.title }}>{model.name}</Text>
-          <Text styles={{ root: classes.label }}>{type === 'export' ? 'Export' : model.projectType}</Text>
+          <Text styles={{ root: classes.title }}>{selectedModel.name}</Text>
+          <Text styles={{ root: classes.label }}>
+            {type === 'sink' ? 'Export' : selectedModel.projectType}
+          </Text>
         </Stack>
         <Stack verticalAlign="center">
           <IconButton
@@ -118,21 +132,9 @@ const NodeCard = (props: Props) => {
           />
         </Stack>
       </Stack>
-      {/* 
-      // @ts-ignore */}
-      {/*
-      <Handle
-        type="source"
-        // @ts-ignore
-        position="right"
-        id="b"
-        style={{ bottom: 10, top: 'auto', background: '#00F' }}
-        isConnectable={true}
-      /> */}
-
-      {type !== 'export' && (
+      {type !== 'sink' && (
         <>
-          {model.block_outputs.map((output, id) => (
+          {selectedModel.outputs.map((output, id) => (
             // @ts-ignore
             <Handle
               key={id}
@@ -140,9 +142,15 @@ const NodeCard = (props: Props) => {
               // @ts-ignore
               position="bottom"
               type="source"
-              style={{ left: getHandlePointer(model.block_outputs.length, id) }}
+              style={{ left: getHandlePointer(selectedModel.outputs.length, id) }}
               isConnectable={true}
               onConnect={(params) => setElements((els) => addEdge(params, els))}
+              isValidConnection={(connection: Connection) =>
+                isValidConnection(
+                  getSourceMetadata(connection, selectedModel),
+                  getTargetMetadata(connection, getModel(connection.target, modelList)),
+                )
+              }
             />
           ))}
         </>

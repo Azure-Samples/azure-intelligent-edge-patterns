@@ -31,9 +31,9 @@ export default (props: Props) => {
   // const trainingProjectIsPredictionModelSelector = trainingProjectIsPredictionModelFactory();
   // const modelList = useSelector(trainingProjectIsPredictionModelSelector);
 
-  const modelList = trainingProjectList.filter((project) => project.node_type === 'model');
-  const transformList = trainingProjectList.filter((project) => project.node_type === 'custom');
-  const exportList = trainingProjectList.filter((project) => project.node_type === 'export');
+  const modelList = trainingProjectList.filter((project) => project.node_type === 'openvino_model');
+  const transformList = trainingProjectList.filter((project) => project.node_type === 'openvino_library');
+  const exportList = trainingProjectList.filter((project) => project.node_type === 'sink');
 
   // console.log('modelList', modelList);
 
@@ -42,13 +42,6 @@ export default (props: Props) => {
   const [isExportOpen, setIsExportOpen] = useState(false);
 
   const classes = getClasses();
-
-  // const onDragStart = useCallback((event, nodeType, selectId) => {
-  //   event.dataTransfer.setData('application/reactflow', nodeType);
-  //   event.dataTransfer.setData('cardCategory', 'model');
-  //   event.dataTransfer.setData('id', selectId);
-  //   event.dataTransfer.effectAllowed = 'move';
-  // }, []);
 
   return (
     <aside
@@ -75,7 +68,7 @@ export default (props: Props) => {
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
               {modelList.map((model, id) => (
-                <ModelSideBar key={id} model={model} type="model" />
+                <ModelSideBar key={id} model={model} type="openvino_model" />
               ))}
             </Stack>
             <Link styles={{ root: classes.manageModels }}>Manage Models</Link>
@@ -96,7 +89,7 @@ export default (props: Props) => {
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
               {transformList.map((transform, id) => (
-                <ModelSideBar key={id} model={transform} type="custom" />
+                <ModelSideBar key={id} model={transform} type="openvino_library" />
               ))}
             </Stack>
           </div>
@@ -116,7 +109,7 @@ export default (props: Props) => {
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
               {exportList.map((model, id) => (
-                <ModelSideBar key={id} model={model} type="export" />
+                <ModelSideBar key={id} model={model} type="sink" />
               ))}
             </Stack>
           </div>

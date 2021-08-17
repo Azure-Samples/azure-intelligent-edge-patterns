@@ -10,19 +10,19 @@ import {
   IconButton,
 } from '@fluentui/react';
 
-import { TrainingProject } from '../../../../store/trainingProjectSlice';
+import { TrainingProject, NodeType } from '../../../../store/trainingProjectSlice';
 import { getClasses } from './style';
 
-type CascadeType = 'model' | 'custom' | 'export';
+// type CascadeType = 'model' | 'custom' | 'export';
 interface Props {
   model: TrainingProject;
-  type: CascadeType;
+  type: NodeType;
 }
 
-const getImage = (type: CascadeType) => {
-  if (type === 'model') return '/icons/modelCard.png';
-  if (type === 'custom') return '/icons/transformCard.png';
-  if (type === 'export') return '/icons/exportCard.png';
+const getImage = (type: NodeType) => {
+  if (type === 'openvino_model') return '/icons/modelCard.png';
+  if (type === 'openvino_library') return '/icons/transformCard.png';
+  if (type === 'sink') return '/icons/exportCard.png';
 };
 
 const Model = (props: Props) => {
@@ -76,7 +76,7 @@ const Model = (props: Props) => {
         </Stack>
       </Stack>
       <Stack styles={{ root: classes.bottomWrapper }}>
-        {type === 'model' && (
+        {type === 'openvino_model' && (
           <Label styles={{ root: classes.smallLabel }}>By Microsoft Cognitive Services</Label>
         )}
         <Link styles={{ root: classes.addLabel }}>add</Link>

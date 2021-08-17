@@ -19,6 +19,7 @@ enum Url {
   MODELS_OBJECTS = '/models/detail/objects',
 
   CASCADES = '/cascades',
+  CASCADES_DETAIL = '/cascades/:id',
   CASCADES_CREATE = '/cascades/create',
 
   DEPLOYMENT = '/deployment',
