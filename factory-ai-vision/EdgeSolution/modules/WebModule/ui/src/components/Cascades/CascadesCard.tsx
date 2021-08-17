@@ -18,11 +18,22 @@ interface Props {
   cascade: Cascade;
 }
 
+const getClasses = () =>
+  mergeStyleSets({
+    root: {
+      boxShadow: '0px 1.6px 3.6px rgba(0, 0, 0, 0.132), 0px 0.3px 0.9px rgba(0, 0, 0, 0.108)',
+      ':hover': {
+        boxShadow: '0px 0.3px 0.9px rgba(0, 0, 0, 0.5), 0px 1.6px 3.6px rgba(0, 0, 0, 0.5)',
+      },
+    },
+  });
+
 const CascadesCard = (props: Props) => {
   const { cascade } = props;
 
   const dispatch = useDispatch();
   const history = useHistory();
+  const classes = getClasses();
 
   const onDeleteCascade = useCallback(async () => {
     await dispatch(deleteCascade(cascade.id));
@@ -30,7 +41,7 @@ const CascadesCard = (props: Props) => {
 
   const onDirectCascadeDetail = useCallback(() => {
     history.push(Url.CASCADES + '/' + cascade.id);
-  }, []);
+  }, [history, cascade]);
 
   const menuProps: IContextualMenuProps = {
     items: [
@@ -64,9 +75,7 @@ const CascadesCard = (props: Props) => {
   return (
     <Stack
       styles={{
-        root: {
-          boxShadow: '0px 1.6px 3.6px rgba(0, 0, 0, 0.132), 0px 0.3px 0.9px rgba(0, 0, 0, 0.108);',
-        },
+        root: classes.root,
       }}
       onClick={onDirectCascadeDetail}
     >
