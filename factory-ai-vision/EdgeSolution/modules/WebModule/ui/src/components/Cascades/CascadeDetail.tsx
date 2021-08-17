@@ -11,13 +11,15 @@ import { selectCascadeById } from '../../store/cascadeSlice';
 import CascadeCreate from './Create/Create';
 
 interface Props {
+  elements: (Node | Edge)[];
+  setElements: React.Dispatch<React.SetStateAction<(Node<any> | Edge<any>)[]>>;
   modelList: TrainingProject[];
 }
 
 const CascadeDetail = (props: Props) => {
-  const { modelList } = props;
+  const { elements, setElements, modelList } = props;
 
-  const [elements, setElements] = useState<(Node | Edge)[]>([]);
+  // const [elements, setElements] = useState<(Node | Edge)[]>([]);
 
   const { id } = useParams<{ id: string }>();
   const cascade = useSelector((state: RootState) => selectCascadeById(state, id));
@@ -26,11 +28,11 @@ const CascadeDetail = (props: Props) => {
     if (cascade) {
       setElements(JSON.parse(cascade.raw_data));
     }
-  }, [cascade]);
+  }, [cascade, setElements]);
 
-  console.log('id', id);
-  console.log('cascade', cascade);
-  console.log('elements', elements);
+  // console.log('id', id);
+  // console.log('cascade', cascade);
+  // console.log('elements', elements);
 
   return <CascadeCreate elements={elements} setElements={setElements} modelList={modelList} />;
 };
