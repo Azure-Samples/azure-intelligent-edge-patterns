@@ -47,14 +47,10 @@ const edgeTypes = {
 const DnDFlow = (props: Props) => {
   const { elements, setElements, modelList } = props;
 
-  // const trainingProjectIsPredictionModelSelector = trainingProjectIsCascadesFactory();
   const trainingProjectList = useSelector(trainingProjectIsCascadesFactory());
-
-  console.log('trainingProjectList', trainingProjectList);
 
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
-  // const [elements, setElements] = useState<(Node | Edge)[]>(initialElements);
 
   // @ts-ignore
   const onConnect = (params) => {

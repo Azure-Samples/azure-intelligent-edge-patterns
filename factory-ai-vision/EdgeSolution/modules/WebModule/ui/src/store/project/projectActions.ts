@@ -165,6 +165,8 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
   const url = isProjectEmpty ? `/api/part_detections/` : `/api/part_detections/${projectId}/`;
   const isDemo = getState().trainingProject.isDemo.includes(projectData.trainingProject);
 
+  console.log('url', url);
+
   dispatch(postProjectRequest());
 
   return Axios(url, {

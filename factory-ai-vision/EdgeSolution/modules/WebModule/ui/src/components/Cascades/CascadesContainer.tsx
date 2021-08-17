@@ -13,8 +13,8 @@ import {
   DefaultButton,
   IconButton,
 } from '@fluentui/react';
-import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
-import { Node, Edge, isNode, isEdge, getConnectedEdges } from 'react-flow-renderer';
+import { Route, Switch, useHistory, useRouteMatch, match } from 'react-router-dom';
+import { Node, Edge, isNode, isEdge } from 'react-flow-renderer';
 import { useSelector, useDispatch } from 'react-redux';
 
 import { State as RootState } from 'RootStateType';
@@ -84,33 +84,8 @@ const getConvertNode = (node: Node, modelList: TrainingProject[]) => {
 };
 
 const getConvertEdge = (edge: Edge, modelList: TrainingProject[]) => {
-  // const matchModel = getModel(node.id, modelList);
-
-  // console.log('edge', edge);
-
   const sourceModel = getModel(edge.source, modelList);
   const targetModel = getModel(edge.target, modelList);
-
-  // console.log({
-  //   source: {
-  //     node_id: edge.source,
-  //     output_name: sourceModel.outputs[parseInt(edge.sourceHandle, 10)].name,
-  //   },
-  //   target: {
-  //     node_id: edge.target,
-  //     output_name: targetModel.inputs[parseInt(edge.targetHandle, 10)].name,
-  //   },
-  // });
-
-  // console.log('node', node);
-  // console.log('matchModel', matchModel);
-  // console.log({
-  //   node_id: node.id,
-  //   node_name: matchModel.name,
-  //   type: node.type,
-  //   inputs: matchModel.inputs,
-  //   outputs: matchModel.outputs,
-  // });
 
   return {
     source: {
@@ -139,8 +114,13 @@ const getCreateCascadePayload = (
     name,
   };
 
-  console.log('payload', payload);
   return payload;
+};
+
+const getSaveText = (isMatchEditRoute: match<{}>, isMatchCreationRoute: match<{}>) => {
+  if (isMatchCreationRoute?.isExact) return 'Add';
+  if (isMatchEditRoute?.isExact) return 'Save';
+  return 'Create Cascade';
 };
 
 const CascadesContainer = () => {
@@ -151,34 +131,39 @@ const CascadesContainer = () => {
   const modelList = useSelector(trainingProjectIsCascadesFactory());
   const cascadeList = useSelector((state: RootState) => selectAllCascades(state));
 
-  console.log('cascadeList', cascadeList);
-
   const [elements, setElements] = useState<(Node | Edge)[]>([]);
   const [defaultName, setDefaultName] = useState('Default Cascade');
   const [isPopup, setIsPopup] = useState(false);
 
   const isMatchCreationRoute = useRouteMatch(Url.CASCADES_CREATE);
+  const isMatchEditRoute = useRouteMatch(Url.CASCADES_DETAIL);
+  const isMatchCascadeRoute = useRouteMatch(Url.CASCADES);
   const classes = getClasses();
 
-  console.log('sourceNode', sourceNode);
   console.log('isMatchCreationRoute', isMatchCreationRoute);
-  console.log('elements', elements);
+  console.log('isMatchEditRoute', isMatchEditRoute);
+  console.log('isMatchCascadeRoute', isMatchCascadeRoute);
 
   useEffect(() => {
     setElements(getSourceElements(sourceNode.id));
   }, [sourceNode]);
 
   const onCreateCascades = useCallback(() => {
+    setElements(getSourceElements(sourceNode.id));
+    setDefaultName('Default Cascade');
+
     history.push(Url.CASCADES_CREATE);
-  }, [history]);
+  }, [history, sourceNode]);
 
   const onSaveCascades = useCallback(async () => {
-    // console.log('onSaveCascades', elements);
-    // getCreateCascadePayload(elements, defaultName, modelList);
     await dispatch(createCascade(getCreateCascadePayload(elements, defaultName, modelList)));
 
-    // history.push(Url.CASCADES);
-  }, [dispatch, elements, defaultName, history]);
+    history.push(Url.CASCADES);
+  }, [dispatch, elements, defaultName, history, modelList]);
+
+  const onEditCascade = useCallback((id: number) => {
+    console.log('onEditCascade', id);
+  }, []);
 
   const breadCrumbItems: IBreadcrumbItem[] = [
     { text: 'Home', key: 'home', onClick: () => history.push(Url.HOME) },
@@ -186,16 +171,38 @@ const CascadesContainer = () => {
     { text: '', key: 'new' },
   ];
 
+  const onSaveClick = useCallback(() => {
+    if (isMatchCreationRoute?.isExact) {
+      onSaveCascades();
+      return;
+    }
+
+    if (isMatchEditRoute?.isExact) {
+      onEditCascade(1);
+      return;
+    }
+
+    if (isMatchCascadeRoute?.isExact) {
+      onCreateCascades();
+      return;
+    }
+  }, [
+    isMatchCreationRoute,
+    isMatchEditRoute,
+    isMatchCascadeRoute,
+    onSaveCascades,
+    onEditCascade,
+    onCreateCascades,
+  ]);
+
   const commandBarItems: ICommandBarItemProps[] = [
     {
       key: 'addBtn',
-      text: isMatchCreationRoute ? 'Add' : 'Create Cascade',
+      text: getSaveText(isMatchEditRoute, isMatchCreationRoute),
       iconProps: {
         iconName: 'Add',
       },
-      onClick: () => {
-        isMatchCreationRoute ? onSaveCascades() : onCreateCascades();
-      },
+      onClick: onSaveClick,
     },
     {
       key: 'refresh',
@@ -265,7 +272,7 @@ const CascadesContainer = () => {
         }}
       >
         {isMatchCreationRoute && <Breadcrumb items={breadCrumbItems} styles={{ root: classes.breadcrumb }} />}
-        {isMatchCreationRoute ? (
+        {isMatchCreationRoute || isMatchEditRoute ? (
           <Label
             styles={{ root: { fontSize: '18px', lineHeight: '24px', paddingLeft: '24px' } }}
             onClick={() => setIsPopup(true)}
@@ -286,7 +293,13 @@ const CascadesContainer = () => {
               <CascadeCreate elements={elements} setElements={setElements} modelList={modelList} />
             )}
           />
-          <Route exact path={Url.CASCADES_DETAIL} render={() => <CascadeDetail modelList={modelList} />} />
+          <Route
+            exact
+            path={Url.CASCADES_DETAIL}
+            render={() => (
+              <CascadeDetail elements={elements} setElements={setElements} modelList={modelList} />
+            )}
+          />
           <Route
             exact
             path={Url.CASCADES}

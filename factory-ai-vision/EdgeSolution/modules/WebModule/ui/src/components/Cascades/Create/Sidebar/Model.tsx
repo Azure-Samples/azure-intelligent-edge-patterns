@@ -76,9 +76,7 @@ const Model = (props: Props) => {
         </Stack>
       </Stack>
       <Stack styles={{ root: classes.bottomWrapper }}>
-        {type === 'openvino_model' && (
-          <Label styles={{ root: classes.smallLabel }}>By Microsoft Cognitive Services</Label>
-        )}
+        {type === 'openvino_model' && <Label styles={{ root: classes.smallLabel }}>By Intel</Label>}
         <Link styles={{ root: classes.addLabel }}>add</Link>
       </Stack>
     </Stack>
