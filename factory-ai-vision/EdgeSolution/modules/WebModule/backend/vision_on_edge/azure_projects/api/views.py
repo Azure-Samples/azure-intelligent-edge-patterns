@@ -296,16 +296,22 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         project_obj = drf_get_object_or_404(queryset, pk=pk)
 
         self.model_name = request.data['model_name']
-        config = create_config(self.model_name)
-        response_data = {}
+        models = ["face_detection", "age_gender_recognition", "emotion_recognition"]
 
-        if config:
-            response_data = {
-                "model_name": self.model_name,
-                "type": "ovms",
-                "url": "ovmsmodule:9010",
-            }
-            return Response(response_data, status=status.HTTP_200_OK)
+        if self.model_name in models:
+            config = create_config(self.model_name)
+            response_data = {}
+
+            if config:
+                response_data = {
+                    "model_name": self.model_name,
+                    "type": "ovms",
+                    "url": "ovmsmodule:9010",
+                }
+                return Response(response_data, status=status.HTTP_200_OK)
+            else:
+                response_data = {"status": "Config file error", }
+                return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
         else:
             response_data = {"status": "Model Dose Not Exist"}
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)

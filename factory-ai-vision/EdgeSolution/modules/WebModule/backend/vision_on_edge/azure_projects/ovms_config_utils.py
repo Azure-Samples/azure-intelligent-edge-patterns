@@ -45,7 +45,7 @@ def create_config(model_name):
 
     if model_name == "face_detection":
         config = face_detection_config
-    elif model_name == "ge_gender_recognition":
+    elif model_name == "age_gender_recognition":
         config = age_gender_recognition_config
     elif model_name == "emotion_recognition":
         config = emotion_recognition_config
