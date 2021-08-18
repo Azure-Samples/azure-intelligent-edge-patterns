@@ -11,10 +11,17 @@ export type Cascade = {
   raw_data: string;
 };
 
-export type CreateCascadePayload = {
+export type CascadePayload = {
   name: string;
   flow: string;
   raw_data: string;
+};
+
+export type CreateCascadePayload = CascadePayload;
+
+export type UpdateCascadePayload = {
+  id: number;
+  data: CascadePayload;
 };
 
 const cascadesAdapter = createEntityAdapter<Cascade>();
@@ -32,6 +39,17 @@ export const createCascade = createWrappedAsync<any, CreateCascadePayload>(
   },
 );
 
+export const updateCascade = createWrappedAsync<any, UpdateCascadePayload>(
+  'cascade/Update',
+  async (payload) => {
+    const { id, data } = payload;
+
+    const response = await Axios.patch(`/api/cascades/${id}`, data);
+
+    return response.data;
+  },
+);
+
 export const deleteCascade = createWrappedAsync<any, number>('cascade/Delete', async (id: number) => {
   await Axios.delete(`/api/cascades/${id}/`);
   return id;
@@ -45,6 +63,7 @@ const cascadeSlice = createSlice({
     builder
       .addCase(getCascades.fulfilled, cascadesAdapter.setAll)
       .addCase(createCascade.fulfilled, cascadesAdapter.addOne)
+      .addCase(updateCascade.fulfilled, cascadesAdapter.upsertOne)
       .addCase(deleteCascade.fulfilled, cascadesAdapter.removeOne);
   },
 });

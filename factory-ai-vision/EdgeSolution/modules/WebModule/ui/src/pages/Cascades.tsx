@@ -4,7 +4,6 @@ import { useDispatch } from 'react-redux';
 import { getTrainingProject } from '../store/trainingProjectSlice';
 import { getCascades } from '../store/cascadeSlice';
 
-import CascadesComponent from '../components/Cascades/Create/Create';
 import CascadesContainer from '../components/Cascades/CascadesContainer';
 
 const Cascades = () => {

@@ -1,20 +1,12 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState } from 'react';
 import { Stack, ActionButton, Icon, Link, mergeStyleSets, SearchBox } from '@fluentui/react';
-import { useSelector } from 'react-redux';
 
-import {
-  trainingProjectIsPredictionModelFactory,
-  TrainingProject,
-} from '../../../store/trainingProjectSlice';
+import { TrainingProject } from '../../../store/trainingProjectSlice';
 
 import ModelSideBar from './Sidebar/Model';
-import TransformSidleBar from './Sidebar/Transform';
-import ExportSideBar from './Sidebar/Export';
 
 interface Props {
   trainingProjectList: TrainingProject[];
-  // transformList: TrainingProject[];
-  // exportList: TrainingProject[];
 }
 
 const getClasses = () =>
@@ -28,14 +20,9 @@ const getClasses = () =>
 export default (props: Props) => {
   const { trainingProjectList } = props;
 
-  // const trainingProjectIsPredictionModelSelector = trainingProjectIsPredictionModelFactory();
-  // const modelList = useSelector(trainingProjectIsPredictionModelSelector);
-
   const modelList = trainingProjectList.filter((project) => project.node_type === 'openvino_model');
   const transformList = trainingProjectList.filter((project) => project.node_type === 'openvino_library');
   const exportList = trainingProjectList.filter((project) => project.node_type === 'sink');
-
-  // console.log('modelList', modelList);
 
   const [isModelOpen, setIsModelOpen] = useState(false);
   const [isTransformOpen, setIsTransformOpen] = useState(false);
@@ -115,12 +102,6 @@ export default (props: Props) => {
           </div>
         )}
       </Stack>
-      {/* <div className="dndnode output" onDragStart={(event) => onDragTransform(event, 'model')} draggable>
-        Model Node
-      </div>
-      <div className="dndnode output" onDragStart={(event) => onDragExport(event, 'model')} draggable>
-        Model Node
-      </div> */}
     </aside>
   );
 };

@@ -1,19 +1,9 @@
 import React, { useCallback } from 'react';
-import {
-  Stack,
-  ActionButton,
-  Icon,
-  Text,
-  Label,
-  Link,
-  IContextualMenuProps,
-  IconButton,
-} from '@fluentui/react';
+import { Stack, Text, Label, Link, IContextualMenuProps, IconButton } from '@fluentui/react';
 
 import { TrainingProject, NodeType } from '../../../../store/trainingProjectSlice';
 import { getClasses } from './style';
 
-// type CascadeType = 'model' | 'custom' | 'export';
 interface Props {
   model: TrainingProject;
   type: NodeType;
@@ -42,13 +32,11 @@ const Model = (props: Props) => {
         key: 'properties',
         text: 'Properties',
         iconProps: { iconName: 'Equalizer' },
-        // onClick: () => setIsEdit(true),
       },
       {
         key: 'delete',
         text: 'Delete',
         iconProps: { iconName: 'Delete' },
-        // onClick: () => setIsOpenDialog(true),
       },
     ],
   };

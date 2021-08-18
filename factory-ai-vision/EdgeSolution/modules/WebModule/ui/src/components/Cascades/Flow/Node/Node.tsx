@@ -55,10 +55,7 @@ const getHandlePointer = (length: number, id) => {
 const NodeCard = (props: Props) => {
   const { id, type, setElements, onDelete, modelList } = props;
 
-  // const model = useSelector((state: RootState) => selectTrainingProjectById(state, modelId));
-
   const classes = getClasses();
-
   const selectedModel = getModel(id, modelList);
 
   const menuProps: IContextualMenuProps = {
@@ -67,7 +64,6 @@ const NodeCard = (props: Props) => {
         key: 'properties',
         text: 'Properties',
         iconProps: { iconName: 'Equalizer' },
-        // onClick: () => setIsEdit(true),
       },
       {
         key: 'delete',
@@ -134,7 +130,7 @@ const NodeCard = (props: Props) => {
       </Stack>
       {type !== 'sink' && (
         <>
-          {selectedModel.outputs.map((output, id) => (
+          {selectedModel.outputs.map((_, id) => (
             // @ts-ignore
             <Handle
               key={id}

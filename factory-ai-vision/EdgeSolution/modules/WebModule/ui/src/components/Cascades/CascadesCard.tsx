@@ -1,13 +1,5 @@
 import React, { useCallback } from 'react';
-import {
-  Stack,
-  Label,
-  PrimaryButton,
-  Text,
-  mergeStyleSets,
-  IContextualMenuProps,
-  IconButton,
-} from '@fluentui/react';
+import { Stack, Text, mergeStyleSets, IContextualMenuProps, IconButton } from '@fluentui/react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
