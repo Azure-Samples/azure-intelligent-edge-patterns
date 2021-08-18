@@ -21,6 +21,7 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ...azure_settings.exceptions import SettingCustomVisionAccessFailed
+from ...azure_settings.models import Setting
 from ...general.api.serializers import (
     MSStyleErrorResponseSerializer,
     SimpleOKSerializer,
@@ -299,15 +300,23 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         models = ["face_detection", "age_gender_recognition", "emotion_recognition"]
 
         if self.model_name in models:
+            setting_obj = Setting.objects.first()
             config = create_config(self.model_name)
+            setting_obj = Setting.objects.first()
             response_data = {}
 
             if config:
-                response_data = {
-                    "model_name": self.model_name,
-                    "type": "ovms",
-                    "url": "ovmsmodule:9010",
-                }
+                Project.objects.update_or_create(
+                    is_demo=False,
+                    setting=setting_obj,
+                    defaults={
+                        "name": self.model_name,
+                        "project_type": "ovms",
+                        "prediction_uri": "ovmsmodule:9010",
+                    }
+                )
+
+                response_data = {"status": "OK"}
                 return Response(response_data, status=status.HTTP_200_OK)
             else:
                 response_data = {"status": "Config file error", }
