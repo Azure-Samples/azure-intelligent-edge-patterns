@@ -1,40 +1,73 @@
-import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import React, { useState, useEffect, useCallback } from 'react';
+import { useParams, useHistory } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import { Node, Edge } from 'react-flow-renderer';
+import { CommandBar, ICommandBarItemProps } from '@fluentui/react';
 
-import { State as RootState } from 'RootStateType';
-import { Cascade } from '../../store/cascadeSlice';
+import { Url } from '../../enums';
 import { TrainingProject } from '../../store/trainingProjectSlice';
-import { selectCascadeById } from '../../store/cascadeSlice';
+import { Cascade } from '../../store/cascadeSlice';
+import { getCascadePayload } from './utils';
+import { updateCascade } from '../../store/cascadeSlice';
 
-import CascadeCreate from './Create/Create';
+import Flow from './Flow/Flow';
 
 interface Props {
-  elements: (Node | Edge)[];
-  setElements: React.Dispatch<React.SetStateAction<(Node<any> | Edge<any>)[]>>;
+  cascadeList: Cascade[];
   modelList: TrainingProject[];
+  defaultCommandBarItems: ICommandBarItemProps[];
+  cascadeName: string;
+  setCascadeName: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const CascadeDetail = (props: Props) => {
-  const { elements, setElements, modelList } = props;
-
-  // const [elements, setElements] = useState<(Node | Edge)[]>([]);
+  const { cascadeList, modelList, defaultCommandBarItems, cascadeName, setCascadeName } = props;
 
   const { id } = useParams<{ id: string }>();
-  const cascade = useSelector((state: RootState) => selectCascadeById(state, id));
+  const [elements, setElements] = useState<(Node | Edge)[]>([]);
+
+  const dispatch = useDispatch();
+  const history = useHistory();
 
   useEffect(() => {
-    if (cascade) {
-      setElements(JSON.parse(cascade.raw_data));
-    }
-  }, [cascade, setElements]);
+    if (cascadeList.length === 0) return;
 
-  // console.log('id', id);
-  // console.log('cascade', cascade);
-  // console.log('elements', elements);
+    const selectedCascade = cascadeList.find((cascade) => cascade.id === parseInt(id, 10));
+    setCascadeName(selectedCascade.name);
+    setElements(JSON.parse(selectedCascade.raw_data));
+  }, [id, cascadeList, setElements, setCascadeName]);
 
-  return <CascadeCreate elements={elements} setElements={setElements} modelList={modelList} />;
+  const onSaveCascade = useCallback(() => {
+    dispatch(
+      updateCascade({
+        id: parseInt(id, 10),
+        data: getCascadePayload(elements, cascadeName, modelList),
+      }),
+    );
+
+    history.push(Url.CASCADES);
+  }, [dispatch, elements, cascadeName, modelList, id, history]);
+
+  const commandBarItems: ICommandBarItemProps[] = [
+    {
+      key: 'addBtn',
+      text: 'Save',
+      iconProps: {
+        iconName: 'Add',
+      },
+      onClick: () => {
+        onSaveCascade();
+      },
+    },
+    ...defaultCommandBarItems,
+  ];
+
+  return (
+    <>
+      <CommandBar styles={{ root: { marginTop: '24px' } }} items={commandBarItems} />
+      <Flow elements={elements} setElements={setElements} modelList={modelList} />
+    </>
+  );
 };
 
 export default CascadeDetail;

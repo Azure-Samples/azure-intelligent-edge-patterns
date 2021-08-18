@@ -2,7 +2,7 @@ import React from 'react';
 import { Stack, Text, Icon, mergeStyleSets } from '@fluentui/react';
 import { Handle, addEdge, Connection } from 'react-flow-renderer';
 
-import { TrainingProject, Metadata } from '../../../../store/trainingProjectSlice';
+import { TrainingProject } from '../../../../store/trainingProjectSlice';
 
 interface Props {
   id: string;

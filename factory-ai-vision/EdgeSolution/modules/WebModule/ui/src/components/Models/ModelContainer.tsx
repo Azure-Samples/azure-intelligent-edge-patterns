@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import {
   CommandBar,
   ICommandBarItemProps,
-  getTheme,
   Stack,
   Label,
   IBreadcrumbItem,
