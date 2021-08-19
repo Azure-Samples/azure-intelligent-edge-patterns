@@ -292,35 +292,39 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
     @action(detail=True, methods=["post"])
     def add_ovms_model(self, request, pk=None) -> Response:
-        """Add OVMS model"""
+        """Create/Add OVMS model"""
         queryset = self.get_queryset()
         project_obj = drf_get_object_or_404(queryset, pk=pk)
 
-        self.model_name = request.data['model_name']
-        models = ["face_detection", "age_gender_recognition", "emotion_recognition"]
+        model_name = request.data['model_name']
+        project_type = request.data['project_type']
+        models = [
+            "face_detection", "age_gender_recognition", "emotion_recognition"
+        ]
 
-        if self.model_name in models:
+        if model_name in models:
             setting_obj = Setting.objects.first()
-            config = create_config(self.model_name)
-            setting_obj = Setting.objects.first()
+            config = create_config(model_name)
             response_data = {}
 
             if config:
-                Project.objects.update_or_create(
-                    is_demo=False,
-                    setting=setting_obj,
-                    defaults={
-                        "name": self.model_name,
-                        "project_type": "ovms",
-                        "prediction_uri": "ovmsmodule:9010",
-                    }
-                )
+                project_obj = Project.objects.create(is_demo=False,
+                                                     setting=setting_obj,
+                                                     name=model_name,
+                                                     project_type=project_type,
+                                                     category="OVMS")
+
+                logger.info("Creating CV project:")
+                project_obj.create_project(project_type=project_type)
 
                 response_data = {"status": "OK"}
                 return Response(response_data, status=status.HTTP_200_OK)
             else:
-                response_data = {"status": "Config file error", }
-                return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+                response_data = {
+                    "status": "Config file error",
+                }
+                return Response(response_data,
+                                status=status.HTTP_400_BAD_REQUEST)
         else:
             response_data = {"status": "Model Dose Not Exist"}
             return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
