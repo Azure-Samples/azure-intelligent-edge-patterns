@@ -62,10 +62,10 @@ const IntelProjectDashboard = (props: Props) => {
   const history = useHistory();
 
   const onCreateIntelModel = useCallback(
-    async (modelName: string) => {
+    async (cascade: IntelProject) => {
       // console.log('onCreateIntelModel', modelName);
 
-      await dispatch(createIntelProject({ model_name: modelName }));
+      await dispatch(createIntelProject({ model_name: cascade.create_name, project_type: cascade.type }));
 
       onCloseIntel();
     },
@@ -169,7 +169,7 @@ const IntelProjectDashboard = (props: Props) => {
                     onClick={(e) => {
                       e.stopPropagation();
 
-                      onCreateIntelModel(card.create_name);
+                      onCreateIntelModel(card);
                     }}
                   />
                 </div>
@@ -189,7 +189,7 @@ const IntelProjectDashboard = (props: Props) => {
           inputDescribe: intelProjectList[selectedId].inputDescribe,
           metric: intelProjectList[selectedId].metric,
         }}
-        onClickAddModel={() => onCreateIntelModel(intelProjectList[selectedId].create_name)}
+        onClickAddModel={() => onCreateIntelModel(intelProjectList[selectedId])}
       />
     </>
   );

@@ -51,7 +51,7 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
   const history = useHistory();
 
   // @ts-ignore
-  const intelProjectList = trainingProjectList.filter((project) => project.project_type === 'ovms');
+  const intelProjectList = trainingProjectList.filter((project) => project.category === 'OVMS');
   const ownProjectList = trainingProjectList.filter((project) => project.category === 'customvision');
 
   const commandBarItems: ICommandBarItemProps[] = useMemo(
@@ -85,7 +85,7 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
           items={commandBarItems}
           styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
         />
-        {isOwnProject && (
+        {isIntelProjectClick && (
           <Stack horizontal tokens={{ childrenGap: '10px' }}>
             {intelProjectList.map((project, i) => (
               <ModelCard key={i} project={project} />

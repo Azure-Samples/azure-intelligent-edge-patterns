@@ -15,7 +15,7 @@ import { createWrappedAsync } from './shared/createWrappedAsync';
 import { getParts } from './partSlice';
 import { thunkGetAllCvProjects } from './setting/settingAction';
 
-type TrainingProjectCategory = 'customvision';
+type TrainingProjectCategory = 'customvision' | 'OVMS';
 
 export type TrainingProject = {
   id: number;

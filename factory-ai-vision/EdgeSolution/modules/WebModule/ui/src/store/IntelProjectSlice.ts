@@ -117,16 +117,17 @@ export const getIntelProjectList = createWrappedAsync<any, undefined, { state: S
   },
 );
 
-export const createIntelProject = createWrappedAsync<any, { model_name: string }, { state: State }>(
-  'intel/createIntelProject',
-  async (payload, { getState, dispatch }) => {
-    const [nonDemoProject] = getState().trainingProject.nonDemo;
+export const createIntelProject = createWrappedAsync<
+  any,
+  { model_name: string; project_type: string },
+  { state: State }
+>('intel/createIntelProject', async (payload, { getState, dispatch }) => {
+  const [nonDemoProject] = getState().trainingProject.nonDemo;
 
-    await Axios.post(`/api/projects/${nonDemoProject}/add_ovms_model`, payload);
+  await Axios.post(`/api/projects/${nonDemoProject}/add_ovms_model`, payload);
 
-    dispatch(refreshTrainingProject());
-  },
-);
+  dispatch(refreshTrainingProject());
+});
 
 const intelSlice = createSlice({
   name: 'intelProject',
