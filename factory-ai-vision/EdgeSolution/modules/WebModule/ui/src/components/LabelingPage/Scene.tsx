@@ -159,14 +159,6 @@ const Scene: FC<SceneProps> = ({
           <Image image={image} />
           {!isLoading &&
             annotations.map((annotation, i) => {
-              console.log('annotation.part', annotation.part);
-              console.log(
-                'annotation.part && parts.find((part) => part.id === annotation.part).name',
-                parts,
-                annotation.part,
-                // parts.find((part) => part.id === annotation.part),
-              );
-
               return (
                 <Group key={i}>
                   <RemoveBoxButton

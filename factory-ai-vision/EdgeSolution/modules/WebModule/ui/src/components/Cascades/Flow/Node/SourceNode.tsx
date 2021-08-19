@@ -37,8 +37,8 @@ const getTargetMetadata = (connect: Connection, model: TrainingProject) =>
   JSON.stringify(model.inputs[connect.targetHandle].metadata);
 
 const isValidConnection = (sourceModelMetadata: string, targetModelMetadata: string) => {
-  console.log('sourceModel', sourceModelMetadata);
-  console.log('targetModel', targetModelMetadata);
+  // console.log('sourceModel', sourceModelMetadata);
+  // console.log('targetModel', targetModelMetadata);
 
   // const sourceModel = getModel(connection.source, ModelList);
   // const targetModel = getModel(connection.target, ModelList);

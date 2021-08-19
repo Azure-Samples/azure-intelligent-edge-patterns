@@ -60,6 +60,9 @@ export const initialProjectData: ProjectData = {
 
   // For select model, old camera still existing.
   oldCameras: [],
+
+  deployment_type: 'model',
+  cascade: 0,
 };
 
 const initialState: Project = {

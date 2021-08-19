@@ -19,13 +19,14 @@ import { isBefore, isSameDay, isAfter } from 'date-fns';
 
 import { getCameras, cameraOptionsSelectorFactoryInConfig } from '../../store/cameraSlice';
 import { partOptionsSelectorFactory, getParts } from '../../store/partSlice';
-import { ProjectData } from '../../store/project/projectTypes';
+import { ProjectData, DeploymentType } from '../../store/project/projectTypes';
 import { getTrainingProject, trainingProjectOptionsSelectorFactory } from '../../store/trainingProjectSlice';
 import { getAppInsights } from '../../TelemetryService';
 import { getConfigure, thunkPostProject } from '../../store/project/projectActions';
 import { getScenario } from '../../store/scenarioSlice';
 import { OnChangeType } from './type';
 import { Url } from '../../enums';
+import { getCascades } from '../../store/cascadeSlice';
 
 import { extractRecommendFps } from '../../utils/projectUtils';
 
@@ -70,7 +71,7 @@ const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChange
   }, [initialProjectData]);
 
   const onChange: OnChangeType = useCallback(
-    (key, value) => {
+    (key, value, optionalValue) => {
       const cloneProject = R.clone(projectData);
       cloneProject[key] = value;
 
@@ -83,6 +84,10 @@ const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChange
           return prev;
         }, []);
         cloneProject.oldCameras = newCameras;
+        cloneProject.deployment_type = optionalValue as DeploymentType;
+        if (optionalValue === 'cascade') {
+          cloneProject.cascade = +value;
+        }
 
         // Because demo parts and demo camera can only be used in demo training project(6 scenarios)
         // We should reset them every time the training project is changed
@@ -199,6 +204,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     dispatch(getCameras(true));
     dispatch(getTrainingProject(true));
     dispatch(getScenario());
+    dispatch(getCascades());
   }, [dispatch]);
 
   const onDeployClicked = async () => {
@@ -252,7 +258,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               required
               selectedKey={projectData.trainingProject}
               onChange={(_, options) => {
-                onChange('trainingProject', options.key as number);
+                onChange('trainingProject', options.key as number, options.title);
               }}
             />
             <Dropdown
