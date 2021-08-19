@@ -30,8 +30,6 @@ if you don’t have one, you can create one here: https://azure.microsoft.com/en
 
 •	https://docs.microsoft.com/en-us/azure/cognitive-services/custom-vision-service/getting-started-build-a-classifier#create-custom-vision-resources
 
-•	https://portal.azure.com/?microsoft_azure_marketplace_ItemHideKey=microsoft_azure_cognitiveservices_customvision#create/Microsoft.CognitiveServicesCustomVision
-
 ![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot1.2.png) 
 <br/><br/>
 
