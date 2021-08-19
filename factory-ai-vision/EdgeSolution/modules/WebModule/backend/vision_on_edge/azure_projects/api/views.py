@@ -293,8 +293,8 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=["post"])
     def add_ovms_model(self, request, pk=None) -> Response:
         """Create/Add OVMS model"""
+
         queryset = self.get_queryset()
-        project_obj = drf_get_object_or_404(queryset, pk=pk)
 
         model_name = request.data['model_name']
         project_type = request.data['project_type']
@@ -313,9 +313,6 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                                                      name=model_name,
                                                      project_type=project_type,
                                                      category="OVMS")
-
-                logger.info("Creating CV project:")
-                project_obj.create_project(project_type=project_type)
 
                 response_data = {"status": "OK"}
                 return Response(response_data, status=status.HTTP_200_OK)
