@@ -124,8 +124,6 @@ Please follow the [instructions here](Tutorial/AKS_deploy.md) to deploy to AKS.
 
 ## Video Tutorials
 
-- Tutorial 0 - Build with VS code [https://youtu.be/ORTwMYOxkVs]
-
 - Tutorial 1: Azure Shell Installer [https://youtu.be/6sDILwkP1yc]
 
 - Tutorial 2 - Start with prebuilt scenario [https://youtu.be/dihAdZTGj-g]
