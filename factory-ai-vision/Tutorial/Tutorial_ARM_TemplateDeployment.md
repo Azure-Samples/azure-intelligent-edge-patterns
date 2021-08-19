@@ -137,10 +137,7 @@ Definition: Enter the name of your existing IOTHub Resource.
 
 
 ### 1.2.6: Edge Device Name: 
-Definition:   Enter the existing IOTHub Edge Device. learn more from link
-
-https://portal.azure.com/#@linkernetworks.com/resource/subscriptions/091725d9-aeba-4638-8faf-d0e81a03a93d/resourceGroups/customvision/providers/Microsoft.Devices/IotHubs/customvision/EdgeExplorer
-
+Definition:   Enter the existing IOTHub Edge Device.
 Example: cam5
 
 ![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot12.png) 
