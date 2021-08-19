@@ -1,0 +1,4 @@
+networkx
+pydantic
+fastapi
+uvicorn
