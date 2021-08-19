@@ -104,7 +104,7 @@ Please follow the [instructions given here](Tutorial/Shell-installer-Tutorial.md
 
 ### Option 2: Azure ARM Template
 
-[![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flinkernetworks%2Fazure-intelligent-edge-patterns%2FOVMS-integration%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
+[![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fazure-intelligent-edge-patterns%2Fmaster%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
 
 Please follow [the following document](Tutorial/Tutorial_ARM_TemplateDeployment.md) to learn more about our Azure ARM deployment.
 
