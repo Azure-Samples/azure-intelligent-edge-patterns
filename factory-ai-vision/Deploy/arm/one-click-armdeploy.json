@@ -1,921 +1,908 @@
 {
-  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
-  "contentVersion": "1.0.0.0",
-  "parameters": {
-    "deviceArchitecture": {
-      "defaultValue": "X86",
-      "allowedValues": [ "X86", "ARM64" ],
-      "type": "string",
-      "metadata": {
-        "description": "Specify the architecture of the Edge Device. Currently supported values are 'X86' and 'ARM64'."
-      }
-    },
-    "moduleRuntime": {
-      "defaultValue": "cpu",
-      "allowedValues": [
-        "cpu",
-        "gpu (NVIDIA cuda11)",
-        "vpu (Movidius)",
-        "Jetson (Jetpack 4.4)"
-      ],
-      "type": "string",
-      "metadata": {
-        "description": "Select value for runtime for Detector module on Edge Device. Set it to 'CPU' to use CPU to run detector module. If the Edge Device has Nvidia GPU, set it to 'NVIDIA' to use GPU to run detector module or to use movidius set it to 'MOVIDIUS'."
-      }
-    },
-    "videoCaptureModule": {
-      "defaultValue": "lva",
-      "allowedValues": [ "lva", "opencv" ],
-      "type": "string",
-      "metadata": {
-        "description": "Select video capture module."
-      }
-    },
-    "location": {
-      "defaultValue": "[resourceGroup().location]",
-      "type": "String",
-      "metadata": {
-        "description": "Specify the location of the resources."
-      }
-    },
-    "iotHubName": {
-      "defaultValue": "visionOnEdgeHub",
-      "type": "string",
-      "metadata": {
-        "description": "Specify the name of the Iot hub"
-      }
-    },
-    "newOrExisting": {
-      "type": "string",
-      "defaultValue": "new",
-      "allowedValues": [
-        "new",
-        "existing"
-      ]
-    },
-    "skuName": {
-      "defaultValue": "S1",
-      "type": "String",
-      "metadata": {
-        "description": "The SKU to use for the IoT Hub."
-      }
-    },
-    "skuUnits": {
-      "defaultValue": "1",
-      "type": "String",
-      "metadata": {
-        "description": "The number of IoT Hub units."
-      }
-    },
-    "edgeDeviceName": {
-      "defaultValue": "visionOnEdgeDevice",
-      "type": "string",
-      "metadata": {
-        "description": "Enter the name of existing Iot Hub Edge Device."
-      }
-    },
-    "customVisionName": {
-      "type": "string",
-      "defaultValue": "visionOnEdgeAI",
-      "metadata": {
-        "description": "Enter the name of existing Custom Vision."
-      }
-    },
-    "sku": {
-      "type": "string",
-      "defaultValue": "S0",
-      "allowedValues": [
-        "S0"
-      ]
-    },
-    "mediaServiceResourceGroup": {
-      "type": "string",
-      "defaultValue": "[resourceGroup().location]",
-      "metadata": {
-        "description": "Enter the resource group of existing Azure Media Service. Required when using LVA."
-      }
-    },
-    "mediaServiceName": {
-      "type": "string",
-      "defaultValue": "voemedia",
-      "metadata": {
-        "description": "Enter the name of existing Azure Media Service. Required when using LVA."
-      }
-    }
-  },
-  "variables": {
-    "resourceGroupName": "[resourceGroup().name]",
-    "deploymentName": "[concat('factoryai-deployment',substring(uniqueString(subscription().id,variables('resourceGroupName')),1,4))]",
-    "managedIdentityName": "[concat('Managed_Identity',substring(uniqueString(subscription().id,variables('resourceGroupName')),1,4))]",
-    "managedIdentityResourceGroup": "[variables('resourceGroupName')]",
-    "containerRegistryName": "docker.io",
-    "containerRegistryUserName": "",
-    "containerRegistryPassword": "",
-    "storageName": "[concat('storage', uniqueString(resourceGroup().id))]"
-  },
-  "resources": [
-    {
-      "condition": "[equals(parameters('newOrExisting'), 'new')]",
-      "type": "Microsoft.Devices/IotHubs",
-      "apiVersion": "2020-03-01",
-      "name": "[parameters('iotHubName')]",
-      "location": "[parameters('location')]",
-      "sku": {
-        "name": "[parameters('skuName')]",
-        "capacity": "[parameters('skuUnits')]"
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+      "deviceArchitecture": {
+        "defaultValue": "X86",
+        "allowedValues": [ "X86", "ARM64" ],
+        "type": "string",
+        "metadata": {
+          "description": "Specify the architecture of the Edge Device. Currently supported values are 'X86' and 'ARM64'."
+        }
       },
-      "properties": {
-        "eventHubEndpoints": {
-          "events": {
-            "retentionTimeInDays": 1,
-            "partitionCount": 2
-          }
+      "moduleRuntime": {
+        "defaultValue": "cpu",
+        "allowedValues": [
+          "cpu",
+          "gpu (NVIDIA cuda11)",
+          "vpu (Movidius)",
+          "Jetson (Jetpack 4.4)"
+        ],
+        "type": "string",
+        "metadata": {
+          "description": "Select value for runtime for Detector module on Edge Device. Set it to 'CPU' to use CPU to run detector module. If the Edge Device has Nvidia GPU, set it to 'NVIDIA' to use GPU to run detector module or to use movidius set it to 'MOVIDIUS'."
+        }
+      },
+      "videoCaptureModule": {
+        "defaultValue": "lva",
+        "allowedValues": [ "lva", "opencv" ],
+        "type": "string",
+        "metadata": {
+          "description": "Select video capture module."
+        }
+      },
+      "location": {
+        "defaultValue": "[resourceGroup().location]",
+        "type": "String",
+        "metadata": {
+          "description": "Specify the location of the resources."
+        }
+      },
+      "iotHubName": {
+        "defaultValue": "visionOnEdgeHub",
+        "type": "string",
+        "metadata": {
+          "description": "Specify the name of the Iot hub"
+        }
+      },
+      "newOrExisting": {
+        "type": "string",
+        "defaultValue": "new",
+        "allowedValues": [
+          "new",
+          "existing"
+        ]
+      },
+      "skuName": {
+        "defaultValue": "S1",
+        "type": "String",
+        "metadata": {
+          "description": "The SKU to use for the IoT Hub."
+        }
+      },
+      "skuUnits": {
+        "defaultValue": "1",
+        "type": "String",
+        "metadata": {
+          "description": "The number of IoT Hub units."
+        }
+      },
+      "edgeDeviceName": {
+        "defaultValue": "visionOnEdgeDevice",
+        "type": "string",
+        "metadata": {
+          "description": "Enter the name of existing Iot Hub Edge Device."
+        }
+      },
+      "customVisionName": {
+        "type": "string",
+        "defaultValue": "visionOnEdgeAI",
+        "metadata": {
+          "description": "Enter the name of existing Custom Vision."
+        }
+      },
+      "sku": {
+        "type": "string",
+        "defaultValue": "S0",
+        "allowedValues": [
+          "S0"
+        ]
+      },
+      "mediaServiceResourceGroup": {
+        "type": "string",
+        "defaultValue": "[resourceGroup().location]",
+        "metadata": {
+          "description": "Enter the resource group of existing Azure Media Service. Required when using LVA."
+        }
+      },
+      "mediaServiceName": {
+        "type": "string",
+        "defaultValue": "voemedia",
+        "metadata": {
+          "description": "Enter the name of existing Azure Media Service. Required when using LVA."
         }
       }
     },
-    {
-      "type": "Microsoft.CognitiveServices/accounts",
-      "apiVersion": "2017-04-18",
-      "name": "[parameters('customVisionName')]",
-      "location": "[ resourceGroup().location ]",
-      "sku": {
-        "name": "[parameters('sku')]"
-      },
-      "kind": "CustomVision.Training",
-      "properties": {
-        "statisticsEnabled": false
-      }
+    "variables": {
+      "resourceGroupName": "[resourceGroup().name]",
+      "deploymentName": "[concat('factoryai-deployment',substring(uniqueString(subscription().id,variables('resourceGroupName')),1,4))]",
+      "managedIdentityName": "[concat('Managed_Identity',substring(uniqueString(subscription().id,variables('resourceGroupName')),1,4))]",
+      "managedIdentityResourceGroup": "[variables('resourceGroupName')]",
+      "containerRegistryName": "docker.io",
+      "containerRegistryUserName": "",
+      "containerRegistryPassword": "",
+      "storageName": "[concat('storage', uniqueString(resourceGroup().id))]"
     },
-    {
-      "condition": "[equals(parameters('videoCaptureModule'), 'lva')]",
-      "type": "Microsoft.Storage/storageAccounts",
-      "apiVersion": "2019-06-01",
-      "name": "[variables('storageName')]",
-      "location": "[parameters('location')]",
-      "sku": {
-        "name": "Standard_LRS"
-      },
-      "kind": "StorageV2"
-    },
-    {
-      "condition": "[equals(parameters('videoCaptureModule'), 'lva')]",
-      "type": "Microsoft.Media/mediaServices",
-      "apiVersion": "2020-05-01",
-      "name": "[parameters('mediaServiceName')]",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
-      ],
-      "properties": {
-        "storageAccounts": [
-          {
-            "id": "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
-            "type": "Primary"
+    "resources": [
+      {
+        "condition": "[equals(parameters('newOrExisting'), 'new')]",
+        "type": "Microsoft.Devices/IotHubs",
+        "apiVersion": "2020-03-01",
+        "name": "[parameters('iotHubName')]",
+        "location": "[parameters('location')]",
+        "sku": {
+          "name": "[parameters('skuName')]",
+          "capacity": "[parameters('skuUnits')]"
+        },
+        "properties": {
+          "eventHubEndpoints": {
+            "events": {
+              "retentionTimeInDays": 1,
+              "partitionCount": 2
+            }
           }
-        ]
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2020-06-01",
-      "name": "CreatingManagedIdentity",
-      "dependsOn": [
-        "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]",
-        "[resourceId('Microsoft.CognitiveServices/accounts', parameters('customVisionName'))]",
-        "[resourceId('Microsoft.Media/mediaServices', parameters('mediaServiceName'))]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "template": {
-          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
-          "parameters": {},
-          "variables": {},
-          "resources": [
+        }
+      },
+      {
+        "type": "Microsoft.CognitiveServices/accounts",
+        "apiVersion": "2017-04-18",
+        "name": "[parameters('customVisionName')]",
+        "location": "[ resourceGroup().location ]",
+        "sku": {
+          "name": "[parameters('sku')]"
+        },
+        "kind": "CustomVision.Training",
+        "properties": {
+          "statisticsEnabled": false
+        }
+      },
+      {
+        "condition": "[equals(parameters('videoCaptureModule'), 'lva')]",
+        "type": "Microsoft.Storage/storageAccounts",
+        "apiVersion": "2019-06-01",
+        "name": "[variables('storageName')]",
+        "location": "[parameters('location')]",
+        "sku": {
+          "name": "Standard_LRS"
+        },
+        "kind": "StorageV2"
+      },
+      {
+        "condition": "[equals(parameters('videoCaptureModule'), 'lva')]",
+        "type": "Microsoft.Media/mediaServices",
+        "apiVersion": "2020-05-01",
+        "name": "[parameters('mediaServiceName')]",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+          "[resourceId('Microsoft.Storage/storageAccounts', variables('storageName'))]"
+        ],
+        "properties": {
+          "storageAccounts": [
             {
-              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
-              "name": "[variables('managedIdentityName')]",
-              "apiVersion": "2018-11-30",
-              "location": "[resourceGroup().location]"
+              "id": "[resourceId('Microsoft.Storage/storageAccounts/', variables('storageName'))]",
+              "type": "Primary"
             }
           ]
         }
       },
-      "resourceGroup": "[variables('resourceGroupName')]"
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2020-06-01",
-      "name": "CreatingRoleAssignments",
-      "dependsOn": [ "CreatingManagedIdentity" ],
-      "properties": {
-        "mode": "Incremental",
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "parameters": {
-          "managedIdentityName": {
-            "value": "[variables('managedIdentityName')]"
+      {
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2020-06-01",
+        "name": "CreatingManagedIdentity",
+        "dependsOn": [
+          "[resourceId('Microsoft.Devices/IotHubs', parameters('iotHubName'))]",
+          "[resourceId('Microsoft.CognitiveServices/accounts', parameters('customVisionName'))]",
+          "[resourceId('Microsoft.Media/mediaServices', parameters('mediaServiceName'))]"
+        ],
+        "properties": {
+          "mode": "Incremental",
+          "template": {
+            "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {},
+            "variables": {},
+            "resources": [
+              {
+                "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+                "name": "[variables('managedIdentityName')]",
+                "apiVersion": "2018-11-30",
+                "location": "[resourceGroup().location]"
+              }
+            ]
           }
         },
-        "template": {
-          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
+        "resourceGroup": "[variables('resourceGroupName')]"
+      },
+      {
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2020-06-01",
+        "name": "CreatingRoleAssignments",
+        "dependsOn": [ "CreatingManagedIdentity" ],
+        "properties": {
+          "mode": "Incremental",
+          "expressionEvaluationOptions": {
+            "scope": "inner"
+          },
           "parameters": {
             "managedIdentityName": {
-              "type": "String"
+              "value": "[variables('managedIdentityName')]"
             }
           },
-          "variables": {},
-          "resources": [
-            {
-              "type": "Microsoft.Authorization/roleAssignments",
-              "apiVersion": "2018-09-01-preview",
-              "name": "[guid(concat(resourceGroup().id, 'contributor'))]",
-              "properties": {
-                "roleDefinitionId": "[concat(resourceGroup().id, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
-                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), '2018-11-30').principalId]",
-                "scope": "[resourceGroup().id]",
-                "principalType": "ServicePrincipal"
+          "template": {
+            "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+              "managedIdentityName": {
+                "type": "String"
               }
-            }
-          ]
-        }
-      },
-      "resourceGroup": "[variables('resourceGroupName')]"
-    },
-    {
-      "type": "Microsoft.Resources/deploymentScripts",
-      "apiVersion": "2019-10-01-preview",
-      "name": "GetDeployConfigInfo",
-      "location": "[parameters('location')]",
-      "dependsOn": [
-        "CreatingRoleAssignments",
-        "CreatingManagedIdentity"
-      ],
-      "kind": "AzureCLI",
-      "identity": {
-        "type": "UserAssigned",
-        "userAssignedIdentities": {
-          "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName'))]": {}
-        }
-      },
-      "properties": {
-        "forceUpdateTag": "1",
-        "azCliVersion": "2.9.1",
-        "primaryScriptUri": "https://raw.githubusercontent.com/Azure-Samples/azure-intelligent-edge-patterns/master/factory-ai-vision/Deploy/arm/scripts/get-deploy-config-info.sh",
-        "supportingScriptUris": [],
-        "environmentVariables": [
-          {
-            "name": "RESOURCE_GROUP",
-            "value": "[resourceGroup().name]"
-          },
-          {
-            "name": "IOTHUB_NAME",
-            "value": "[parameters('iotHubName')]"
-          },
-          {
-            "name": "DEVICE_NAME",
-            "value": "[parameters('edgeDeviceName')]"
-          },
-          {
-            "name": "AMS_ACCOUNT",
-            "value": "[parameters('mediaServiceName')]"
+            },
+            "variables": {},
+            "resources": [
+              {
+                "type": "Microsoft.Authorization/roleAssignments",
+                "apiVersion": "2018-09-01-preview",
+                "name": "[guid(concat(resourceGroup().id, 'contributor'))]",
+                "properties": {
+                  "roleDefinitionId": "[concat(resourceGroup().id, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+                  "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), '2018-11-30').principalId]",
+                  "scope": "[resourceGroup().id]",
+                  "principalType": "ServicePrincipal"
+                }
+              }
+            ]
           }
+        },
+        "resourceGroup": "[variables('resourceGroupName')]"
+      },
+      {
+        "type": "Microsoft.Resources/deploymentScripts",
+        "apiVersion": "2019-10-01-preview",
+        "name": "GetDeployConfigInfo",
+        "location": "[parameters('location')]",
+        "dependsOn": [
+          "CreatingRoleAssignments",
+          "CreatingManagedIdentity"
         ],
-        "retentionInterval": "P1D",
-        "timeout": "PT30M",
-        "containerSettings": {},
-        "cleanupPreference": "OnSuccess"
-      }
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2020-06-01",
-      "name": "CreateVM",
-      "dependsOn": [
-        "GetDeployConfigInfo"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "parameters": {
-          "vmName": {
-            "value": "visionOnEdgeVM"
-          },
-          "ubuntuOSVersion": {
-            "value": "18.04-LTS"
-          },
-          "moduleRuntime": {
-            "value": "[parameters('moduleRuntime')]"
-          },
-          "adminUsername": {
-            "value": "visionOnEdge"
-          },
-          "authenticationType": {
-            "value": "password"
-          },
-          "adminPasswordOrKey": {
-            "value": "Password123@"
-          },
-          "dnsLabelPrefix": {
-            "value": "[toLower(concat('visiononedgevm-', uniqueString(resourceGroup().id)))]"
-          },
-          "virtualNetworkName": {
-            "value": "visionOnEdge-vNet"
-          },
-          "subnetName": {
-            "value": "visionOnEdge-Subnet"
-          },
-          "networkSecurityGroupName": {
-            "value": "visionOnEdge-SecGroupNet"
-          },
-          "deviceConnectionString": {
-            "value": "[reference('GetDeployConfigInfo').outputs.deviceinfo.deviceConnectString]"
+        "kind": "AzureCLI",
+        "identity": {
+          "type": "UserAssigned",
+          "userAssignedIdentities": {
+            "[resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', variables('managedIdentityName'))]": {}
           }
         },
-        "template": {
-          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
+        "properties": {
+          "forceUpdateTag": "1",
+          "azCliVersion": "2.9.1",
+          "primaryScriptUri": "https://raw.githubusercontent.com/Azure-Samples/azure-intelligent-edge-patterns/master/factory-ai-vision/Deploy/arm/scripts/get-deploy-config-info.sh",
+          "supportingScriptUris": [],
+          "environmentVariables": [
+            {
+              "name": "RESOURCE_GROUP",
+              "value": "[resourceGroup().name]"
+            },
+            {
+              "name": "IOTHUB_NAME",
+              "value": "[parameters('iotHubName')]"
+            },
+            {
+              "name": "DEVICE_NAME",
+              "value": "[parameters('edgeDeviceName')]"
+            },
+            {
+              "name": "AMS_ACCOUNT",
+              "value": "[parameters('mediaServiceName')]"
+            }
+          ],
+          "retentionInterval": "P1D",
+          "timeout": "PT30M",
+          "containerSettings": {},
+          "cleanupPreference": "OnSuccess"
+        }
+      },
+      {
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2020-06-01",
+        "name": "CreateVM",
+        "dependsOn": [
+          "GetDeployConfigInfo"
+        ],
+        "properties": {
+          "mode": "Incremental",
+          "expressionEvaluationOptions": {
+            "scope": "inner"
+          },
           "parameters": {
             "vmName": {
-              "type": "string"
+              "value": "visionOnEdgeVM"
             },
             "ubuntuOSVersion": {
-              "type": "string"
+              "value": "18.04-LTS"
             },
             "moduleRuntime": {
-              "type": "string"
+              "value": "[parameters('moduleRuntime')]"
             },
             "adminUsername": {
-              "type": "string"
+              "value": "visionOnEdge"
             },
             "authenticationType": {
-              "type": "string"
+              "value": "password"
             },
             "adminPasswordOrKey": {
-              "type": "SecureString"
+              "value": "Password123@"
             },
             "dnsLabelPrefix": {
-              "type": "string"
+              "value": "[toLower(concat('visiononedgevm-', uniqueString(resourceGroup().id)))]"
             },
             "virtualNetworkName": {
-              "type": "string"
+              "value": "visionOnEdge-vNet"
             },
             "subnetName": {
-              "type": "string"
+              "value": "visionOnEdge-Subnet"
             },
             "networkSecurityGroupName": {
-              "type": "string"
+              "value": "visionOnEdge-SecGroupNet"
             },
             "deviceConnectionString": {
-              "type": "string"
+              "value": "[reference('GetDeployConfigInfo').outputs.deviceinfo.deviceConnectString]"
             }
           },
-          "variables": {
-            "publicIpAddressName": "[concat(parameters('vmName'), 'PublicIP' )]",
-            "networkInterfaceName": "[concat(parameters('vmName'),'NetInt')]",
-            "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]",
-            "osDiskType": "Standard_LRS",
-            "vmSize": {
-              "cpu": "Standard_DS1_v2",
-              "gpu (NVIDIA cuda11)": "Standard_NC6"
-            },
-            "location": {
-              "cpu": "[resourceGroup().location]",
-              "gpu (NVIDIA cuda11)": "westus2"
-            },
-            "subnetAddressPrefix": "10.1.0.0/24",
-            "addressPrefix": "10.1.0.0/16",
-            "linuxConfiguration": {
-              "disablePasswordAuthentication": true,
-              "ssh": {
-                "publicKeys": [
-                  {
-                    "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
-                    "keyData": "[parameters('adminPasswordOrKey')]"
-                  }
-                ]
+          "template": {
+            "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+              "vmName": {
+                "type": "string"
+              },
+              "ubuntuOSVersion": {
+                "type": "string"
+              },
+              "moduleRuntime": {
+                "type": "string"
+              },
+              "adminUsername": {
+                "type": "string"
+              },
+              "authenticationType": {
+                "type": "string"
+              },
+              "adminPasswordOrKey": {
+                "type": "SecureString"
+              },
+              "dnsLabelPrefix": {
+                "type": "string"
+              },
+              "virtualNetworkName": {
+                "type": "string"
+              },
+              "subnetName": {
+                "type": "string"
+              },
+              "networkSecurityGroupName": {
+                "type": "string"
+              },
+              "deviceConnectionString": {
+                "type": "string"
               }
-            }
-          },
-          "resources": [
-            {
-              "name": "[variables('networkInterfaceName')]",
-              "type": "Microsoft.Network/networkInterfaces",
-              "apiVersion": "2020-06-01",
-              "location": "[variables('location')[parameters('moduleRuntime')]]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
-                "[resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
-                "[resourceId('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
-              ],
-              "properties": {
-                "ipConfigurations": [
+            },
+            "variables": {
+              "publicIpAddressName": "[concat(parameters('vmName'), 'PublicIP' )]",
+              "networkInterfaceName": "[concat(parameters('vmName'),'NetInt')]",
+              "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', parameters('virtualNetworkName'), parameters('subnetName'))]",
+              "osDiskType": "Standard_LRS",
+              "vmSize": {
+                "cpu": "Standard_DS1_v2",
+                "gpu (NVIDIA cuda11)": "Standard_NC6"
+              },
+              "location": {
+                "cpu": "[resourceGroup().location]",
+                "gpu (NVIDIA cuda11)": "westus2"
+              },
+              "subnetAddressPrefix": "10.1.0.0/24",
+              "addressPrefix": "10.1.0.0/16",
+              "linuxConfiguration": {
+                "disablePasswordAuthentication": true,
+                "ssh": {
+                  "publicKeys": [
+                    {
+                      "path": "[concat('/home/', parameters('adminUsername'), '/.ssh/authorized_keys')]",
+                      "keyData": "[parameters('adminPasswordOrKey')]"
+                    }
+                  ]
+                }
+              }
+            },
+            "resources": [
+              {
+                "name": "[variables('networkInterfaceName')]",
+                "type": "Microsoft.Network/networkInterfaces",
+                "apiVersion": "2020-06-01",
+                "location": "[variables('location')[parameters('moduleRuntime')]]",
+                "dependsOn": [
+                  "[resourceId('Microsoft.Network/networkSecurityGroups/', parameters('networkSecurityGroupName'))]",
+                  "[resourceId('Microsoft.Network/virtualNetworks/', parameters('virtualNetworkName'))]",
+                  "[resourceId('Microsoft.Network/publicIpAddresses/', variables('publicIpAddressName'))]"
+                ],
+                "properties": {
+                  "ipConfigurations": [
+                    {
+                      "name": "ipconfig1",
+                      "properties": {
+                        "subnet": {
+                          "id": "[variables('subnetRef')]"
+                        },
+                        "privateIPAllocationMethod": "Dynamic",
+                        "publicIpAddress": {
+                          "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+                        }
+                      }
+                    }
+                  ],
+                  "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('networkSecurityGroupName'))]"
+                  }
+                }
+              },
+              {
+                "name": "[parameters('networkSecurityGroupName')]",
+                "type": "Microsoft.Network/networkSecurityGroups",
+                "apiVersion": "2020-06-01",
+                "location": "[variables('location')[parameters('moduleRuntime')]]",
+                "properties": {
+                  "securityRules": [
+                    {
+                      "name": "SSH",
+                      "properties": {
+                        "priority": 300,
+                        "protocol": "TCP",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "22"
+                      }
+                    },
+                    {
+                      "name": "Port_8080",
+                      "properties": {
+                        "priority": 310,
+                        "protocol": "*",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "8080"
+                      }
+                    },
+                    {
+                      "name": "Port_5000",
+                      "properties": {
+                        "priority": 311,
+                        "protocol": "*",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "5000"
+                      }
+                    },
+                    {
+                      "name": "Port_8000",
+                      "properties": {
+                        "priority": 321,
+                        "protocol": "*",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "8000"
+                      }
+                    },
+                    {
+                      "name": "Port_8181",
+                      "properties": {
+                        "priority": 331,
+                        "protocol": "*",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "8181"
+                      }
+                    },
+                    {
+                      "name": "Port_5679",
+                      "properties": {
+                        "priority": 341,
+                        "protocol": "*",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "5679"
+                      }
+                    },
+                    {
+                      "name": "Port_5678",
+                      "properties": {
+                        "priority": 351,
+                        "protocol": "*",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "5678"
+                      }
+                    },
+                    {
+                      "name": "Port_5005",
+                      "properties": {
+                        "priority": 361,
+                        "protocol": "*",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "5005"
+                      }
+                    },
+                    {
+                      "name": "Port_6000",
+                      "properties": {
+                        "priority": 1100,
+                        "protocol": "*",
+                        "access": "Allow",
+                        "direction": "Inbound",
+                        "sourceAddressPrefix": "*",
+                        "sourcePortRange": "*",
+                        "destinationAddressPrefix": "*",
+                        "destinationPortRange": "6000"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "[parameters('virtualNetworkName')]",
+                "type": "Microsoft.Network/virtualNetworks",
+                "apiVersion": "2020-06-01",
+                "location": "[variables('location')[parameters('moduleRuntime')]]",
+                "properties": {
+                  "addressSpace": {
+                    "addressPrefixes": [
+                      "[variables('addressPrefix')]"
+                    ]
+                  },
+                  "subnets": [
+                    {
+                      "name": "[parameters('subnetName')]",
+                      "properties": {
+                        "addressPrefix": "[variables('subnetAddressPrefix')]",
+                        "privateEndpointNetworkPolicies": "Enabled",
+                        "privateLinkServiceNetworkPolicies": "Enabled"
+                      }
+                    }
+                  ]
+                }
+              },
+              {
+                "name": "[variables('publicIpAddressName')]",
+                "type": "Microsoft.Network/publicIpAddresses",
+                "apiVersion": "2020-06-01",
+                "location": "[variables('location')[parameters('moduleRuntime')]]",
+                "sku": {
+                  "name": "Basic",
+                  "tier": "Regional"
+                },
+                "properties": {
+                  "publicIpAllocationMethod": "Dynamic",
+                  "publicIPAddressVersion": "IPv4",
+                  "dnsSettings": {
+                    "domainNameLabel": "[parameters('dnsLabelPrefix')]"
+                  },
+                  "idleTimeoutInMinutes": 4
+                }
+              },
+              {
+                "name": "[concat(parameters('vmName'), '-', substring(parameters('moduleRuntime'), 0, 3))]",
+                "type": "Microsoft.Compute/virtualMachines",
+                "apiVersion": "2020-06-01",
+                "location": "[variables('location')[parameters('moduleRuntime')]]",
+                "dependsOn": [
+                  "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                ],
+                "properties": {
+                  "hardwareProfile": {
+                    "vmSize": "[variables('vmSize')[parameters('moduleRuntime')]]"
+                  },
+                  "osProfile": {
+                    "computerName": "[parameters('vmName')]",
+                    "adminUsername": "[parameters('adminUsername')]",
+                    "adminPassword": "[parameters('adminPasswordOrKey')]",
+                    "customData": "[base64(concat('#cloud-config\n\napt:\n  preserve_sources_list: true\n  sources:\n    msft.list:\n      source: \"deb https://packages.microsoft.com/ubuntu/18.04/multiarch/prod bionic main\"\n      key: |\n        -----BEGIN PGP PUBLIC KEY BLOCK-----\n        Version: GnuPG v1.4.7 (GNU/Linux)\n\n        mQENBFYxWIwBCADAKoZhZlJxGNGWzqV+1OG1xiQeoowKhssGAKvd+buXCGISZJwT\n        LXZqIcIiLP7pqdcZWtE9bSc7yBY2MalDp9Liu0KekywQ6VVX1T72NPf5Ev6x6DLV\n        7aVWsCzUAF+eb7DC9fPuFLEdxmOEYoPjzrQ7cCnSV4JQxAqhU4T6OjbvRazGl3ag\n        OeizPXmRljMtUUttHQZnRhtlzkmwIrUivbfFPD+fEoHJ1+uIdfOzZX8/oKHKLe2j\n        H632kvsNzJFlROVvGLYAk2WRcLu+RjjggixhwiB+Mu/A8Tf4V6b+YppS44q8EvVr\n        M+QvY7LNSOffSO6Slsy9oisGTdfE39nC7pVRABEBAAG0N01pY3Jvc29mdCAoUmVs\n        ZWFzZSBzaWduaW5nKSA8Z3Bnc2VjdXJpdHlAbWljcm9zb2Z0LmNvbT6JATUEEwEC\n        AB8FAlYxWIwCGwMGCwkIBwMCBBUCCAMDFgIBAh4BAheAAAoJEOs+lK2+EinPGpsH\n        /32vKy29Hg51H9dfFJMx0/a/F+5vKeCeVqimvyTM04C+XENNuSbYZ3eRPHGHFLqe\n        MNGxsfb7C7ZxEeW7J/vSzRgHxm7ZvESisUYRFq2sgkJ+HFERNrqfci45bdhmrUsy\n        7SWw9ybxdFOkuQoyKD3tBmiGfONQMlBaOMWdAsic965rvJsd5zYaZZFI1UwTkFXV\n        KJt3bp3Ngn1vEYXwijGTa+FXz6GLHueJwF0I7ug34DgUkAFvAs8Hacr2DRYxL5RJ\n        XdNgj4Jd2/g6T9InmWT0hASljur+dJnzNiNCkbn9KbX7J/qK1IbR8y560yRmFsU+\n        NdCFTW7wY0Fb1fWJ+/KTsC4=\n        =J6gs\n        -----END PGP PUBLIC KEY BLOCK-----\npackages:\n  - moby-cli\n  - libiothsm-std\n  - moby-engine\nruncmd:\n  - |\n      set -x\n      (\n        # Wait for docker daemon to start\n        while [ $(ps -ef | grep -v grep | grep docker | wc -l) -le 0 ]; do\n          sleep 3\n        done\n\n        # Prevent iotedge from starting before the device connection string is set in config.yaml\n        sudo ln -s /dev/null /etc/systemd/system/iotedge.service\n        apt install -y --allow-downgrades iotedge=1.0.10.4-1 libiothsm-std=1.0.10.4-1\n        sed -i \"s#\\(device_connection_string: \\).*#\\1\\\"', parameters('deviceConnectionString'), '\\\"#g\" /etc/iotedge/config.yaml\n        systemctl unmask iotedge\n        systemctl start iotedge\n      ) &\n'))]",
+                    "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
+                  },
+                  "storageProfile": {
+                    "imageReference": {
+                      "publisher": "Canonical",
+                      "offer": "UbuntuServer",
+                      "sku": "[parameters('ubuntuOSVersion')]",
+                      "version": "latest"
+                    },
+                    "osDisk": {
+                      "createOption": "fromImage",
+                      "managedDisk": {
+                        "storageAccountType": "[variables('osDiskType')]"
+                      }
+                    }
+                  },
+                  "networkProfile": {
+                    "networkInterfaces": [
+                      {
+                        "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
+                      }
+                    ]
+                  }
+                },
+                "resources": [
                   {
-                    "name": "ipconfig1",
+                    "condition": "[equals(substring(parameters('moduleRuntime'), 0, 3), 'gpu')]",
+                    "name": "InstallNvidiaGpuDriverLinux",
+                    "type": "extensions",
+                    "apiVersion": "2015-06-15",
+                    "location": "[variables('location')[parameters('moduleRuntime')]]",
+                    "dependsOn": [
+                      "[resourceId('Microsoft.Compute/virtualMachines', concat(parameters('vmName'), '-', substring(parameters('moduleRuntime'), 0, 3)))]"
+                    ],
                     "properties": {
-                      "subnet": {
-                        "id": "[variables('subnetRef')]"
-                      },
-                      "privateIPAllocationMethod": "Dynamic",
-                      "publicIpAddress": {
-                        "id": "[resourceId('Microsoft.Network/publicIPAddresses',variables('publicIPAddressName'))]"
+                      "publisher": "Microsoft.Azure.Extensions",
+                      "type": "CustomScript",
+                      "typeHandlerVersion": "2.0",
+                      "autoUpgradeMinorVersion": true,
+                      "settings": {
+                        "fileUris": [
+                          "https://raw.githubusercontent.com/Azure-Samples/azure-intelligent-edge-patterns/master/factory-ai-vision/Deploy/arm/scripts/install-nvidia-driver.sh"
+                        ],
+                        "commandToExecute": "[concat('./install-nvidia-driver.sh ', parameters('adminUsername'))]"
                       }
                     }
                   }
-                ],
-                "networkSecurityGroup": {
-                  "id": "[resourceId('Microsoft.Network/networkSecurityGroups',parameters('networkSecurityGroupName'))]"
-                }
-              }
-            },
-            {
-              "name": "[parameters('networkSecurityGroupName')]",
-              "type": "Microsoft.Network/networkSecurityGroups",
-              "apiVersion": "2020-06-01",
-              "location": "[variables('location')[parameters('moduleRuntime')]]",
-              "properties": {
-                "securityRules": [
-                  {
-                    "name": "SSH",
-                    "properties": {
-                      "priority": 300,
-                      "protocol": "TCP",
-                      "access": "Allow",
-                      "direction": "Inbound",
-                      "sourceAddressPrefix": "*",
-                      "sourcePortRange": "*",
-                      "destinationAddressPrefix": "*",
-                      "destinationPortRange": "22"
-                    }
-                  },
-                  {
-                    "name": "Port_8080",
-                    "properties": {
-                      "priority": 310,
-                      "protocol": "*",
-                      "access": "Allow",
-                      "direction": "Inbound",
-                      "sourceAddressPrefix": "*",
-                      "sourcePortRange": "*",
-                      "destinationAddressPrefix": "*",
-                      "destinationPortRange": "8080"
-                    }
-                  },
-                  {
-                    "name": "Port_5000",
-                    "properties": {
-                      "priority": 311,
-                      "protocol": "*",
-                      "access": "Allow",
-                      "direction": "Inbound",
-                      "sourceAddressPrefix": "*",
-                      "sourcePortRange": "*",
-                      "destinationAddressPrefix": "*",
-                      "destinationPortRange": "5000"
-                    }
-                  },
-                  {
-                    "name": "Port_8000",
-                    "properties": {
-                      "priority": 321,
-                      "protocol": "*",
-                      "access": "Allow",
-                      "direction": "Inbound",
-                      "sourceAddressPrefix": "*",
-                      "sourcePortRange": "*",
-                      "destinationAddressPrefix": "*",
-                      "destinationPortRange": "8000"
-                    }
-                  },
-                  {
-                    "name": "Port_8181",
-                    "properties": {
-                      "priority": 331,
-                      "protocol": "*",
-                      "access": "Allow",
-                      "direction": "Inbound",
-                      "sourceAddressPrefix": "*",
-                      "sourcePortRange": "*",
-                      "destinationAddressPrefix": "*",
-                      "destinationPortRange": "8181"
-                    }
-                  },
-                  {
-                    "name": "Port_5679",
-                    "properties": {
-                      "priority": 341,
-                      "protocol": "*",
-                      "access": "Allow",
-                      "direction": "Inbound",
-                      "sourceAddressPrefix": "*",
-                      "sourcePortRange": "*",
-                      "destinationAddressPrefix": "*",
-                      "destinationPortRange": "5679"
-                    }
-                  },
-                  {
-                    "name": "Port_5678",
-                    "properties": {
-                      "priority": 351,
-                      "protocol": "*",
-                      "access": "Allow",
-                      "direction": "Inbound",
-                      "sourceAddressPrefix": "*",
-                      "sourcePortRange": "*",
-                      "destinationAddressPrefix": "*",
-                      "destinationPortRange": "5678"
-                    }
-                  },
-                  {
-                    "name": "Port_5005",
-                    "properties": {
-                      "priority": 361,
-                      "protocol": "*",
-                      "access": "Allow",
-                      "direction": "Inbound",
-                      "sourceAddressPrefix": "*",
-                      "sourcePortRange": "*",
-                      "destinationAddressPrefix": "*",
-                      "destinationPortRange": "5005"
-                    }
-                  },
-                  {
-                    "name": "Port_6000",
-                    "properties": {
-                      "priority": 1100,
-                      "protocol": "*",
-                      "access": "Allow",
-                      "direction": "Inbound",
-                      "sourceAddressPrefix": "*",
-                      "sourcePortRange": "*",
-                      "destinationAddressPrefix": "*",
-                      "destinationPortRange": "6000"
-                    }
-                  },
-                  {
-                    "name": "Port_5010",
-                    "properties": {
-                      "priority": 371,
-                      "protocol": "*",
-                      "access": "Allow",
-                      "direction": "Inbound",
-                      "sourceAddressPrefix": "*",
-                      "sourcePortRange": "*",
-                      "destinationAddressPrefix": "*",
-                      "destinationPortRange": "5000"
-                    }
-                  }
                 ]
               }
-            },
-            {
-              "name": "[parameters('virtualNetworkName')]",
-              "type": "Microsoft.Network/virtualNetworks",
-              "apiVersion": "2020-06-01",
-              "location": "[variables('location')[parameters('moduleRuntime')]]",
-              "properties": {
-                "addressSpace": {
-                  "addressPrefixes": [
-                    "[variables('addressPrefix')]"
-                  ]
-                },
-                "subnets": [
-                  {
-                    "name": "[parameters('subnetName')]",
-                    "properties": {
-                      "addressPrefix": "[variables('subnetAddressPrefix')]",
-                      "privateEndpointNetworkPolicies": "Enabled",
-                      "privateLinkServiceNetworkPolicies": "Enabled"
-                    }
-                  }
-                ]
+            ],
+            "outputs": {
+              "dcs": {
+                "type": "string",
+                "value": "[parameters('deviceConnectionString')]"
               }
-            },
-            {
-              "name": "[variables('publicIpAddressName')]",
-              "type": "Microsoft.Network/publicIpAddresses",
-              "apiVersion": "2020-06-01",
-              "location": "[variables('location')[parameters('moduleRuntime')]]",
-              "sku": {
-                "name": "Basic",
-                "tier": "Regional"
-              },
-              "properties": {
-                "publicIpAllocationMethod": "Dynamic",
-                "publicIPAddressVersion": "IPv4",
-                "dnsSettings": {
-                  "domainNameLabel": "[parameters('dnsLabelPrefix')]"
-                },
-                "idleTimeoutInMinutes": 4
-              }
-            },
-            {
-              "name": "[concat(parameters('vmName'), '-', substring(parameters('moduleRuntime'), 0, 3))]",
-              "type": "Microsoft.Compute/virtualMachines",
-              "apiVersion": "2020-06-01",
-              "location": "[variables('location')[parameters('moduleRuntime')]]",
-              "dependsOn": [
-                "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
-              ],
-              "properties": {
-                "hardwareProfile": {
-                  "vmSize": "[variables('vmSize')[parameters('moduleRuntime')]]"
-                },
-                "osProfile": {
-                  "computerName": "[parameters('vmName')]",
-                  "adminUsername": "[parameters('adminUsername')]",
-                  "adminPassword": "[parameters('adminPasswordOrKey')]",
-                  "customData": "[base64(concat('#cloud-config\n\napt:\n  preserve_sources_list: true\n  sources:\n    msft.list:\n      source: \"deb https://packages.microsoft.com/ubuntu/18.04/multiarch/prod bionic main\"\n      key: |\n        -----BEGIN PGP PUBLIC KEY BLOCK-----\n        Version: GnuPG v1.4.7 (GNU/Linux)\n\n        mQENBFYxWIwBCADAKoZhZlJxGNGWzqV+1OG1xiQeoowKhssGAKvd+buXCGISZJwT\n        LXZqIcIiLP7pqdcZWtE9bSc7yBY2MalDp9Liu0KekywQ6VVX1T72NPf5Ev6x6DLV\n        7aVWsCzUAF+eb7DC9fPuFLEdxmOEYoPjzrQ7cCnSV4JQxAqhU4T6OjbvRazGl3ag\n        OeizPXmRljMtUUttHQZnRhtlzkmwIrUivbfFPD+fEoHJ1+uIdfOzZX8/oKHKLe2j\n        H632kvsNzJFlROVvGLYAk2WRcLu+RjjggixhwiB+Mu/A8Tf4V6b+YppS44q8EvVr\n        M+QvY7LNSOffSO6Slsy9oisGTdfE39nC7pVRABEBAAG0N01pY3Jvc29mdCAoUmVs\n        ZWFzZSBzaWduaW5nKSA8Z3Bnc2VjdXJpdHlAbWljcm9zb2Z0LmNvbT6JATUEEwEC\n        AB8FAlYxWIwCGwMGCwkIBwMCBBUCCAMDFgIBAh4BAheAAAoJEOs+lK2+EinPGpsH\n        /32vKy29Hg51H9dfFJMx0/a/F+5vKeCeVqimvyTM04C+XENNuSbYZ3eRPHGHFLqe\n        MNGxsfb7C7ZxEeW7J/vSzRgHxm7ZvESisUYRFq2sgkJ+HFERNrqfci45bdhmrUsy\n        7SWw9ybxdFOkuQoyKD3tBmiGfONQMlBaOMWdAsic965rvJsd5zYaZZFI1UwTkFXV\n        KJt3bp3Ngn1vEYXwijGTa+FXz6GLHueJwF0I7ug34DgUkAFvAs8Hacr2DRYxL5RJ\n        XdNgj4Jd2/g6T9InmWT0hASljur+dJnzNiNCkbn9KbX7J/qK1IbR8y560yRmFsU+\n        NdCFTW7wY0Fb1fWJ+/KTsC4=\n        =J6gs\n        -----END PGP PUBLIC KEY BLOCK-----\npackages:\n  - moby-cli\n  - libiothsm-std\n  - moby-engine\nruncmd:\n  - |\n      set -x\n      (\n        # Wait for docker daemon to start\n        while [ $(ps -ef | grep -v grep | grep docker | wc -l) -le 0 ]; do\n          sleep 3\n        done\n\n        # Prevent iotedge from starting before the device connection string is set in config.yaml\n        sudo ln -s /dev/null /etc/systemd/system/iotedge.service\n        apt install -y --allow-downgrades iotedge=1.0.10.4-1 libiothsm-std=1.0.10.4-1\n        sed -i \"s#\\(device_connection_string: \\).*#\\1\\\"', parameters('deviceConnectionString'), '\\\"#g\" /etc/iotedge/config.yaml\n        systemctl unmask iotedge\n        systemctl start iotedge\n      ) &\n'))]",
-                  "linuxConfiguration": "[if(equals(parameters('authenticationType'), 'password'), json('null'), variables('linuxConfiguration'))]"
-                },
-                "storageProfile": {
-                  "imageReference": {
-                    "publisher": "Canonical",
-                    "offer": "UbuntuServer",
-                    "sku": "[parameters('ubuntuOSVersion')]",
-                    "version": "latest"
-                  },
-                  "osDisk": {
-                    "createOption": "fromImage",
-                    "managedDisk": {
-                      "storageAccountType": "[variables('osDiskType')]"
-                    }
-                  }
-                },
-                "networkProfile": {
-                  "networkInterfaces": [
-                    {
-                      "id": "[resourceId('Microsoft.Network/networkInterfaces', variables('networkInterfaceName'))]"
-                    }
-                  ]
-                }
-              },
-              "resources": [
-                {
-                  "condition": "[equals(substring(parameters('moduleRuntime'), 0, 3), 'gpu')]",
-                  "name": "InstallNvidiaGpuDriverLinux",
-                  "type": "extensions",
-                  "apiVersion": "2015-06-15",
-                  "location": "[variables('location')[parameters('moduleRuntime')]]",
-                  "dependsOn": [
-                    "[resourceId('Microsoft.Compute/virtualMachines', concat(parameters('vmName'), '-', substring(parameters('moduleRuntime'), 0, 3)))]"
-                  ],
-                  "properties": {
-                    "publisher": "Microsoft.Azure.Extensions",
-                    "type": "CustomScript",
-                    "typeHandlerVersion": "2.0",
-                    "autoUpgradeMinorVersion": true,
-                    "settings": {
-                      "fileUris": [
-                        "https://raw.githubusercontent.com/Azure-Samples/azure-intelligent-edge-patterns/master/factory-ai-vision/Deploy/arm/scripts/install-nvidia-driver.sh",
-                      ],
-                      "commandToExecute": "[concat('./install-nvidia-driver.sh ', parameters('adminUsername'))]"
-                    }
-                  }
-                }
-              ]
-            }
-          ],
-          "outputs": {
-            "dcs": {
-              "type": "string",
-              "value": "[parameters('deviceConnectionString')]"
             }
           }
-        }
+        },
+        "resourceGroup": "[variables('resourceGroupName')]"
       },
-      "resourceGroup": "[variables('resourceGroupName')]"
-    },
-    {
-      "type": "Microsoft.Resources/deployments",
-      "apiVersion": "2020-06-01",
-      "name": "ResourcesDeployment",
-      "dependsOn": [
-        "[resourceId('Microsoft.Resources/deployments', 'CreateVM')]"
-      ],
-      "properties": {
-        "mode": "Incremental",
-        "expressionEvaluationOptions": {
-          "scope": "inner"
-        },
-        "parameters": {
-          "resourceGroupName": {
-            "value": "[variables('resourceGroupName')]"
+      {
+        "type": "Microsoft.Resources/deployments",
+        "apiVersion": "2020-06-01",
+        "name": "ResourcesDeployment",
+        "dependsOn": [
+          "[resourceId('Microsoft.Resources/deployments', 'CreateVM')]"
+        ],
+        "properties": {
+          "mode": "Incremental",
+          "expressionEvaluationOptions": {
+            "scope": "inner"
           },
-          "videoCaptureModule": {
-            "value": "[parameters('videoCaptureModule')]"
-          },
-          "mediaServiceResourceGroup": {
-            "value": "[parameters('mediaServiceResourceGroup')]"
-          },
-          "mediaServiceName": {
-            "value": "[parameters('mediaServiceName')]"
-          },
-          "mediaServiceServicePrincipalName": {
-            "value": "[reference('GetDeployConfigInfo').outputs.amsinfo.servicesPrincipalName]"
-          },
-          "mediaServiceServicePrincipalSecret": {
-            "value": "[reference('GetDeployConfigInfo').outputs.amsinfo.servicesPrincipalSecret]"
-          },
-          "iotHubName": {
-            "value": "[parameters('iotHubName')]"
-          },
-          "resourceGroupLocation": {
-            "value": "[resourceGroup().location]"
-          },
-          "deviceArchitecture": {
-            "value": "[parameters('deviceArchitecture')]"
-          },
-          "moduleRuntime": {
-            "value": "[parameters('moduleRuntime')]"
-          },
-          "containerRegistryName": {
-            "value": "[variables('containerRegistryName')]"
-          },
-          "containerRegistryUserName": {
-            "value": "[variables('containerRegistryUserName')]"
-          },
-          "containerRegistryPassword": {
-            "value": "[variables('containerRegistryPassword')]"
-          },
-          "managedIdentityResourceGroup": {
-            "value": "[variables('managedIdentityResourceGroup')]"
-          },
-          "managedIdentityName": {
-            "value": "[variables('managedIdentityName')]"
-          },
-          "edgeDeviceName": {
-            "value": "[parameters('edgeDeviceName')]"
-          },
-          "deploymentName": {
-            "value": "[variables('deploymentName')]"
-          },
-          "customVisionName": {
-            "value": "[parameters('customVisionName')]"
-          }
-        },
-        "template": {
-          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-          "contentVersion": "1.0.0.0",
           "parameters": {
             "resourceGroupName": {
-              "type": "String"
-            },
-            "mediaServiceResourceGroup": {
-              "type": "String"
-            },
-            "mediaServiceName": {
-              "type": "String"
-            },
-            "mediaServiceServicePrincipalName": {
-              "type": "String"
-            },
-            "mediaServiceServicePrincipalSecret": {
-              "type": "String"
+              "value": "[variables('resourceGroupName')]"
             },
             "videoCaptureModule": {
-              "type": "String"
+              "value": "[parameters('videoCaptureModule')]"
+            },
+            "mediaServiceResourceGroup": {
+              "value": "[parameters('mediaServiceResourceGroup')]"
+            },
+            "mediaServiceName": {
+              "value": "[parameters('mediaServiceName')]"
+            },
+            "mediaServiceServicePrincipalName": {
+              "value": "[reference('GetDeployConfigInfo').outputs.amsinfo.servicesPrincipalName]"
+            },
+            "mediaServiceServicePrincipalSecret": {
+              "value": "[reference('GetDeployConfigInfo').outputs.amsinfo.servicesPrincipalSecret]"
             },
             "iotHubName": {
-              "type": "string"
+              "value": "[parameters('iotHubName')]"
             },
             "resourceGroupLocation": {
-              "type": "String"
+              "value": "[resourceGroup().location]"
             },
             "deviceArchitecture": {
-              "type": "String"
+              "value": "[parameters('deviceArchitecture')]"
             },
             "moduleRuntime": {
-              "type": "String"
+              "value": "[parameters('moduleRuntime')]"
             },
             "containerRegistryName": {
-              "type": "string"
+              "value": "[variables('containerRegistryName')]"
             },
             "containerRegistryUserName": {
-              "type": "string"
+              "value": "[variables('containerRegistryUserName')]"
             },
             "containerRegistryPassword": {
-              "type": "string"
+              "value": "[variables('containerRegistryPassword')]"
             },
             "managedIdentityResourceGroup": {
-              "type": "String"
+              "value": "[variables('managedIdentityResourceGroup')]"
             },
             "managedIdentityName": {
-              "type": "String"
+              "value": "[variables('managedIdentityName')]"
             },
             "edgeDeviceName": {
-              "type": "String"
+              "value": "[parameters('edgeDeviceName')]"
             },
             "deploymentName": {
-              "type": "String"
-            },
-            "utcValue": {
-              "type": "string",
-              "defaultValue": "[utcNow()]"
+              "value": "[variables('deploymentName')]"
             },
             "customVisionName": {
-              "type": "string"
+              "value": "[parameters('customVisionName')]"
             }
           },
-          "variables": {},
-          "resources": [
-            {
-              "type": "Microsoft.Resources/deploymentScripts",
-              "apiVersion": "2019-10-01-preview",
-              "name": "[concat('ModuleDeployment',parameters('utcValue'))]",
-              "location": "[parameters('resourceGroupLocation')]",
-              "kind": "AzureCLI",
-              "identity": {
-                "type": "UserAssigned",
-                "userAssignedIdentities": {
-                  "[concat(subscription().id,'/resourceGroups/', parameters('managedIdentityResourceGroup'),'/providers/Microsoft.ManagedIdentity/userAssignedIdentities/',parameters('managedIdentityName'))]": {}
-                }
+          "template": {
+            "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+            "contentVersion": "1.0.0.0",
+            "parameters": {
+              "resourceGroupName": {
+                "type": "String"
               },
-              "properties": {
-                "forceUpdateTag": "1",
-                "azCliVersion": "2.9.1",
-                "primaryScriptUri": "https://raw.githubusercontent.com/Azure-Samples/azure-intelligent-edge-patterns/master/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
-                "supportingScriptUris": [],
-                "environmentVariables": [
-                  {
-                    "name": "CONTAINER_REGISTRY_NAME",
-                    "value": "[parameters('containerRegistryName')]"
-                  },
-                  {
-                    "name": "CONTAINER_REGISTRY_USERNAME",
-                    "value": "[parameters('containerRegistryUserName')]"
-                  },
-                  {
-                    "name": "CONTAINER_REGISTRY_PASSWORD",
-                    "value": "[parameters('containerRegistryPassword')]"
-                  },
-                  {
-                    "name": "INFERENCE_MODULE_RUNTIME",
-                    "value": "[parameters('moduleRuntime')]"
-                  },
-                  {
-                    "name": "EDGE_DEVICE_ARCHITECTURE",
-                    "value": "[parameters('deviceArchitecture')]"
-                  },
-                  {
-                    "name": "IOTHUB_NAME",
-                    "value": "[parameters('iotHubName')]"
-                  },
-                  {
-                    "name": "RESOURCE_GROUP",
-                    "value": "[parameters('resourceGroupName')]"
-                  },
-                  {
-                    "name": "DEVICE_NAME",
-                    "value": "[parameters('edgeDeviceName')]"
-                  },
-                  {
-                    "name": "DEPLOYMENT_NAME",
-                    "value": "[concat(parameters('deploymentName'),parameters('utcValue'))]"
-                  },
-                  {
-                    "name": "IDENTITY_NAME",
-                    "value": "[parameters('managedIdentityName')]"
-                  },
-                  {
-                    "name": "CUSTOMVISION_NAME",
-                    "value": "[parameters('customVisionName')]"
-                  },
-                  {
-                    "name": "AMS_RESOURCE_GROUP",
-                    "value": "[parameters('mediaServiceResourceGroup')]"
-                  },
-                  {
-                    "name": "AMS_NAME",
-                    "value": "[parameters('mediaServiceName')]"
-                  },
-                  {
-                    "name": "AMS_SP_NAME",
-                    "value": "[parameters('mediaServiceServicePrincipalName')]"
-                  },
-                  {
-                    "name": "AMS_SP_SECRET",
-                    "value": "[parameters('mediaServiceServicePrincipalSecret')]"
-                  },
-                  {
-                    "name": "VIDEO_CAPTURE_MODULE",
-                    "value": "[parameters('videoCaptureModule')]"
-                  }
-                ],
-                "retentionInterval": "P1D",
-                "timeout": "PT45M",
-                "containerSettings": {},
-                "cleanupPreference": "OnSuccess"
+              "mediaServiceResourceGroup": {
+                "type": "String"
+              },
+              "mediaServiceName": {
+                "type": "String"
+              },
+              "mediaServiceServicePrincipalName": {
+                "type": "String"
+              },
+              "mediaServiceServicePrincipalSecret": {
+                "type": "String"
+              },
+              "videoCaptureModule": {
+                "type": "String"
+              },
+              "iotHubName": {
+                "type": "string"
+              },
+              "resourceGroupLocation": {
+                "type": "String"
+              },
+              "deviceArchitecture": {
+                "type": "String"
+              },
+              "moduleRuntime": {
+                "type": "String"
+              },
+              "containerRegistryName": {
+                "type": "string"
+              },
+              "containerRegistryUserName": {
+                "type": "string"
+              },
+              "containerRegistryPassword": {
+                "type": "string"
+              },
+              "managedIdentityResourceGroup": {
+                "type": "String"
+              },
+              "managedIdentityName": {
+                "type": "String"
+              },
+              "edgeDeviceName": {
+                "type": "String"
+              },
+              "deploymentName": {
+                "type": "String"
+              },
+              "utcValue": {
+                "type": "string",
+                "defaultValue": "[utcNow()]"
+              },
+              "customVisionName": {
+                "type": "string"
               }
-            }
-          ]
-        }
-      },
-      "resourceGroup": "[variables('resourceGroupName')]"
-    }
-  ]
-}
+            },
+            "variables": {},
+            "resources": [
+              {
+                "type": "Microsoft.Resources/deploymentScripts",
+                "apiVersion": "2019-10-01-preview",
+                "name": "[concat('ModuleDeployment',parameters('utcValue'))]",
+                "location": "[parameters('resourceGroupLocation')]",
+                "kind": "AzureCLI",
+                "identity": {
+                  "type": "UserAssigned",
+                  "userAssignedIdentities": {
+                    "[concat(subscription().id,'/resourceGroups/', parameters('managedIdentityResourceGroup'),'/providers/Microsoft.ManagedIdentity/userAssignedIdentities/',parameters('managedIdentityName'))]": {}
+                  }
+                },
+                "properties": {
+                  "forceUpdateTag": "1",
+                  "azCliVersion": "2.9.1",
+                  "primaryScriptUri": "https://raw.githubusercontent.com/Azure-Samples/azure-intelligent-edge-patterns/master/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
+                  "supportingScriptUris": [],
+                  "environmentVariables": [
+                    {
+                      "name": "CONTAINER_REGISTRY_NAME",
+                      "value": "[parameters('containerRegistryName')]"
+                    },
+                    {
+                      "name": "CONTAINER_REGISTRY_USERNAME",
+                      "value": "[parameters('containerRegistryUserName')]"
+                    },
+                    {
+                      "name": "CONTAINER_REGISTRY_PASSWORD",
+                      "value": "[parameters('containerRegistryPassword')]"
+                    },
+                    {
+                      "name": "INFERENCE_MODULE_RUNTIME",
+                      "value": "[parameters('moduleRuntime')]"
+                    },
+                    {
+                      "name": "EDGE_DEVICE_ARCHITECTURE",
+                      "value": "[parameters('deviceArchitecture')]"
+                    },
+                    {
+                      "name": "IOTHUB_NAME",
+                      "value": "[parameters('iotHubName')]"
+                    },
+                    {
+                      "name": "RESOURCE_GROUP",
+                      "value": "[parameters('resourceGroupName')]"
+                    },
+                    {
+                      "name": "DEVICE_NAME",
+                      "value": "[parameters('edgeDeviceName')]"
+                    },
+                    {
+                      "name": "DEPLOYMENT_NAME",
+                      "value": "[concat(parameters('deploymentName'),parameters('utcValue'))]"
+                    },
+                    {
+                      "name": "IDENTITY_NAME",
+                      "value": "[parameters('managedIdentityName')]"
+                    },
+                    {
+                      "name": "CUSTOMVISION_NAME",
+                      "value": "[parameters('customVisionName')]"
+                    },
+                    {
+                      "name": "AMS_RESOURCE_GROUP",
+                      "value": "[parameters('mediaServiceResourceGroup')]"
+                    },
+                    {
+                      "name": "AMS_NAME",
+                      "value": "[parameters('mediaServiceName')]"
+                    },
+                    {
+                      "name": "AMS_SP_NAME",
+                      "value": "[parameters('mediaServiceServicePrincipalName')]"
+                    },
+                    {
+                      "name": "AMS_SP_SECRET",
+                      "value": "[parameters('mediaServiceServicePrincipalSecret')]"
+                    },
+                    {
+                      "name": "VIDEO_CAPTURE_MODULE",
+                      "value": "[parameters('videoCaptureModule')]"
+                    }
+                  ],
+                  "retentionInterval": "P1D",
+                  "timeout": "PT45M",
+                  "containerSettings": {},
+                  "cleanupPreference": "OnSuccess"
+                }
+              }
+            ]
+          }
+        },
+        "resourceGroup": "[variables('resourceGroupName')]"
+      }
+    ]
+  }
