@@ -261,7 +261,7 @@
               "properties": {
                 "forceUpdateTag": "1",
                 "azCliVersion": "2.9.1",
-                "primaryScriptUri": "https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/feat/lva-to-ava/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
+                "primaryScriptUri": "https://raw.githubusercontent.com/Azure-Samples/azure-intelligent-edge-patterns/master/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
                 "supportingScriptUris": [],
                 "environmentVariables": [
                   {
