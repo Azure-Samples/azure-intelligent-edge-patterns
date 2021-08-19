@@ -16,30 +16,25 @@ import {
   Icon,
 } from '@fluentui/react';
 
-import {
-  getTrainingProject,
-  trainingProjectIsPredictionModelFactory,
-  TrainingProject as TrainingProjectType,
-} from '../../store/trainingProjectSlice';
+import { TrainingProject } from '../../store/trainingProjectSlice';
 
-import { Url } from '../../enums';
+// import { Url } from '../../enums';
 // import { ModelType } from './type';
 
-import { EmptyAddIcon } from '../EmptyAddIcon';
+// import { EmptyAddIcon } from '../EmptyAddIcon';
 import ModelCard from './ModelCard';
 
 export type ModelType = 'custom' | 'own' | 'ovms';
 
 type PassingProps = {
-  // onOpen: () => void;
-  // onPanelTypeChange: (type: ModelType) => void;
+  trainingProjectList: TrainingProject[];
   onOpenCustomVision: () => void;
   onOpenIntelOvms: () => void;
   onOpenOwnUpload: () => void;
 };
 
 type ModelsProps = {
-  trainingProject: TrainingProjectType[];
+  trainingProjectList: TrainingProject[];
 };
 
 const theme = getTheme();
@@ -48,26 +43,27 @@ const openIcon = { iconName: 'ChevronDown' };
 const closeIcon = { iconName: 'ChevronUp' };
 
 const BaseModel: React.FC<ModelsProps> = (props) => {
-  const { trainingProject } = props;
+  const { trainingProjectList } = props;
 
-  const [isCVProjectClick, setIsCVProjectClick] = useState(true);
+  const [isIntelProjectClick, setIsIntelProjectClick] = useState(true);
   const [isOwnProject, setIsOwnProject] = useState(true);
 
   const history = useHistory();
 
-  const ownProjectList = trainingProject.filter((project) => project.category === 'customvision');
-  // const ownProject = trainingProject.filter((project) => project.predictionUri !== '');
+  // @ts-ignore
+  const intelProjectList = trainingProjectList.filter((project) => project.project_type === 'ovms');
+  const ownProjectList = trainingProjectList.filter((project) => project.category === 'customvision');
 
   const commandBarItems: ICommandBarItemProps[] = useMemo(
     () => [
       {
         key: 'addBtn',
         text: 'Public Models',
-        iconProps: isCVProjectClick ? openIcon : closeIcon,
-        onClick: () => setIsCVProjectClick((prev) => !prev),
+        iconProps: isIntelProjectClick ? openIcon : closeIcon,
+        onClick: () => setIsIntelProjectClick((prev) => !prev),
       },
     ],
-    [isCVProjectClick],
+    [isIntelProjectClick],
   );
 
   const ownCommandBarItems: ICommandBarItemProps[] = useMemo(
@@ -85,6 +81,19 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
   return (
     <Stack tokens={{ childrenGap: '40' }}>
       <Stack tokens={{ childrenGap: '16' }}>
+        <CommandBar
+          items={commandBarItems}
+          styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
+        />
+        {isOwnProject && (
+          <Stack horizontal tokens={{ childrenGap: '10px' }}>
+            {intelProjectList.map((project, i) => (
+              <ModelCard key={i} project={project} />
+            ))}
+          </Stack>
+        )}
+      </Stack>
+      <Stack tokens={{ childrenGap: '16' }}>
         {/* <ActionButton text="Public Models" /> */}
         <CommandBar
           items={ownCommandBarItems}
@@ -98,19 +107,6 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
           </Stack>
         )}
       </Stack>
-      {/* <Stack tokens={{ childrenGap: '16' }}>
-        <CommandBar
-          items={commandBarItems2}
-          styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
-        />
-        {isOwnProject && (
-          <Stack horizontal tokens={{ childrenGap: '10px' }}>
-            {ownProject.map((project, i) => (
-              <ModelCard key={i} project={project} />
-            ))}
-          </Stack>
-        )}
-      </Stack> */}
     </Stack>
   );
 };
@@ -140,18 +136,12 @@ const NEW_MODELS = [
 
 export default compose(
   (BaseComponent: React.ComponentType<ModelsProps>): React.FC<PassingProps> => (props) => {
-    const { onOpenCustomVision, onOpenIntelOvms, onOpenOwnUpload } = props;
+    const { onOpenCustomVision, onOpenIntelOvms, onOpenOwnUpload, trainingProjectList } = props;
 
-    const trainingProjectIsPredictionModelSelector = trainingProjectIsPredictionModelFactory();
-    const trainingProjectIsPredictionModel = useSelector(trainingProjectIsPredictionModelSelector);
+    // const trainingProjectIsPredictionModelSelector = trainingProjectIsPredictionModelFactory();
+    // const trainingProjectIsPredictionModel = useSelector(trainingProjectIsPredictionModelSelector);
 
-    const dispatch = useDispatch();
-
-    useEffect(() => {
-      dispatch(getTrainingProject(true));
-    }, [dispatch]);
-
-    if (isEmpty(trainingProjectIsPredictionModel)) {
+    if (trainingProjectList.length === 0) {
       return (
         <Stack styles={{ root: { color: '#323130' } }}>
           <Stack styles={{ root: { textAlign: 'center' } }} horizontalAlign="center">
@@ -179,8 +169,8 @@ export default compose(
             tokens={{ childrenGap: 16 }}
             horizontalAlign="center"
           >
-            {NEW_MODELS.map((model) => (
-              <div style={{ width: '300px' }}>
+            {NEW_MODELS.map((model, id) => (
+              <div key={id} style={{ width: '300px' }}>
                 <img style={{ height: '180px' }} src={model.imagePath} alt="icon" />
                 <Stack>
                   <Label styles={{ root: { marginTop: '16px', fontSize: '16px', lineHeight: '22px' } }}>
@@ -221,6 +211,6 @@ export default compose(
       );
     }
 
-    return <BaseComponent trainingProject={trainingProjectIsPredictionModel} />;
+    return <BaseComponent trainingProjectList={trainingProjectList} />;
   },
 )(BaseModel);

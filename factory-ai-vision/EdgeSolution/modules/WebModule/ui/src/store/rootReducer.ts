@@ -15,7 +15,7 @@ import trainingProjectReducer from './trainingProjectSlice';
 import scenarioReducer from './scenarioSlice';
 import cameraSettingReducer from './cameraSetting/cameraSettingReducer';
 
-import intelReduce from './IntelOvmsProjectSlice';
+import intelProjectReduce from './IntelProjectSlice';
 
 export const rootReducer = combineReducers({
   project: projectReducer,
@@ -32,5 +32,5 @@ export const rootReducer = combineReducers({
   trainingProject: trainingProjectReducer,
   scenario: scenarioReducer,
   cameraSetting: cameraSettingReducer,
-  intel: intelReduce,
+  intelProject: intelProjectReduce,
 });
