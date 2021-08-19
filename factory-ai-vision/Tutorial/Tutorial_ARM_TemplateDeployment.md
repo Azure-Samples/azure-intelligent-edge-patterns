@@ -55,7 +55,7 @@ https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge?view=iot
 
 ## 	Step 1: Click to deploy the solution using the following link:
 
-[![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flinkernetworks%2Fazure-intelligent-edge-patterns%2FOVMS-integration%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
+[![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2FAzure-Samples%2Fazure-intelligent-edge-patterns%2Fmaster%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
 
 ![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot3-2.png) 
 <br/><br/>
