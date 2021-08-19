@@ -88,8 +88,6 @@ const NodeCard = (props: Props) => {
             onConnect={(params) => setElements((els) => addEdge(params, els))}
             isConnectable={true}
             isValidConnection={(connection: Connection) => {
-              console.log('connection', connection);
-
               return isValidConnection(
                 getSourceMetadata(connection, getModel(connection.source, modelList)),
                 getTargetMetadata(connection, selectedModel),

@@ -23,6 +23,7 @@ import { selectAllCascades } from '../../store/cascadeSlice';
 import Cascades from './Cascades';
 import CascadeCreate from './CascadeCreate';
 import CascadeDetail from './CascadeDetail';
+import NameModal from './NameModal';
 
 const getClasses = () =>
   mergeStyleSets({
@@ -185,22 +186,12 @@ const CascadesContainer = () => {
         </Switch>
       </Stack>
       {isPopup && (
-        <Modal isOpen={true} onDismiss={() => setIsPopup(false)} styles={{ main: classes.model }}>
-          <Stack horizontalAlign="end">
-            <IconButton iconProps={{ iconName: 'Cancel' }} onClick={() => setIsPopup(false)} />
-          </Stack>
-          <Stack tokens={{ childrenGap: 15 }}>
-            <TextField
-              label="Input Cascade Name"
-              value={cascadeName}
-              onChange={(_, value: string) => setCascadeName(value)}
-            />
-            <Stack horizontal horizontalAlign="space-around">
-              <PrimaryButton onClick={() => setIsPopup(false)}>Save</PrimaryButton>
-              <DefaultButton onClick={() => setIsPopup(false)}>Cancel</DefaultButton>
-            </Stack>
-          </Stack>
-        </Modal>
+        <NameModal
+          onClose={() => setIsPopup(false)}
+          onSave={() => setIsPopup(false)}
+          cascadeName={cascadeName}
+          setCascadeName={setCascadeName}
+        />
       )}
     </>
   );

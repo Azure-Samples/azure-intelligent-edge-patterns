@@ -1,10 +1,12 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Stack, Text, mergeStyleSets, IContextualMenuProps, IconButton } from '@fluentui/react';
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import { Url } from '../../enums';
-import { Cascade, deleteCascade } from '../../store/cascadeSlice';
+import { Cascade, deleteCascade, updateCascade } from '../../store/cascadeSlice';
+
+import NameModal from './NameModal';
 
 interface Props {
   cascade: Cascade;
@@ -23,6 +25,9 @@ const getClasses = () =>
 const CascadesCard = (props: Props) => {
   const { cascade } = props;
 
+  const [cascadeName, setCascadeName] = useState(cascade.name);
+  const [isPopup, setIsPopup] = useState(false);
+
   const dispatch = useDispatch();
   const history = useHistory();
   const classes = getClasses();
@@ -30,6 +35,16 @@ const CascadesCard = (props: Props) => {
   const onDeleteCascade = useCallback(async () => {
     await dispatch(deleteCascade(cascade.id));
   }, [dispatch, cascade]);
+
+  const onEditCascadeName = useCallback(async () => {
+    await dispatch(
+      updateCascade({
+        id: cascade.id,
+        data: { name: cascadeName, flow: cascade.flow, raw_data: cascade.raw_data },
+      }),
+    );
+    setIsPopup(false);
+  }, [dispatch, cascade, cascadeName]);
 
   const onDirectCascadeDetail = useCallback(() => {
     history.push(Url.CASCADES + '/' + cascade.id);
@@ -41,7 +56,7 @@ const CascadesCard = (props: Props) => {
         key: 'rename',
         text: 'Rename',
         iconProps: { iconName: 'Edit' },
-        onClick: () => {},
+        onClick: () => setIsPopup(true),
       },
       // {
       //   key: 'deploy',
@@ -59,31 +74,41 @@ const CascadesCard = (props: Props) => {
         key: 'delete',
         text: 'Delete',
         iconProps: { iconName: 'Delete' },
-        onClick: () => onDeleteCascade(),
+        onClick: onDeleteCascade,
       },
     ],
   };
 
   return (
-    <Stack
-      styles={{
-        root: classes.root,
-      }}
-      onClick={onDirectCascadeDetail}
-    >
-      <img style={{ width: '300px', height: '200px' }} alt="cascadeCover" />
-      <Stack styles={{ root: { padding: '12px 16px' } }} horizontal horizontalAlign="space-between">
-        <Stack>
-          <Text styles={{ root: { fontSize: '10px', lineHeight: '14px' } }}>SECTION 29004</Text>
-          <Text styles={{ root: { fontSize: '16px', lineHeight: '22px' } }}>{cascade.name}</Text>
+    <>
+      <Stack
+        styles={{
+          root: classes.root,
+        }}
+        onClick={onDirectCascadeDetail}
+      >
+        <img style={{ width: '300px', height: '200px' }} alt="cascadeCover" />
+        <Stack styles={{ root: { padding: '12px 16px' } }} horizontal horizontalAlign="space-between">
+          <Stack>
+            <Text styles={{ root: { fontSize: '10px', lineHeight: '14px' } }}>SECTION 29004</Text>
+            <Text styles={{ root: { fontSize: '16px', lineHeight: '22px' } }}>{cascade.name}</Text>
+          </Stack>
+          <IconButton
+            styles={{ root: { color: '#212121' } }}
+            menuProps={menuProps}
+            menuIconProps={{ iconName: 'More' }}
+          />
         </Stack>
-        <IconButton
-          styles={{ root: { color: '#212121' } }}
-          menuProps={menuProps}
-          menuIconProps={{ iconName: 'More' }}
-        />
       </Stack>
-    </Stack>
+      {isPopup && (
+        <NameModal
+          onClose={() => setIsPopup(false)}
+          onSave={onEditCascadeName}
+          cascadeName={cascadeName}
+          setCascadeName={setCascadeName}
+        />
+      )}
+    </>
   );
 };
 

@@ -111,6 +111,8 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   maxPeople: data?.max_people,
 
   oldCameras: [],
+  cascade: 0,
+  deployment_type: 'model',
 });
 
 const getProjectData = (state: State): ProjectData => state.project.data;
@@ -165,8 +167,6 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
   const url = isProjectEmpty ? `/api/part_detections/` : `/api/part_detections/${projectId}/`;
   const isDemo = getState().trainingProject.isDemo.includes(projectData.trainingProject);
 
-  console.log('url', url);
-
   dispatch(postProjectRequest());
 
   return Axios(url, {
@@ -201,6 +201,8 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
         ? ''
         : new Date(projectData.countingEndTime).toUTCString(),
       max_people: projectData.maxPeople,
+      deployment_type: projectData.deployment_type,
+      cascade: projectData.cascade,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {
