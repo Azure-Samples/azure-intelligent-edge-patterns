@@ -14,8 +14,7 @@ if you don’t have one, you can create one here: https://azure.microsoft.com/en
 3.	Azure Custom Vision account, see the below link to find your training key here and learn more here
 <br/><br/>
 
-![Diagram - Custom vision setting path](
-https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot1.png) 
+![Diagram - Custom vision setting path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot1.png) 
 <br/><br/>
 
 
@@ -23,7 +22,7 @@ https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/fac
 
 ## Step 3: Create a new account, can get the app at the Azure Marketplace
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot1.1.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot1.1.png) 
 <br/><br/>
 
 ## Please follow below links for reference
@@ -33,17 +32,17 @@ https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/fac
 
 •	https://portal.azure.com/?microsoft_azure_marketplace_ItemHideKey=microsoft_azure_cognitiveservices_customvision#create/Microsoft.CognitiveServicesCustomVision
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot1.2.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot1.2.png) 
 <br/><br/>
 
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot1.3.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot1.3.png) 
 <br/><br/>
 
 
 ## Step4: Choose the resources under the account; you will see information of “Key” and “Endpoint”
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot2.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot2.png) 
 <br/><br/>
 
 ## Additonal Prerequisites
@@ -56,11 +55,11 @@ https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge?view=iot
 
 # Get Started :
 
-## 	Step 1: Open your browser and paste the link
+## 	Step 1: Click to deploy the solution using the following link:
 
-https://portal.azure.com/#create/Microsoft.Template
+[![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flinkernetworks%2Fazure-intelligent-edge-patterns%2FOVMS-integration%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot3-2.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot3-2.png) 
 <br/><br/>
 
 ## Step 1.1: Please fill the below mandatory field and check the below instruction of each field to decide the information needed for go ahead.
@@ -70,7 +69,7 @@ https://portal.azure.com/#create/Microsoft.Template
 Definition:  All resources in an Azure subscription are billed together.  
  Example: Microsoft Azure Sponsorship
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot4.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot4.png) 
 <br/><br/>
 
 ### 1.1.2: Resource Group: 
@@ -78,12 +77,12 @@ Definition:  All resources in an Azure subscription are billed together.
 Definition:  A resource group is a collection of resources that share the same life cycles, permissions and policies.  
 Example: customvision
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot5.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot5.png) 
 <br/><br/>
 
-A resource group can be created by click “Create new”
+A resource group can be created by clicking on “Create new”
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot6.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot6.png) 
 <br/><br/>
 
 ## Step 1.2: Please fill “Instance Details” as below:
@@ -93,14 +92,14 @@ A resource group can be created by click “Create new”
 Definition:   Choose the Azure region that’s right for you and your customers. Not every resource is available in every region.  
 Example: East US
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot7.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot7.png) 
 <br/><br/>
 
 ### 1.2.2: Device Architecture: 
 Definition:   Specify the Architecture of the Edge Device. Currently supported values are “X86” and “ARM64”. 
 Example: X86 or ARM64
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot8.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot8.png) 
 <br/><br/>
 
 ### 1.2.3: Module Runtime: 
@@ -113,12 +112,12 @@ o	or to use movidius set it to “MOVIDIUS“
 Example:  
 o	If You selected X86 in Device Architecture in 1.2.2 then you will see below option 
    •	cpu 
-   •  gpu (NVIDIA cude 11) 
+   • gpu (NVIDIA cude 11) 
    •	vpu(Movidius) 
 o	If You selected ARM64 in Device Architecture in 1.2.2 then you will see below option 
    • Jetson(Jetpack 4.4)
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot9.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot9.png) 
 <br/><br/>
 
 
@@ -127,28 +126,24 @@ Definition:   Select video capture module to deal with the media source.
 •	Azure Video Analyzer (AVA): is a series from Microsoft that enables developers to capture, record, analyze live video and publish the results (video  and /or video analytics) to Azure services (in the cloud and/or the edge) 
 •	OpenCV: is an open source library that includes several hundreds of computer vision Algorithm.
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot10-2.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot10-2.png) 
 <br/><br/>
 
 ### 1.2.5: IOT HUB Name: 
-Definition:   Enter the Name of Existing IOT Hub learn more from link
+Definition: Enter the name of your existing IOTHub Resource.
 
-https://portal.azure.com/#@linkernetworks.com/resource/subscriptions/091725d9-aeba-4638-8faf-d0e81a03a93d/resourceGroups/customvision/providers/Microsoft.Devices/IotHubs/customvision/Overview
-
-Example: customvision
-
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot11.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot11.png) 
 <br/><br/>
 
 
 ### 1.2.6: Edge Device Name: 
-Definition:   Enter the existing IOT Hub Edge Device. learn more from link
+Definition:   Enter the existing IOTHub Edge Device. learn more from link
 
 https://portal.azure.com/#@linkernetworks.com/resource/subscriptions/091725d9-aeba-4638-8faf-d0e81a03a93d/resourceGroups/customvision/providers/Microsoft.Devices/IotHubs/customvision/EdgeExplorer
 
 Example: cam5
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot12.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot12.png) 
 <br/><br/>
 
 
@@ -158,7 +153,7 @@ Definition:   Enter the existing CustomVision service. learn more from link
 https://www.customvision.ai/projects
 Example: factoryai
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot13.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot13.png) 
 <br/><br/>
 
 ### 1.2.8: Edge Token: 
@@ -175,39 +170,39 @@ https://azure.microsoft.com/en-us/products/video-analyzer/
 ## 1.3: After Filled above fields as definition we will have below two filled scenario 
 ### 1.3.1: When Video Capture Module = AVA
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot20-2.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot20-2.png) 
 <br/><br/>
 
 ### •	Then click “Review + Create”
 
 ### 1.3.2: When Video Capture Module = OpenCV
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot21-2.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot21-2.png) 
 <br/><br/>
 
 ### •	Then click “Review + Create”  
 1.4: After click “Review + Create” in step 1.3 Deployment Process will as below screen
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot22.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot22.png) 
 <br/><br/>
 
 •	Press “Create” for finish the deployment.  
 Note: The Installation will take some time. Please wait for couple of minutes to complete the installation. 
 You can check the deployment on the Azure portal.
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot23.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot23.png) 
 <br/><br/>
 
 ### •	Press “Go to Resource Group” to get selected “Edge Device Name” to get the IP address. 
 For example: Edge Device Name = cam5
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot24.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot24.png) 
 <br/><br/>
 
 
 ### •	Press Edge device Name “cam 5” to get selected get the IP address.
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot25.png) 
+![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot25.png) 
 <br/><br/>
 
 
