@@ -14,6 +14,7 @@ import {
 import { createWrappedAsync } from './shared/createWrappedAsync';
 import { getParts } from './partSlice';
 import { thunkGetAllCvProjects } from './setting/settingAction';
+import { selectAllCascades } from './cascadeSlice';
 
 type TrainingProjectCategory = 'customvision' | 'OVMS';
 
@@ -149,8 +150,6 @@ export const createNewTrainingProject = createWrappedAsync<any, string, { state:
 
     dispatch(refreshTrainingProject());
 
-    console.log('createNewTrainingProject', response.data);
-
     return normalize(response.data);
   },
 );
@@ -165,8 +164,6 @@ export const createCustomVisionProjectAndModel = createWrappedAsync<any, string,
     dispatch(
       pullCVProjects({ selectedCustomvisionId: response.data.customvision_id, loadFullImages: false }),
     );
-
-    console.log('createNewTrainingProject', response.data);
 
     return normalize(response.data);
   },
@@ -199,8 +196,6 @@ export const updateCustomVisionProjectTags = createWrappedAsync<
   { state: State }
 >('trainingSlice/updateCustomVisionTags', async ({ id, tags }, { dispatch }) => {
   const response = await Axios.post(`/api/projects/${id}/update_tags`, { tags });
-
-  console.log('createNewTrainingProject', response.data);
 
   dispatch(getParts());
   dispatch(refreshTrainingProject());
@@ -298,17 +293,27 @@ export const selectNonDemoProject = getNonDemoSelector('trainingProject', select
  */
 export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number) =>
   createSelector(
-    [selectAllTrainingProjects, (state: State) => state.scenario],
-    (trainingProjects, scenarios) => {
+    [selectAllTrainingProjects, (state: State) => state.scenario, selectAllCascades],
+    (trainingProjects, scenarios, cascadeList) => {
       const relatedScenario = scenarios.find((e) => e.trainingProject === trainingProjectId);
 
-      return trainingProjects
+      let optionsList = trainingProjects
         .filter((t) => !t.isDemo || t.id === relatedScenario?.trainingProject)
-        .filter((t) => t.id !== 9)
+        .filter((t) => t.id !== 20)
+        .filter((t) => !t.isCascade)
         .map((e) => ({
           key: e.id,
           text: e.name,
+          title: 'model',
         }));
+
+      if (trainingProjectId === null) {
+        optionsList = [...optionsList].concat(
+          cascadeList.map((cascade) => ({ key: cascade.id, text: cascade.name, title: 'cascade' })),
+        );
+      }
+
+      return optionsList;
     },
   );
 
