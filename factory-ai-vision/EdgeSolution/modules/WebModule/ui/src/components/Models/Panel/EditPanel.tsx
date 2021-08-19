@@ -47,6 +47,7 @@ const EditPanel: React.FC<Props> = (props) => {
   const [localTag, setLocalTag] = useState('');
   const [localTags, setLocalTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [name, setName] = useState(project.name);
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -116,12 +117,30 @@ const EditPanel: React.FC<Props> = (props) => {
       <Stack styles={{ root: classes.itemWrapper }} tokens={{ childrenGap: 16 }}>
         <Stack>
           <Label styles={{ root: classes.itemTitle }}>Source</Label>
-          <Text styles={{ root: classes.item }}>Microsoft Custom Vision</Text>
+          <Text styles={{ root: classes.item }}>
+            {project.category === 'OVMS' ? 'Intel' : 'Microsoft Custom Vision'}
+          </Text>
         </Stack>
         <Stack>
           <Label styles={{ root: classes.itemTitle }}>Trainable</Label>
-          <Text styles={{ root: classes.item }}>True</Text>
+          <Text styles={{ root: classes.item }}>{project.category === 'OVMS' ? 'False' : 'True'}</Text>
         </Stack>
+        {project.category === 'OVMS' && (
+          <Stack>
+            <Label styles={{ root: classes.itemTitle }}>Category</Label>
+            <Text styles={{ root: classes.item }}>{project.projectType}</Text>
+          </Stack>
+        )}
+        {project.category === 'OVMS' && (
+          <Stack>
+            <Label styles={{ root: classes.itemTitle }}>Object / Tags</Label>
+          </Stack>
+        )}
+        {project.category === 'OVMS' && (
+          <Stack>
+            <TextField label="Name" value={name} onChange={(_, newValue) => setName(newValue)} required />
+          </Stack>
+        )}
         {project.customVisionId && (
           <>
             <Stack>
@@ -152,20 +171,22 @@ const EditPanel: React.FC<Props> = (props) => {
           </>
         )}
       </Stack>
-      <Stack styles={{ root: classes.tagsWrapper }} tokens={{ childrenGap: '10px' }}>
-        <TextField
-          label="Objects/Tags"
-          value={localTag}
-          onChange={(_, newValue) => setLocalTag(newValue)}
-          onKeyPress={onTagAdd}
-          required
-        />
-        <Stack horizontal tokens={{ childrenGap: '8px' }} wrap>
-          {localTags.map((part, id) => (
-            <Tag key={id} id={id} text={part} isDelete onDelete={onRemoveTag} />
-          ))}
+      {project.customVisionId !== '' && (
+        <Stack styles={{ root: classes.tagsWrapper }} tokens={{ childrenGap: '10px' }}>
+          <TextField
+            label="Objects/Tags"
+            value={localTag}
+            onChange={(_, newValue) => setLocalTag(newValue)}
+            onKeyPress={onTagAdd}
+            required
+          />
+          <Stack horizontal tokens={{ childrenGap: '8px' }} wrap>
+            {localTags.map((part, id) => (
+              <Tag key={id} id={id} text={part} isDelete onDelete={onRemoveTag} />
+            ))}
+          </Stack>
         </Stack>
-      </Stack>
+      )}
     </Panel>
   );
 };

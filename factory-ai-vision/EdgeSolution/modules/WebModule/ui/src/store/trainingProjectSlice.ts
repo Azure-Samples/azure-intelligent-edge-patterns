@@ -26,7 +26,7 @@ export type TrainingProject = {
   predictionUri: string;
   predictionHeader: string;
   category: TrainingProjectCategory;
-  project_type: 'ObjectDetection' | 'Classification';
+  projectType: 'ObjectDetection' | 'Classification';
 };
 
 export type CreatOwnModelPayload = {
