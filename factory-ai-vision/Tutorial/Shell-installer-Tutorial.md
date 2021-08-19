@@ -29,33 +29,31 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 <br/>You would be asked:
 <br/>Would you like to use an existing Custom Vision Service? (y or n):  y 
 <br/>To learn more about Custom Vision Service, please refer the linke [here](https://azure.microsoft.com/en-us/services/cognitive-services/custom-vision-service/)
-<br/>If you choose “yes”, you will asking to input endpoint and key.
+<br/>If you choose “yes”, you will asked to input your training endpoint and key.
 <br/>Please enter your Custom Vision endpoint: xxxxxx
 <br/>Please enter your Custom Vision Key: xxxxxx
 <br/> You can find your training key [here](https://www.customvision.ai/projects#/setting)
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step4.png)
 
-7. If you choose not to use existing account, please go ahead to create a new one with the instruction
+7. If you choose not to use an existing account, please go ahead and create a new one using the instruction
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step5.png)
 
-8. Once you input Custom Vision account information. The next you will be able to choose if you want to install the solution with AVA or OpenCV. 
-
+8. Once you input Custom Vision account information. Next, you will be able to choose if you want to install the solution with AVA or OpenCV Video Pipeline Manager backend. 
 <br/>Do you want to install with Azure Video Analyzer? (y or n): 
 <br/>If you choose “YES”, then you have to provide your Video Analyzer Edge modules' provisioning token. You can get/generate your provisioning token by following parts of the following document: https://docs.microsoft.com/en-us/azure/azure-video-analyzer/video-analyzer-docs/get-started-detect-motion-emit-events-portal#create-a-video-analyzer-account-in-the-azure-portal
-
 <br/>If you choose “NO”, OpenCV version of the solution will be installed.
 
-10. There will be a list of IoT hubs, please choose “customvision”
+9. There will be a list of IoT Hubs resources listed. Please choose your desired/appropriate resource.
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step8.png)
 
-11. It will show a list of devices in your account, and choose the device to install your visiononedge 
+10. It will show a list of devices in your account, and choose the device to install your visiononedge 
 <br/>You will be asked if your device has a GPU
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step9.png)
 
-12. The installation will be started after. Please wait for couple minutes to complete the installation. 
+11. The installation will be started after. Please wait for couple minutes to complete the installation. 
 <br/> You can check the deployment status on the [Azure portal](https://portal.azure.com/#home)
 
-13. Go to your device --> Properties-->Networking--> 
+12. Go to your device --> Properties-->Networking--> 
 
 Public IP address(  get your IP address)
 168.63.246.174
@@ -63,7 +61,7 @@ Public IP address(  get your IP address)
 Open your browser, connect to http://YOUR_IP:8181
 e.g.  connect to http://168.63.246.174:8181
 
-14. Check out our tutorials on youtube channel 
+13. Check out our tutorials on youtube channel 
 
 
 - Tutorial 2 - <a href="https://youtu.be/dihAdZTGj-g" target="_blank">Start with prebuilt scenario</a>
