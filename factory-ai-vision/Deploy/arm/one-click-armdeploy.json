@@ -671,7 +671,7 @@
                     "autoUpgradeMinorVersion": true,
                     "settings": {
                       "fileUris": [
-                        "https://raw.githubusercontent.com/kaka-lin/azure-intelligent-edge-patterns/develop/factory-ai-vision/Deploy/arm/scripts/install-nvidia-driver.sh",
+                        "https://raw.githubusercontent.com/Azure-Samples/azure-intelligent-edge-patterns/master/factory-ai-vision/Deploy/arm/scripts/install-nvidia-driver.sh",
                       ],
                       "commandToExecute": "[concat('./install-nvidia-driver.sh ', parameters('adminUsername'))]"
                     }
