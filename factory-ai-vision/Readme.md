@@ -37,9 +37,6 @@ Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief
   * [For Azure IoT Edge](#for-azure-iotedge-devices-recommended)
     + [Option 1: Azure Shell Installer](#option-1-azure-shell-installer-recommended)
     + [Option 2: Azure ARM Template](#option-2-azure-arm-template)
-    + [Option 3: Deploy by Visual studio](#option-3-deploy-by-visual-studio)
-      - [Prerequisites](#prerequisites-1)
-      - [Get Started](#get-started-1)
   * [For Kubernetes (AKS/AKS-HCI/ASE K8s)(Beta)](#for-kubernetes-aksaks-hciase-k8sbeta)
     + [Option 1: VoE Helm Chart (Recommended)](#option-1-voe-helm-chart-recommended)
     + [Option 2: Static Kubernetes YAML](#option-2-static-kubernetes-yaml)
@@ -110,96 +107,6 @@ Please follow the [instructions given here](Tutorial/Shell-installer-Tutorial.md
 [![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flinkernetworks%2Fazure-intelligent-edge-patterns%2FOVMS-integration%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
 
 Please follow [the following document](Tutorial/Tutorial_ARM_TemplateDeployment.md) to learn more about our Azure ARM deployment.
-
-### Option 3: Deploy by Visual studio
-
-
-#### Prerequisites:
-
- - Before installation, You must have the following services set up to use Vision on Edge:
-
-1.  **Azure Container Registry**, please follow the document to create one https://docs.microsoft.com/en-us/azure/container-registry/
-2.  **Visual Studio Code**: IoT Edge development environment. [Download it from here](https://code.visualstudio.com/).
-3.  **Visual Studio Code: Azure IoT Edge Extension**: An extension that connects to your IoT Hub and lets you manage your IoT Devices and IoT Edge Devices right from VS Code. A must-have for IoT Edge development. [Download it from here](https://marketplace.visualstudio.com/items?itemName=vsciot-vscode.azure-iot-edge). Once installed, connect it to your IoT Hub.
-
-To learn more about this development environment, check out [this tutorial](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-deploy-modules-vscode) and [this video](https://www.youtube.com/watch?v=C5eTQ1cwlLk&t=1s&index=35&list=PLlrxD0HtieHh5_pOv-6xsMxS3URD6XD52):
-
-[![Visual Studio Code Extension Video](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/develop/factory-ai-vision/assets/VSCodeExtensionVideo.png)](https://www.youtube.com/watch?v=C5eTQ1cwlLk&t=1s&index=35&list=PLlrxD0HtieHh5_pOv-6xsMxS3URD6XD52)
-
-#### Get Started:
-
-- Clone azure intelligent edge patterns branch
-
-  ```bash
-  git clone https://github.com/Azure-Samples/azure-intelligent-edge-patterns.git
-  ```
-
-- Go to factoryai directory and open your vscode
-
-  ```bash
-  cd azure-intelligent-edge-patterns/factory-ai-vision
-  ```
-
-- Edit the `env-template` file, you should see something like this
-
-  ```bash
-  # For Azure Container Registry
-  CONTAINER_REGISTRY_NAME=""
-  CONTAINER_REGISTRY_USERNAME=""
-  CONTAINER_REGISTRY_PASSWORD=""
-
-  # For Azure IoT Hub
-  IOTHUB_CONNECTION_STRING=""
-
-  # FOR Media Services
-  SUBSCRIPTION_ID=""
-  RESOURCE_GROUP=""
-  TENANT_ID=""
-  SERVICE_NAME=""
-  SERVICE_PRINCIPAL_APP_ID=""
-  SERVICE_PRINCIPAL_SECRET=""
-  ```
-
-- Please fill in your credentials and rename it as `.env`, vscode will use this file to set the environment variables
-
-- Choose a deployment template that suites your Edge device.
-
-  - For Azure Stack Edge =>
-    `deployment.ase.gpu.template.json`
-  - For x86 device with CPU =>
-    `deployment.cpu.template.json`
-  - For x86 device with CPU =>
-    `deployment.gpu.template.json`
-  - using an arm64v8 device with CPU =>
-    `deployment.cpu.arm64v8.template.json`
-  - using an arm64v8 device with GPU =>
-    `deployment.gpu.arm64v8.template.json`
-
-  In this instruction, we take `deployment.gpu.template.json` for instance.
-
-- Find `deployment.gpu.template.json` under `EdgeSolution` directory in vscode, right click on it, choose "Build and Push Iot Edge Solution". It'll start to build the container, you should expect to wait for more than 10 mins if it's the first time you build the container.
-
-- Find `deployment.gpu.amd64.json` under `EdgeSolution/config` directory in vscode, right click on it, choose "Create Deployment to Single Device", select your device to deploy, you should expect the edge will pull the container for more than 10 mins if it's the first time.
-
-- Go to your device (via ssh), use `docker ps` to check whether all the modules are pulled and running. You should see 6 modules running including:
-
-  a. webmodule
-
-  b. inferencemodule
-
-  c. rtspsimmodule
-
-  d. webdbmodule
-  
-  e. predictmodule
-  
-  f. uploadmodule
-
-  g. azureiotedge-hub
-
-  h. azureiotedge-agent
-
-- Please wait until all 6 are running. Open your browser and connect [http://YOUR_DEVICE_IP:8181](http://YOUR_DEVICE_IP:8181)
 
 ## For Kubernetes (AKS/AKS-HCI/ASE K8s)(Beta)
 
