@@ -8,10 +8,10 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 
 1. You must have an Azure subscription.
 <br/> if you don’t have one, you can create one here: https://azure.microsoft.com/en-us/pricing/purchase-options/pay-as-you-go/
-2. That subscription must contain Azure Stack Edge with compute enabled as per [documentaton here](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-deploy-configure-compute) or IoT hub Edge device with port 8181 opened. please follow this [documentation](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/CreateIoTEdgeDevice.md) for deployment information
+2. If you are deploying the solution to an Azure Stack Edge device, your subscription must contain Azure Stack Edge with compute enabled as per [documentaton here](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-deploy-configure-compute) or IoT hub Edge device with port 8181 opened. please follow this [documentation](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/CreateIoTEdgeDevice.md) for deployment information
 3. Azure Custom Vision account, see the below link to find your training key [here](https://www.customvision.ai/projects#/settings) and learn more [here](https://azure.microsoft.com/en-us/services/cognitive-services/custom-vision-service/)
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/customvisioninfo.png)
-4. (Optional) Azure Media Service, please follow the document to create one https://docs.microsoft.com/en-us/azure/media-services/latest/create-account-howto?tabs=portal
+4. (Optional) Azure Video Analyzer, please follow the "Create Video Analyzer Account" section of this document to create one https://docs.microsoft.com/en-us/azure/azure-video-analyzer/video-analyzer-docs/get-started-detect-motion-emit-events-portal#create-a-video-analyzer-account-in-the-azure-portal
 5. (Optional) Azure Time Series Insight environment. If you would like to use the Azure portal to add an event source that reads data from Azure IoT Hub to your Azure Time Series Insights environment, please follow this instruction https://docs.microsoft.com/en-us/azure/time-series-insights/how-to-ingest-data-iot-hub  
    
 ### Get Started:
@@ -38,23 +38,18 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 7. If you choose not to use existing account, please go ahead to create a new one with the instruction
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step5.png)
 
-8. Once you input custom vision account information. The next you will be able to choose if you want to install with LVA or opencv. 
-<br/>Do you want to install with Azure Live Video Analytics? (y or n): 
-<br/>If you choose YES, select from one of listing Azure Media Service in your account.
-<br/>And Choose the number corresponding to your Azure Media Service. This is where you will be asked for the principle secret 
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step6.png)
+8. Once you input Custom Vision account information. The next you will be able to choose if you want to install the solution with AVA or OpenCV. 
 
-9. Or if you don’t have one, but you would like to install with LVA, please go ahead and create a [new account] and come back to continue the installer. 
-<br/>And please copy the "SERVICE-PRINCIPLE-SECRET" information in the bottom
-<br/>You will need the secret information for later use
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step7.png)
-<br/>You will being with opencv installation if you choose “no”
+<br/>Do you want to install with Azure Video Analyzer? (y or n): 
+<br/>If you choose “YES”, then you have to provide your Video Analyzer Edge modules' provisioning token. You can get/generate your provisioning token by following parts of the following document: https://docs.microsoft.com/en-us/azure/azure-video-analyzer/video-analyzer-docs/get-started-detect-motion-emit-events-portal#create-a-video-analyzer-account-in-the-azure-portal
+
+<br/>If you choose “NO”, OpenCV version of the solution will be installed.
 
 10. There will be a list of IoT hubs, please choose “customvision”
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step8.png)
 
 11. It will show a list of devices in your account, and choose the device to install your visiononedge 
-<br/>You will be asking if your device have a GPU or not
+<br/>You will be asked if your device has a GPU
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step9.png)
 
 12. The installation will be started after. Please wait for couple minutes to complete the installation. 
