@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
 import { Url } from '../../enums';
-import { Cascade, deleteCascade, updateCascade } from '../../store/cascadeSlice';
+import { Cascade, deleteCascade, updateCascade, createCascade } from '../../store/cascadeSlice';
 
 import NameModal from './NameModal';
 
@@ -46,6 +46,16 @@ const CascadesCard = (props: Props) => {
     setIsPopup(false);
   }, [dispatch, cascade, cascadeName]);
 
+  const onDuplicateCascade = useCallback(async () => {
+    await dispatch(
+      createCascade({
+        name: `${cascade.name} (1)`,
+        flow: cascade.flow,
+        raw_data: cascade.raw_data,
+      }),
+    );
+  }, [cascade]);
+
   const onDirectCascadeDetail = useCallback(() => {
     history.push(Url.CASCADES + '/' + cascade.id);
   }, [history, cascade]);
@@ -68,7 +78,7 @@ const CascadesCard = (props: Props) => {
         key: 'duplicate',
         text: 'Duplicate',
         iconProps: { iconName: 'Copy' },
-        onClick: () => {},
+        onClick: onDuplicateCascade,
       },
       {
         key: 'delete',

@@ -3,5 +3,5 @@ import { ProjectData } from '../../store/project/projectTypes';
 export type OnChangeType = <K extends keyof ProjectData>(
   key: K,
   value: ProjectData[K],
-  optionalValue?: string,
+  optional?: { type: string; value: number },
 ) => void;
