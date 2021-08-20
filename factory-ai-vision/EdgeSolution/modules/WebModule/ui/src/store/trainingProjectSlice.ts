@@ -297,7 +297,7 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
     (trainingProjects, scenarios, cascadeList) => {
       const relatedScenario = scenarios.find((e) => e.trainingProject === trainingProjectId);
 
-      let optionsList = trainingProjects
+      const optionsList = trainingProjects
         .filter((t) => !t.isDemo || t.id === relatedScenario?.trainingProject)
         .filter((t) => t.id !== 20)
         .filter((t) => !t.isCascade)
@@ -306,12 +306,6 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
           text: e.name,
           title: 'model',
         }));
-
-      if (trainingProjectId === null) {
-        optionsList = [...optionsList].concat(
-          cascadeList.map((cascade) => ({ key: cascade.id, text: cascade.name, title: 'cascade' })),
-        );
-      }
 
       return optionsList;
     },

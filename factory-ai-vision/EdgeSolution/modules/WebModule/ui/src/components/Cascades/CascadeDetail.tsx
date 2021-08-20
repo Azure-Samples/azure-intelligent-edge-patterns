@@ -53,7 +53,7 @@ const CascadeDetail = (props: Props) => {
       key: 'addBtn',
       text: 'Save',
       iconProps: {
-        iconName: 'Add',
+        iconName: 'Save',
       },
       onClick: () => {
         onSaveCascade();
