@@ -74,13 +74,6 @@ const CascadesContainer = () => {
       onClick: () => history.go(0),
     },
     {
-      key: 'undo',
-      text: 'Undo',
-      iconProps: {
-        iconName: 'Undo',
-      },
-    },
-    {
       key: 'feedback',
       text: 'Feedback',
       iconProps: {
