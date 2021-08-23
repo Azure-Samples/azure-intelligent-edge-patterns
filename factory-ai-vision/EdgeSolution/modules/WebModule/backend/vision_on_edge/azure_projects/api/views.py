@@ -3,22 +3,25 @@
 
 from __future__ import absolute_import, unicode_literals
 
+import os
 import datetime
 import logging
 from distutils.util import strtobool
+import json
+import glob
 
 from azure.cognitiveservices.vision.customvision.training.models import (
-    CustomVisionErrorException,
-)
+    CustomVisionErrorException, )
 from django.utils import timezone
 from drf_yasg2 import openapi
 from drf_yasg2.utils import swagger_auto_schema
 from filters.mixins import FiltersMixin
-from rest_framework import filters, viewsets
+from rest_framework import filters, viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
 
 from ...azure_settings.exceptions import SettingCustomVisionAccessFailed
+from ...azure_settings.models import Setting
 from ...general.api.serializers import (
     MSStyleErrorResponseSerializer,
     SimpleOKSerializer,
@@ -35,6 +38,7 @@ from .serializers import (
     CreateCVProjectSerializer,
     UpdateTagSerializer,
 )
+from ..ovms_config_utils import create_config, get_model_info
 
 logger = logging.getLogger(__name__)
 
@@ -50,7 +54,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
     queryset = Project.objects.all()
     serializer_class = ProjectSerializer
-    filter_backends = (filters.OrderingFilter,)
+    filter_backends = (filters.OrderingFilter, )
     filter_mappings = {"is_demo": "is_demo"}
 
     @swagger_auto_schema(operation_summary="Keep relabel alive.")
@@ -60,8 +64,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         queryset = self.get_queryset()
         instance = drf_get_object_or_404(queryset, pk=pk)
         instance.relabel_expired_time = timezone.now() + datetime.timedelta(
-            seconds=PROJECT_RELABEL_TIME_THRESHOLD
-        )
+            seconds=PROJECT_RELABEL_TIME_THRESHOLD)
         instance.save(update_fields=["relabel_expired_time"])
         serializer = ProjectSerializer(instance)
         return Response(serializer.data)
@@ -99,8 +102,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             iteration_status = iteration["status"]
             if iteration_status == "Completed":
                 performance = trainer.get_iteration_performance(
-                    customvision_project_id, iteration["id"]
-                ).as_dict()
+                    customvision_project_id, iteration["id"]).as_dict()
                 precision = performance["precision"]
                 recall = performance["recall"]
                 mAP = performance["average_precision"]
@@ -126,23 +128,25 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                 "recall": 0.0,
                 "mAP": 0.0,
             }
-            iteration_serialzer = IterationPerformanceSerializer(data=iteration_data)
+            iteration_serialzer = IterationPerformanceSerializer(
+                data=iteration_data)
             if iteration_serialzer.is_valid(raise_exception=True):
                 res_data["iterations"].append(iteration_serialzer.data)
-            project_performance_serializer = ProjectPerformanesSerializer(data=res_data)
+            project_performance_serializer = ProjectPerformanesSerializer(
+                data=res_data)
         else:
             iterations = trainer.get_iterations(customvision_project_id)
             for i in range(min(2, len(iterations))):
                 iteration_data = _parse(
-                    iterations[i], iteration_name=("new" if i == 0 else "previous")
-                )
+                    iterations[i],
+                    iteration_name=("new" if i == 0 else "previous"))
                 iteration_serialzer = IterationPerformanceSerializer(
-                    data=iteration_data
-                )
+                    data=iteration_data)
                 if iteration_serialzer.is_valid(raise_exception=True):
                     res_data["iterations"].append(iteration_serialzer.data)
 
-        project_performance_serializer = ProjectPerformanesSerializer(data=res_data)
+        project_performance_serializer = ProjectPerformanesSerializer(
+            data=res_data)
         if project_performance_serializer.is_valid(raise_exception=True):
             return Response(data=project_performance_serializer.data)
 
@@ -157,7 +161,10 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                 required=True,
             )
         ],
-        responses={"200": ProjectSerializer, "400": MSStyleErrorResponseSerializer},
+        responses={
+            "200": ProjectSerializer,
+            "400": MSStyleErrorResponseSerializer
+        },
     )
     @action(detail=True, methods=["get"])
     def reset_project(self, request, pk=None) -> Response:
@@ -185,7 +192,10 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
         try:
             # Let Signals to handle if we need to delete Part/Image
-            project_obj = create_cv_project_helper(name=serializer.validated_data["name"], tags=serializer.validated_data["tags"], project_type=serializer.validated_data["project_type"])
+            project_obj = create_cv_project_helper(
+                name=serializer.validated_data["name"],
+                tags=serializer.validated_data["tags"],
+                project_type=serializer.validated_data["project_type"])
             serializer = ProjectSerializer(project_obj)
             return Response(serializer.data)
         except CustomVisionErrorException:
@@ -200,7 +210,9 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
 
         try:
-            project_obj = update_tags_helper(project_id=project_obj.id, tags=serializer.validated_data["tags"])
+            project_obj = update_tags_helper(
+                project_id=project_obj.id,
+                tags=serializer.validated_data["tags"])
             return Response({"status": "ok"})
         except CustomVisionErrorException:
             raise SettingCustomVisionAccessFailed
@@ -221,7 +233,10 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                 description="partial download or not",
             ),
         ],
-        responses={"200": SimpleOKSerializer, "400": MSStyleErrorResponseSerializer},
+        responses={
+            "200": SimpleOKSerializer,
+            "400": MSStyleErrorResponseSerializer
+        },
     )
     @action(detail=True, methods=["get"])
     def pull_cv_project(self, request, pk=None) -> Response:
@@ -230,7 +245,8 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         project_obj = drf_get_object_or_404(queryset, pk=pk)
 
         # Check Customvision Project id
-        customvision_project_id = request.query_params.get("customvision_project_id")
+        customvision_project_id = request.query_params.get(
+            "customvision_project_id")
         logger.info("Project customvision_id: %s", {customvision_project_id})
 
         # Check Partial
@@ -249,7 +265,10 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
     @swagger_auto_schema(
         operation_summary="Train project in background.",
-        responses={"200": SimpleOKSerializer, "400": MSStyleErrorResponseSerializer},
+        responses={
+            "200": SimpleOKSerializer,
+            "400": MSStyleErrorResponseSerializer
+        },
     )
     @action(detail=True, methods=["get"])
     def train(self, request, pk=None) -> Response:
@@ -260,11 +279,58 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         TRAINING_MANAGER.add(project_id=pk)
         return Response({"status": "ok"})
 
+    @action(detail=True, methods=["get"])
+    def get_default_ovms_model(self, request, pk=None) -> Response:
+        """Get default OVMS model"""
+        queryset = self.get_queryset()
+        project_obj = drf_get_object_or_404(queryset, pk=pk)
+
+        model_infos = {}
+        model_infos = get_model_info()
+        response_data = {"model_infos": model_infos}
+        return Response(response_data, status=status.HTTP_200_OK)
+
+    @action(detail=True, methods=["post"])
+    def add_ovms_model(self, request, pk=None) -> Response:
+        """Create/Add OVMS model"""
+
+        queryset = self.get_queryset()
+
+        model_name = request.data['model_name']
+        project_type = request.data['project_type']
+        models = [
+            "face_detection", "age_gender_recognition", "emotion_recognition"
+        ]
+
+        if model_name in models:
+            setting_obj = Setting.objects.first()
+            config = create_config(model_name)
+            response_data = {}
+
+            if config:
+                project_obj = Project.objects.create(is_demo=False,
+                                                     setting=setting_obj,
+                                                     name=model_name,
+                                                     project_type=project_type,
+                                                     category="OVMS")
+
+                response_data = {"status": "OK"}
+                return Response(response_data, status=status.HTTP_200_OK)
+            else:
+                response_data = {
+                    "status": "Config file error",
+                }
+                return Response(response_data,
+                                status=status.HTTP_400_BAD_REQUEST)
+        else:
+            response_data = {"status": "Model Dose Not Exist"}
+            return Response(response_data, status=status.HTTP_400_BAD_REQUEST)
+
 
 class TaskViewSet(FiltersMixin, viewsets.ModelViewSet):
     """Task ModelViewSet"""
 
     queryset = Task.objects.all()
     serializer_class = TaskSerializer
-    filter_backends = (filters.OrderingFilter,)
+    filter_backends = (filters.OrderingFilter, )
     filter_mappings = {"project": "project"}

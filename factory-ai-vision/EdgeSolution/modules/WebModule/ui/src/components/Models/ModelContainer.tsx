@@ -8,14 +8,20 @@ import {
   Breadcrumb,
   mergeStyleSets,
 } from '@fluentui/react';
-import { useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-// import AddPanel from '../components/Models/Panel/AddPanel';
+import {
+  getTrainingProject,
+  trainingProjectIsPredictionModelFactory,
+  TrainingProject as TrainingProjectType,
+} from '../../store/trainingProjectSlice';
+import { State as RootState } from 'RootStateType';
+import { selectAllIntelProject } from '../../store/IntelProjectSlice';
+
 import Model from './Model';
-import { getParts } from '../../store/partSlice';
 import AddCustomVision from './Panel/AddCustomVision';
-import IntelOvmsDashboard from './IntelOvmsDashboard';
+import IntelProjectDashboard from './IntelProjectDashboard';
 
 const getClasses = () =>
   mergeStyleSets({
@@ -29,18 +35,16 @@ const getClasses = () =>
   });
 
 const ModelContainer = () => {
-  // const [isOpen, setIsOpen] = useState(false);
   const [isAddCustomVision, setIsAddCustomVision] = useState(false);
   const [isAddIntelOvms, setIsAddIntelOvms] = useState(false);
   const [isAddUpload, setIsAddUpload] = useState(false);
 
-  const history = useHistory();
-  const dispatch = useDispatch();
-  const classes = getClasses();
+  const trainingProjectIsPredictionModelSelector = trainingProjectIsPredictionModelFactory();
+  const trainingProjectList = useSelector(trainingProjectIsPredictionModelSelector);
+  const intelProjectList = useSelector((state: RootState) => selectAllIntelProject(state));
 
-  useEffect(() => {
-    dispatch(getParts());
-  }, [dispatch]);
+  const history = useHistory();
+  const classes = getClasses();
 
   const newCommandBarItems: ICommandBarItemProps[] = [
     {
@@ -162,9 +166,13 @@ const ModelContainer = () => {
         <Stack tokens={{ childrenGap: '65px' }}>
           <CommandBar styles={{ root: { marginTop: '24px' } }} items={newCommandBarItems} />
           {isAddIntelOvms ? (
-            <IntelOvmsDashboard />
+            <IntelProjectDashboard
+              intelProjectList={intelProjectList}
+              onCloseIntel={() => setIsAddIntelOvms(false)}
+            />
           ) : (
             <Model
+              trainingProjectList={trainingProjectList}
               onOpenCustomVision={() => setIsAddCustomVision(true)}
               onOpenIntelOvms={() => setIsAddIntelOvms(true)}
               onOpenOwnUpload={() => setIsAddUpload(true)}

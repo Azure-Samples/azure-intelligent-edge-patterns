@@ -16,6 +16,8 @@ import scenarioReducer from './scenarioSlice';
 import cameraSettingReducer from './cameraSetting/cameraSettingReducer';
 import cascadeReducer from './cascadeSlice';
 
+import intelProjectReduce from './IntelProjectSlice';
+
 export const rootReducer = combineReducers({
   project: projectReducer,
   setting: settingReducer,
@@ -31,5 +33,6 @@ export const rootReducer = combineReducers({
   trainingProject: trainingProjectReducer,
   scenario: scenarioReducer,
   cameraSetting: cameraSettingReducer,
+  intelProject: intelProjectReduce,
   cascade: cascadeReducer,
 });

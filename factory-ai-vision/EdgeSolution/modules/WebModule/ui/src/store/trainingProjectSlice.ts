@@ -16,7 +16,9 @@ import { getParts } from './partSlice';
 import { thunkGetAllCvProjects } from './setting/settingAction';
 import { selectAllCascades } from './cascadeSlice';
 
-type TrainingProjectCategory = 'customvision';
+type TrainingProjectCategory = 'customvision' | 'OVMS';
+
+export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink';
 
 export type Metadata = {
   type: string;
@@ -34,8 +36,6 @@ type Output = {
   name: string;
   metadata: Metadata;
 };
-
-export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink';
 
 export type TrainingProject = {
   id: number;
