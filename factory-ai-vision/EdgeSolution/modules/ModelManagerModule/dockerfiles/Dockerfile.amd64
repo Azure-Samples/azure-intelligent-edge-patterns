@@ -1,4 +1,4 @@
-FROM python:3.9.6-buster
+FROM python:3.8.6-buster
 
 COPY app/entry.sh /app/
 COPY app/workspace /app/workspace/
