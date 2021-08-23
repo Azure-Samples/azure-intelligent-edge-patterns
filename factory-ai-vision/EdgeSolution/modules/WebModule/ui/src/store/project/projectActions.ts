@@ -173,7 +173,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
     data: {
       parts: projectData.parts,
       cameras: projectData.cameras,
-      project: projectData.trainingProject,
+      project: projectData.deployment_type === 'model' ? projectData.trainingProject : null,
       needRetraining: isDemo ? false : projectData.needRetraining,
       accuracyRangeMin: projectData.accuracyRangeMin,
       accuracyRangeMax: projectData.accuracyRangeMax,
@@ -202,7 +202,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
         : new Date(projectData.countingEndTime).toUTCString(),
       max_people: projectData.maxPeople,
       deployment_type: projectData.deployment_type,
-      cascade: projectData.cascade,
+      cascade: projectData.deployment_type === 'cascade' ? projectData.cascade : null,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {
