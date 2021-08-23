@@ -105,6 +105,7 @@ class PartDetection(models.Model):
         Returns:
             bool: is_deployable
         """
+        return True
         try:
             if not self.inference_module:
                 raise PdDeployWithoutInferenceModule

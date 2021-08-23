@@ -530,7 +530,7 @@ class Stream:
                          MAX_MESSAGE_LENGTH),
                     ])
 
-                stub = prediction_service_pb2_grpc.PredictionServiceStub(
+                self.stub = prediction_service_pb2_grpc.PredictionServiceStub(
                     channel)
             request = predict_pb2.PredictRequest()
             request.model_spec.name = args['pipeline_name']
@@ -595,7 +595,26 @@ class Stream:
             self.last_drawn_img = img
             self.last_update = time.time()
             return
+        elif "ovmsserver" in self.model.endpoint.lower():
+            if not self.stub:
+                address = self.model.endpoint.lower()
+                if 'http://' in address:
+                    address = address[7:]
+                MAX_MESSAGE_LENGTH = 1024 * 1024 * 1024
+                channel = grpc.insecure_channel(
+                    address,
+                    options=[
+                        ('grpc.max_send_message_length', MAX_MESSAGE_LENGTH),
+                        ('grpc.max_receive_message_length',
+                         MAX_MESSAGE_LENGTH),
+                    ])
 
+                self.stub = prediction_service_pb2_grpc.PredictionServiceStub(
+                    channel)
+            resized_image = cv2.resize(image, (416, 416))
+            resized_image = resized_image
+            self.predict_grpc(image, self.stub)
+            return
         else:
             # for yolo enpoint testing
             resized_image = cv2.resize(image, (416, 416))
@@ -703,113 +722,38 @@ class Stream:
 
     def predict_grpc(self, image, stub):
 
-        width = self.IMG_WIDTH
-        ratio = self.IMG_WIDTH / image.shape[1]
-        height = int(image.shape[0] * ratio + 0.000001)
-        if height >= self.IMG_HEIGHT:
-            height = self.IMG_HEIGHT
-            ratio = self.IMG_HEIGHT / image.shape[0]
-            width = int(image.shape[1] * ratio + 0.000001)
+        # width = self.IMG_WIDTH
+        # ratio = self.IMG_WIDTH / image.shape[1]
+        # height = int(image.shape[0] * ratio + 0.000001)
+        # if height >= self.IMG_HEIGHT:
+        #     height = self.IMG_HEIGHT
+        #     ratio = self.IMG_HEIGHT / image.shape[0]
+        #     width = int(image.shape[1] * ratio + 0.000001)
 
         s = time.time()
         detectedObjects = self.ovms_score(stub, image)
         inf_time = time.time() - s
-        predictions = lva_to_customvision_format(detectedObjects)
 
-        # check whether it's the tag we want
-        predictions = list(p for p in predictions
-                           if p["tagName"] in self.model.parts)
+        img = process_response(detectedObjects, image.copy())
 
-        # check whether it's inside aoi (if has)
-        if self.has_aoi:
-            _predictions = []
-            for p in predictions:
-                (x1, y1), (x2, y2) = parse_bbox(p, width, height)
-                if is_inside_aoi(x1, y1, x2, y2, self.aoi_info):
-                    _predictions.append(p)
-            predictions = _predictions
+        # FIXME last count, last prediction
+        self.last_prediction_count = 0
+        self.last_prediction = []
+        self.last_drawn_img = img
+        self.last_update = time.time()        
 
-        # update detection status before filter out by threshold
-        self.update_detection_status(predictions)
 
-        if self.is_retrain:
-            self.process_retrain_image(predictions, image)
 
-        # check whether it's larger than threshold
-        predictions = list(p for p in predictions
-                           if p["probability"] >= self.threshold)
-
-        # update last_prediction_count
-        _last_prediction_count = {}
-        for p in predictions:
-            tag = p["tagName"]
-            if tag not in _last_prediction_count:
-                _last_prediction_count[tag] = 1
-            else:
-                _last_prediction_count[tag] += 1
-        self.last_prediction_count = _last_prediction_count
-
-        # update the buffer
-        # no need to copy since resize already did it
-        self.last_img = image
-        self.last_prediction = predictions
-
-        # FIXME support more scenarios
-        # Update Tracker / Scenario
-        _detections = []
-        for prediction in predictions:
-            tag = prediction["tagName"]
-            # if prediction['probability'] > 0.5:
-            (x1, y1), (x2, y2) = parse_bbox(prediction, width, height)
-            _detections.append(
-                Detection(tag, x1, y1, x2, y2, prediction["probability"]))
-        if self.scenario:
-            update_ret = self.scenario.update(_detections)
-            if self.get_mode() in ['ES', 'DD', 'PC', 'TCC', 'CQA']:
-                self.counter = update_ret[0]
-
-        self.draw_img()
-
-        if self.scenario:
-            if (self.get_mode() in ["ES", "TCC", "CQA"] and self.use_zone
-                    == True) or (self.get_mode() in ['DD', 'PD', 'PC']
-                                 and self.use_line == True):
-                self.scenario.draw_counter(self.last_drawn_img)
-            if self.get_mode() == "ESA":
-                self.scenario.draw_counter(self.last_drawn_img)
-            if self.get_mode() == "DD":
-                self.scenario.draw_objs(self.last_drawn_img)
-            if self.get_mode() == 'PD' and self.use_tracker is True:
-                self.scenario.draw_objs(self.last_drawn_img)
-
-        if self.iothub_is_send:
-            if self.get_mode() in ["ES", "ESA", "TCC", "CQA"]:
-                if self.scenario.has_new_event:
-                    self.process_send_message_to_iothub(predictions)
-            else:
-                self.process_send_message_to_iothub(predictions)
-
-        if self.send_video_to_cloud:
-            if self.get_mode() in ["ES", "ESA", "TCC", "CQA"]:
-                if self.scenario.has_new_event:
-                    self.precess_send_signal_to_lva()
-            else:
-                self.precess_send_signal_to_lva()
-
-        # update avg inference time (moving avg)
-        inf_time_ms = inf_time * 1000
-        self.average_inference_time = (1 / 16 * inf_time_ms +
-                                       15 / 16 * self.average_inference_time)
 
     def ovms_score(self, stub, image):
-        model_name = "yolov3"
-        input_layer = "inputs"
+        model_name = "Default Cascade"
+        input_layer = "image"
         output_layers = [
             "detector/yolo-v3/Conv_14/BiasAdd/YoloRegion",
             "detector/yolo-v3/Conv_22/BiasAdd/YoloRegion",
             "detector/yolo-v3/Conv_6/BiasAdd/YoloRegion"
         ]
-        class_names = load_classes("model_data/coco.names")
+        # class_names = load_classes("model_data/coco.names")
         results = {}
 
         print("Start processing:")
@@ -817,7 +761,7 @@ class Stream:
 
         image = np.array(image, dtype=np.float32)
         image = cv2.resize(image, (416, 416))
-        image = image.transpose(2, 0, 1).reshape(1, 3, 416, 416)
+        image = image.reshape((1, 416, 416, 3))
 
         request = predict_pb2.PredictRequest()
         request.model_spec.name = model_name
@@ -825,25 +769,28 @@ class Stream:
             make_tensor_proto(image, shape=(image.shape)))
 
         # result includes a dictionary with all model outputs
-        result = stub.Predict(request, 10.0)
+        try:
+            result = stub.Predict(request, 10.0)
+        except:
+            result = None
 
-        yolo_outputs = [[], [], []]
-        for output_layer in output_layers:
-            output = make_ndarray(result.outputs[output_layer])
-            output_numpy = np.array(output)
-            anchor_size = output_numpy.shape[2]
-            output_numpy = output_numpy.transpose(0, 2, 3, 1).reshape(
-                1, anchor_size, anchor_size, 3, 85)
-            yolo_outputs[int((anchor_size / 13) / 2)] = output_numpy
+        # yolo_outputs = [[], [], []]
+        # for output_layer in output_layers:
+        #     output = make_ndarray(result.outputs[output_layer])
+        #     output_numpy = np.array(output)
+        #     anchor_size = output_numpy.shape[2]
+        #     output_numpy = output_numpy.transpose(0, 2, 3, 1).reshape(
+        #         1, anchor_size, anchor_size, 3, 85)
+        #     yolo_outputs[int((anchor_size / 13) / 2)] = output_numpy
 
-        scores, boxes, classes = yolo_eval(yolo_outputs,
-                                           classes=80,
-                                           score_threshold=0.5,
-                                           iou_threshold=0.3)
+        # scores, boxes, classes = yolo_eval(yolo_outputs,
+        #                                    classes=80,
+        #                                    score_threshold=0.5,
+        #                                    iou_threshold=0.3)
 
-        results = postprocess(boxes, scores, classes, class_names)
+        # results = postprocess(boxes, scores, classes, class_names)
 
-        return results
+        return result
 
     def process_retrain_image(self, predictions, img):
         for prediction in predictions:
@@ -1179,3 +1126,67 @@ def update_people_coordinate(output_nd, people):
         else:
             people[i].update({'coordinate': output_nd[i, 0, :]})
     return people
+
+
+def process_response(response, img):
+    if response is not None:
+        coordinates = make_ndarray(response.outputs['coordinates'])
+        confidences = make_ndarray(response.outputs['confidences'])
+        is_ages = False
+        is_emotions = False
+        is_genders = False
+        if 'ages' in response.outputs:
+            ages = make_ndarray(response.outputs['ages'])
+            is_ages = True
+        if 'genders' in response.outputs:
+            genders = make_ndarray(response.outputs['genders'])
+            is_genders = True
+        if 'emotions' in response.outputs:
+            emotions = make_ndarray(response.outputs['emotions'])
+            is_emotions = True
+        n = coordinates.shape[0]
+        predictions = []
+        for i in range(n):
+            x1, y1, x2, y2 = coordinates[i,0]
+            prediction = {
+                'tag': 'person',
+                'attributes': [],
+                'box': {
+                    'l': x1,
+                    't': y1,
+                    'w': x2-x1,
+                    'h': y2-y1
+                }
+            }
+            emotion_label =  ('neutral', 'happy', 'sad', 'surprise', 'anger')
+            gender_label = ('female', 'male')
+            if is_emotions:
+                emotion = emotion_label[np.argmax(emotions[i], axis=1).flatten()[0]]
+                confidence = np.max(emotions[i], axis=1).flatten()[0]
+                prediction['attributes'].append({'name': 'emotion', 'value': emotion, 'confidence': confidence})
+            if is_ages:
+                age = str(int(ages[i].flatten()[0]*100))
+                prediction['attributes'].append({'name': 'age', 'value': age, 'confidence': -1})
+            if is_genders:
+                gender = gender_label[np.argmax(genders[i], axis=1).flatten()[0]]
+                confidence = np.max(genders[i], axis=1).flatten()[0]
+                prediction['attributes'].append({'name': 'gender', 'value': gender, 'confidence': confidence})
+            predictions.append(prediction)
+
+    h, w, _ = img.shape
+    for prediction in predictions:
+        x1 = int( prediction['box']['l'] * w )
+        y1 = int( prediction['box']['t'] * h )
+        x2 = int(( prediction['box']['w'] + prediction['box']['l'] ) * w)
+        y2 = int(( prediction['box']['h'] + prediction['box']['t'] ) * h)
+        cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 255), 3)
+        font = cv2.FONT_HERSHEY_SIMPLEX
+        fontScale = 0.5
+        color = (0, 255, 255)
+        thickness = 1
+        text = prediction['tag']
+        for attribute in prediction['attributes']:
+            text += ' / ' + str(attribute['value'])
+        cv2.putText(img, text, (x1, y1-10), font, 
+                   fontScale, color, thickness, cv2.LINE_AA)
+    return img

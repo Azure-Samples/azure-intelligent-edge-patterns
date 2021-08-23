@@ -135,7 +135,7 @@ async def predict_opencv(camera_id: str, edge: str, request: Request):
     else:
         img = cv2.imdecode(np.frombuffer(img_raw, dtype=np.uint8), -1)
     # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
-    cv2.imwrite('grpc_inf.jpg', img)
+    # cv2.imwrite('grpc_inf.jpg', img)
     results = http_inference_engine.predict(camera_id, img)
     if int(time.time()) % 5 == 0:
         logger.warning(results)

@@ -126,14 +126,24 @@ def deploy_worker(part_detection_id):
     # =====================================================
     # 2.1 Update endpoint                               ===
     # =====================================================
-    requests.post(
-        "http://" + str(instance.inference_module.url) + "/update_endpoint",
-        json={
-            "endpoint": instance.project.get_prediction_uri(),
-            "headers": instance.project.prediction_header,
-        },
-        timeout=REQUEST_TIMEOUT,
-    )
+    if instance.deployment_type == 'cascade':
+        requests.post(
+            "http://" + str(instance.inference_module.url) + "/update_endpoint",
+            json={
+                "endpoint": "ovmsserver:9001",
+                "headers": "",
+            },
+            timeout=REQUEST_TIMEOUT,
+        ) 
+    else:
+        requests.post(
+            "http://" + str(instance.inference_module.url) + "/update_endpoint",
+            json={
+                "endpoint": instance.project.get_prediction_uri(),
+                "headers": instance.project.prediction_header,
+            },
+            timeout=REQUEST_TIMEOUT,
+        )
 
     # =====================================================
     # 2.2 Update model                                  ===
