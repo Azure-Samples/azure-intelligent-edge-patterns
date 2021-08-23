@@ -1,2 +1,2 @@
-cp -R /workspace/* /workspace
-unicorn main:app --port 8585
+cp -R /app/workspace/* /workspace
+uvicorn main:app --port 8585

@@ -1,6 +1,9 @@
 import logging
+import requests
+
 from django.db import models
 from django.db.models.signals import post_save
+from ..azure_iot.utils import model_manager_module_url
 
 logger = logging.getLogger(__name__)
 
@@ -25,9 +28,13 @@ class Cascade(models.Model):
 
     @staticmethod
     def post_create(**kwargs):
-        logger.warning("cascade post save:")
+        logger.warning("cascade post save: send config to model manager")
         instance = kwargs["instance"]
 
+        url = "http://" + str(model_manager_module_url()) + "/set_voe_config"
+        data = {"config": instance.flow}
+        res = requests.post(url, data)
+        logger.warning(res.text)
         # automatically add two edges: crop(coordinate, confidence)
         # edges = json.loads(instance.flow)["edges"]
         
