@@ -34,6 +34,7 @@ type Props = {
       mow?: string;
     };
   };
+  onClickAddModel: () => void;
 };
 
 const getClasses = () =>
@@ -51,7 +52,7 @@ const getClasses = () =>
   });
 
 const EditPanel: React.FC<Props> = (props) => {
-  const { intel, isOpen, onDissmiss } = props;
+  const { intel, isOpen, onDissmiss, onClickAddModel } = props;
 
   const classes = getClasses();
 
@@ -61,7 +62,7 @@ const EditPanel: React.FC<Props> = (props) => {
       onDismiss={onDissmiss}
       hasCloseButton
       headerText={intel.name}
-      onRenderFooterContent={() => <PrimaryButton onClick={() => {}} text="Add" />}
+      onRenderFooterContent={() => <PrimaryButton onClick={onClickAddModel} text="Add" />}
       isFooterAtBottom={true}
     >
       <Stack>

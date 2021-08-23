@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   SearchBox,
   Stack,
@@ -9,70 +9,21 @@ import {
   PrimaryButton,
   Text,
 } from '@fluentui/react';
+import { useDispatch } from 'react-redux';
+import { useHistory } from 'react-router-dom';
+
+import { IntelProject, createIntelProject } from '../../store/IntelProjectSlice';
+import { Url } from '../../enums';
 
 import Tag from './Tag';
 import AddIntelPanel from './Panel/AddIntel';
 
-const INTEL_OVMS_CARD_DATA = [
-  {
-    name: 'Face Detection',
-    describe:
-      'Face detector based on MobileNetV2 as a backbone with a single SSD head for indoor/outdoor scenes shot by a front-facing camera. The single SSD head from 1/16 scale feature map has nine clustered prior boxes.',
-    type: 'Object Detector',
-    imageUrl:
-      'https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/models/intel/face-detection-retail-0005/assets/face-detection-retail-0001.png',
-    inputDescribe: 'Image, name: input, shape: 1, 3, 300, 300 in the format B, C, H, W, where:',
-    createdAt: '7/3/2021',
-    tags: ['Car', 'Person', 'Bus', 'Stop Sign', 'Abc'],
-    metric: {
-      ap: '84.52%',
-      GFlops: '0.982',
-      MParams: '1.021',
-      sf: 'PyTorch',
-    },
-  },
-  {
-    name: 'Emotion Recognition',
-    describe: `Fully convolutional network for recognition of five emotions ('neutral', 'happy', 'sad', 'surprise', 'anger').`,
-    type: 'Classifier',
-    imageUrl:
-      'https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/models/intel/emotions-recognition-retail-0003/assets/emotions-recognition-retail-0003.jpg',
-    inputDescribe: 'Image, name: data, shape: 1, 3, 64, 64 in 1, C, H, W format, where:',
-    createdAt: '',
-    tags: [],
-    metric: {
-      ifo: 'Frontal',
-      rip: '±15˚',
-      roop: 'Yaw: ±15˚ / Pitch: ±15˚',
-      mow: '64 pixels',
-      GFlops: '0.126',
-      MParams: '2.483',
-      sf: 'Caffe',
-    },
-  },
-  {
-    name: 'Age / Gender Recognition',
-    describe:
-      'Fully convolutional network for simultaneous Age/Gender recognition. The network is able to recognize age of people in [18, 75] years old range, it is not applicable for children since their faces were not in the training set.',
-    type: 'Object Detector',
-    imageUrl:
-      'https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/models/intel/age-gender-recognition-retail-0013/assets/age-gender-recognition-retail-0001.jpg',
-    inputDescribe: 'Image, name: input, shape: 1, 3, 62, 62 in 1, C, H, W format, where:',
-    createdAt: '7/3/2021',
-    tags: ['Car', 'Person', 'Bus', 'Stop Sign', 'Abc'],
-    metric: {
-      // ifo: 'Frontal',
-      rip: '±45˚',
-      roop: 'Yaw: ±45˚ / Pitch: ±45˚',
-      mow: '62 pixels',
-      GFlops: '0.094',
-      MParams: '2.138',
-      sf: 'Caffe',
-    },
-  },
-];
-
 const CARD_PART_LIMIT = 5;
+
+interface Props {
+  intelProjectList: IntelProject[];
+  onCloseIntel: () => void;
+}
 
 const getClasses = () =>
   mergeStyleSets({
@@ -100,11 +51,26 @@ const getClasses = () =>
     },
   });
 
-const IntelOvmsDashboard = () => {
+const IntelProjectDashboard = (props: Props) => {
+  const { intelProjectList, onCloseIntel } = props;
+
   const [isOpen, setIsOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(0);
 
+  const dispatch = useDispatch();
   const classes = getClasses();
+  const history = useHistory();
+
+  const onCreateIntelModel = useCallback(
+    async (cascade: IntelProject) => {
+      // console.log('onCreateIntelModel', modelName);
+
+      await dispatch(createIntelProject({ model_name: cascade.create_name, project_type: cascade.type }));
+
+      onCloseIntel();
+    },
+    [dispatch, onCloseIntel],
+  );
 
   const menuProps: IContextualMenuProps = {
     items: [
@@ -118,7 +84,6 @@ const IntelOvmsDashboard = () => {
         key: 'delete',
         text: 'Delete',
         iconProps: { iconName: 'Delete' },
-        onClick: () => {},
       },
     ],
   };
@@ -128,13 +93,12 @@ const IntelOvmsDashboard = () => {
       <Stack tokens={{ childrenGap: 45 }}>
         <SearchBox styles={{ root: { width: '470px' } }} placeholder="Search" />
         <Stack horizontal wrap tokens={{ childrenGap: 16 }}>
-          {INTEL_OVMS_CARD_DATA.map((card, id) => (
+          {intelProjectList.map((card, id) => (
             <Stack
+              key={id}
               className={classes.root}
               onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                console.log(e.currentTarget);
-                // @ts-ignore
-                console.log(e.target.id);
+                e.preventDefault();
 
                 setSelectedId(id);
                 setIsOpen(true);
@@ -204,6 +168,8 @@ const IntelOvmsDashboard = () => {
                     text="Add"
                     onClick={(e) => {
                       e.stopPropagation();
+
+                      onCreateIntelModel(card);
                     }}
                   />
                 </div>
@@ -217,15 +183,16 @@ const IntelOvmsDashboard = () => {
         onDissmiss={() => setIsOpen(false)}
         intel={{
           id: selectedId,
-          name: INTEL_OVMS_CARD_DATA[selectedId].name,
-          describe: INTEL_OVMS_CARD_DATA[selectedId].describe,
-          imageUrl: INTEL_OVMS_CARD_DATA[selectedId].imageUrl,
-          inputDescribe: INTEL_OVMS_CARD_DATA[selectedId].inputDescribe,
-          metric: INTEL_OVMS_CARD_DATA[selectedId].metric,
+          name: intelProjectList[selectedId].name,
+          describe: intelProjectList[selectedId].describe,
+          imageUrl: intelProjectList[selectedId].imageUrl,
+          inputDescribe: intelProjectList[selectedId].inputDescribe,
+          metric: intelProjectList[selectedId].metric,
         }}
+        onClickAddModel={() => onCreateIntelModel(intelProjectList[selectedId])}
       />
     </>
   );
 };
 
-export default IntelOvmsDashboard;
+export default IntelProjectDashboard;

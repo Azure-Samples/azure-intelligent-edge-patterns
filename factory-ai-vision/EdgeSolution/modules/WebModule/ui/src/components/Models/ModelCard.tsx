@@ -133,6 +133,7 @@ const ModelCard: React.FC<Props> = (props) => {
             }}
           >
             {project.customVisionId !== '' && 'By Microsoft Custom Vision'}
+            {project.category === 'OVMS' && 'By Intel'}
           </Label>
           {project.customVisionId !== '' && (
             <Label styles={{ root: { fontSize: '13px', lineHeight: '18px', marginBottom: '10px' } }}>
