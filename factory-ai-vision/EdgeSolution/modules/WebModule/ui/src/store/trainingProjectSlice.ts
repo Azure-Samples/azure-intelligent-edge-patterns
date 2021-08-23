@@ -18,23 +18,6 @@ import { selectAllCascades } from './cascadeSlice';
 
 type TrainingProjectCategory = 'customvision' | 'OVMS';
 
-export type Metadata = {
-  type: string;
-  shape: string[];
-  layout: string[];
-  color_format: string;
-};
-
-type Input = {
-  name: string;
-  metadata: Metadata;
-};
-
-type Output = {
-  name: string;
-  metadata: Metadata;
-};
-
 export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink';
 
 export type Metadata = {
@@ -53,8 +36,6 @@ type Output = {
   name: string;
   metadata: Metadata;
 };
-
-export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink';
 
 export type TrainingProject = {
   id: number;
