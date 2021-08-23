@@ -1,0 +1,13 @@
+FROM python:3.9.6-buster
+
+COPY ../app/entry.sh /app/
+COPY ../app/workspace /app/workspace
+
+COPY ../app/requirements.txt /app/
+RUN pip install -r /app/requirements.txt
+
+COPY ../app/cascade/*.py /app/cascade
+COPY ../app/*.py /app/
+
+WORKDIR /app/
+ENTRYPOINT ["bash", "entry.sh"]
