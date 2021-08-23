@@ -33,7 +33,7 @@ class Cascade(models.Model):
 
         url = "http://" + str(model_manager_module_url()) + "/set_voe_config"
         data = {"config": instance.flow}
-        res = requests.post(url, data)
+        res = requests.post(url, json=data)
         logger.warning(res.text)
         # automatically add two edges: crop(coordinate, confidence)
         # edges = json.loads(instance.flow)["edges"]
