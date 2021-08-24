@@ -50,10 +50,17 @@ const Model = (props: Props) => {
       <Stack horizontal>
         <img style={{ height: '60px', width: '60px' }} src={getImage(type)} alt="icon" />
         <Stack styles={{ root: classes.titleWrapper }} horizontal horizontalAlign="space-between">
-          <Stack>
-            <Label styles={{ root: classes.title }}>{model.name}</Label>
-            <Text styles={{ root: classes.label }}>{model.projectType}</Text>
-          </Stack>
+          {type === 'sink' ? (
+            <Stack>
+              <Label styles={{ root: classes.title }}>placeholder.json</Label>
+              <Text styles={{ root: classes.label }}>Export</Text>
+            </Stack>
+          ) : (
+            <Stack>
+              <Label styles={{ root: classes.title }}>{model.name}</Label>
+              <Text styles={{ root: classes.label }}>{model.projectType}</Text>
+            </Stack>
+          )}
           <Stack verticalAlign="center">
             <IconButton
               className={classes.controlBtn}

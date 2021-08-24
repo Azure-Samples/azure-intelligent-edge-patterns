@@ -62,7 +62,7 @@ export const initialProjectData: ProjectData = {
   oldCameras: [],
 
   deployment_type: 'model',
-  cascade: 0,
+  cascade: '',
 };
 
 const initialState: Project = {

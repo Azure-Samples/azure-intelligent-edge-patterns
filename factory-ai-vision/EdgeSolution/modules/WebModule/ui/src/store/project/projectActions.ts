@@ -111,7 +111,7 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   maxPeople: data?.max_people,
 
   oldCameras: [],
-  cascade: 0,
+  cascade: '',
   deployment_type: 'model',
 });
 
@@ -202,7 +202,10 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
         : new Date(projectData.countingEndTime).toUTCString(),
       max_people: projectData.maxPeople,
       deployment_type: projectData.deployment_type,
-      cascade: projectData.deployment_type === 'cascade' ? projectData.cascade : null,
+      cascade:
+        projectData.deployment_type === 'cascade'
+          ? parseInt(projectData.cascade.replace('cascade_', ''), 10)
+          : null,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {

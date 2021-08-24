@@ -25,6 +25,7 @@
   flex-grow: 1;
   height: 100%;
   background: #edebe9;
+  position: relative;
 }
 
 @media screen and (min-width: 768px) {

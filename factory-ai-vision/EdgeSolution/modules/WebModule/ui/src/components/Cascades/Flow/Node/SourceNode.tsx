@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Stack, Text, Icon, mergeStyleSets } from '@fluentui/react';
 import { Handle, addEdge, Connection } from 'react-flow-renderer';
 
@@ -50,6 +50,8 @@ const isValidConnection = (sourceModelMetadata: string, targetModelMetadata: str
 const SourceNode = (props: Props) => {
   const { id, setElements, modelList } = props;
 
+  const [isBottomHandle, setIsBottomHandle] = useState(false);
+
   const classes = getClasses();
 
   const selectedModel = getModel(id, modelList);
@@ -67,22 +69,33 @@ const SourceNode = (props: Props) => {
         <Icon styles={{ root: classes.title }} iconName="Camera" />
         <Text styles={{ root: classes.describe }}>Camera Input</Text>
       </Stack>
-      {selectedModel.outputs.map((_, id) => (
-        <Handle
-          key={id}
-          id={`${id}`}
-          type="source"
-          // @ts-ignore
-          position="bottom"
-          // @ts-ignore
-          onConnect={(params) => setElements((els) => addEdge(params, els))}
-          isValidConnection={(connection: Connection) =>
-            isValidConnection(
-              getSourceMetadata(connection, selectedModel),
-              getTargetMetadata(connection, getModel(connection.target, modelList)),
-            )
-          }
-        />
+      {selectedModel.outputs.map((output, id) => (
+        <>
+          <Handle
+            key={id}
+            id={`${id}`}
+            type="source"
+            // @ts-ignore
+            position="bottom"
+            // @ts-ignore
+            onConnect={(params) => setElements((els) => addEdge(params, els))}
+            style={{ height: '10px', width: '10px', bottom: '-6px' }}
+            isValidConnection={(connection: Connection) =>
+              isValidConnection(
+                getSourceMetadata(connection, selectedModel),
+                getTargetMetadata(connection, getModel(connection.target, modelList)),
+              )
+            }
+            onMouseEnter={() => setIsBottomHandle(true)}
+            onMouseLeave={() => setIsBottomHandle(false)}
+          />
+          {isBottomHandle && (
+            <Stack styles={{ root: { position: 'absolute', bottom: '-45px' } }} tokens={{ childrenGap: 2 }}>
+              <Stack>Type: {output.metadata.type}</Stack>
+              <Stack>Shape: {`[${output.metadata.shape.join(',')}]`}</Stack>
+            </Stack>
+          )}
+        </>
       ))}
     </>
   );

@@ -3,7 +3,7 @@ import { Stack, ActionButton, Icon, Link, mergeStyleSets, SearchBox } from '@flu
 
 import { TrainingProject } from '../../../store/trainingProjectSlice';
 
-import ModelSideBar from './Sidebar/Model';
+import SideBardCard from './Sidebar/SideBar';
 
 interface Props {
   trainingProjectList: TrainingProject[];
@@ -22,7 +22,7 @@ export default (props: Props) => {
 
   const modelList = trainingProjectList.filter((project) => project.node_type === 'openvino_model');
   const transformList = trainingProjectList.filter((project) => project.node_type === 'openvino_library');
-  const exportList = trainingProjectList.filter((project) => project.node_type === 'sink');
+  const exportModel = trainingProjectList.find((project) => project.node_type === 'sink');
 
   const [isModelOpen, setIsModelOpen] = useState(false);
   const [isTransformOpen, setIsTransformOpen] = useState(false);
@@ -55,7 +55,7 @@ export default (props: Props) => {
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
               {modelList.map((model, id) => (
-                <ModelSideBar key={id} model={model} type="openvino_model" />
+                <SideBardCard key={id} model={model} type="openvino_model" />
               ))}
             </Stack>
             <Link styles={{ root: classes.manageModels }}>Manage Models</Link>
@@ -76,7 +76,7 @@ export default (props: Props) => {
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
               {transformList.map((transform, id) => (
-                <ModelSideBar key={id} model={transform} type="openvino_library" />
+                <SideBardCard key={id} model={transform} type="openvino_library" />
               ))}
             </Stack>
           </div>
@@ -95,9 +95,7 @@ export default (props: Props) => {
         {isExportOpen && (
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
-              {exportList.map((model, id) => (
-                <ModelSideBar key={id} model={model} type="sink" />
-              ))}
+              <SideBardCard type="sink" model={exportModel} />
             </Stack>
           </div>
         )}

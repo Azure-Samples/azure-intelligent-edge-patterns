@@ -85,7 +85,7 @@ export type ProjectData = {
   oldCameras?: number[];
 
   deployment_type: DeploymentType;
-  cascade: number;
+  cascade: string;
 };
 
 // Describing the different ACTION NAMES available

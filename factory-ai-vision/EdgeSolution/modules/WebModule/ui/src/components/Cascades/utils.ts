@@ -4,6 +4,7 @@ import { TrainingProject } from '../../store/trainingProjectSlice';
 import { CascadePayload } from '../../store/cascadeSlice';
 
 export const getModel = (id: string, modelList: TrainingProject[]) => {
+  if (!id) return;
   const re = /(?<=_).*/;
 
   const targetId = id.match(re)[0];

@@ -1,10 +1,11 @@
-import React, { memo } from 'react';
+import React, { memo, useState } from 'react';
 import { Stack, Text, IContextualMenuProps, IconButton, mergeStyleSets } from '@fluentui/react';
 import { Handle, addEdge, Connection } from 'react-flow-renderer';
 
-import { NodeType, TrainingProject } from '../../../../store/trainingProjectSlice';
+import { NodeType, selectNonDemoProject, TrainingProject } from '../../../../store/trainingProjectSlice';
 import { getSourceMetadata, getTargetMetadata, isValidConnection } from './utils';
 import { getModel } from '../../utils';
+import { OutputFileType } from 'typescript';
 
 interface Props {
   id: string;
@@ -12,6 +13,7 @@ interface Props {
   setElements: any;
   onDelete: () => void;
   modelList: TrainingProject[];
+  onSelected: () => void;
 }
 
 const getClasses = () =>
@@ -52,11 +54,22 @@ const getHandlePointer = (length: number, id) => {
   return 150;
 };
 
+const OUTPUTS_LIMIT_NAME = ['coordinates', 'confidences'];
+
+const getEnhanceSelectedModel = (model: TrainingProject): TrainingProject => {
+  if (model.node_type === 'openvino_library')
+    return { ...model, outputs: model.outputs.filter((output) => !OUTPUTS_LIMIT_NAME.includes(output.name)) };
+  return model;
+};
+
 const NodeCard = (props: Props) => {
-  const { id, type, setElements, onDelete, modelList } = props;
+  const { id, type, setElements, onDelete, modelList, onSelected } = props;
+
+  const [selectedInput, setSelectedInput] = useState(-1);
+  const [selectedOutput, setSelectedOutput] = useState(-1);
 
   const classes = getClasses();
-  const selectedModel = getModel(id, modelList);
+  const selectedModel = getEnhanceSelectedModel(getModel(id, modelList));
 
   const menuProps: IContextualMenuProps = {
     items: [
@@ -64,37 +77,52 @@ const NodeCard = (props: Props) => {
         key: 'properties',
         text: 'Properties',
         iconProps: { iconName: 'Equalizer' },
+        onClick: onSelected,
       },
       {
         key: 'delete',
         text: 'Delete',
         iconProps: { iconName: 'Delete' },
-        onClick: () => onDelete(),
+        onClick: onDelete,
       },
     ],
   };
 
+  // if (!selectedModel) return <></>;
+
   return (
     <>
-      {type !== 'sink' &&
-        selectedModel.inputs.map((_, id) => (
-          <Handle
-            key={id}
-            id={`${id}`}
-            // @ts-ignore
-            position="top"
-            type="target"
-            style={{ left: getHandlePointer(selectedModel.inputs.length, id) }}
-            onConnect={(params) => setElements((els) => addEdge(params, els))}
-            isConnectable={true}
-            isValidConnection={(connection: Connection) => {
-              return isValidConnection(
-                getSourceMetadata(connection, getModel(connection.source, modelList)),
-                getTargetMetadata(connection, selectedModel),
-              );
-            }}
-          />
-        ))}
+      {selectedModel.inputs.map((_, id) => (
+        <Handle
+          key={id}
+          id={`${id}`}
+          // @ts-ignore
+          position="top"
+          type="target"
+          style={{
+            left: getHandlePointer(selectedModel.inputs.length, id),
+            height: '10px',
+            width: '10px',
+            top: '-6px',
+          }}
+          onConnect={(params) => setElements((els) => addEdge(params, els))}
+          isConnectable={true}
+          isValidConnection={(connection: Connection) => {
+            return isValidConnection(
+              getSourceMetadata(connection, getModel(connection.source, modelList)),
+              getTargetMetadata(connection, selectedModel),
+            );
+          }}
+          onMouseEnter={() => setSelectedInput(id)}
+          onMouseLeave={() => setSelectedInput(-1)}
+        />
+      ))}
+      {selectedInput !== -1 && (
+        <Stack styles={{ root: { position: 'absolute', top: '-45px' } }} tokens={{ childrenGap: 2 }}>
+          <Stack>Type: {selectedModel.inputs[selectedInput].metadata.type}</Stack>
+          <Stack>Shape: {`[${selectedModel.inputs[selectedInput].metadata.shape.join(',')}]`}</Stack>
+        </Stack>
+      )}
       {type === 'sink' && (
         <Handle
           id={`0`}
@@ -126,28 +154,38 @@ const NodeCard = (props: Props) => {
           />
         </Stack>
       </Stack>
-      {type !== 'sink' && (
+      {selectedModel.outputs.map((_, id) => (
         <>
-          {selectedModel.outputs.map((_, id) => (
+          <Handle
+            key={id}
+            id={id.toString()}
             // @ts-ignore
-            <Handle
-              key={id}
-              id={id.toString()}
-              // @ts-ignore
-              position="bottom"
-              type="source"
-              style={{ left: getHandlePointer(selectedModel.outputs.length, id) }}
-              isConnectable={true}
-              onConnect={(params) => setElements((els) => addEdge(params, els))}
-              isValidConnection={(connection: Connection) =>
-                isValidConnection(
-                  getSourceMetadata(connection, selectedModel),
-                  getTargetMetadata(connection, getModel(connection.target, modelList)),
-                )
-              }
-            />
-          ))}
+            position="bottom"
+            type="source"
+            style={{
+              left: getHandlePointer(selectedModel.outputs.length, id),
+              height: '10px',
+              width: '10px',
+              bottom: '-6px',
+            }}
+            isConnectable={true}
+            onConnect={(params) => setElements((els) => addEdge(params, els))}
+            onMouseEnter={() => setSelectedOutput(id)}
+            onMouseLeave={() => setSelectedOutput(-1)}
+            isValidConnection={(connection: Connection) =>
+              isValidConnection(
+                getSourceMetadata(connection, selectedModel),
+                getTargetMetadata(connection, getModel(connection.target, modelList)),
+              )
+            }
+          />
         </>
+      ))}
+      {selectedOutput !== -1 && (
+        <Stack styles={{ root: { position: 'absolute', bottom: '-45px' } }} tokens={{ childrenGap: 2 }}>
+          <Stack>Type: {selectedModel.outputs[selectedOutput].metadata.type}</Stack>
+          <Stack>Shape: {`[${selectedModel.outputs[selectedOutput].metadata.shape.join(',')}]`}</Stack>
+        </Stack>
       )}
     </>
   );

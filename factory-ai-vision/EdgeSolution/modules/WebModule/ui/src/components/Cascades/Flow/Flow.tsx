@@ -10,7 +10,12 @@ import ReactFlow, {
 } from 'react-flow-renderer';
 import { useSelector } from 'react-redux';
 
-import { trainingProjectIsCascadesFactory, TrainingProject } from '../../../store/trainingProjectSlice';
+import {
+  trainingProjectIsCascadesFactory,
+  TrainingProject,
+  NodeType,
+} from '../../../store/trainingProjectSlice';
+import { getModel } from '../utils';
 
 import './dnd.css';
 
@@ -18,7 +23,10 @@ import Sidebar from './Sidebar';
 import NodeCard from './Node/Node';
 import CustomEdge from './CustomEdge';
 import InitialNode from './Node/SourceNode';
+import ExportNodeCard from './Node/ExportNode';
+import NodePanel from './NodePanel';
 
+const MAIN_LAYER_HOST_ID = 'testLayer';
 interface Props {
   elements: (Node | Edge)[];
   setElements: React.Dispatch<React.SetStateAction<(Node<any> | Edge<any>)[]>>;
@@ -38,6 +46,10 @@ const DnDFlow = (props: Props) => {
 
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
+  const [selectedNode, setSelectedNode] = useState(null);
+
+  console.log('elements', elements);
+  console.log('selectedNode', selectedNode);
 
   const onElementsRemove = (elementsToRemove) => setElements((els) => removeElements(elementsToRemove, els));
   const onLoad = (_reactFlowInstance) => setReactFlowInstance(_reactFlowInstance);
@@ -51,7 +63,7 @@ const DnDFlow = (props: Props) => {
     event.preventDefault();
 
     const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
-    const type = event.dataTransfer.getData('application/reactflow');
+    const type = event.dataTransfer.getData('application/reactflow') as NodeType;
     const id = event.dataTransfer.getData('id');
 
     const position = reactFlowInstance.project({
@@ -66,6 +78,7 @@ const DnDFlow = (props: Props) => {
         position,
         data: {
           id,
+          name: type === 'sink' ? 'placeholder.json' : null,
         },
       }),
     );
@@ -114,6 +127,12 @@ const DnDFlow = (props: Props) => {
         <ReactFlowProvider>
           <Sidebar trainingProjectList={trainingProjectList} />
           <div className="reactflow-wrapper" ref={reactFlowWrapper}>
+            <NodePanel
+              selectedNode={selectedNode}
+              setSelectedNode={setSelectedNode}
+              model={selectedNode && getModel(selectedNode?.id, modelList)}
+              setElements={setElements}
+            />
             <ReactFlow
               elements={elements}
               nodeTypes={{
@@ -132,6 +151,7 @@ const DnDFlow = (props: Props) => {
                       type="openvino_model"
                       setElements={setElements}
                       onDelete={() => onDeleteNode(id)}
+                      onSelected={() => setSelectedNode(node)}
                     />
                   );
                 },
@@ -145,19 +165,20 @@ const DnDFlow = (props: Props) => {
                       type="openvino_library"
                       setElements={setElements}
                       onDelete={() => onDeleteNode(id)}
+                      onSelected={() => setSelectedNode(node)}
                     />
                   );
                 },
                 sink: (node) => {
-                  const { id } = node;
+                  const { id, data } = node;
 
                   return (
-                    <NodeCard
+                    <ExportNodeCard
                       id={id}
-                      modelList={modelList}
-                      type="sink"
+                      data={data}
                       setElements={setElements}
                       onDelete={() => onDeleteNode(id)}
+                      onSelected={() => setSelectedNode(node)}
                     />
                   );
                 },

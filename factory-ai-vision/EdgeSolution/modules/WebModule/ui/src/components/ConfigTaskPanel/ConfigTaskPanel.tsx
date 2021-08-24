@@ -210,7 +210,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     { key: 'divider_1', text: '-', itemType: DropdownMenuItemType.Divider },
     { key: 'cascade', text: 'Cascade', itemType: DropdownMenuItemType.Header },
     ...cascadeList.map((cascade, id) => ({
-      key: id + 1 + trainingProjectOptions.length,
+      key: `cascade_${cascade.id}`,
       text: cascade.name,
       title: 'cascade',
     })),
@@ -277,7 +277,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               onChange={(_, options) => {
                 onChange('trainingProject', options.key as number, {
                   type: options.title,
-                  value: (options.key as number) - trainingProjectOptions.length,
+                  value: options.key as string,
                 });
               }}
             />
