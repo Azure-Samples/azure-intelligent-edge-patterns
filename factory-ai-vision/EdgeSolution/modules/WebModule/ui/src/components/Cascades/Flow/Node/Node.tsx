@@ -2,10 +2,9 @@ import React, { memo, useState } from 'react';
 import { Stack, Text, IContextualMenuProps, IconButton, mergeStyleSets } from '@fluentui/react';
 import { Handle, addEdge, Connection } from 'react-flow-renderer';
 
-import { NodeType, selectNonDemoProject, TrainingProject } from '../../../../store/trainingProjectSlice';
+import { NodeType, TrainingProject } from '../../../../store/trainingProjectSlice';
 import { getSourceMetadata, getTargetMetadata, isValidConnection } from './utils';
 import { getModel } from '../../utils';
-import { OutputFileType } from 'typescript';
 
 interface Props {
   id: string;
@@ -62,7 +61,7 @@ const getEnhanceSelectedModel = (model: TrainingProject): TrainingProject => {
   return model;
 };
 
-const NodeCard = (props: Props) => {
+const Node = (props: Props) => {
   const { id, type, setElements, onDelete, modelList, onSelected } = props;
 
   const [selectedInput, setSelectedInput] = useState(-1);
@@ -191,4 +190,4 @@ const NodeCard = (props: Props) => {
   );
 };
 
-export default memo(NodeCard);
+export default memo(Node);

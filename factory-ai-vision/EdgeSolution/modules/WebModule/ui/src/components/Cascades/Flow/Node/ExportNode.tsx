@@ -1,10 +1,6 @@
-import React, { memo, useState } from 'react';
+import React, { memo } from 'react';
 import { Stack, Text, IContextualMenuProps, IconButton, mergeStyleSets } from '@fluentui/react';
-import { Handle, addEdge, Connection, Node } from 'react-flow-renderer';
-
-import { NodeType, TrainingProject } from '../../../../store/trainingProjectSlice';
-import { getSourceMetadata, getTargetMetadata, isValidConnection } from './utils';
-import { getModel } from '../../utils';
+import { Handle, addEdge } from 'react-flow-renderer';
 
 interface Props {
   id: string;

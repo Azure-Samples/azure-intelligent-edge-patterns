@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Node, Edge } from 'react-flow-renderer';
 import { CommandBar, ICommandBarItemProps } from '@fluentui/react';
+import domtoimage from 'dom-to-image';
 
 import { Url } from '../../enums';
 import { TrainingProject } from '../../store/trainingProjectSlice';
@@ -25,6 +26,7 @@ const CascadeDetail = (props: Props) => {
 
   const { id } = useParams<{ id: string }>();
   const [elements, setElements] = useState<(Node | Edge)[]>([]);
+  const flowElementRef = useRef(null);
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -37,8 +39,10 @@ const CascadeDetail = (props: Props) => {
     setElements(JSON.parse(selectedCascade.raw_data));
   }, [id, cascadeList, setElements, setCascadeName]);
 
-  const onSaveCascade = useCallback(() => {
-    dispatch(
+  const onSaveCascade = useCallback(async () => {
+    const blob = await domtoimage.toBlob(flowElementRef.current);
+
+    await dispatch(
       updateCascade({
         id: parseInt(id, 10),
         data: getCascadePayload(elements, cascadeName, modelList),
@@ -65,7 +69,12 @@ const CascadeDetail = (props: Props) => {
   return (
     <>
       <CommandBar styles={{ root: { marginTop: '24px' } }} items={commandBarItems} />
-      <Flow elements={elements} setElements={setElements} modelList={modelList} />
+      <Flow
+        elements={elements}
+        setElements={setElements}
+        modelList={modelList}
+        flowElementRef={flowElementRef}
+      />
     </>
   );
 };
