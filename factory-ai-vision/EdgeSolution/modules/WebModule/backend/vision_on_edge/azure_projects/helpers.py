@@ -339,18 +339,18 @@ def create_demo_objects():
         },
     )
 
-    # sink*5
-    Project.objects.update_or_create(
-        name="face_images",
-        defaults={
-            "is_cascade": True,
-            "type": "sink",
-            "combined": "true",
-            "inputs": json.dumps([
-                {"name": "face_images"}
-            ])
-        },
-    )
+    # sink*1
+    # Project.objects.update_or_create(
+    #     name="face_images",
+    #     defaults={
+    #         "is_cascade": True,
+    #         "type": "sink",
+    #         "combined": "true",
+    #         "inputs": json.dumps([
+    #             {"name": "face_images"}
+    #         ])
+    #     },
+    # )
 
     Project.objects.update_or_create(
         name="export.json",

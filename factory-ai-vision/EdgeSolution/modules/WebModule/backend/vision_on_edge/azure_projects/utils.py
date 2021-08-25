@@ -160,7 +160,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
 
     # Get project objects
     #TODO need to resolve hard-coded pk=20
-    project_obj_template = Project.objects.get(pk=20)
+    project_obj_template = Project.objects.get(pk=16)
 
     project_obj = Project.objects.create(setting=project_obj_template.setting, is_demo=False, category="customvision")
     # Check Training_Key, Endpoint
