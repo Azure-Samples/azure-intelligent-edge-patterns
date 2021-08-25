@@ -78,7 +78,7 @@ const DnDFlow = (props: Props) => {
         position,
         data: {
           id,
-          name: type === 'sink' ? 'placeholder.json' : null,
+          name: type === 'sink' ? 'export.json' : null,
         },
       }),
     );

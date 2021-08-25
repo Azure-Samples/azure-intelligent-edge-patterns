@@ -52,7 +52,7 @@ const Model = (props: Props) => {
         <Stack styles={{ root: classes.titleWrapper }} horizontal horizontalAlign="space-between">
           {type === 'sink' ? (
             <Stack>
-              <Label styles={{ root: classes.title }}>placeholder.json</Label>
+              <Label styles={{ root: classes.title }}>export.json</Label>
               <Text styles={{ root: classes.label }}>Export</Text>
             </Stack>
           ) : (

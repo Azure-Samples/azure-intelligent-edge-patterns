@@ -16,7 +16,7 @@ export const getConvertNode = (node: Node, modelList: TrainingProject[]) => {
 
   return {
     node_id: node.id,
-    name: matchModel.name,
+    name: matchModel.node_type === 'sink' ? node.data.name : matchModel.name,
     type: node.type,
     inputs: matchModel.inputs,
     outputs: matchModel.outputs,
