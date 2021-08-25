@@ -24,7 +24,10 @@ class HttpInferenceEngine:
 
         try:
             stream.predict(img)
-            predictions = stream.last_prediction
+            if stream.last_prediction:
+                predictions = stream.last_prediction
+            else:
+                predictions = []
             #logger.info("Predictions %s", predictions)
         except:
             logger.error("Unexpected error: %s", sys.exc_info())
