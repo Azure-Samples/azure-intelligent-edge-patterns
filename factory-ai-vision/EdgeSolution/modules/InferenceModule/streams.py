@@ -1129,6 +1129,7 @@ def update_people_coordinate(output_nd, people):
 
 
 def process_response(response, img):
+    predictions = []
     if response is not None:
         coordinates = make_ndarray(response.outputs['coordinates'])
         confidences = make_ndarray(response.outputs['confidences'])

@@ -4,7 +4,7 @@
     "image": {
         "repository": "${CONTAINER_REGISTRY_NAME}/intelligentedge/modelmanagermodule",
         "tag": {
-            "version": "0.0.2",
+            "version": "0.0.11",
             "platforms": {
                 "amd64": "./dockerfiles/Dockerfile.amd64"
             }

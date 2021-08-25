@@ -41,6 +41,9 @@ class Project(models.Model):
     download_uri_fp16 = models.CharField(
         max_length=1000, null=True, blank=True, default=""
     )
+    download_uri_openvino = models.CharField(
+        max_length=1000, null=True, blank=True, default=""
+    )
     is_prediction_module = models.BooleanField(default=False)
     prediction_uri = models.CharField(
         max_length=1000, null=True, blank=True, default=""
@@ -68,6 +71,8 @@ class Project(models.Model):
     demultiply_count = models.IntegerField(blank=True, null=True)
     openvino_library_name = models.CharField(max_length=1000, null=True, blank=True, default="")
     openvino_model_name = models.CharField(max_length=1000, null=True, blank=True, default="")
+
+    screenshot = models.CharField(max_length=10000, null=True, blank=True, default="")
 
     def __repr__(self):
         return self.name.__repr__()
@@ -408,6 +413,7 @@ class Task(models.Model):
                 try:
                     project_obj.export_iteration(iteration.id)
                     project_obj.export_iteration(iteration.id, flavor="ONNXFloat16")
+                    project_obj.export_iteration(iteration.id, platform="OPENVINO")
                 except Exception:
                     logger.exception("Export already in queue")
                 exports = project_obj.get_exports(iteration.id)
@@ -430,17 +436,30 @@ class Task(models.Model):
                     "Successfully export model. download_uri: %s",
                     exports[1].download_uri,
                 )
+                logger.info(
+                    "Successfully export model. download_uri: %s",
+                    exports[2].download_uri,
+                )
                 self.status = "ok"
                 self.log = "Status : work done"
                 self.save()
                 # Get the latest object
                 project_obj = Project.objects.get(pk=project_obj.id)
-                if not exports[0].flavor:
-                    project_obj.download_uri = exports[0].download_uri
-                    project_obj.download_uri_fp16 = exports[1].download_uri
-                else:
-                    project_obj.download_uri = exports[1].download_uri
-                    project_obj.download_uri_fp16 = exports[0].download_uri
+                for export in exports:
+                    if export.flavor:
+                        project_obj.download_uri_fp16 = export.download_uri
+                    else:
+                        if "onnx" in export.platform.lower():
+                            project_obj.download_uri = export.download_uri
+                        else:
+                            project_obj.download_uri_openvino = export.download_uri
+
+                # if not exports[0].flavor:
+                #     project_obj.download_uri = exports[0].download_uri
+                #     project_obj.download_uri_fp16 = exports[1].download_uri
+                # else:
+                #     project_obj.download_uri = exports[1].download_uri
+                #     project_obj.download_uri_fp16 = exports[0].download_uri
                 project_obj.save()
                 break
             return

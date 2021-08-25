@@ -537,6 +537,10 @@ def train_project_worker(project_id):
         except Exception:
             logger.exception("Export already in queue")
         try:
+            project_obj.export_iteration(iteration.id, platform="OPENVINO")
+        except Exception:
+            logger.exception("Export already in queue")
+        try:
             exports = project_obj.get_exports(iteration.id)
         except Exception:
             logger.exception("get_exports exception")
@@ -557,12 +561,22 @@ def train_project_worker(project_id):
     logger.info("Training about to completed.")
 
     exports = trainer.get_exports(customvision_id, iteration.id)
-    if not exports[0].flavor:
-        project_obj.download_uri = exports[0].download_uri
-        project_obj.download_uri_fp16 = exports[1].download_uri
-    else:
-        project_obj.download_uri = exports[1].download_uri
-        project_obj.download_uri_fp16 = exports[0].download_uri
+
+    for export in exports:
+        if export.flavor:
+            project_obj.download_uri_fp16 = export.download_uri
+        else:
+            if "onnx" in export.platform.lower():
+                project_obj.download_uri = export.download_uri
+            else:
+                project_obj.download_uri_openvino = export.download_uri
+
+    # if not exports[0].flavor:
+    #     project_obj.download_uri = exports[0].download_uri
+    #     project_obj.download_uri_fp16 = exports[1].download_uri
+    # else:
+    #     project_obj.download_uri = exports[1].download_uri
+    #     project_obj.download_uri_fp16 = exports[0].download_uri
 
     train_performance_list = []
 
