@@ -90,7 +90,7 @@ const SourceNode = (props: Props) => {
             onMouseLeave={() => setIsBottomHandle(false)}
           />
           {isBottomHandle && (
-            <Stack styles={{ root: { position: 'absolute', bottom: '-45px' } }} tokens={{ childrenGap: 2 }}>
+            <Stack styles={{ root: { position: 'absolute' } }} tokens={{ childrenGap: 2 }}>
               <Stack>Type: {output.metadata.type}</Stack>
               <Stack>Shape: {`[${output.metadata.shape.join(',')}]`}</Stack>
             </Stack>

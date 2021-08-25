@@ -35,7 +35,7 @@ const NodePanel = (props: Props) => {
 
   const [exportName, setExportName] = useState(selectedNode?.data.name);
   const [type, setType] = useState('crop');
-  const [tags, setTags] = useState(['car']);
+  const [tags, setTags] = useState('car');
 
   useEffect(() => {
     setExportName(selectedNode?.data.name);
@@ -62,7 +62,7 @@ const NodePanel = (props: Props) => {
     });
 
     setSelectedNode(null);
-  }, [exportName, setElements]);
+  }, [exportName, setElements, selectedNode, setSelectedNode]);
 
   if (!selectedNode) return <></>;
 
@@ -119,8 +119,9 @@ const NodePanel = (props: Props) => {
             <Stack>
               <Label>Objects / Tags</Label>
               <Stack horizontal tokens={{ childrenGap: 6 }}>
-                {['Red', 'Blue', 'Green'].map((tag) => (
+                {['Red', 'Blue', 'Green'].map((tag, i) => (
                   <Stack
+                    key={i}
                     style={{
                       backgroundColor: 'rgba(0, 137, 250, 0.15)',
                       fontSize: '13px',
@@ -139,7 +140,13 @@ const NodePanel = (props: Props) => {
         {(selectedNode.type as NodeType) === 'openvino_library' && (
           <Stack tokens={{ childrenGap: 20 }}>
             <Dropdown label="Type" options={typeOptions} selectedKey={type} required disabled />
-            <Dropdown label="Objects / Tags" options={tagsOptions} selectedKeys={tags} multiSelect required />
+            <Dropdown
+              label="Objects / Tags"
+              options={tagsOptions}
+              selectedKey={tags}
+              onChange={(_, options) => setTags(options.key as string)}
+              required
+            />
           </Stack>
         )}
         {(selectedNode.type as NodeType) === 'sink' && (
@@ -151,7 +158,13 @@ const NodePanel = (props: Props) => {
               onChange={(_, value: string) => onNameChange(value)}
               required
             />
-            <Dropdown label="Objects / Tags" options={tagsOptions} selectedKeys={tags} multiSelect required />
+            <Dropdown
+              label="Objects / Tags"
+              options={tagsOptions}
+              selectedKey={tags}
+              onChange={(_, options) => setTags(options.key as string)}
+              required
+            />
           </Stack>
         )}
       </Panel>

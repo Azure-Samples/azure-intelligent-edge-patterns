@@ -54,7 +54,7 @@ const CascadesCard = (props: Props) => {
         raw_data: cascade.raw_data,
       }),
     );
-  }, [cascade]);
+  }, [dispatch, cascade]);
 
   const onDirectCascadeDetail = useCallback(() => {
     history.push(Url.CASCADES + '/' + cascade.id);

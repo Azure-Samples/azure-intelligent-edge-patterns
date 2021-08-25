@@ -1,8 +1,9 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { CommandBar, ICommandBarItemProps } from '@fluentui/react';
 import { useHistory } from 'react-router-dom';
 import { Node, Edge } from 'react-flow-renderer';
 import { useDispatch } from 'react-redux';
+import domtoimage from 'dom-to-image';
 
 import { Url } from '../../enums';
 import { NodeType, TrainingProject } from '../../store/trainingProjectSlice';
@@ -34,6 +35,7 @@ const CascadeCreate = (props: Props) => {
   const { modelList, cascadeName, defaultCommandBarItems } = props;
 
   const [elements, setElements] = useState<(Node | Edge)[]>([]);
+  const flowElementRef = useRef(null);
 
   const dispatch = useDispatch();
   const history = useHistory();
@@ -67,7 +69,12 @@ const CascadeCreate = (props: Props) => {
   return (
     <>
       <CommandBar styles={{ root: { marginTop: '24px' } }} items={commandBarItems} />
-      <DnDFlow elements={elements} setElements={setElements} modelList={modelList} />
+      <DnDFlow
+        elements={elements}
+        setElements={setElements}
+        modelList={modelList}
+        flowElementRef={flowElementRef}
+      />
     </>
   );
 };

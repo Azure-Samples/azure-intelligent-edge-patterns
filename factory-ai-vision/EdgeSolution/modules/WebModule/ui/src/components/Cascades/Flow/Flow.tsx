@@ -26,11 +26,11 @@ import InitialNode from './Node/SourceNode';
 import ExportNodeCard from './Node/ExportNode';
 import NodePanel from './NodePanel';
 
-const MAIN_LAYER_HOST_ID = 'testLayer';
 interface Props {
   elements: (Node | Edge)[];
   setElements: React.Dispatch<React.SetStateAction<(Node<any> | Edge<any>)[]>>;
   modelList: TrainingProject[];
+  flowElementRef: React.MutableRefObject<any>;
 }
 
 const getNodeId = (modeId: string, length: number) => `${length++}_${modeId}`;
@@ -40,13 +40,15 @@ const edgeTypes = {
 };
 
 const DnDFlow = (props: Props) => {
-  const { elements, setElements, modelList } = props;
+  const { elements, setElements, modelList, flowElementRef } = props;
 
   const trainingProjectList = useSelector(trainingProjectIsCascadesFactory());
 
+  // const flowElementRef = useRef(null);
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
+  const [dataUrl, setDataUrl] = useState(null);
 
   console.log('elements', elements);
   console.log('selectedNode', selectedNode);
@@ -98,6 +100,15 @@ const DnDFlow = (props: Props) => {
     [setElements],
   );
 
+  // const onCreateImage = useCallback(async () => {
+  //   const blob = await domtoimage.toBlob(flowElementRef.current);
+
+  //   setDataUrl(blob);
+  //   console.log('blob', blob);
+
+  //   // console.log('test', test);
+  // }, []);
+
   // const onSaveCascades = useCallback(async () => {
   //   await dispatch(createCascade(getCreateCascadePayload(elements, cascadesName, modelList)));
 
@@ -134,6 +145,7 @@ const DnDFlow = (props: Props) => {
               setElements={setElements}
             />
             <ReactFlow
+              ref={flowElementRef}
               elements={elements}
               nodeTypes={{
                 source: (node) => {
