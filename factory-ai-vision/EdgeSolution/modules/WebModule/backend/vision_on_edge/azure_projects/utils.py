@@ -162,7 +162,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     #TODO need to resolve hard-coded pk=20
     project_obj_template = Project.objects.get(pk=15)
 
-    project_obj = Project.objects.create(setting=project_obj_template.setting, is_demo=False, category="customvision")
+    project_obj = Project.objects.create(setting=project_obj_template.setting, is_demo=False, category="customvision", is_cascade=True)
     # Check Training_Key, Endpoint
     if not project_obj.setting.is_trainer_valid:
         raise SettingCustomVisionAccessFailed
