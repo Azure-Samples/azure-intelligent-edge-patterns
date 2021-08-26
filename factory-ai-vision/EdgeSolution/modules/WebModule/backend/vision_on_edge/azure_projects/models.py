@@ -67,7 +67,7 @@ class Project(models.Model):
     inputs = models.CharField(max_length=2000, null=True, blank=True, default="")
     outputs = models.CharField(max_length=2000, null=True, blank=True, default="")
     combined = models.CharField(max_length=50, null=True, blank=True, default="")
-    params = models.CharField(max_length=2000, null=True, blank=True, default="")
+    params = models.CharField(max_length=2000, null=True, blank=True, default=None)
     demultiply_count = models.IntegerField(blank=True, null=True)
     openvino_library_name = models.CharField(max_length=1000, null=True, blank=True, default="")
     openvino_model_name = models.CharField(max_length=1000, null=True, blank=True, default="")
