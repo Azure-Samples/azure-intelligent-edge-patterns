@@ -72,8 +72,6 @@ class Project(models.Model):
     openvino_library_name = models.CharField(max_length=1000, null=True, blank=True, default="")
     openvino_model_name = models.CharField(max_length=1000, null=True, blank=True, default="")
 
-    screenshot = models.CharField(max_length=10000, null=True, blank=True, default="")
-
     def __repr__(self):
         return self.name.__repr__()
 

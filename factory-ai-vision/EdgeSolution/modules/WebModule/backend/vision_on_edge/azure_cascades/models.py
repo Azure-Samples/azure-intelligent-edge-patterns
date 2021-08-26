@@ -16,6 +16,8 @@ class Cascade(models.Model):
         max_length=1000, null=True, blank=True, default=""
     )
 
+    screenshot = models.CharField(max_length=10000, null=True, blank=True, default="")
+
     def __repr__(self):
         return self.name.__repr__()
 
