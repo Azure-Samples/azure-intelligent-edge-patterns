@@ -56,7 +56,7 @@ const getHandlePointer = (length: number, id) => {
 const OUTPUTS_LIMIT_NAME = ['coordinates', 'confidences'];
 
 const getEnhanceSelectedModel = (model: TrainingProject): TrainingProject => {
-  if (model.node_type === 'openvino_library')
+  if (model.nodeType === 'openvino_library')
     return { ...model, outputs: model.outputs.filter((output) => !OUTPUTS_LIMIT_NAME.includes(output.name)) };
   return model;
 };
@@ -86,8 +86,6 @@ const Node = (props: Props) => {
       },
     ],
   };
-
-  // if (!selectedModel) return <></>;
 
   return (
     <>
@@ -154,31 +152,29 @@ const Node = (props: Props) => {
         </Stack>
       </Stack>
       {selectedModel.outputs.map((_, id) => (
-        <>
-          <Handle
-            key={id}
-            id={id.toString()}
-            // @ts-ignore
-            position="bottom"
-            type="source"
-            style={{
-              left: getHandlePointer(selectedModel.outputs.length, id),
-              height: '10px',
-              width: '10px',
-              bottom: '-6px',
-            }}
-            isConnectable={true}
-            onConnect={(params) => setElements((els) => addEdge(params, els))}
-            onMouseEnter={() => setSelectedOutput(id)}
-            onMouseLeave={() => setSelectedOutput(-1)}
-            isValidConnection={(connection: Connection) =>
-              isValidConnection(
-                getSourceMetadata(connection, selectedModel),
-                getTargetMetadata(connection, getModel(connection.target, modelList)),
-              )
-            }
-          />
-        </>
+        <Handle
+          key={id}
+          id={id.toString()}
+          // @ts-ignore
+          position="bottom"
+          type="source"
+          style={{
+            left: getHandlePointer(selectedModel.outputs.length, id),
+            height: '10px',
+            width: '10px',
+            bottom: '-6px',
+          }}
+          isConnectable={true}
+          onConnect={(params) => setElements((els) => addEdge(params, els))}
+          onMouseEnter={() => setSelectedOutput(id)}
+          onMouseLeave={() => setSelectedOutput(-1)}
+          isValidConnection={(connection: Connection) =>
+            isValidConnection(
+              getSourceMetadata(connection, selectedModel),
+              getTargetMetadata(connection, getModel(connection.target, modelList)),
+            )
+          }
+        />
       ))}
       {selectedOutput !== -1 && (
         <Stack styles={{ root: { position: 'absolute', bottom: '-45px' } }} tokens={{ childrenGap: 2 }}>

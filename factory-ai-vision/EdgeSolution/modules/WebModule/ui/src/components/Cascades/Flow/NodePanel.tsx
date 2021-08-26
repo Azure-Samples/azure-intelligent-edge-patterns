@@ -12,6 +12,7 @@ import {
   Text,
   IDropdownOption,
 } from '@fluentui/react';
+import { isNil, isEmpty } from 'ramda';
 
 import { NodeType, TrainingProject } from '../../../store/trainingProjectSlice';
 
@@ -30,16 +31,34 @@ const getPanelTitle = (type: NodeType) => {
   return 'Model';
 };
 
+const isThreshold = (threshold) => {
+  if (+threshold !== parseInt(threshold, 10)) return false;
+  if (threshold > 100 || threshold < 0) return false;
+  return true;
+};
+
+const isExportName = (name: string) => {
+  console.log('exportName', name);
+  if (isNil(name) || isEmpty(name)) return false;
+
+  return true;
+};
+
 const NodePanel = (props: Props) => {
   const { selectedNode, setSelectedNode, model, setElements } = props;
 
-  const [exportName, setExportName] = useState(selectedNode?.data.name);
+  const [exportName, setExportName] = useState<string>(null);
+  const [threshold, setThreshold] = useState(null);
   const [type, setType] = useState('crop');
   const [tags, setTags] = useState('car');
 
   useEffect(() => {
     setExportName(selectedNode?.data.name);
+
+    setThreshold(+selectedNode?.data.params.confidence_threshold * 100);
   }, [selectedNode]);
+
+  console.log('threshold', threshold);
 
   const tagsOptions: IDropdownOption[] = [
     { key: 'car', text: 'Car' },
@@ -52,7 +71,22 @@ const NodePanel = (props: Props) => {
     setExportName(value);
   }, []);
 
-  const onSaveExport = useCallback(() => {
+  const onSaveTransformNode = useCallback(() => {
+    setElements((prev) => {
+      const node = prev.find((element) => element.id === selectedNode.id);
+      const newNode = {
+        ...node,
+        data: { ...node.data, params: { ...node.data.params, confidence_threshold: threshold / 100 } },
+      };
+      const newElements = prev.filter((element) => element.id !== selectedNode.id);
+
+      return [...newElements, newNode];
+    });
+
+    setSelectedNode(null);
+  }, [setElements, selectedNode, setSelectedNode, threshold]);
+
+  const onSaveExportNode = useCallback(() => {
     setElements((prev) => {
       const node = prev.find((element) => element.id === selectedNode.id);
       const newNode = { ...node, data: { ...node.data, name: exportName } };
@@ -94,9 +128,11 @@ const NodePanel = (props: Props) => {
         onRenderFooterContent={() => (
           <Stack tokens={{ childrenGap: 10 }} horizontal>
             {(selectedNode.type as NodeType) === 'openvino_model' && <PrimaryButton text="Go to Models" />}
-            {(selectedNode.type as NodeType) === 'openvino_library' && <PrimaryButton text="Save" />}
+            {(selectedNode.type as NodeType) === 'openvino_library' && (
+              <PrimaryButton text="Save" onClick={onSaveTransformNode} disabled={!isThreshold(threshold)} />
+            )}
             {(selectedNode.type as NodeType) === 'sink' && (
-              <PrimaryButton text="Save" onClick={onSaveExport} />
+              <PrimaryButton text="Save" onClick={onSaveExportNode} disabled={!isExportName(exportName)} />
             )}
             <DefaultButton text="Cancel" onClick={() => setSelectedNode(null)} />
           </Stack>
@@ -147,6 +183,13 @@ const NodePanel = (props: Props) => {
               onChange={(_, options) => setTags(options.key as string)}
               required
             />
+            <TextField
+              label="Confidence Threshold"
+              onChange={(_, value) => setThreshold(value)}
+              value={threshold}
+              required
+              errorMessage={!isThreshold(threshold) && '0 ~ 100'}
+            />
           </Stack>
         )}
         {(selectedNode.type as NodeType) === 'sink' && (
@@ -154,9 +197,9 @@ const NodePanel = (props: Props) => {
             <TextField
               label="Name"
               value={exportName}
-              // errorMessage={formData.name.errMsg}
               onChange={(_, value: string) => onNameChange(value)}
               required
+              errorMessage={!isExportName(exportName) && 'Not null'}
             />
             <Dropdown
               label="Objects / Tags"

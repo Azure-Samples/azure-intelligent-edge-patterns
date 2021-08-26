@@ -6,7 +6,7 @@ import { TrainingProject } from '../../../store/trainingProjectSlice';
 import SideBardCard from './Sidebar/SideBar';
 
 interface Props {
-  trainingProjectList: TrainingProject[];
+  modelList: TrainingProject[];
 }
 
 const getClasses = () =>
@@ -18,11 +18,13 @@ const getClasses = () =>
   });
 
 export default (props: Props) => {
-  const { trainingProjectList } = props;
+  const { modelList } = props;
 
-  const modelList = trainingProjectList.filter((project) => project.node_type === 'openvino_model');
-  const transformList = trainingProjectList.filter((project) => project.node_type === 'openvino_library');
-  const exportModel = trainingProjectList.find((project) => project.node_type === 'sink');
+  const modelNodeList = modelList.filter((model) =>
+    ['openvino_model', 'customvision_model'].includes(model.nodeType),
+  );
+  const transformList = modelList.filter((model) => model.nodeType === 'openvino_library');
+  const exportModel = modelList.find((model) => model.nodeType === 'sink');
 
   const [isModelOpen, setIsModelOpen] = useState(false);
   const [isTransformOpen, setIsTransformOpen] = useState(false);
@@ -54,7 +56,7 @@ export default (props: Props) => {
         {isModelOpen && (
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
-              {modelList.map((model, id) => (
+              {modelNodeList.map((model, id) => (
                 <SideBardCard key={id} model={model} type="openvino_model" />
               ))}
             </Stack>

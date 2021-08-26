@@ -39,7 +39,7 @@ const getClasses = () =>
   });
 
 const ExportNode = (props: Props) => {
-  const { id, setElements, onDelete, onSelected, data } = props;
+  const { setElements, onDelete, onSelected, data } = props;
   const { name } = data;
 
   const classes = getClasses();

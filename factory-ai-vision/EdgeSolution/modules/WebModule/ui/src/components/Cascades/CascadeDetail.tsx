@@ -2,32 +2,34 @@ import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useParams, useHistory } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { Node, Edge } from 'react-flow-renderer';
-import { CommandBar, ICommandBarItemProps } from '@fluentui/react';
+import { CommandBar, ICommandBarItemProps, Stack, Label, IconButton } from '@fluentui/react';
 import domtoimage from 'dom-to-image';
 
 import { Url } from '../../enums';
 import { TrainingProject } from '../../store/trainingProjectSlice';
 import { Cascade } from '../../store/cascadeSlice';
-import { getCascadePayload } from './utils';
+import { getCascadePayload, getBlobToBase64 } from './utils';
 import { updateCascade } from '../../store/cascadeSlice';
 
 import Flow from './Flow/Flow';
+import NameModal from './NameModal';
 
 interface Props {
   cascadeList: Cascade[];
   modelList: TrainingProject[];
   defaultCommandBarItems: ICommandBarItemProps[];
-  cascadeName: string;
-  setCascadeName: React.Dispatch<React.SetStateAction<string>>;
 }
 
 const CascadeDetail = (props: Props) => {
-  const { cascadeList, modelList, defaultCommandBarItems, cascadeName, setCascadeName } = props;
+  const { cascadeList, modelList, defaultCommandBarItems } = props;
 
   const { id } = useParams<{ id: string }>();
+  const [cascadeName, setCascadeName] = useState('');
   const [elements, setElements] = useState<(Node | Edge)[]>([]);
-  const flowElementRef = useRef(null);
+  const [isPopup, setIsPopup] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
+  const flowElementRef = useRef(null);
   const dispatch = useDispatch();
   const history = useHistory();
 
@@ -39,15 +41,23 @@ const CascadeDetail = (props: Props) => {
     setElements(JSON.parse(selectedCascade.raw_data));
   }, [id, cascadeList, setElements, setCascadeName]);
 
-  const onSaveCascade = useCallback(async () => {
+  const onSaveEditCascade = useCallback(async () => {
+    setIsLoading(true);
+
     const blob = await domtoimage.toBlob(flowElementRef.current);
+    const base64Screenshot = await getBlobToBase64(blob);
 
     await dispatch(
       updateCascade({
         id: parseInt(id, 10),
-        data: getCascadePayload(elements, cascadeName, modelList),
+        data: {
+          ...getCascadePayload(elements, cascadeName, modelList),
+          screenshot: base64Screenshot,
+        },
       }),
     );
+
+    setIsLoading(false);
 
     history.push(Url.CASCADES);
   }, [dispatch, elements, cascadeName, modelList, id, history]);
@@ -60,14 +70,25 @@ const CascadeDetail = (props: Props) => {
         iconName: 'Save',
       },
       onClick: () => {
-        onSaveCascade();
+        onSaveEditCascade();
       },
+      disabled: isLoading,
     },
     ...defaultCommandBarItems,
   ];
 
   return (
     <>
+      <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 8 }}>
+        <Label styles={{ root: { fontSize: '18px', lineHeight: '24px', paddingLeft: '24px' } }}>
+          {cascadeName}
+        </Label>
+        <IconButton
+          iconProps={{ iconName: 'Edit' }}
+          onClick={() => setIsPopup(true)}
+          styles={{ icon: { fontSize: '12px', color: '#323130' } }}
+        />
+      </Stack>
       <CommandBar styles={{ root: { marginTop: '24px' } }} items={commandBarItems} />
       <Flow
         elements={elements}
@@ -75,6 +96,13 @@ const CascadeDetail = (props: Props) => {
         modelList={modelList}
         flowElementRef={flowElementRef}
       />
+      {isPopup && (
+        <NameModal
+          onClose={() => setIsPopup(false)}
+          cascadeName={cascadeName}
+          onSave={(name) => setCascadeName(name)}
+        />
+      )}
     </>
   );
 };

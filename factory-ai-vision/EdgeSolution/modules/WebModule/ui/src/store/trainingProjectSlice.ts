@@ -18,7 +18,9 @@ import { selectAllCascades } from './cascadeSlice';
 
 type TrainingProjectCategory = 'customvision' | 'OVMS';
 
-export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink';
+export type Params = { confidence_threshold: string };
+
+export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink' | 'customvision_model';
 
 export type Metadata = {
   type: string;
@@ -50,12 +52,13 @@ export type TrainingProject = {
   isCascade: boolean;
   inputs: Input[];
   outputs: Output[];
-  node_type: NodeType;
+  nodeType: NodeType;
   demultiply_count: number;
   combined: string;
-  params: string;
+  params: Params | string;
   openvino_library_name: string;
   openvino_model_name: string;
+  download_uri_openvino: string;
 };
 
 export type CreatOwnModelPayload = {
@@ -90,12 +93,13 @@ const normalize = (e) => ({
   isCascade: e.is_cascade,
   inputs: e.inputs === '' ? [] : JSON.parse(e.inputs),
   outputs: e.outputs === '' ? [] : JSON.parse(e.outputs),
-  node_type: e.type,
-  demultiply_count: e.demultiply_count,
+  nodeType: e.type,
+  demultiplyCount: e.demultiply_count,
   combined: e.combined,
   params: e.params === '' ? '' : JSON.parse(e.params),
   openvino_library_name: e.openvino_library_name,
   openvino_model_name: e.openvino_model_name,
+  download_uri_openvino: e.download_uri_openvino,
 });
 
 export const getTrainingProject = createWrappedAsync<any, boolean, { state: State }>(
@@ -323,5 +327,5 @@ export const trainingProjectIsCascadesFactory = () =>
 
 export const trainingProjectIsSourceNodeFactory = () =>
   createSelector(selectAllTrainingProjects, (entities) =>
-    entities.find((project) => !project.isDemo && project.isCascade && project.node_type === 'source'),
+    entities.find((project) => !project.isDemo && project.isCascade && project.nodeType === 'source'),
   );

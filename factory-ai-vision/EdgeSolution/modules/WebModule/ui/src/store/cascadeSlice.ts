@@ -9,6 +9,7 @@ export type Cascade = {
   flow: string;
   prediction_uri: string;
   raw_data: string;
+  screenshot: string;
 };
 
 export type CascadePayload = {
@@ -17,11 +18,15 @@ export type CascadePayload = {
   raw_data: string;
 };
 
-export type CreateCascadePayload = CascadePayload;
+export type CreateCascadePayload = CascadePayload & {
+  screenshot: string;
+};
 
 export type UpdateCascadePayload = {
   id: number;
-  data: CascadePayload;
+  data: CascadePayload & {
+    screenshot: string;
+  };
 };
 
 const cascadesAdapter = createEntityAdapter<Cascade>();
@@ -43,6 +48,8 @@ export const updateCascade = createWrappedAsync<any, UpdateCascadePayload>(
   'cascade/Update',
   async (payload) => {
     const { id, data } = payload;
+
+    console.log('data', data);
 
     const response = await Axios.patch(`/api/cascades/${id}`, data);
 

@@ -1,12 +1,5 @@
-import React, { useState, useCallback } from 'react';
-import {
-  Stack,
-  ICommandBarItemProps,
-  Label,
-  IBreadcrumbItem,
-  Breadcrumb,
-  mergeStyleSets,
-} from '@fluentui/react';
+import React, { useCallback } from 'react';
+import { Stack, ICommandBarItemProps, IBreadcrumbItem, Breadcrumb, mergeStyleSets } from '@fluentui/react';
 import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
@@ -18,7 +11,6 @@ import { selectAllCascades } from '../../store/cascadeSlice';
 import Cascades from './Cascades';
 import CascadeCreate from './CascadeCreate';
 import CascadeDetail from './CascadeDetail';
-import NameModal from './NameModal';
 
 const getClasses = () =>
   mergeStyleSets({
@@ -41,15 +33,14 @@ const CascadesContainer = () => {
   const modelList = useSelector(trainingProjectIsCascadesFactory());
   const cascadeList = useSelector((state: RootState) => selectAllCascades(state));
 
-  const [cascadeName, setCascadeName] = useState('Default Cascade');
-  const [isPopup, setIsPopup] = useState(false);
+  // const [cascadeName, setCascadeName] = useState('Default Cascade');
+  // const [isPopup, setIsPopup] = useState(false);
 
   const isMatchCreationRoute = useRouteMatch(Url.CASCADES_CREATE);
   const isMatchEditRoute = useRouteMatch(Url.CASCADES_DETAIL);
   const classes = getClasses();
 
   const onCreateCascades = useCallback(() => {
-    setCascadeName('Default Cascade');
     history.push(Url.CASCADES_CREATE);
   }, [history]);
 
@@ -123,28 +114,28 @@ const CascadesContainer = () => {
         {(isMatchCreationRoute || isMatchEditRoute) && (
           <Breadcrumb items={breadCrumbItems} styles={{ root: classes.breadcrumb }} />
         )}
-        {isMatchCreationRoute || isMatchEditRoute ? (
-          <Label
-            styles={{ root: { fontSize: '18px', lineHeight: '24px', paddingLeft: '24px' } }}
-            onClick={() => setIsPopup(true)}
-          >
-            {cascadeName}
-          </Label>
+        {/* {isMatchCreationRoute || isMatchEditRoute ? (
+          <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 8 }}>
+            <Label styles={{ root: { fontSize: '18px', lineHeight: '24px', paddingLeft: '24px' } }}>
+              {cascadeName}
+            </Label>
+            <IconButton
+              iconProps={{ iconName: 'Edit' }}
+              onClick={() => setIsPopup(true)}
+              styles={{ icon: { fontSize: '12px', color: '#323130' } }}
+            />
+          </Stack>
         ) : (
           <Label styles={{ root: { fontSize: '18px', lineHeight: '24px', paddingLeft: '24px' } }}>
             Cascade
           </Label>
-        )}
+        )} */}
         <Switch>
           <Route
             exact
             path={Url.CASCADES_CREATE}
             render={() => (
-              <CascadeCreate
-                modelList={modelList}
-                cascadeName={cascadeName}
-                defaultCommandBarItems={defaultCommandBarItems}
-              />
+              <CascadeCreate modelList={modelList} defaultCommandBarItems={defaultCommandBarItems} />
             )}
           />
           <Route
@@ -154,9 +145,7 @@ const CascadesContainer = () => {
               <CascadeDetail
                 modelList={modelList}
                 cascadeList={cascadeList}
-                cascadeName={cascadeName}
                 defaultCommandBarItems={defaultCommandBarItems}
-                setCascadeName={setCascadeName}
               />
             )}
           />
@@ -173,14 +162,6 @@ const CascadesContainer = () => {
           />
         </Switch>
       </Stack>
-      {isPopup && (
-        <NameModal
-          onClose={() => setIsPopup(false)}
-          onSave={() => setIsPopup(false)}
-          cascadeName={cascadeName}
-          setCascadeName={setCascadeName}
-        />
-      )}
     </>
   );
 };

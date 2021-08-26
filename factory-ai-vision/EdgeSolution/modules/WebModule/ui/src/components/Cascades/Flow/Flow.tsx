@@ -14,6 +14,7 @@ import {
   trainingProjectIsCascadesFactory,
   TrainingProject,
   NodeType,
+  Params,
 } from '../../../store/trainingProjectSlice';
 import { getModel } from '../utils';
 
@@ -35,20 +36,21 @@ interface Props {
 
 const getNodeId = (modeId: string, length: number) => `${length++}_${modeId}`;
 
+const getNodeParams = (modelId: string, modelList: TrainingProject[]) => {
+  const model = modelList.find((model) => model.id === parseInt(modelId, 10));
+  return model.params;
+};
+
 const edgeTypes = {
-  customEdge: CustomEdge,
+  default: CustomEdge,
 };
 
 const DnDFlow = (props: Props) => {
   const { elements, setElements, modelList, flowElementRef } = props;
 
-  const trainingProjectList = useSelector(trainingProjectIsCascadesFactory());
-
-  // const flowElementRef = useRef(null);
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
-  const [dataUrl, setDataUrl] = useState(null);
 
   console.log('elements', elements);
   console.log('selectedNode', selectedNode);
@@ -81,6 +83,7 @@ const DnDFlow = (props: Props) => {
         data: {
           id,
           name: type === 'sink' ? 'export.json' : null,
+          params: getNodeParams(id, modelList),
         },
       }),
     );
@@ -136,7 +139,7 @@ const DnDFlow = (props: Props) => {
     <>
       <div className="dndflow">
         <ReactFlowProvider>
-          <Sidebar trainingProjectList={trainingProjectList} />
+          <Sidebar modelList={modelList} />
           <div className="reactflow-wrapper" ref={reactFlowWrapper}>
             <NodePanel
               selectedNode={selectedNode}

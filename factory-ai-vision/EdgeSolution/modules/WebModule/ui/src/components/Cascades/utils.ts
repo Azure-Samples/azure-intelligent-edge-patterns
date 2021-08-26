@@ -1,6 +1,6 @@
 import { Node, Edge, isNode, isEdge } from 'react-flow-renderer';
 
-import { TrainingProject } from '../../store/trainingProjectSlice';
+import { TrainingProject, Params } from '../../store/trainingProjectSlice';
 import { CascadePayload } from '../../store/cascadeSlice';
 
 export const getModel = (id: string, modelList: TrainingProject[]) => {
@@ -16,14 +16,21 @@ export const getConvertNode = (node: Node, modelList: TrainingProject[]) => {
 
   return {
     node_id: node.id,
-    name: matchModel.node_type === 'sink' ? node.data.name : matchModel.name,
+    name: matchModel.nodeType === 'sink' ? node.data.name : matchModel.name,
     type: node.type,
     inputs: matchModel.inputs,
     outputs: matchModel.outputs,
     openvino_model_name: matchModel.openvino_model_name,
     openvino_library_name: matchModel.openvino_library_name,
     demultiply_count: matchModel.demultiply_count,
-    params: matchModel.params,
+    download_uri_openvino: matchModel.download_uri_openvino,
+    params:
+      matchModel.nodeType === 'openvino_library'
+        ? {
+            ...(matchModel.params as Params),
+            confidence_threshold: (node.data.params.confidence_threshold as number).toString(),
+          }
+        : matchModel.params,
     combined: matchModel.combined,
   };
 };
@@ -60,4 +67,12 @@ export const getCascadePayload = (
   };
 
   return payload;
+};
+
+export const getBlobToBase64 = (blob: Blob): Promise<string> => {
+  return new Promise((resolve, _) => {
+    const reader = new FileReader();
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.readAsDataURL(blob);
+  });
 };

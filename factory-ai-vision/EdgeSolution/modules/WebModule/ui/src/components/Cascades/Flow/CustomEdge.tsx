@@ -1,8 +1,10 @@
 import React from 'react';
-import { getBezierPath, getMarkerEnd } from 'react-flow-renderer';
+import { getBezierPath, getMarkerEnd, ArrowHeadType } from 'react-flow-renderer';
 
 export default function CustomEdge({
   id,
+  source,
+  target,
   sourceX,
   sourceY,
   targetX,
@@ -11,27 +13,25 @@ export default function CustomEdge({
   targetPosition,
   style = {},
   data,
-  arrowHeadType,
   markerEndId,
 }) {
   const edgePath = getBezierPath({ sourceX, sourceY, sourcePosition, targetX, targetY, targetPosition });
-  const markerEnd = getMarkerEnd(arrowHeadType, markerEndId);
+  const markerEnd = getMarkerEnd(ArrowHeadType.Arrow, markerEndId);
 
   return (
     <>
       <path
         id={id}
-        style={{ strokeWidth: '2px' }}
+        style={{ strokeWidth: '3px', color: '#979593' }}
         className="react-flow__edge-path"
         d={edgePath}
         markerEnd={markerEnd}
       />
-      <text>
+      {/* <text>
         <textPath href={`#${id}`} style={{ fontSize: '12px' }} startOffset="50%" textAnchor="middle">
-          {/* {data.text} */}
           ABC
         </textPath>
-      </text>
+      </text> */}
     </>
   );
 }

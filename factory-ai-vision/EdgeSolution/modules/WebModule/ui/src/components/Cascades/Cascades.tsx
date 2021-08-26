@@ -46,6 +46,7 @@ const Cascades: React.FC<Props> = (props) => {
 
   return (
     <>
+      <Label styles={{ root: { fontSize: '18px', lineHeight: '24px', paddingLeft: '24px' } }}>Cascade</Label>
       <CommandBar styles={{ root: { marginTop: '24px' } }} items={commandBarItems} />
       {cascadeList.length === 0 ? (
         <Stack horizontalAlign="center">

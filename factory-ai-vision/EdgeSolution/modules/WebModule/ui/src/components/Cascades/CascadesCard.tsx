@@ -25,7 +25,6 @@ const getClasses = () =>
 const CascadesCard = (props: Props) => {
   const { cascade } = props;
 
-  const [cascadeName, setCascadeName] = useState(cascade.name);
   const [isPopup, setIsPopup] = useState(false);
 
   const dispatch = useDispatch();
@@ -36,22 +35,24 @@ const CascadesCard = (props: Props) => {
     await dispatch(deleteCascade(cascade.id));
   }, [dispatch, cascade]);
 
-  const onEditCascadeName = useCallback(async () => {
-    await dispatch(
-      updateCascade({
-        id: cascade.id,
-        data: { name: cascadeName, flow: cascade.flow, raw_data: cascade.raw_data },
-      }),
-    );
-    setIsPopup(false);
-  }, [dispatch, cascade, cascadeName]);
+  const onEditCascadeName = useCallback(
+    async (name: string) => {
+      await dispatch(
+        updateCascade({
+          id: cascade.id,
+          data: { ...cascade, name },
+        }),
+      );
+      setIsPopup(false);
+    },
+    [dispatch, cascade],
+  );
 
   const onDuplicateCascade = useCallback(async () => {
     await dispatch(
       createCascade({
+        ...cascade,
         name: `${cascade.name} (1)`,
-        flow: cascade.flow,
-        raw_data: cascade.raw_data,
       }),
     );
   }, [dispatch, cascade]);
@@ -68,12 +69,6 @@ const CascadesCard = (props: Props) => {
         iconProps: { iconName: 'Edit' },
         onClick: () => setIsPopup(true),
       },
-      // {
-      //   key: 'deploy',
-      //   text: 'Deploy',
-      //   iconProps: { iconName: 'CodeEdit' },
-      //   onClick: () => {},
-      // },
       {
         key: 'duplicate',
         text: 'Duplicate',
@@ -97,7 +92,7 @@ const CascadesCard = (props: Props) => {
         }}
         onClick={onDirectCascadeDetail}
       >
-        <img style={{ width: '300px', height: '200px' }} alt="cascadeCover" />
+        <img style={{ width: '300px', height: '200px' }} src={cascade.screenshot} alt="cascadeCover" />
         <Stack styles={{ root: { padding: '12px 16px' } }} horizontal horizontalAlign="space-between">
           <Stack>
             <Text styles={{ root: { fontSize: '10px', lineHeight: '14px' } }}>SECTION 29004</Text>
@@ -113,9 +108,8 @@ const CascadesCard = (props: Props) => {
       {isPopup && (
         <NameModal
           onClose={() => setIsPopup(false)}
-          onSave={onEditCascadeName}
-          cascadeName={cascadeName}
-          setCascadeName={setCascadeName}
+          cascadeName={cascade.name}
+          onSave={(name: string) => onEditCascadeName(name)}
         />
       )}
     </>

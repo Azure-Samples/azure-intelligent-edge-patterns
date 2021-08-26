@@ -7,12 +7,11 @@ import {
   IconButton,
   mergeStyleSets,
 } from '@fluentui/react';
-import React from 'react';
+import React, { useState, useCallback } from 'react';
 
 interface Props {
   onClose: () => void;
-  onSave: () => void;
-  setCascadeName: (value: React.SetStateAction<string>) => void;
+  onSave: (value: string) => void;
   cascadeName: string;
 }
 
@@ -24,7 +23,14 @@ const getClasses = () =>
   });
 
 const NameModal = (props: Props) => {
-  const { onClose, onSave, setCascadeName, cascadeName } = props;
+  const { onClose, onSave, cascadeName } = props;
+
+  const [localName, setLocalName] = useState(cascadeName);
+
+  const onSaveName = useCallback(() => {
+    onSave(localName);
+    onClose();
+  }, [localName, onClose, onSave]);
 
   const classes = getClasses();
 
@@ -36,11 +42,11 @@ const NameModal = (props: Props) => {
       <Stack tokens={{ childrenGap: 15 }}>
         <TextField
           label="Input Cascade Name"
-          value={cascadeName}
-          onChange={(_, value: string) => setCascadeName(value)}
+          value={localName}
+          onChange={(_, value: string) => setLocalName(value)}
         />
         <Stack horizontal horizontalAlign="space-around">
-          <PrimaryButton onClick={onSave}>Save</PrimaryButton>
+          <PrimaryButton onClick={onSaveName}>Save</PrimaryButton>
           <DefaultButton onClick={onClose}>Cancel</DefaultButton>
         </Stack>
       </Stack>
