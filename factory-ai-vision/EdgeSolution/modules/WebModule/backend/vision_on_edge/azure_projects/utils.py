@@ -162,7 +162,27 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     #TODO need to resolve hard-coded pk=20
     project_obj_template = Project.objects.get(pk=15)
 
-    project_obj = Project.objects.create(setting=project_obj_template.setting, is_demo=False, category="customvision", is_cascade=True, type="customvision_model")
+    inputs_ = [
+        {
+            "name": "data",
+            "metadata": {
+                "type": "image",    
+                "shape": [1, 3, 416, 416],
+                "layout": ["N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
+        }
+    ]
+    
+    inputs = json.dumps(inputs_)
+    project_obj = Project.objects.create(
+        setting=project_obj_template.setting, 
+        is_demo=False, 
+        category="customvision", 
+        is_cascade=True, 
+        type="customvision_model",
+        inputs=inputs,
+    )
     # Check Training_Key, Endpoint
     if not project_obj.setting.is_trainer_valid:
         raise SettingCustomVisionAccessFailed
@@ -179,7 +199,6 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     project_obj.name = trainer.get_project(project_id=customvision_project_id).name
     project_obj.project_type = trainer.get_domain(trainer.get_project(customvision_project_id).settings.domain_id).type
     project_obj.customvision_id = customvision_project_id
-    project_obj.save()
 
     # Delete parts and images
     logger.info("Deleting all parts and images...")
@@ -188,7 +207,28 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     # Download parts and images
     logger.info("Pulling Parts...")
     counter = 0
+
+    # update node outputs
     tags = trainer.get_tags(customvision_project_id)
+    labels = []
+    for tag in tags:
+        labels.append(tag.name)
+    outputs_ = [
+        {
+            "name": "detection_out",
+            "metadata": {
+                "type": "bounding_box",
+                "shape": [1, 1, 200, 7],
+                "layout": [1, 1, "B", "F"],
+                "labels": labels,
+            }
+        }
+    ]
+    project_obj.outputs = json.dumps(outputs_)
+    project_obj.save()
+
+
+
     for tag in tags:
         logger.info("Creating Part %s: %s %s", counter, tag.name, tag.description)
         part_obj, created = Part.objects.update_or_create(

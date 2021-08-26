@@ -174,6 +174,7 @@ def create_demo_objects():
                 "type": "bounding_box",
                 "shape": [1, 1, 200, 7],
                 "layout": [1, 1, "B", "F"],
+                "labels": ["person"],
             }
         }
     ]
@@ -208,6 +209,7 @@ def create_demo_objects():
                 "type": "classification",
                 "shape": [1, 5, 1, 1],
                 "layout": [1, "C", 1, 1],
+                "labels": ["neutral", "happy", "sad", "surprise", "anger"],
             }
         }
     ]
@@ -242,6 +244,7 @@ def create_demo_objects():
                 "type": "regression",
                 "shape": [1, 1, 1, 1],
                 "layout": [1, 1, 1, 1],
+                "scale": 100,
             }
         },
         {
@@ -250,6 +253,7 @@ def create_demo_objects():
                 "type": "classfication",
                 "shape": [1, 2, 1, 1],
                 "layout": [1, "P", 1, 1],
+                "labels": ["female", "male"],
             }
         }
     ]
