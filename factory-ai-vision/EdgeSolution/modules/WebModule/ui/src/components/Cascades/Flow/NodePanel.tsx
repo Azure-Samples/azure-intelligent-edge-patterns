@@ -38,7 +38,6 @@ const isThreshold = (threshold) => {
 };
 
 const isExportName = (name: string) => {
-  console.log('exportName', name);
   if (isNil(name) || isEmpty(name)) return false;
 
   return true;
@@ -55,7 +54,9 @@ const NodePanel = (props: Props) => {
   useEffect(() => {
     setExportName(selectedNode?.data.name);
 
-    setThreshold(+selectedNode?.data.params.confidence_threshold * 100);
+    if ((selectedNode?.type as NodeType) === 'openvino_library') {
+      setThreshold(+selectedNode?.data.params.confidence_threshold * 100);
+    }
   }, [selectedNode]);
 
   console.log('threshold', threshold);
@@ -127,6 +128,9 @@ const NodePanel = (props: Props) => {
         headerText={getPanelTitle(selectedNode.type as NodeType)}
         onRenderFooterContent={() => (
           <Stack tokens={{ childrenGap: 10 }} horizontal>
+            {(selectedNode.type as NodeType) === 'customvision_model' && (
+              <PrimaryButton text="Go to Models" />
+            )}
             {(selectedNode.type as NodeType) === 'openvino_model' && <PrimaryButton text="Go to Models" />}
             {(selectedNode.type as NodeType) === 'openvino_library' && (
               <PrimaryButton text="Save" onClick={onSaveTransformNode} disabled={!isThreshold(threshold)} />
@@ -138,7 +142,7 @@ const NodePanel = (props: Props) => {
           </Stack>
         )}
       >
-        {(selectedNode.type as NodeType) === 'openvino_model' && (
+        {['openvino_model', 'customvision_model'].includes(selectedNode.type as NodeType) && (
           <Stack tokens={{ childrenGap: 7 }}>
             <Stack>
               <Label>Name</Label>
@@ -150,7 +154,11 @@ const NodePanel = (props: Props) => {
             </Stack>
             <Stack>
               <Label>Source</Label>
-              <Text>Intel</Text>
+              <Text>
+                {(selectedNode.type as NodeType) === 'customvision_model'
+                  ? 'By Microsoft Custom Vision'
+                  : 'Intel'}
+              </Text>
             </Stack>
             <Stack>
               <Label>Objects / Tags</Label>

@@ -49,8 +49,6 @@ export const updateCascade = createWrappedAsync<any, UpdateCascadePayload>(
   async (payload) => {
     const { id, data } = payload;
 
-    console.log('data', data);
-
     const response = await Axios.patch(`/api/cascades/${id}`, data);
 
     return response.data;
