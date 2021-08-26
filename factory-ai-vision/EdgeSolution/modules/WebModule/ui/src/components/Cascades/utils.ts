@@ -1,6 +1,6 @@
 import { Node, Edge, isNode, isEdge } from 'react-flow-renderer';
 
-import { TrainingProject, Params } from '../../store/trainingProjectSlice';
+import { TrainingProject, Params, NodeType } from '../../store/trainingProjectSlice';
 import { CascadePayload } from '../../store/cascadeSlice';
 
 export const getModel = (id: string, modelList: TrainingProject[]) => {
@@ -75,4 +75,10 @@ export const getBlobToBase64 = (blob: Blob): Promise<string> => {
     reader.onloadend = () => resolve(reader.result as string);
     reader.readAsDataURL(blob);
   });
+};
+
+export const getNodeImage = (type: NodeType) => {
+  if (['customvision_model', 'openvino_model'].includes(type)) return '/icons/modelCard.png';
+  if (type === 'openvino_library') return '/icons/transformCard.png';
+  if (type === 'sink') return '/icons/exportCard.png';
 };

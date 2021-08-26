@@ -57,7 +57,7 @@ export default (props: Props) => {
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
               {modelNodeList.map((model, id) => (
-                <SideBardCard key={id} model={model} type="openvino_model" />
+                <SideBardCard key={id} model={model} type={model.nodeType} />
               ))}
             </Stack>
             <Link styles={{ root: classes.manageModels }}>Manage Models</Link>

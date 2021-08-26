@@ -4,7 +4,7 @@ import { Handle, addEdge, Connection } from 'react-flow-renderer';
 
 import { NodeType, TrainingProject } from '../../../../store/trainingProjectSlice';
 import { getSourceMetadata, getTargetMetadata, isValidConnection } from './utils';
-import { getModel } from '../../utils';
+import { getModel, getNodeImage } from '../../utils';
 
 interface Props {
   id: string;
@@ -39,12 +39,6 @@ const getClasses = () =>
       },
     },
   });
-
-const getNodeImage = (type: NodeType) => {
-  if (type === 'openvino_model') return '/icons/modelCard.png';
-  if (type === 'openvino_library') return '/icons/transformCard.png';
-  if (type === 'sink') return '/icons/exportCard.png';
-};
 
 const getHandlePointer = (length: number, id) => {
   if (length === 1) return 150;

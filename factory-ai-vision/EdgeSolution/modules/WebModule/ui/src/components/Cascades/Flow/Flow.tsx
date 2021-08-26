@@ -52,9 +52,6 @@ const DnDFlow = (props: Props) => {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
 
-  console.log('elements', elements);
-  console.log('selectedNode', selectedNode);
-
   const onElementsRemove = (elementsToRemove) => setElements((els) => removeElements(elementsToRemove, els));
   const onLoad = (_reactFlowInstance) => setReactFlowInstance(_reactFlowInstance);
 
@@ -164,6 +161,20 @@ const DnDFlow = (props: Props) => {
                       id={id}
                       modelList={modelList}
                       type="openvino_model"
+                      setElements={setElements}
+                      onDelete={() => onDeleteNode(id)}
+                      onSelected={() => setSelectedNode(node)}
+                    />
+                  );
+                },
+                customvision_model: (node) => {
+                  const { id } = node;
+
+                  return (
+                    <NodeCard
+                      id={id}
+                      modelList={modelList}
+                      type="customvision_model"
                       setElements={setElements}
                       onDelete={() => onDeleteNode(id)}
                       onSelected={() => setSelectedNode(node)}

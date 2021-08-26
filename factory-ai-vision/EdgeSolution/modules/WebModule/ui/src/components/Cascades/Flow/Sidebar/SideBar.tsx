@@ -3,17 +3,12 @@ import { Stack, Text, Label, Link, IContextualMenuProps, IconButton } from '@flu
 
 import { TrainingProject, NodeType } from '../../../../store/trainingProjectSlice';
 import { getClasses } from './style';
+import { getNodeImage } from '../../utils';
 
 interface Props {
   model: TrainingProject;
   type: NodeType;
 }
-
-const getImage = (type: NodeType) => {
-  if (type === 'openvino_model') return '/icons/modelCard.png';
-  if (type === 'openvino_library') return '/icons/transformCard.png';
-  if (type === 'sink') return '/icons/exportCard.png';
-};
 
 const Model = (props: Props) => {
   const { model, type } = props;
@@ -48,7 +43,7 @@ const Model = (props: Props) => {
       styles={{ root: classes.root }}
     >
       <Stack horizontal>
-        <img style={{ height: '60px', width: '60px' }} src={getImage(type)} alt="icon" />
+        <img style={{ height: '60px', width: '60px' }} src={getNodeImage(type)} alt="icon" />
         <Stack styles={{ root: classes.titleWrapper }} horizontal horizontalAlign="space-between">
           {type === 'sink' ? (
             <Stack>
@@ -72,6 +67,9 @@ const Model = (props: Props) => {
       </Stack>
       <Stack styles={{ root: classes.bottomWrapper }}>
         {type === 'openvino_model' && <Label styles={{ root: classes.smallLabel }}>By Intel</Label>}
+        {type === 'customvision_model' && (
+          <Label styles={{ root: classes.smallLabel }}>By Microsoft Custom Vision</Label>
+        )}
         <Link styles={{ root: classes.addLabel }}>add</Link>
       </Stack>
     </Stack>
