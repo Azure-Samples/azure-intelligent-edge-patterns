@@ -33,9 +33,6 @@ const CascadesContainer = () => {
   const modelList = useSelector(trainingProjectIsCascadesFactory());
   const cascadeList = useSelector((state: RootState) => selectAllCascades(state));
 
-  // const [cascadeName, setCascadeName] = useState('Default Cascade');
-  // const [isPopup, setIsPopup] = useState(false);
-
   const isMatchCreationRoute = useRouteMatch(Url.CASCADES_CREATE);
   const isMatchEditRoute = useRouteMatch(Url.CASCADES_DETAIL);
   const classes = getClasses();
