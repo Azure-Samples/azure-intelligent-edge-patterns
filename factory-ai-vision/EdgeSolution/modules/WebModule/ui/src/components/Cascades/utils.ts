@@ -82,3 +82,12 @@ export const getNodeImage = (type: NodeType) => {
   if (type === 'openvino_library') return '/icons/transformCard.png';
   if (type === 'sink') return '/icons/exportCard.png';
 };
+
+export const isDuplicateNodeName = (elements: (Node | Edge)[]) => {
+  const exportNameList = elements
+    .filter((element) => isNode(element))
+    .filter((node) => (node.type as NodeType) === 'sink')
+    .map((node) => node.data?.name);
+
+  return new Set(exportNameList).size !== exportNameList.length;
+};

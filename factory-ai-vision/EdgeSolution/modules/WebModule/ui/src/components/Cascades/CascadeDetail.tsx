@@ -8,11 +8,12 @@ import domtoimage from 'dom-to-image';
 import { Url } from '../../enums';
 import { TrainingProject } from '../../store/trainingProjectSlice';
 import { Cascade } from '../../store/cascadeSlice';
-import { getCascadePayload, getBlobToBase64 } from './utils';
+import { getCascadePayload, getBlobToBase64, isDuplicateNodeName } from './utils';
 import { updateCascade } from '../../store/cascadeSlice';
 
 import Flow from './Flow/Flow';
 import NameModal from './NameModal';
+import DuplicationModal from './DuplicationModal';
 
 interface Props {
   cascadeList: Cascade[];
@@ -28,6 +29,7 @@ const CascadeDetail = (props: Props) => {
   const [elements, setElements] = useState<(Node | Edge)[]>([]);
   const [isPopup, setIsPopup] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDuplicate, setIsDuplicate] = useState(false);
 
   const flowElementRef = useRef(null);
   const dispatch = useDispatch();
@@ -42,6 +44,11 @@ const CascadeDetail = (props: Props) => {
   }, [id, cascadeList, setElements, setCascadeName]);
 
   const onSaveEditCascade = useCallback(async () => {
+    if (isDuplicateNodeName(elements)) {
+      setIsDuplicate(true);
+      return;
+    }
+
     setIsLoading(true);
 
     const blob = await domtoimage.toBlob(flowElementRef.current);
@@ -103,6 +110,7 @@ const CascadeDetail = (props: Props) => {
           onSave={(name) => setCascadeName(name)}
         />
       )}
+      {isDuplicate && <DuplicationModal onClose={() => setIsDuplicate(false)} />}
     </>
   );
 };
