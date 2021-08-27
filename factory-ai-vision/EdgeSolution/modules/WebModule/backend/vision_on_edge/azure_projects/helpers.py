@@ -339,7 +339,7 @@ def create_demo_objects():
                 "max_output_batch": "100",
                 "confidence_threshold": "0.7",
                 "debug": "true",
-                "filter_label_id": -1
+                "filter_label_id": "-1"
             }),
         },
     )
