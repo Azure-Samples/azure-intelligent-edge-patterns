@@ -20,7 +20,7 @@ import { getModel } from '../utils';
 
 import './dnd.css';
 
-import Sidebar from './Sidebar/Sidebar';
+import SidebarList from './Sidebar/SidebarList';
 import NodeCard from './Node/Node';
 import CustomEdge from './CustomEdge';
 import InitialNode from './Node/SourceNode';
@@ -104,7 +104,7 @@ const DnDFlow = (props: Props) => {
     <>
       <div className="dndflow">
         <ReactFlowProvider>
-          <Sidebar modelList={modelList} />
+          <SidebarList modelList={modelList} />
           <div className="reactflow-wrapper" ref={reactFlowWrapper}>
             <NodePanel
               selectedNode={selectedNode}
