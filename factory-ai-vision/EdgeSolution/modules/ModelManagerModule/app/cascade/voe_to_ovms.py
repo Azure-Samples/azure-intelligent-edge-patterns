@@ -98,12 +98,12 @@ def process_customvision_model(node, g):
     #
     # Download Model
     #
-    #subprocess.run(['wget', '-O', TMP_DIR+'/model.zip', node.download_uri_openvino])
-    #subprocess.run(['unzip', '-o', TMP_DIR+'/model.zip', '-d', TMP_DIR])
-    #subprocess.run(['mkdir', '-p', MODEL_DIR+'/'+model_name])
-    #subprocess.run(['mkdir', '-p', MODEL_DIR+'/'+model_name+'/1'])
-    #subprocess.run(['mv', TMP_DIR+'/model.xml', MODEL_DIR+'/'+model_name+'/1/'+model_name+'.xml'])
-    #subprocess.run(['mv', TMP_DIR+'/model.bin', MODEL_DIR+'/'+model_name+'/1/'+model_name+'.bin'])
+    subprocess.run(['wget', '-O', TMP_DIR+'/model.zip', node.download_uri_openvino])
+    subprocess.run(['unzip', '-o', TMP_DIR+'/model.zip', '-d', TMP_DIR])
+    subprocess.run(['mkdir', '-p', MODEL_DIR+'/'+model_name])
+    subprocess.run(['mkdir', '-p', MODEL_DIR+'/'+model_name+'/1'])
+    subprocess.run(['mv', TMP_DIR+'/model.xml', MODEL_DIR+'/'+model_name+'/1/'+model_name+'.xml'])
+    subprocess.run(['mv', TMP_DIR+'/model.bin', MODEL_DIR+'/'+model_name+'/1/'+model_name+'.bin'])
 
     if node.inputs[0].metadata['type'] != 'image': raise Exception('Not a model')
 

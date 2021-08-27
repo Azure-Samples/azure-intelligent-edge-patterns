@@ -23,7 +23,7 @@ def set_voe_config(voe_config_data: VoeConfigData):
     ovms_config = voe_config_to_ovms_config(voe_config)
 
     with open('../workspace/config.json', 'w+') as f:
-        json.dump(ovms_config.dict(), f)
+        json.dump(ovms_config.dict(exclude_none=True), f)
 
     return 'ok'
 
