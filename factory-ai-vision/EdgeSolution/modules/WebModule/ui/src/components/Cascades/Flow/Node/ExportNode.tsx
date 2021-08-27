@@ -85,7 +85,6 @@ const ExportNode = (props: Props) => {
         />
         <Stack styles={{ root: classes.nodeWrapper }}>
           <Text styles={{ root: classes.title }}>{name}</Text>
-          <Text styles={{ root: classes.label }}>Export</Text>
         </Stack>
         <Stack verticalAlign="center">
           <IconButton

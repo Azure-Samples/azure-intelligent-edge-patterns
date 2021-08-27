@@ -209,13 +209,6 @@ const NodePanel = (props: Props) => {
               required
               errorMessage={!isExportName(exportName) && 'Not null'}
             />
-            <Dropdown
-              label="Objects / Tags"
-              options={tagsOptions}
-              selectedKey={tags}
-              onChange={(_, options) => setTags(options.key as string)}
-              required
-            />
           </Stack>
         )}
       </Panel>

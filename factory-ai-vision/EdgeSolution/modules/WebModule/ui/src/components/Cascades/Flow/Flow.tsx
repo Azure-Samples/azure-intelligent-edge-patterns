@@ -20,7 +20,7 @@ import { getModel } from '../utils';
 
 import './dnd.css';
 
-import Sidebar from './Sidebar';
+import Sidebar from './Sidebar/Sidebar';
 import NodeCard from './Node/Node';
 import CustomEdge from './CustomEdge';
 import InitialNode from './Node/SourceNode';
@@ -79,7 +79,7 @@ const DnDFlow = (props: Props) => {
         position,
         data: {
           id,
-          name: type === 'sink' ? 'export.json' : null,
+          name: type === 'sink' ? 'Export' : null,
           params: getNodeParams(id, modelList),
         },
       }),
@@ -99,38 +99,6 @@ const DnDFlow = (props: Props) => {
     },
     [setElements],
   );
-
-  // const onCreateImage = useCallback(async () => {
-  //   const blob = await domtoimage.toBlob(flowElementRef.current);
-
-  //   setDataUrl(blob);
-  //   console.log('blob', blob);
-
-  //   // console.log('test', test);
-  // }, []);
-
-  // const onSaveCascades = useCallback(async () => {
-  //   await dispatch(createCascade(getCreateCascadePayload(elements, cascadesName, modelList)));
-
-  //   history.push(Url.CASCADES);
-  // }, [dispatch, elements, cascadesName, history, modelList]);
-
-  // const commandBarItems: ICommandBarItemProps[] = useMemo(() => {
-  //   const items = [
-  //     {
-  //       key: 'addBtn',
-  //       text: 'Add',
-  //       iconProps: {
-  //         iconName: 'Add',
-  //       },
-  //       // onClick: onSaveCascades,
-  //       onClick: onSaveCascades,
-  //     },
-  //     ...defaultCommandBarItems,
-  //   ];
-
-  //   return items;
-  // }, [defaultCommandBarItems]);
 
   return (
     <>

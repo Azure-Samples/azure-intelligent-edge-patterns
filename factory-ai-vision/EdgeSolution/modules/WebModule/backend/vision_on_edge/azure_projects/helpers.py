@@ -338,7 +338,8 @@ def create_demo_objects():
                 "convert_to_gray_scale": "false",
                 "max_output_batch": "100",
                 "confidence_threshold": "0.7",
-                "debug": "true"
+                "debug": "true",
+                "filter_label_id": -1
             }),
         },
     )
