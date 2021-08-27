@@ -70,9 +70,9 @@ const CascadeCreate = (props: Props) => {
   const commandBarItems: ICommandBarItemProps[] = [
     {
       key: 'addBtn',
-      text: 'Add',
+      text: 'Save',
       iconProps: {
-        iconName: 'Add',
+        iconName: 'Save',
       },
       onClick: () => {
         onCreateNewCascade();
