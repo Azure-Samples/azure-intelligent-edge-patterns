@@ -59,8 +59,6 @@ const NodePanel = (props: Props) => {
     }
   }, [selectedNode]);
 
-  console.log('threshold', threshold);
-
   const tagsOptions: IDropdownOption[] = [
     { key: 'car', text: 'Car' },
     { key: 'bus', text: 'Bus' },

@@ -312,6 +312,8 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
                   );
                 }
               }}
+              styles={{ root: { '.is-disabled': { border: '1px solid #605e5c' } } }}
+              disabled={projectData.deployment_type === 'cascade'}
             />
           </Stack>
         </PivotItem>
