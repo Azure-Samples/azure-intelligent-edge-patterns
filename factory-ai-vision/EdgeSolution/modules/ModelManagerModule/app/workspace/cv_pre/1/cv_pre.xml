@@ -1,0 +1,99 @@
+<?xml version="1.0" ?>
+<net name="saved_model" version="10">
+	<layers>
+		<layer id="0" name="image" type="Parameter" version="opset1">
+			<data shape="1, 3, 416, 416" element_type="f32"/>
+			<output>
+				<port id="0" precision="FP32" names="Func/PartitionedCall/input/_0:0,image:0">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>416</dim>
+					<dim>416</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="1" name="Func/PartitionedCall/input/_1" type="Const" version="opset1">
+			<data element_type="f32" shape="1, 3, 416, 416" offset="0" size="2076672"/>
+			<output>
+				<port id="0" precision="FP32" names="Func/PartitionedCall/input/_1:0">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>416</dim>
+					<dim>416</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="2" name="PartitionedCall/model/image_out/mul" type="Multiply" version="opset1">
+			<data auto_broadcast="numpy"/>
+			<input>
+				<port id="0" precision="FP32">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>416</dim>
+					<dim>416</dim>
+				</port>
+				<port id="1" precision="FP32">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>416</dim>
+					<dim>416</dim>
+				</port>
+			</input>
+			<output>
+				<port id="2" precision="FP32" names="Func/PartitionedCall/output/_2:0,Identity:0,PartitionedCall/Identity:0,PartitionedCall/model/image_out/mul:0">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>416</dim>
+					<dim>416</dim>
+				</port>
+			</output>
+		</layer>
+		<layer id="3" name="Func/PartitionedCall/output/_2:0" type="Result" version="opset1">
+			<input>
+				<port id="0" precision="FP32">
+					<dim>1</dim>
+					<dim>3</dim>
+					<dim>416</dim>
+					<dim>416</dim>
+				</port>
+			</input>
+		</layer>
+	</layers>
+	<edges>
+		<edge from-layer="0" from-port="0" to-layer="2" to-port="0"/>
+		<edge from-layer="1" from-port="0" to-layer="2" to-port="1"/>
+		<edge from-layer="2" from-port="2" to-layer="3" to-port="0"/>
+	</edges>
+	<meta_data>
+		<MO_version value="2021.4.0-3839-cd81789d294-releases/2021/4"/>
+		<cli_parameters>
+			<data_type value="float"/>
+			<disable_nhwc_to_nchw value="True"/>
+			<disable_resnet_optimization value="False"/>
+			<disable_weights_compression value="False"/>
+			<enable_concat_optimization value="False"/>
+			<extensions value="DIR"/>
+			<framework value="tf"/>
+			<freeze_placeholder_with_value value="{}"/>
+			<generate_deprecated_IR_V7 value="False"/>
+			<input_model_is_text value="False"/>
+			<keep_shape_ops value="True"/>
+			<legacy_ir_generation value="False"/>
+			<log_level value="ERROR"/>
+			<mean_scale_values value="{}"/>
+			<mean_values value="()"/>
+			<model_name value="saved_model"/>
+			<output_dir value="DIR"/>
+			<placeholder_data_types value="{}"/>
+			<progress value="False"/>
+			<reverse_input_channels value="False"/>
+			<saved_model_dir value="DIR"/>
+			<scale_values value="()"/>
+			<silent value="False"/>
+			<static_shape value="False"/>
+			<stream_output value="False"/>
+			<transform value=""/>
+			<unset unset_cli_parameters="batch, disable_fusing, disable_gfusing, finegrain_fusing, input, input_checkpoint, input_meta_graph, input_model, input_shape, move_to_preprocess, output, placeholder_shapes, saved_model_tags, scale, tensorboard_logdir, tensorflow_custom_layer_libraries, tensorflow_custom_operations_config_update, tensorflow_object_detection_api_pipeline_config, tensorflow_use_custom_operations_config, transformations_config"/>
+		</cli_parameters>
+	</meta_data>
+</net>

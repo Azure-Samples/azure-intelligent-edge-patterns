@@ -4,7 +4,7 @@ from pydantic import BaseModel, constr, validator, conint
 
 class ImageLayoutEnum(str, Enum):
     NHWC = 'NHWC'
-    NCWH = 'NCWH'
+    NCHW = 'NCHW'
 
 class ModelConfig(BaseModel):
     name: str

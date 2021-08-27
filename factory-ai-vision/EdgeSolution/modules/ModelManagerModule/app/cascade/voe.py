@@ -50,13 +50,17 @@ class NodeOutput(BaseModel):
 
 class SourceNode(_Node):
     type: Literal['source']
-    outputs: List[NodeInput]
+    outputs: List[NodeOutput]
+
+class Source2Node(_Node):
+    type: Literal['source2']
+    outputs: List[NodeOutput]
 
 class OpenvinoModelNode(_Node):
     type: Literal['openvino_model']
     openvino_model_name: str
     inputs: List[NodeInput]
-    outputs: List[NodeInput]
+    outputs: List[NodeOutput]
 
 class OpenvinoLibraryNode(_Node):
     type: Literal['openvino_library']
@@ -64,7 +68,14 @@ class OpenvinoLibraryNode(_Node):
     demultiply_count: Optional[int]
     params: Any
     inputs: List[NodeInput]
-    outputs: List[NodeInput]
+    outputs: List[NodeOutput]
+
+
+class CustomvisionModelNode(_Node):
+    type: Literal['customvision_model']
+    download_uri_openvino: str
+    inputs: List[NodeInput]
+    outputs: List[NodeOutput]
 
 
 class SinkNode(_Node):
@@ -72,7 +83,7 @@ class SinkNode(_Node):
     combined: Optional[bool]
     inputs: List[NodeInput]
 
-Node = Union[SourceNode, OpenvinoModelNode, OpenvinoLibraryNode, SinkNode]
+Node = Union[SourceNode, OpenvinoModelNode, OpenvinoLibraryNode, CustomvisionModelNode, SinkNode]
 
 
 

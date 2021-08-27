@@ -1,5 +1,9 @@
 import json
+import subprocess
+import requests
+
 import networkx
+
 from . import ovms
 from . import voe
 
@@ -8,8 +12,16 @@ from . import voe
 # FIXME
 ROOT = '/workspace'
 
+# uncomment these for running at local
+#ROOT = '/tmp/workspace'
+#subprocess.run(['mkdir', '-p', '/tmp/workspace'])
+#subprocess.run(['mkdir', '-p', '/tmp/workspace/tmp'])
+
+
 MODEL_DIR = ROOT
 LIB_DIR = ROOT + '/lib'
+TMP_DIR = ROOT + '/tmp'
+
 
 def load_voe_config_from_dict(j):
     voe_config = voe.VoeConfig(**j)
@@ -79,6 +91,131 @@ def process_openvino_model(node, g):
 
     return model_config, pipeline_config_node
 
+def process_customvision_model(node, g):
+
+    model_name = node.download_uri_openvino.split('/')[3][2:]
+
+    #
+    # Download Model
+    #
+    #subprocess.run(['wget', '-O', TMP_DIR+'/model.zip', node.download_uri_openvino])
+    #subprocess.run(['unzip', '-o', TMP_DIR+'/model.zip', '-d', TMP_DIR])
+    #subprocess.run(['mkdir', '-p', MODEL_DIR+'/'+model_name])
+    #subprocess.run(['mkdir', '-p', MODEL_DIR+'/'+model_name+'/1'])
+    #subprocess.run(['mv', TMP_DIR+'/model.xml', MODEL_DIR+'/'+model_name+'/1/'+model_name+'.xml'])
+    #subprocess.run(['mv', TMP_DIR+'/model.bin', MODEL_DIR+'/'+model_name+'/1/'+model_name+'.bin'])
+
+    if node.inputs[0].metadata['type'] != 'image': raise Exception('Not a model')
+
+
+    model_configs = [] 
+    cv_pre_model_config = ovms.ModelConfig(
+            name='cv_pre',
+            base_path=MODEL_DIR+'/cv_pre',
+            shape='('+', '.join(str(n) for n in node.inputs[0].metadata['shape'])+')',
+            layout=''.join(node.inputs[0].metadata['layout'])
+    )
+
+    cv_model_config = ovms.ModelConfig(
+            name=node.name,
+            base_path=MODEL_DIR+'/'+model_name,
+            shape='('+', '.join(str(n) for n in node.inputs[0].metadata['shape'])+')',
+            #layout=''.join(node.inputs[0].metadata['layout'])
+            layout='NCHW'
+    )
+
+    cv_post_model_config = ovms.ModelConfig(
+            name='cv_post',
+            base_path=MODEL_DIR+'/cv_post',
+     )
+
+    model_configs = [cv_pre_model_config, cv_model_config, cv_post_model_config]
+
+    
+    cv_post_outputs = []
+    for output in node.outputs:
+        cv_post_outputs.append(ovms.PipelineConfigNodeOutput(
+            data_item='PartitionedCall/model/detection_out/concat',
+            alias=output.name
+        ))
+
+    cv_pre_inputs = []
+    for input in node.inputs:
+        found_parent = False
+        for parent_id in g.predecessors(node.node_id):
+            parent_node = _get_node_from_graph(parent_id, g)
+            edge = _get_edge_from_graph(parent_id, node.node_id, g)
+            if input.name == edge.target.input_name:
+                found_parent = True
+
+                cv_pre_inputs.append(
+                    {'image': ovms.PipelineConfigNodeInput(
+                        node_name=parent_node.name,
+                        data_item=edge.source.output_name)
+                    }
+                )
+
+                break
+
+        if not found_parent: raise Exception('Unfulfilled inputs')
+
+    cv_pre_pipeline_config_node = ovms.PipelineConfigModelNode(
+        name='cv_pre',
+        model_name='cv_pre',
+        type='DL model',
+        inputs=cv_pre_inputs,
+        outputs=[
+            ovms.PipelineConfigNodeOutput(
+                data_item='PartitionedCall/model/image_out/mul',
+                alias='image')
+        ]
+    )
+
+    cv_pipeline_config_node = ovms.PipelineConfigModelNode(
+        name=node.name,
+        model_name=node.name,
+        type='DL model',
+        inputs=[
+            {'data': ovms.PipelineConfigNodeInput(
+                node_name='cv_pre',
+                data_item='image')},
+        ],
+        outputs=[
+            ovms.PipelineConfigNodeOutput(
+                data_item='detected_classes',
+                alias='detected_classes'),
+            ovms.PipelineConfigNodeOutput(
+                data_item='detected_scores',
+                alias='detected_scores'),
+            ovms.PipelineConfigNodeOutput(
+                data_item='detected_boxes',
+                alias='detected_boxes'),
+        ]
+    )
+
+    cv_post_pipeline_config_node = ovms.PipelineConfigModelNode(
+        name='cv_post',
+        model_name='cv_post',
+        type='DL model',
+        inputs=[
+            {'detected_classes': ovms.PipelineConfigNodeInput(
+                node_name=node.name,
+                data_item='detected_classes')},
+            {'detected_scores': ovms.PipelineConfigNodeInput(
+                node_name=node.name,
+                data_item='detected_scores')},
+            {'detected_boxes': ovms.PipelineConfigNodeInput(
+                node_name=node.name,
+                data_item='detected_boxes')},
+        ],
+        outputs=cv_post_outputs,
+    )
+
+    pipeline_config_nodes = [cv_pre_pipeline_config_node, cv_pipeline_config_node, cv_post_pipeline_config_node]
+    
+
+    return model_configs, pipeline_config_nodes
+
 
 def process_openvino_library(node, g): 
 
@@ -103,9 +240,14 @@ def process_openvino_library(node, g):
             if input.name == edge.target.input_name:
                 found_parent = True
 
+                # FIXME
+                parent_node_name = parent_node.name
+                if parent_node.type == 'customvision_model':
+                    parent_node_name = 'cv_post'
+
                 inputs.append(
                     {input.name: ovms.PipelineConfigNodeInput(
-                        node_name=parent_node.name,
+                        node_name=parent_node_name,
                         data_item=edge.source.output_name)
                     }
                 )
@@ -198,6 +340,13 @@ def voe_config_to_ovms_config(voe_config,
                         data_item='coordinates'
                 )})
 
+        elif node.type == 'customvision_model':
+            model_configs, pipeline_config_nodes = process_customvision_model(node, g)
+            for model_config in model_configs:
+                model_config_list.append({'config': model_config})
+            pipeline_config['nodes'] += pipeline_config_nodes
+
+
         elif node.type == 'sink':
             output = process_sink(node, g)
             pipeline_config['outputs'].append(output)
@@ -218,10 +367,10 @@ def voe_config_to_ovms_config(voe_config,
     return ovms_config
 
 if __name__ == '__main__':
-    #j = json.load(open('../voe_config.json'))
-    j = json.load(open('../wew.json'))
+    j = json.load(open('cascade/test/voe_config2.json'))
     voe_config = load_voe_config_from_dict(j)
-    voe_config_to_ovms_config(voe_config)
+    c = voe_config_to_ovms_config(voe_config)
+    json.dump(c.dict(exclude_none=True), open('cascade/test/ovms_config2.json', 'w+'))
 
 
 
