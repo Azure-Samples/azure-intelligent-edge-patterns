@@ -1,8 +1,7 @@
 /* eslint react/display-name: "off" */
 
 import React, { useEffect, useState, useMemo } from 'react';
-import { isEmpty, compose } from 'ramda';
-import { useSelector, useDispatch } from 'react-redux';
+import { compose } from 'ramda';
 import { useHistory } from 'react-router-dom';
 import {
   Stack,
@@ -17,12 +16,12 @@ import {
 } from '@fluentui/react';
 
 import { TrainingProject } from '../../store/trainingProjectSlice';
+import { useQuery } from '../../hooks/useQuery';
 
-// import { Url } from '../../enums';
-// import { ModelType } from './type';
+import { Url } from '../../enums';
 
-// import { EmptyAddIcon } from '../EmptyAddIcon';
 import ModelCard from './ModelCard';
+import EditPanel from './Panel/EditPanel';
 
 export type ModelType = 'custom' | 'own' | 'ovms';
 
@@ -47,12 +46,19 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
 
   const [isIntelProjectClick, setIsIntelProjectClick] = useState(true);
   const [isOwnProject, setIsOwnProject] = useState(true);
+  const [selectedProjectId, setSelectedProjectId] = useState(null);
 
+  const modelId = parseInt(useQuery().get('modelId'), 10);
   const history = useHistory();
 
-  // @ts-ignore
   const intelProjectList = trainingProjectList.filter((project) => project.category === 'OVMS');
   const ownProjectList = trainingProjectList.filter((project) => project.category === 'customvision');
+
+  useEffect(() => {
+    if (modelId) {
+      setSelectedProjectId(modelId);
+    }
+  }, [modelId]);
 
   const commandBarItems: ICommandBarItemProps[] = useMemo(
     () => [
@@ -79,35 +85,67 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
   );
 
   return (
-    <Stack tokens={{ childrenGap: '40' }}>
-      <Stack tokens={{ childrenGap: '16' }}>
-        <CommandBar
-          items={commandBarItems}
-          styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
-        />
-        {isIntelProjectClick && (
-          <Stack horizontal tokens={{ childrenGap: '10px' }}>
-            {intelProjectList.map((project, i) => (
-              <ModelCard key={i} project={project} />
-            ))}
-          </Stack>
-        )}
+    <>
+      <Stack tokens={{ childrenGap: '40' }}>
+        <Stack tokens={{ childrenGap: '16' }}>
+          <CommandBar
+            items={commandBarItems}
+            styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
+          />
+          {isIntelProjectClick && (
+            <Stack horizontal tokens={{ childrenGap: '10px' }}>
+              {intelProjectList.map((project, i) => (
+                <ModelCard
+                  key={i}
+                  project={project}
+                  onSelectedProject={() => {
+                    history.push(`${Url.MODELS}?modelId=${project.id}`);
+                    setSelectedProjectId(project.id);
+                  }}
+                  onDismiss={() => {
+                    setSelectedProjectId(null);
+                    history.push(Url.MODELS);
+                  }}
+                />
+              ))}
+            </Stack>
+          )}
+        </Stack>
+        <Stack tokens={{ childrenGap: '16' }}>
+          <CommandBar
+            items={ownCommandBarItems}
+            styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
+          />
+          {isOwnProject && (
+            <Stack horizontal tokens={{ childrenGap: '10px' }}>
+              {ownProjectList.map((project, i) => (
+                <ModelCard
+                  key={i}
+                  project={project}
+                  onSelectedProject={() => {
+                    history.push(`${Url.MODELS}?modelId=${project.id}`);
+                    setSelectedProjectId(project.id);
+                  }}
+                  onDismiss={() => {
+                    setSelectedProjectId(null);
+                    history.push(Url.MODELS);
+                  }}
+                />
+              ))}
+            </Stack>
+          )}
+        </Stack>
       </Stack>
-      <Stack tokens={{ childrenGap: '16' }}>
-        {/* <ActionButton text="Public Models" /> */}
-        <CommandBar
-          items={ownCommandBarItems}
-          styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
+      {selectedProjectId && (
+        <EditPanel
+          projectId={selectedProjectId}
+          onDismiss={() => {
+            setSelectedProjectId(null);
+            history.push(Url.MODELS);
+          }}
         />
-        {isOwnProject && (
-          <Stack horizontal tokens={{ childrenGap: '10px' }}>
-            {ownProjectList.map((project, i) => (
-              <ModelCard key={i} project={project} />
-            ))}
-          </Stack>
-        )}
-      </Stack>
-    </Stack>
+      )}
+    </>
   );
 };
 

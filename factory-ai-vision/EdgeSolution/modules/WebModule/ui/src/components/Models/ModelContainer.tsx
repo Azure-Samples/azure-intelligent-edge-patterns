@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   CommandBar,
   ICommandBarItemProps,
@@ -8,14 +8,10 @@ import {
   Breadcrumb,
   mergeStyleSets,
 } from '@fluentui/react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import {
-  getTrainingProject,
-  trainingProjectIsPredictionModelFactory,
-  TrainingProject as TrainingProjectType,
-} from '../../store/trainingProjectSlice';
+import { trainingProjectIsPredictionModelFactory } from '../../store/trainingProjectSlice';
 import { State as RootState } from 'RootStateType';
 import { selectAllIntelProject } from '../../store/IntelProjectSlice';
 
@@ -154,10 +150,7 @@ const ModelContainer = () => {
             styles={{
               root: classes.breadcrumb,
             }}
-            // className={classes.breadcrumb}
             items={items}
-            // ariaLabel="Breadcrumb with items rendered as buttons"
-            // overflowAriaLabel="More links"
           />
         )}
         <Label styles={{ root: { fontSize: '18px', lineHeight: '24px' } }}>
@@ -181,7 +174,6 @@ const ModelContainer = () => {
         </Stack>
       </Stack>
       <AddCustomVision isOpen={isAddCustomVision} onDissmiss={() => setIsAddCustomVision(false)} />
-      {/* <AddPanel isOpen={isOpen} modelType={modelType} onDissmiss={() => setIsOpen(false)} /> */}
     </>
   );
 };

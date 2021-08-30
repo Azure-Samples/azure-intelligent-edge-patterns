@@ -202,7 +202,7 @@ export const updateCustomVisionProjectTags = createWrappedAsync<
   updateCustomVisionProjectTagsPayload,
   { state: State }
 >('trainingSlice/updateCustomVisionTags', async ({ id, tags }, { dispatch }) => {
-  const response = await Axios.post(`/api/projects/${id}/update_tags`, { tags });
+  await Axios.post(`/api/projects/${id}/update_tags`, { tags });
 
   dispatch(getParts());
   dispatch(refreshTrainingProject());

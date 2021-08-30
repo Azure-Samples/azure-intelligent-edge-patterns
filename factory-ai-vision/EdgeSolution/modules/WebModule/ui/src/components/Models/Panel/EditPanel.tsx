@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useMemo } from 'react';
 import {
   Panel,
   Stack,
@@ -12,20 +12,22 @@ import {
   Link,
   Icon,
 } from '@fluentui/react';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, generatePath } from 'react-router-dom';
 
-import { TrainingProject, updateCustomVisionProjectTags } from '../../../store/trainingProjectSlice';
-import { Part } from '../../../store/partSlice';
+import { State as RootState } from 'RootStateType';
+import {
+  updateCustomVisionProjectTags,
+  selectTrainingProjectById,
+} from '../../../store/trainingProjectSlice';
+import { trainingProjectPartsSelectorFactory } from '../../../store/partSlice';
 import { Url } from '../../../enums';
 
 import Tag from '../Tag';
 
 type Props = {
-  isOpen: boolean;
-  project: TrainingProject;
-  parts: Part[];
-  onDissmiss: () => void;
+  projectId: string;
+  onDismiss: () => void;
 };
 
 const getClasses = () =>
@@ -42,7 +44,11 @@ const getClasses = () =>
   });
 
 const EditPanel: React.FC<Props> = (props) => {
-  const { isOpen, project, parts, onDissmiss } = props;
+  const { projectId, onDismiss } = props;
+
+  const project = useSelector((state: RootState) => selectTrainingProjectById(state, projectId));
+  const partSelector = useMemo(() => trainingProjectPartsSelectorFactory(project.id), [project]);
+  const parts = useSelector(partSelector);
 
   const [localTag, setLocalTag] = useState('');
   const [localTags, setLocalTags] = useState<string[]>([]);
@@ -96,19 +102,19 @@ const EditPanel: React.FC<Props> = (props) => {
     await dispatch(updateCustomVisionProjectTags({ id: project.id.toString(), tags: localTags }));
 
     setIsLoading(false);
-    onDissmiss();
-  }, [dispatch, project, localTags, onDissmiss]);
+    onDismiss();
+  }, [dispatch, project, localTags, onDismiss]);
 
   return (
     <Panel
-      isOpen={isOpen}
-      onDismiss={onDissmiss}
+      isOpen={true}
+      onDismiss={onDismiss}
       hasCloseButton
       headerText="Edit Model"
       onRenderFooterContent={() => (
         <Stack tokens={{ childrenGap: 10 }} horizontal>
           <PrimaryButton onClick={onSaveModelClick} text="Save" disabled={isLoading} />
-          <DefaultButton onClick={onDissmiss}>Cancel</DefaultButton>
+          <DefaultButton onClick={onDismiss}>Cancel</DefaultButton>
         </Stack>
       )}
       isFooterAtBottom={true}

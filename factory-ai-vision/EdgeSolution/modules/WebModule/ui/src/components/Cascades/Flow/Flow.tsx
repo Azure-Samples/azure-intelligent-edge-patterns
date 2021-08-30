@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import ReactFlow, {
   ReactFlowProvider,
   removeElements,
@@ -8,14 +8,8 @@ import ReactFlow, {
   Node,
   Edge,
 } from 'react-flow-renderer';
-import { useSelector } from 'react-redux';
 
-import {
-  trainingProjectIsCascadesFactory,
-  TrainingProject,
-  NodeType,
-  Params,
-} from '../../../store/trainingProjectSlice';
+import { TrainingProject, NodeType } from '../../../store/trainingProjectSlice';
 import { getModel } from '../utils';
 
 import './dnd.css';

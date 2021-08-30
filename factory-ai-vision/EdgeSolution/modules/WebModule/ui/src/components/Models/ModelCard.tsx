@@ -15,24 +15,16 @@ import {
 
 import { TrainingProject } from '../../store/trainingProjectSlice';
 import { trainingProjectPartsSelectorFactory } from '../../store/partSlice';
-import {
-  deleteCustomProject,
-  TrainingProject as TrainingProjectType,
-} from '../../store/trainingProjectSlice';
+import { deleteCustomProject } from '../../store/trainingProjectSlice';
 
 import { Url } from '../../enums';
-import { ModelType } from './type';
 
-import { EmptyAddIcon } from '../EmptyAddIcon';
-import EditPanel from './Panel/EditPanel';
 import Tag from './Tag';
-
-// type PassingProps = {
-//   onAddModelClick: () => void;
-// };
 
 type Props = {
   project: TrainingProject;
+  onSelectedProject: () => void;
+  onDismiss: () => void;
 };
 
 const getClasses = () =>
@@ -62,10 +54,9 @@ const getClasses = () =>
 const CARD_PART_LIMIT = 5;
 
 const ModelCard: React.FC<Props> = (props) => {
-  const { project } = props;
+  const { project, onSelectedProject } = props;
 
   const [isOpenDialog, setIsOpenDialog] = useState(false);
-  const [isEdit, setIsEdit] = useState(false);
 
   const partSelector = useMemo(() => trainingProjectPartsSelectorFactory(project.id), [project]);
   const parts = useSelector(partSelector);
@@ -80,7 +71,7 @@ const ModelCard: React.FC<Props> = (props) => {
         key: 'properties',
         text: 'Properties',
         iconProps: { iconName: 'Equalizer' },
-        onClick: () => setIsEdit(true),
+        onClick: () => onSelectedProject(),
       },
       {
         key: 'delete',
@@ -105,7 +96,7 @@ const ModelCard: React.FC<Props> = (props) => {
 
   return (
     <>
-      <Stack className={classes.root} onClick={() => setIsEdit(true)}>
+      <Stack className={classes.root} onClick={onSelectedProject}>
         <Stack horizontal>
           <img style={{ height: '60px', width: '60px' }} src="/icons/modelCard.png" alt="icon" />
           <Stack horizontal horizontalAlign="space-between" styles={{ root: classes.titleContainer }}>
@@ -173,7 +164,7 @@ const ModelCard: React.FC<Props> = (props) => {
           <DefaultButton text="Cancel" onClick={() => setIsOpenDialog(false)} />
         </DialogFooter>
       </Dialog>
-      <EditPanel project={project} parts={parts} isOpen={isEdit} onDissmiss={() => setIsEdit(false)} />
+      {/* {isEdit && <EditPanel project={project} parts={parts} onDissmiss={() => setIsEdit(false)} />} */}
     </>
   );
 };

@@ -1,18 +1,5 @@
-import React, { useState, useCallback, useEffect } from 'react';
-import {
-  Panel,
-  Stack,
-  PrimaryButton,
-  DefaultButton,
-  ProgressIndicator,
-  Label,
-  TextField,
-  mergeStyleSets,
-  Text,
-  Link,
-  Icon,
-  mergeStyles,
-} from '@fluentui/react';
+import React from 'react';
+import { Panel, Stack, PrimaryButton, Label, mergeStyleSets, Text } from '@fluentui/react';
 
 type Props = {
   isOpen: boolean;

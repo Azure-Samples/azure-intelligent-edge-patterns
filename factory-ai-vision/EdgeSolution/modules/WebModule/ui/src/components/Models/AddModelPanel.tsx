@@ -13,7 +13,6 @@ import {
 import * as R from 'ramda';
 import { useDispatch } from 'react-redux';
 
-// import { thunkPostCustomProject } from '../../store/project/projectActions';
 import { createCustomProject, updateCustomProject } from '../../store/trainingProjectSlice';
 
 const toBase64 = (file) =>

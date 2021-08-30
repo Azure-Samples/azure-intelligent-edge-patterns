@@ -13,8 +13,11 @@ import {
   IDropdownOption,
 } from '@fluentui/react';
 import { isNil, isEmpty } from 'ramda';
+import { useHistory } from 'react-router-dom';
 
 import { NodeType, TrainingProject } from '../../../store/trainingProjectSlice';
+import { Url } from '../../../enums';
+import { getModelId } from '../utils';
 
 interface Props {
   selectedNode: Node;
@@ -51,6 +54,8 @@ const NodePanel = (props: Props) => {
   const [threshold, setThreshold] = useState(null);
   const [type, setType] = useState('crop');
   const [tagId, setTagId] = useState(-1);
+
+  const history = useHistory();
 
   useEffect(() => {
     setExportName(selectedNode?.data.name);
@@ -99,6 +104,10 @@ const NodePanel = (props: Props) => {
     setSelectedNode(null);
   }, [exportName, setElements, selectedNode, setSelectedNode]);
 
+  const onDirectModel = useCallback(() => {
+    history.push(`${Url.MODELS}?modelId=${getModelId(selectedNode.id)}`);
+  }, [history, selectedNode]);
+
   if (!selectedNode) return <></>;
 
   return (
@@ -129,9 +138,11 @@ const NodePanel = (props: Props) => {
         onRenderFooterContent={() => (
           <Stack tokens={{ childrenGap: 10 }} horizontal>
             {(selectedNode.type as NodeType) === 'customvision_model' && (
-              <PrimaryButton text="Go to Models" />
+              <PrimaryButton text="Go to Models" onClick={onDirectModel} />
             )}
-            {(selectedNode.type as NodeType) === 'openvino_model' && <PrimaryButton text="Go to Models" />}
+            {(selectedNode.type as NodeType) === 'openvino_model' && (
+              <PrimaryButton text="Go to Models" onClick={onDirectModel} />
+            )}
             {(selectedNode.type as NodeType) === 'openvino_library' && (
               <PrimaryButton text="Save" onClick={onSaveTransformNode} disabled={!isThreshold(threshold)} />
             )}

@@ -3,12 +3,17 @@ import { Node, Edge, isNode, isEdge } from 'react-flow-renderer';
 import { TrainingProject, Params, NodeType } from '../../store/trainingProjectSlice';
 import { CascadePayload } from '../../store/cascadeSlice';
 
-export const getModel = (id: string, modelList: TrainingProject[]) => {
-  if (!id) return;
+export const getModelId = (nodeId: string) => {
   const re = /(?<=_).*/;
 
-  const targetId = id.match(re)[0];
-  return modelList.find((model) => model.id === parseInt(targetId, 10));
+  return nodeId.match(re)[0];
+};
+
+export const getModel = (id: string, modelList: TrainingProject[]) => {
+  if (!id) return;
+
+  const nodeId = getModelId(id);
+  return modelList.find((model) => model.id === parseInt(nodeId, 10));
 };
 
 export const getConvertNode = (node: Node, modelList: TrainingProject[]) => {
