@@ -227,7 +227,6 @@ def create_demo_objects():
             "category": "openvino",
         },
     )
-openvino
     # age/gender recognition
     inputs_ = [
         {
