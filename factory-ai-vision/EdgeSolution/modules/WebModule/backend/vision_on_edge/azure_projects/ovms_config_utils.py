@@ -3,6 +3,7 @@ import glob
 import json
 import configparser
 
+
 face_detection_config = {
     "model_config_list": [{
         "config": {
@@ -11,7 +12,57 @@ face_detection_config = {
             "shape": "(1,3,400,600)",
             "layout": "NHWC"
         }
-    }]
+    }],
+    "cascade_config_list": {
+        "inputs": [{
+            "name": "data",
+            "metadata": {
+                "type": "image",    
+                "shape": [1, 3, 416, 416],
+                "layout": ["N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
+        }],
+        "outputs": [{
+            "name": "detection_out",
+            "metadata": {
+                "type": "bounding_box",
+                "shape": [1, 1, 200, 7],
+                "layout": [1, 1, "B", "F"],
+                "labels": ["person"],
+            }
+        }]
+    }
+}
+
+emotion_recognition_config = {
+    "model_config_list": [{
+        "config": {
+            "name": "emotion_recognition",
+            "base_path": "/workspace/emotion-recognition-retail-0003/",
+            "shape": "(1,3,64,64)",
+            "layout": "NHWC"
+        }
+    }],
+    "cascade_config_list": {
+        "inputs": [{
+            "name": "data",
+            "metadata": {
+                "type": "image",
+                "shape": [1, 3, 64, 64],
+                "layout": ["N", "H", "W", "C"],
+            }
+        }],
+        "outputs": [{
+            "name": "prob_emotion",
+            "metadata": {
+                "type": "classification",
+                "shape": [1, 5, 1, 1],
+                "layout": [1, "C", 1, 1],
+                "labels": ["neutral", "happy", "sad", "surprise", "anger"],
+            }
+        }]
+    }
 }
 
 age_gender_recognition_config = {
@@ -24,18 +75,37 @@ age_gender_recognition_config = {
                 "layout": "NHWC"
             }
         },
-    ]
-}
-
-emotion_recognition_config = {
-    "model_config_list": [{
-        "config": {
-            "name": "emotion_recognition",
-            "base_path": "/workspace/emotion-recognition-retail-0003/",
-            "shape": "(1,3,64,64)",
-            "layout": "NHWC"
-        }
-    }]
+    ],
+    "cascade_config_list": {
+        "inputs": [{
+            "name": "data",
+            "metadata": {
+                "type": "image",
+                "shape": [1, 3, 64, 64],
+                "layout": ["N", "H", "W", "C"],
+            }
+        }],
+        "outputs": [
+            {
+                "name": "age_conv3",
+                "metadata": {
+                    "type": "regression",
+                    "shape": [1, 1, 1, 1],
+                    "layout": [1, 1, 1, 1],
+                    "scale": 100,
+                }
+            },
+            {
+                "name": "prob",
+                "metadata": {
+                    "type": "classfication",
+                    "shape": [1, 2, 1, 1],
+                    "layout": [1, "P", 1, 1],
+                    "labels": ["female", "male"],
+                }
+            }
+        ]
+    }
 }
 
 
@@ -44,19 +114,24 @@ def create_config(model_name):
     config = {}
 
     if model_name == "face_detection":
-        config = face_detection_config
+        model_config_list = face_detection_config['model_config_list']
+        cascade_config_list = face_detection_config['cascade_config_list']
     elif model_name == "age_gender_recognition":
-        config = age_gender_recognition_config
+        model_config_list = age_gender_recognition_config['model_config_list']
+        cascade_config_list = age_gender_recognition_config['cascade_config_list']
     elif model_name == "emotion_recognition":
-        config = emotion_recognition_config
+        model_config_list = emotion_recognition_config['model_config_list']
+        cascade_config_list = emotion_recognition_config['cascade_config_list']
     else:
         return config
+    
+    config['model_config_list'] = model_config_list
 
     configObj = json.dumps(config)
     with open(config_file, 'w') as f:
         f.write(configObj)
 
-    return config
+    return cascade_config_list
 
 
 def read_classes(classes_path):

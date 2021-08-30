@@ -304,15 +304,22 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
         if model_name in models:
             setting_obj = Setting.objects.first()
-            config = create_config(model_name)
+            cascade_config = create_config(model_name)
             response_data = {}
 
-            if config:
+            if cascade_config:
+                inputsObj = json.dumps(cascade_config['inputs'])
+                outputsObj = json.dumps(cascade_config['outputs'])
                 project_obj = Project.objects.create(is_demo=False,
                                                      setting=setting_obj,
                                                      name=model_name,
-                                                     project_type=project_type,
-                                                     category="OVMS")
+                                                     project_type=project_type, 
+                                                     is_cascade=True,
+                                                     type="openvino_model",
+                                                     openvino_model_name=model_name,
+                                                     inputs=inputsObj,
+                                                     outputs=outputsObj,
+                                                     category="openvino")
 
                 response_data = {"status": "OK"}
                 return Response(response_data, status=status.HTTP_200_OK)
