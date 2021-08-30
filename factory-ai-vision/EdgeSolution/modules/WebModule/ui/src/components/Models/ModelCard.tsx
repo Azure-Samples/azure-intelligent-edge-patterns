@@ -124,12 +124,21 @@ const ModelCard: React.FC<Props> = (props) => {
             }}
           >
             {project.customVisionId !== '' && 'By Microsoft Custom Vision'}
-            {project.category === 'OVMS' && 'By Intel'}
+            {project.category === 'openvino' && 'By Intel'}
           </Label>
           {project.customVisionId !== '' && (
             <Label styles={{ root: { fontSize: '13px', lineHeight: '18px', marginBottom: '10px' } }}>
               Trainable
             </Label>
+          )}
+          {project.category === 'openvino' && (
+            <Stack horizontal tokens={{ childrenGap: '5px' }} wrap>
+              {project.outputs
+                .filter((output) => output.metadata.labels)
+                .map((output) =>
+                  output.metadata.labels.map((label, id) => <Tag key={id} id={id} text={label} />),
+                )}
+            </Stack>
           )}
           <Stack horizontal tokens={{ childrenGap: '5px' }} wrap>
             {parts

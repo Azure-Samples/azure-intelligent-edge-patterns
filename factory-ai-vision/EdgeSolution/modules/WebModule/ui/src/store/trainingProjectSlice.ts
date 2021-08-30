@@ -16,7 +16,7 @@ import { getParts } from './partSlice';
 import { thunkGetAllCvProjects } from './setting/settingAction';
 import { selectAllCascades } from './cascadeSlice';
 
-type TrainingProjectCategory = 'customvision' | 'OVMS';
+type TrainingProjectCategory = 'customvision' | 'openvino' | 'OVMS';
 
 export type Params = { confidence_threshold: string; filter_label_id: string };
 

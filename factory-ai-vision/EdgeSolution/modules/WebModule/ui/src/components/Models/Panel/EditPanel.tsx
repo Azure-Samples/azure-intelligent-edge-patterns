@@ -124,25 +124,32 @@ const EditPanel: React.FC<Props> = (props) => {
         <Stack>
           <Label styles={{ root: classes.itemTitle }}>Source</Label>
           <Text styles={{ root: classes.item }}>
-            {project.category === 'OVMS' ? 'Intel' : 'Microsoft Custom Vision'}
+            {project.category === 'openvino' ? 'Intel' : 'Microsoft Custom Vision'}
           </Text>
         </Stack>
         <Stack>
           <Label styles={{ root: classes.itemTitle }}>Trainable</Label>
-          <Text styles={{ root: classes.item }}>{project.category === 'OVMS' ? 'False' : 'True'}</Text>
+          <Text styles={{ root: classes.item }}>{project.category === 'openvino' ? 'False' : 'True'}</Text>
         </Stack>
-        {project.category === 'OVMS' && (
+        {project.category === 'openvino' && (
           <Stack>
             <Label styles={{ root: classes.itemTitle }}>Category</Label>
             <Text styles={{ root: classes.item }}>{project.projectType}</Text>
           </Stack>
         )}
-        {project.category === 'OVMS' && (
+        {project.category === 'openvino' && (
           <Stack>
             <Label styles={{ root: classes.itemTitle }}>Object / Tags</Label>
+            <Stack horizontal tokens={{ childrenGap: '8px' }} wrap>
+              {project.outputs
+                .filter((output) => output.metadata.labels)
+                .map((output) =>
+                  output.metadata.labels.map((label, id) => <Tag key={id} id={id} text={label} />),
+                )}
+            </Stack>
           </Stack>
         )}
-        {project.category === 'OVMS' && (
+        {project.category === 'openvino' && (
           <Stack>
             <TextField label="Name" value={name} onChange={(_, newValue) => setName(newValue)} required />
           </Stack>

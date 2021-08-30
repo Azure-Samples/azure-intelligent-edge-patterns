@@ -51,7 +51,7 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
   const modelId = parseInt(useQuery().get('modelId'), 10);
   const history = useHistory();
 
-  const intelProjectList = trainingProjectList.filter((project) => project.category === 'OVMS');
+  const intelProjectList = trainingProjectList.filter((project) => project.category === 'openvino');
   const ownProjectList = trainingProjectList.filter((project) => project.category === 'customvision');
 
   useEffect(() => {
