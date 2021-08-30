@@ -188,6 +188,7 @@ def create_demo_objects():
             "openvino_model_name": "face-detection-retail-0004",
             "inputs": inputs,
             "outputs": outputs,
+            "category": "openvino",
         },
     )
 
@@ -223,9 +224,10 @@ def create_demo_objects():
             "openvino_model_name": "emotions-recognition-retail-0003",
             "inputs": inputs,
             "outputs": outputs,
+            "category": "openvino",
         },
     )
-
+openvino
     # age/gender recognition
     inputs_ = [
         {
@@ -267,6 +269,7 @@ def create_demo_objects():
             "openvino_model_name": "age-gender-recognition-retail-0013",
             "inputs": inputs,
             "outputs": outputs,
+            "category": "openvino",
         },
     )
 
