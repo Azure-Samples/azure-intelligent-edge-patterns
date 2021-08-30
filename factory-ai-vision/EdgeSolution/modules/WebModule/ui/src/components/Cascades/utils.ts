@@ -29,6 +29,7 @@ export const getConvertNode = (node: Node, modelList: TrainingProject[]) => {
         ? {
             ...(matchModel.params as Params),
             confidence_threshold: (node.data.params.confidence_threshold as number).toString(),
+            filter_label_id: (node.data.params.filter_label_id as number).toString(),
           }
         : matchModel.params,
     combined: matchModel.combined,

@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useRef, useCallback, useEffect } from 'react';
 import ReactFlow, {
   ReactFlowProvider,
   removeElements,
@@ -39,6 +39,25 @@ const getNodeId = (modeId: string, length: number) => `${length++}_${modeId}`;
 const getNodeParams = (modelId: string, modelList: TrainingProject[]) => {
   const model = modelList.find((model) => model.id === parseInt(modelId, 10));
   return model.params;
+};
+
+const getSourceMetadata = (
+  selectedNode: Node,
+  elements: (Node<any> | Edge<any>)[],
+  modelList: TrainingProject[],
+) => {
+  if (!selectedNode) return [];
+  if ((selectedNode.type as NodeType) !== 'openvino_library') return [];
+
+  const matchModel = elements
+    .filter((ele) => isEdge(ele))
+    .filter((edge: Edge<any>) => edge.target === selectedNode.id)
+    .map((edge: Edge<any>) => getModel(edge.source, modelList))
+    .map((model: TrainingProject) =>
+      model.outputs.find((output) => output.metadata.type === 'bounding_box'),
+    )[0];
+
+  return matchModel.metadata.labels;
 };
 
 const edgeTypes = {
@@ -111,17 +130,18 @@ const DnDFlow = (props: Props) => {
               setSelectedNode={setSelectedNode}
               model={selectedNode && getModel(selectedNode?.id, modelList)}
               setElements={setElements}
+              matchTargetLabels={getSourceMetadata(selectedNode, elements, modelList)}
             />
             <ReactFlow
               ref={flowElementRef}
               elements={elements}
               nodeTypes={{
-                source: (node) => {
+                source: (node: Node) => {
                   const { id } = node;
 
                   return <InitialNode id={id} setElements={setElements} modelList={modelList} />;
                 },
-                openvino_model: (node) => {
+                openvino_model: (node: Node) => {
                   const { id } = node;
 
                   return (
@@ -135,7 +155,7 @@ const DnDFlow = (props: Props) => {
                     />
                   );
                 },
-                customvision_model: (node) => {
+                customvision_model: (node: Node) => {
                   const { id } = node;
 
                   return (
@@ -149,7 +169,7 @@ const DnDFlow = (props: Props) => {
                     />
                   );
                 },
-                openvino_library: (node) => {
+                openvino_library: (node: Node) => {
                   const { id } = node;
 
                   return (
@@ -163,7 +183,7 @@ const DnDFlow = (props: Props) => {
                     />
                   );
                 },
-                sink: (node) => {
+                sink: (node: Node) => {
                   const { id, data } = node;
 
                   return (

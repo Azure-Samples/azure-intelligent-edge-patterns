@@ -21,6 +21,7 @@ interface Props {
   setSelectedNode: React.Dispatch<any>;
   model: TrainingProject | null;
   setElements: React.Dispatch<React.SetStateAction<(Node<any> | Edge<any>)[]>>;
+  matchTargetLabels: string[];
 }
 
 const MAIN_LAYER_HOST_ID = 'testLayer';
@@ -44,26 +45,24 @@ const isExportName = (name: string) => {
 };
 
 const NodePanel = (props: Props) => {
-  const { selectedNode, setSelectedNode, model, setElements } = props;
+  const { selectedNode, setSelectedNode, model, setElements, matchTargetLabels } = props;
 
   const [exportName, setExportName] = useState<string>(null);
   const [threshold, setThreshold] = useState(null);
   const [type, setType] = useState('crop');
-  const [tags, setTags] = useState('car');
+  const [tagId, setTagId] = useState(-1);
 
   useEffect(() => {
     setExportName(selectedNode?.data.name);
 
     if ((selectedNode?.type as NodeType) === 'openvino_library') {
       setThreshold(+selectedNode?.data.params.confidence_threshold * 100);
+      setTagId(+selectedNode?.data.params.filter_label_id);
     }
   }, [selectedNode]);
 
-  const tagsOptions: IDropdownOption[] = [
-    { key: 'car', text: 'Car' },
-    { key: 'bus', text: 'Bus' },
-    { key: 'person', text: 'Person' },
-  ];
+  const tagsOptions: IDropdownOption[] = matchTargetLabels.map((label, id) => ({ key: id, text: label }));
+
   const typeOptions: IDropdownOption[] = [{ key: 'crop', text: 'Crop' }];
 
   const onNameChange = useCallback((value: string) => {
@@ -75,7 +74,10 @@ const NodePanel = (props: Props) => {
       const node = prev.find((element) => element.id === selectedNode.id);
       const newNode = {
         ...node,
-        data: { ...node.data, params: { ...node.data.params, confidence_threshold: threshold / 100 } },
+        data: {
+          ...node.data,
+          params: { ...node.data.params, confidence_threshold: threshold / 100, filter_label_id: tagId },
+        },
       };
       const newElements = prev.filter((element) => element.id !== selectedNode.id);
 
@@ -83,7 +85,7 @@ const NodePanel = (props: Props) => {
     });
 
     setSelectedNode(null);
-  }, [setElements, selectedNode, setSelectedNode, threshold]);
+  }, [setElements, selectedNode, setSelectedNode, threshold, tagId]);
 
   const onSaveExportNode = useCallback(() => {
     setElements((prev) => {
@@ -185,8 +187,8 @@ const NodePanel = (props: Props) => {
             <Dropdown
               label="Objects / Tags"
               options={tagsOptions}
-              selectedKey={tags}
-              onChange={(_, options) => setTags(options.key as string)}
+              selectedKey={tagId}
+              onChange={(_, options) => setTagId(options.key as number)}
               required
             />
             <TextField

@@ -18,15 +18,18 @@ import { selectAllCascades } from './cascadeSlice';
 
 type TrainingProjectCategory = 'customvision' | 'OVMS';
 
-export type Params = { confidence_threshold: string };
+export type Params = { confidence_threshold: string; filter_label_id: string };
 
 export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink' | 'customvision_model';
 
+type MetadataType = 'image' | 'bounding_box' | 'classification' | 'regression';
+
 export type Metadata = {
-  type: string;
+  type: MetadataType;
   shape: string[];
   layout: string[];
   color_format: string;
+  labels?: string[];
 };
 
 type Input = {
