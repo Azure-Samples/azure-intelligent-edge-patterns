@@ -12,6 +12,8 @@ import numpy as np
 
 import extension_pb2
 import extension_pb2_grpc
+from tensorflow_serving.apis import predict_pb2
+from tensorflow_serving.apis import prediction_service_pb2_grpc
 import inferencing_pb2
 import media_pb2
 from exception_handler import PrintGetExceptionDetails
@@ -305,7 +307,7 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                     channel)
             else:
                 try:
-                    if self.ovms:
+                    if False:
                         stream.predict_grpc(cvImage, self.stub)
                         predictions = stream.last_prediction
                     else:
