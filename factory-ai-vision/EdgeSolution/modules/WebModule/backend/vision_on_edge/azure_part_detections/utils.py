@@ -132,6 +132,7 @@ def deploy_worker(part_detection_id):
             json={
                 "endpoint": "ovmsserver:9001",
                 "headers": "",
+                "pipeline": instance.cascade.flow,
             },
             timeout=REQUEST_TIMEOUT,
         ) 

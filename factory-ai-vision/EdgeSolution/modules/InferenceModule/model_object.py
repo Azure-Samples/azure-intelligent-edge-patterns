@@ -33,6 +33,7 @@ class ModelObject():
         self.lva_mode = LVA_MODE
         self.endpoint = 'http://predictmodule:7777/predict'
         self.headers = None
+        self.pipeline = None
 
         self.image_shape = [IMG_HEIGHT, IMG_WIDTH]
 

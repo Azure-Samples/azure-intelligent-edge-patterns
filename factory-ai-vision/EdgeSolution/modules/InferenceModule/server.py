@@ -230,6 +230,8 @@ def update_endpoint(request_body: UpdateEndpointBody):
         endpoint = 'http://' + endpoint
     logger.warning('SET ENDPOINT: {}'.format(endpoint))
     onnx.endpoint = endpoint
+    if request_body.pipeline:
+        onnx.pipeline = request_body.pipeline
     return 'ok', 200
 
 
