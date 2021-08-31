@@ -20,7 +20,7 @@ docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/webmodule:$WEB_MODULE_VERSIO
 #docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/webdbmodule:$WEBDB_MODULE_VERSION-amd64     intelligentedge/webdbmodule:$RELEASE_VERSION-amd64  
 docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/inferencemodule:$INFERENCE_MODULE_VERSION-amd64  intelligentedge/inferencemodule:$RELEASE_VERSION-amd64
 
-docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-gpuamd64  intelligentedge/predictmodule:$RELEASE_VERSION-gpuamd64
+#docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-gpuamd64  intelligentedge/predictmodule:$RELEASE_VERSION-gpuamd64
 docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-cpuamd64  intelligentedge/predictmodule:$RELEASE_VERSION-cpuamd64
 docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-vpuamd64  intelligentedge/predictmodule:$RELEASE_VERSION-vpuamd64
 
@@ -38,7 +38,7 @@ docker push intelligentedge/webmodule:$RELEASE_VERSION-amd64
 
 docker push intelligentedge/inferencemodule:$RELEASE_VERSION-amd64
 
-docker push intelligentedge/predictmodule:$RELEASE_VERSION-gpuamd64
+#docker push intelligentedge/predictmodule:$RELEASE_VERSION-gpuamd64
 docker push intelligentedge/predictmodule:$RELEASE_VERSION-cpuamd64
 docker push intelligentedge/predictmodule:$RELEASE_VERSION-vpuamd64
 
@@ -52,34 +52,34 @@ docker push intelligentedge/uploadmodule:$RELEASE_VERSION-amd64
 # ===================
 # Tag new version
 # ===================
-docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/webmodule:$WEB_MODULE_VERSION-arm64v8     intelligentedge/webmodule:$RELEASE_VERSION-arm64v8  
+#docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/webmodule:$WEB_MODULE_VERSION-arm64v8     intelligentedge/webmodule:$RELEASE_VERSION-arm64v8  
 #docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/webdbmodule:$WEBDB_MODULE_VERSION-arm64v8     intelligentedge/webdbmodule:$RELEASE_VERSION-arm64v8  
-docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/inferencemodule:$INFERENCE_MODULE_VERSION-arm64v8  intelligentedge/inferencemodule:$RELEASE_VERSION-arm64v8
+#docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/inferencemodule:$INFERENCE_MODULE_VERSION-arm64v8  intelligentedge/inferencemodule:$RELEASE_VERSION-arm64v8
 
-docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-jetsonarm64v8  intelligentedge/predictmodule:$RELEASE_VERSION-jetsonarm64v8
-docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-cpuarm64v8  intelligentedge/predictmodule:$RELEASE_VERSION-cpuarm64v8
+#docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-jetsonarm64v8  intelligentedge/predictmodule:$RELEASE_VERSION-jetsonarm64v8
+#docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-cpuarm64v8  intelligentedge/predictmodule:$RELEASE_VERSION-cpuarm64v8
 
-docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/rtspsimmodule:$RTSPSIM_MODULE_VERSION-arm64v8  intelligentedge/rtspsimmodule:$RELEASE_VERSION-arm64v8
-docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/nginxmodule:$NGINX_MODULE_VERSION-arm64v8  intelligentedge/nginxmodule:$RELEASE_VERSION-arm64v8
-docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/cameramodule:$CAMERA_MODULE_VERSION-arm64v8  intelligentedge/cameramodule:$RELEASE_VERSION-arm64v8
-docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/uploadmodule:$UPLOAD_MODULE_VERSION-arm64v8  intelligentedge/uploadmodule:$RELEASE_VERSION-arm64v8
+#docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/rtspsimmodule:$RTSPSIM_MODULE_VERSION-arm64v8  intelligentedge/rtspsimmodule:$RELEASE_VERSION-arm64v8
+#docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/nginxmodule:$NGINX_MODULE_VERSION-arm64v8  intelligentedge/nginxmodule:$RELEASE_VERSION-arm64v8
+#docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/cameramodule:$CAMERA_MODULE_VERSION-arm64v8  intelligentedge/cameramodule:$RELEASE_VERSION-arm64v8
+#docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/uploadmodule:$UPLOAD_MODULE_VERSION-arm64v8  intelligentedge/uploadmodule:$RELEASE_VERSION-arm64v8
 
 
 # ===================
 # Push images
 # ===================
-docker push intelligentedge/webmodule:$RELEASE_VERSION-arm64v8
+#docker push intelligentedge/webmodule:$RELEASE_VERSION-arm64v8
 #docker push intelligentedge/webdbmodule:$RELEASE_VERSION-arm64v8
 
-docker push intelligentedge/inferencemodule:$RELEASE_VERSION-arm64v8
+#docker push intelligentedge/inferencemodule:$RELEASE_VERSION-arm64v8
 
-docker push intelligentedge/predictmodule:$RELEASE_VERSION-jetsonarm64v8
-docker push intelligentedge/predictmodule:$RELEASE_VERSION-cpuarm64v8
+#docker push intelligentedge/predictmodule:$RELEASE_VERSION-jetsonarm64v8
+#docker push intelligentedge/predictmodule:$RELEASE_VERSION-cpuarm64v8
 
-docker push intelligentedge/rtspsimmodule:$RELEASE_VERSION-arm64v8
-docker push intelligentedge/nginxmodule:$RELEASE_VERSION-arm64v8
-docker push intelligentedge/cameramodule:$RELEASE_VERSION-arm64v8
-docker push intelligentedge/uploadmodule:$RELEASE_VERSION-arm64v8
+#docker push intelligentedge/rtspsimmodule:$RELEASE_VERSION-arm64v8
+#docker push intelligentedge/nginxmodule:$RELEASE_VERSION-arm64v8
+#docker push intelligentedge/cameramodule:$RELEASE_VERSION-arm64v8
+#docker push intelligentedge/uploadmodule:$RELEASE_VERSION-arm64v8
 
 
 # ===================
