@@ -156,34 +156,37 @@ def get_model_info():
         if glob.glob('{}/{}/1/*.xml'.format(model_path, model)):
             cur_path = '{}/{}/1/'.format(model_path, model)
             model_type_file = glob.glob('{}/config.ini'.format(cur_path))
-            parser.read(model_type_file)
-            model_type = parser['model']['type']
-            model_id = parser['model']['id']
-            description_title = parser['description']['title']
-            description_content = parser['description']['content']
-            description_image_url = parser['description']['imageURL']
-            inputs_content = parser['inputs']['content']
-            inputs_layout = parser['inputs']['layout']
-            outputs_content = parser['outputs']['content']
+            if model_type_file:
+                parser.read(model_type_file)
+                model_type = parser['model']['type']
+                model_id = parser['model']['id']
+                description_title = parser['description']['title']
+                description_content = parser['description']['content']
+                description_image_url = parser['description']['imageURL']
+                inputs_content = parser['inputs']['content']
+                inputs_layout = parser['inputs']['layout']
+                outputs_content = parser['outputs']['content']
 
-            class_file = glob.glob(model + '/1/classes.*')
-            if class_file:
-                classes = read_classes(class_file[0])
+                class_file = glob.glob('{}/classes.*'.format(cur_path))
+                if class_file:
+                    classes = read_classes(class_file[0])
+                else:
+                    classes = []
+
+                model_infos = {
+                    'model_name': model_name,
+                    'model_type': model_type,
+                    'model_id': model_id,
+                    'classes': classes,
+                    'description_title': description_title,
+                    'description_content': description_content,
+                    'description_image_url': description_image_url,
+                    'inputs_content': inputs_content,
+                    'inputs_layout': inputs_layout,
+                    'outputs_content': outputs_content
+                }
             else:
-                classes = []
-
-            model_infos = {
-                'model_name': model_name,
-                'model_type': model_type,
-                'model_id': model_id,
-                'classes': classes,
-                'description_title': description_title,
-                'description_content': description_content,
-                'description_image_url': description_image_url,
-                'inputs_content': inputs_content,
-                'inputs_layout': inputs_layout,
-                'outputs_content': outputs_content
-            }
+                continue
         else:
             continue
 
