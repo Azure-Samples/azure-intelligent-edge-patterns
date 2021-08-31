@@ -107,13 +107,12 @@
             "settings": {
               "image": "${MODULES.WebModule}",
               "createOptions": {
-                "Volumes": {
-                  "/workspace": {}
-                },
                 "HostConfig": {
-                  "Binds": [
-                    "/var/workspace:/workspace:rw"
-                  ],
+                  "Mounts": [{
+                    "Target": "/workspace",
+                    "Source": "ovmsworkspace",
+                    "Type": "volume"
+                  }],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
