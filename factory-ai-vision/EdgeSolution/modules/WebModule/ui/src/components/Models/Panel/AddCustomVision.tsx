@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Panel,
   Stack,
@@ -24,7 +24,6 @@ import {
   getSelectedProjectInfo,
   onEmptySelectedProjectInfo,
 } from '../../../store/trainingProjectSlice';
-// import { thunkGetSelectedProject } from '../../../store/model';
 import { CreateCustomVisionForm } from '../type';
 
 import Tag from '../Tag';

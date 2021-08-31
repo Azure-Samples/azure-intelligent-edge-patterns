@@ -10,10 +10,8 @@ import {
   Text,
 } from '@fluentui/react';
 import { useDispatch } from 'react-redux';
-import { useHistory } from 'react-router-dom';
 
 import { IntelProject, createIntelProject } from '../../store/IntelProjectSlice';
-import { Url } from '../../enums';
 
 import Tag from './Tag';
 import AddIntelPanel from './Panel/AddIntel';
@@ -59,7 +57,6 @@ const IntelProjectDashboard = (props: Props) => {
 
   const dispatch = useDispatch();
   const classes = getClasses();
-  const history = useHistory();
 
   const onCreateIntelModel = useCallback(
     async (cascade: IntelProject) => {
@@ -93,89 +90,89 @@ const IntelProjectDashboard = (props: Props) => {
       <Stack tokens={{ childrenGap: 45 }}>
         <SearchBox styles={{ root: { width: '470px' } }} placeholder="Search" />
         <Stack horizontal wrap tokens={{ childrenGap: 16 }}>
-          {intelProjectList.map((card, id) => (
-            <Stack
-              key={id}
-              className={classes.root}
-              onClick={(e: React.MouseEvent<HTMLDivElement>) => {
-                e.preventDefault();
+          {intelProjectList.length > 0 &&
+            intelProjectList.map((card, id) => (
+              <Stack
+                key={id}
+                className={classes.root}
+                onClick={(e: React.MouseEvent<HTMLDivElement>) => {
+                  e.preventDefault();
 
-                setSelectedId(id);
-                setIsOpen(true);
-              }}
-            >
-              <Stack horizontal>
-                <img style={{ height: '60px', width: '60px' }} src="/icons/modelCard.png" alt="icon" />
-                <Stack horizontal horizontalAlign="space-between" styles={{ root: classes.titleContainer }}>
-                  {/* <Icon iconName="ModelingView" className={classes.cardIcon} /> */}
-                  <Stack styles={{ root: classes.titleWrapper }}>
-                    <Label>{card.name}</Label>
-                    <Text styles={{ root: classes.titleType }}>{card.type}</Text>
-                  </Stack>
-                  <Stack horizontalAlign="center" verticalAlign="center">
-                    <IconButton
-                      styles={{ root: classes.deleteIcon }}
-                      menuProps={menuProps}
-                      menuIconProps={{ iconName: 'MoreVertical' }}
-                    />
+                  setSelectedId(id);
+                  setIsOpen(true);
+                }}
+              >
+                <Stack horizontal>
+                  <img style={{ height: '60px', width: '60px' }} src="/icons/modelCard.png" alt="icon" />
+                  <Stack horizontal horizontalAlign="space-between" styles={{ root: classes.titleContainer }}>
+                    <Stack styles={{ root: classes.titleWrapper }}>
+                      <Label>{card.name}</Label>
+                      <Text styles={{ root: classes.titleType }}>{card.type}</Text>
+                    </Stack>
+                    <Stack horizontalAlign="center" verticalAlign="center">
+                      <IconButton
+                        styles={{ root: classes.deleteIcon }}
+                        menuProps={menuProps}
+                        menuIconProps={{ iconName: 'MoreVertical' }}
+                      />
+                    </Stack>
                   </Stack>
                 </Stack>
-              </Stack>
-              <Stack styles={{ root: { padding: '10px 20px 12px', height: '100%', position: 'relative' } }}>
-                <Label
-                  styles={{
-                    root: {
-                      fontSize: '10px',
-                      lineHeightL: '14px',
-                      color: '#605E5C',
-                    },
-                  }}
-                >
-                  By Intel
-                </Label>
-                {card.createdAt && (
-                  <Label styles={{ root: { fontSize: '13px', lineHeight: '18px', marginBottom: '10px' } }}>
-                    {`Updated: ${card.createdAt}`}
-                  </Label>
-                )}
-                <Stack horizontal tokens={{ childrenGap: '5px' }} wrap>
-                  {card.tags
-                    .filter((_, i) => i < 3)
-                    .map((part, id) => (
-                      <Tag key={id} id={id} text={part} />
-                    ))}
-                  {card.tags.length > CARD_PART_LIMIT && (
-                    <span
-                      style={{
-                        padding: '4px 8px',
-                        fontSize: '12px',
-                        color: '#0078D4',
-                      }}
-                    >{`+${card.tags.length - CARD_PART_LIMIT} more`}</span>
-                  )}
-                </Stack>
-                <div
-                  style={{
-                    textAlign: 'left',
-                    marginTop: '34px',
-                    position: 'absolute',
-                    right: '10px',
-                    bottom: '10px',
-                  }}
-                >
-                  <PrimaryButton
-                    id="test"
-                    text="Add"
-                    onClick={(e) => {
-                      e.stopPropagation();
-
-                      onCreateIntelModel(card);
+                <Stack styles={{ root: { padding: '10px 20px 12px', height: '100%', position: 'relative' } }}>
+                  <Label
+                    styles={{
+                      root: {
+                        fontSize: '10px',
+                        lineHeightL: '14px',
+                        color: '#605E5C',
+                      },
                     }}
-                  />
-                </div>
+                  >
+                    By Intel
+                  </Label>
+                  {card.createdAt && (
+                    <Label styles={{ root: { fontSize: '13px', lineHeight: '18px', marginBottom: '10px' } }}>
+                      {`Updated: ${card.createdAt}`}
+                    </Label>
+                  )}
+                  <Stack horizontal tokens={{ childrenGap: '5px' }} wrap>
+                    {card.tags
+                      .filter((_, i) => i < 3)
+                      .map((part, id) => (
+                        <Tag key={id} id={id} text={part} />
+                      ))}
+                    {card.tags.length > CARD_PART_LIMIT && (
+                      <span
+                        style={{
+                          padding: '4px 8px',
+                          fontSize: '12px',
+                          color: '#0078D4',
+                        }}
+                      >{`+${card.tags.length - CARD_PART_LIMIT} more`}</span>
+                    )}
+                  </Stack>
+                  <div
+                    style={{
+                      textAlign: 'left',
+                      marginTop: '34px',
+                      position: 'absolute',
+                      right: '10px',
+                      bottom: '10px',
+                    }}
+                  >
+                    <PrimaryButton
+                      id="test"
+                      text="Add"
+                      onClick={(e) => {
+                        e.stopPropagation();
+
+                        onCreateIntelModel(card);
+                      }}
+                    />
+                  </div>
+                </Stack>
               </Stack>
-            </Stack>
-          ))}
+            ))}
         </Stack>
       </Stack>
       <AddIntelPanel
