@@ -93,7 +93,7 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
             styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
           />
           {isIntelProjectClick && (
-            <Stack horizontal tokens={{ childrenGap: '10px' }}>
+            <Stack horizontal tokens={{ childrenGap: '10px' }} wrap>
               {intelProjectList.map((project, i) => (
                 <ModelCard
                   key={i}
@@ -117,7 +117,7 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
             styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
           />
           {isOwnProject && (
-            <Stack horizontal tokens={{ childrenGap: '10px' }}>
+            <Stack horizontal tokens={{ childrenGap: '10px' }} wrap>
               {ownProjectList.map((project, i) => (
                 <ModelCard
                   key={i}

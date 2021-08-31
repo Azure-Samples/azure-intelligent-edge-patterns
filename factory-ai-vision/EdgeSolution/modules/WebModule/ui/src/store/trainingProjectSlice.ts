@@ -16,12 +16,12 @@ import { getParts } from './partSlice';
 import { thunkGetAllCvProjects } from './setting/settingAction';
 import { selectAllCascades } from './cascadeSlice';
 
-type TrainingProjectCategory = 'customvision' | 'openvino' | 'OVMS';
+export const DEFAULT_PROJECT_ID = 15;
 
 export type Params = { confidence_threshold: string; filter_label_id: string };
 
 export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink' | 'customvision_model';
-
+type TrainingProjectCategory = 'customvision' | 'openvino' | 'OVMS';
 type MetadataType = 'image' | 'bounding_box' | 'classification' | 'regression';
 
 export type Metadata = {
@@ -306,7 +306,7 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
 
       const optionsList = trainingProjects
         .filter((t) => !t.isDemo || t.id === relatedScenario?.trainingProject)
-        .filter((t) => t.id !== 20)
+        .filter((t) => t.id !== DEFAULT_PROJECT_ID)
         .filter((t) => !t.isCascade)
         .map((e) => ({
           key: e.id,
