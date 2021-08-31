@@ -34,6 +34,7 @@ class ModelObject():
         self.endpoint = 'http://predictmodule:7777/predict'
         self.headers = None
         self.pipeline = None
+        self.metadatas = None
 
         self.image_shape = [IMG_HEIGHT, IMG_WIDTH]
 

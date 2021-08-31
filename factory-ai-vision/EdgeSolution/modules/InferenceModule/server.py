@@ -42,6 +42,8 @@ from model_object import ModelObject
 from stream_manager import StreamManager
 from utility import is_edge
 
+from cascade.voe_to_ovms import load_voe_config_from_json, voe_config_to_ovms_config
+
 # sys.path.insert(0, '../lib')
 # Set logging parameters
 
@@ -119,13 +121,14 @@ async def predict(camera_id: str, request: Request):
         return json.dumps({"inferences": results}), 200
     return "", 204
 
+
 @app.post("/predict_opencv")
 async def predict_opencv(camera_id: str, edge: str, request: Request):
     """predict."""
     img_raw = await request.body()
     if IS_OPENCV == "true":
         nparr = np.frombuffer(img_raw, np.uint8)
-        if edge ==  '960':
+        if edge == '960':
             logger.warning('960')
             img = nparr.reshape(-1, 960, 3)
         else:
@@ -230,8 +233,13 @@ def update_endpoint(request_body: UpdateEndpointBody):
         endpoint = 'http://' + endpoint
     logger.warning('SET ENDPOINT: {}'.format(endpoint))
     onnx.endpoint = endpoint
+
     if request_body.pipeline:
         onnx.pipeline = request_body.pipeline
+        voe_config = load_voe_config_from_json(onnx.pipeline)
+        _, metadatas = voe_config_to_ovms_config(voe_config)
+        onnx.metadatas = metadatas
+        print(metadatas)
     return 'ok', 200
 
 

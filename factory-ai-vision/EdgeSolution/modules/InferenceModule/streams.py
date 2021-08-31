@@ -734,16 +734,15 @@ class Stream:
         detectedObjects = self.ovms_score(stub, image)
         inf_time = time.time() - s
 
-        img = process_response(detectedObjects, image.copy())
+        img, predictions = process_response(
+            detectedObjects, image.copy(), self.model.metadatas)
+        # print(self.model.pipeline)
 
         # FIXME last count, last prediction
         self.last_prediction_count = 0
-        self.last_prediction = []
+        self.last_prediction = predictions
         self.last_drawn_img = img
-        self.last_update = time.time()        
-
-
-
+        self.last_update = time.time()
 
     def ovms_score(self, stub, image):
         model_name = "Default Cascade"
@@ -1128,29 +1127,91 @@ def update_people_coordinate(output_nd, people):
     return people
 
 
-def process_response(response, img):
+def process_response(response, img, metadatas):
     predictions = []
+    # if response is not None:
+    #    coordinates = make_ndarray(response.outputs['coordinates'])
+    #    confidences = make_ndarray(response.outputs['confidences'])
+    #    is_ages = False
+    #    is_emotions = False
+    #    is_genders = False
+    #    if 'ages' in response.outputs:
+    #        ages = make_ndarray(response.outputs['ages'])
+    #        is_ages = True
+    #    if 'genders' in response.outputs:
+    #        genders = make_ndarray(response.outputs['genders'])
+    #        is_genders = True
+    #    if 'emotions' in response.outputs:
+    #        emotions = make_ndarray(response.outputs['emotions'])
+    #        is_emotions = True
+    #    n = coordinates.shape[0]
+    #    predictions = []
+    #    for i in range(n):
+    #        x1, y1, x2, y2 = coordinates[i,0]
+    #        prediction = {
+    #            'tag': 'person',
+    #            'attributes': [],
+    #            'box': {
+    #                'l': x1,
+    #                't': y1,
+    #                'w': x2-x1,
+    #                'h': y2-y1
+    #            }
+    #        }
+    #        emotion_label =  ('neutral', 'happy', 'sad', 'surprise', 'anger')
+    #        gender_label = ('female', 'male')
+    #        if is_emotions:
+    #            emotion = emotion_label[np.argmax(emotions[i], axis=1).flatten()[0]]
+    #            confidence = np.max(emotions[i], axis=1).flatten()[0]
+    #            prediction['attributes'].append({'name': 'emotion', 'value': emotion, 'confidence': confidence})
+    #        if is_ages:
+    #            age = str(int(ages[i].flatten()[0]*100))
+    #            prediction['attributes'].append({'name': 'age', 'value': age, 'confidence': -1})
+    #        if is_genders:
+    #            gender = gender_label[np.argmax(genders[i], axis=1).flatten()[0]]
+    #            confidence = np.max(genders[i], axis=1).flatten()[0]
+    #            prediction['attributes'].append({'name': 'gender', 'value': gender, 'confidence': confidence})
+    #        predictions.append(prediction)
     if response is not None:
         coordinates = make_ndarray(response.outputs['coordinates'])
         confidences = make_ndarray(response.outputs['confidences'])
-        is_ages = False
-        is_emotions = False
-        is_genders = False
-        if 'ages' in response.outputs:
-            ages = make_ndarray(response.outputs['ages'])
-            is_ages = True
-        if 'genders' in response.outputs:
-            genders = make_ndarray(response.outputs['genders'])
-            is_genders = True
-        if 'emotions' in response.outputs:
-            emotions = make_ndarray(response.outputs['emotions'])
-            is_emotions = True
+        attributes = []
+
+        for k in response.outputs:
+            if (metadatas is not None) and (k in metadatas):
+                #print(k)
+                #print(metadatas[k])
+                metadata = metadatas[k]
+                if metadata['type'] == 'classification':
+                    ndarray = make_ndarray(response.outputs[k])
+                    tag_indexes = np.argmax(ndarray, axis=2).flatten()
+                    tags = list(metadata['labels'][tag_index]
+                                for tag_index in tag_indexes)
+                    confidences = np.max(ndarray, axis=2).flatten()
+                    attributes.append({
+                        'name': k,
+                        'type': 'classification',
+                        'values': tags,
+                        'confidences': confidences
+                    })
+                if metadata['type'] == 'regression':
+                    ndarray = make_ndarray(response.outputs[k])
+                    scores = ndarray
+                    if 'scale' in metadata:
+                        scores *= metadata['scale']
+                    scores = scores.flatten().astype('int').tolist()
+                    attributes.append({
+                        'name': k,
+                        'type': 'regression',
+                        'values': scores
+                    })
+
         n = coordinates.shape[0]
         predictions = []
         for i in range(n):
-            x1, y1, x2, y2 = coordinates[i,0]
+            x1, y1, x2, y2 = coordinates[i, 0]
             prediction = {
-                'tag': 'person',
+                'tag': 'face',
                 'attributes': [],
                 'box': {
                     'l': x1,
@@ -1159,27 +1220,27 @@ def process_response(response, img):
                     'h': y2-y1
                 }
             }
-            emotion_label =  ('neutral', 'happy', 'sad', 'surprise', 'anger')
-            gender_label = ('female', 'male')
-            if is_emotions:
-                emotion = emotion_label[np.argmax(emotions[i], axis=1).flatten()[0]]
-                confidence = np.max(emotions[i], axis=1).flatten()[0]
-                prediction['attributes'].append({'name': 'emotion', 'value': emotion, 'confidence': confidence})
-            if is_ages:
-                age = str(int(ages[i].flatten()[0]*100))
-                prediction['attributes'].append({'name': 'age', 'value': age, 'confidence': -1})
-            if is_genders:
-                gender = gender_label[np.argmax(genders[i], axis=1).flatten()[0]]
-                confidence = np.max(genders[i], axis=1).flatten()[0]
-                prediction['attributes'].append({'name': 'gender', 'value': gender, 'confidence': confidence})
+            print(attributes)
+            for attribute in attributes:
+                if attribute['type'] == 'regression':
+                    prediction['attributes'].append({
+                        'name': attribute['name'],
+                        'value': attribute['values'][i],
+                        'confidence': -1})
+                if attribute['type'] == 'classification':
+                    prediction['attributes'].append({
+                        'name': attribute['name'],
+                        'value': attribute['values'][i],
+                        'confidence': attribute['confidences'][i]})
+            prediction['attributes'].sort(key=lambda x:x['name'])
             predictions.append(prediction)
 
     h, w, _ = img.shape
     for prediction in predictions:
-        x1 = int( prediction['box']['l'] * w )
-        y1 = int( prediction['box']['t'] * h )
-        x2 = int(( prediction['box']['w'] + prediction['box']['l'] ) * w)
-        y2 = int(( prediction['box']['h'] + prediction['box']['t'] ) * h)
+        x1 = int(prediction['box']['l'] * w)
+        y1 = int(prediction['box']['t'] * h)
+        x2 = int((prediction['box']['w'] + prediction['box']['l']) * w)
+        y2 = int((prediction['box']['h'] + prediction['box']['t']) * h)
         cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 255), 3)
         font = cv2.FONT_HERSHEY_SIMPLEX
         fontScale = 0.5
@@ -1188,6 +1249,6 @@ def process_response(response, img):
         text = prediction['tag']
         for attribute in prediction['attributes']:
             text += ' / ' + str(attribute['value'])
-        cv2.putText(img, text, (x1, y1-10), font, 
-                   fontScale, color, thickness, cv2.LINE_AA)
-    return img
+        cv2.putText(img, text, (x1, y1-10), font,
+                    fontScale, color, thickness, cv2.LINE_AA)
+    return img, predictions

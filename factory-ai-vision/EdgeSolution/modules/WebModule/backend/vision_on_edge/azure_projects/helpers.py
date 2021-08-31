@@ -200,6 +200,7 @@ def create_demo_objects():
                 "type": "image",
                 "shape": [1, 3, 64, 64],
                 "layout": ["N", "H", "W", "C"],
+                "color_format": "BGR"
             }
         }
     ]
@@ -251,7 +252,7 @@ def create_demo_objects():
         {
             "name": "prob",
             "metadata": {
-                "type": "classfication",
+                "type": "classification",
                 "shape": [1, 2, 1, 1],
                 "layout": [1, "P", 1, 1],
                 "labels": ["female", "male"],
