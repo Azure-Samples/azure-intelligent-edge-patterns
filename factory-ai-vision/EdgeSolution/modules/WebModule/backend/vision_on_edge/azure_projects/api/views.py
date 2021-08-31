@@ -305,6 +305,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         if model_name in models:
             setting_obj = Setting.objects.first()
             cascade_config = create_config(model_name)
+            openvino_model_name = cascade_config['openvino_model_name']
             response_data = {}
 
             if cascade_config:
@@ -316,7 +317,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
                                                      project_type=project_type, 
                                                      is_cascade=True,
                                                      type="openvino_model",
-                                                     openvino_model_name=model_name,
+                                                     openvino_model_name=openvino_model_name,
                                                      inputs=inputsObj,
                                                      outputs=outputsObj,
                                                      category="openvino")

@@ -14,6 +14,7 @@ face_detection_config = {
         }
     }],
     "cascade_config_list": {
+        "openvino_model_name": "face-detection-retail-0004",
         "inputs": [{
             "name": "data",
             "metadata": {
@@ -45,6 +46,7 @@ emotion_recognition_config = {
         }
     }],
     "cascade_config_list": {
+        "openvino_model_name": "emotions-recognition-retail-0003",
         "inputs": [{
             "name": "data",
             "metadata": {
@@ -77,6 +79,7 @@ age_gender_recognition_config = {
         },
     ],
     "cascade_config_list": {
+        "openvino_model_name": "age-gender-recognition-retail-0013",
         "inputs": [{
             "name": "data",
             "metadata": {
