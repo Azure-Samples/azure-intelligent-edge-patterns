@@ -300,14 +300,17 @@ export const selectNonDemoProject = getNonDemoSelector('trainingProject', select
  */
 export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number) =>
   createSelector(
-    [selectAllTrainingProjects, (state: State) => state.scenario, selectAllCascades],
-    (trainingProjects, scenarios, cascadeList) => {
+    [selectAllTrainingProjects, (state: State) => state.scenario],
+    (trainingProjects, scenarios) => {
       const relatedScenario = scenarios.find((e) => e.trainingProject === trainingProjectId);
 
       const optionsList = trainingProjects
-        .filter((t) => !t.isDemo || t.id === relatedScenario?.trainingProject)
+        .filter(
+          (t) =>
+            t.id === relatedScenario?.trainingProject ||
+            (!t.isDemo && ['customvision', 'openvino'].includes(t.category)),
+        )
         .filter((t) => t.id !== DEFAULT_PROJECT_ID)
-        .filter((t) => t.category === 'customvision')
         .map((e) => ({
           key: e.id,
           text: e.name,

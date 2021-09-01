@@ -197,6 +197,7 @@ const DnDFlow = (props: Props) => {
               onLoad={onLoad}
               onDrop={onDrop}
               onDragOver={onDragOver}
+              snapToGrid={true}
             >
               <Controls />
             </ReactFlow>
