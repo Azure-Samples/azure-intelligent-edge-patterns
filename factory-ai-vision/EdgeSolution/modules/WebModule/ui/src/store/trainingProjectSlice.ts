@@ -310,7 +310,6 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
             t.id === relatedScenario?.trainingProject ||
             (!t.isDemo && ['customvision', 'openvino'].includes(t.category)),
         )
-        .filter((t) => t.id !== DEFAULT_PROJECT_ID)
         .map((e) => ({
           key: e.id,
           text: e.name,
