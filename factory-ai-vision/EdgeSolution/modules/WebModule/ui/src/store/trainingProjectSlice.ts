@@ -307,8 +307,7 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
       const optionsList = trainingProjects
         .filter(
           (t) =>
-            t.id === relatedScenario?.trainingProject ||
-            (!t.isDemo && ['customvision', 'openvino'].includes(t.category)),
+            t.id === relatedScenario?.trainingProject || (!t.isDemo && ['customvision'].includes(t.category)),
         )
         .map((e) => ({
           key: e.id,
