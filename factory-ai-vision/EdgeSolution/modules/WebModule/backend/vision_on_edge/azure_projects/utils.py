@@ -160,7 +160,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
 
     # Get project objects
     #TODO need to resolve hard-coded pk=20
-    project_obj_template = Project.objects.get(pk=15)
+    project_obj_template = Project.objects.get(pk=12)
 
     inputs_ = [
         {

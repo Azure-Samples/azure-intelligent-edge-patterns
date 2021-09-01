@@ -155,123 +155,123 @@ def create_demo_objects():
             "outputs": outputs,
         },
     )
-    # face detection
-    inputs_ = [
-        {
-            "name": "data",
-            "metadata": {
-                "type": "image",    
-                "shape": [1, 3, 416, 416],
-                "layout": ["N", "H", "W", "C"],
-                "color_format": "BGR",
-            }
-        }
-    ]
-    outputs_ = [
-        {
-            "name": "detection_out",
-            "metadata": {
-                "type": "bounding_box",
-                "shape": [1, 1, 200, 7],
-                "layout": [1, 1, "B", "F"],
-                "labels": ["person"],
-            }
-        }
-    ]
-    inputs = json.dumps(inputs_)
-    outputs = json.dumps(outputs_)
-    Project.objects.update_or_create(
-        name="face_detection",
-        defaults={
-            "is_cascade": True,
-            "type": "openvino_model",
-            "openvino_model_name": "face-detection-retail-0004",
-            "inputs": inputs,
-            "outputs": outputs,
-            "category": "openvino",
-        },
-    )
+    # # face detection
+    # inputs_ = [
+    #     {
+    #         "name": "data",
+    #         "metadata": {
+    #             "type": "image",    
+    #             "shape": [1, 3, 416, 416],
+    #             "layout": ["N", "H", "W", "C"],
+    #             "color_format": "BGR",
+    #         }
+    #     }
+    # ]
+    # outputs_ = [
+    #     {
+    #         "name": "detection_out",
+    #         "metadata": {
+    #             "type": "bounding_box",
+    #             "shape": [1, 1, 200, 7],
+    #             "layout": [1, 1, "B", "F"],
+    #             "labels": ["person"],
+    #         }
+    #     }
+    # ]
+    # inputs = json.dumps(inputs_)
+    # outputs = json.dumps(outputs_)
+    # Project.objects.update_or_create(
+    #     name="face_detection",
+    #     defaults={
+    #         "is_cascade": True,
+    #         "type": "openvino_model",
+    #         "openvino_model_name": "face-detection-retail-0004",
+    #         "inputs": inputs,
+    #         "outputs": outputs,
+    #         "category": "openvino",
+    #     },
+    # )
 
-    # emotion recognition
-    inputs_ = [
-        {
-            "name": "data",
-            "metadata": {
-                "type": "image",
-                "shape": [1, 3, 64, 64],
-                "layout": ["N", "H", "W", "C"],
-                "color_format": "BGR"
-            }
-        }
-    ]
-    outputs_ = [
-        {
-            "name": "prob_emotion",
-            "metadata": {
-                "type": "classification",
-                "shape": [1, 5, 1, 1],
-                "layout": [1, "C", 1, 1],
-                "labels": ["neutral", "happy", "sad", "surprise", "anger"],
-            }
-        }
-    ]
-    inputs = json.dumps(inputs_)
-    outputs = json.dumps(outputs_)
-    Project.objects.update_or_create(
-        name="emotion_recognition",
-        defaults={
-            "is_cascade": True,
-            "type": "openvino_model",
-            "openvino_model_name": "emotions-recognition-retail-0003",
-            "inputs": inputs,
-            "outputs": outputs,
-            "category": "openvino",
-        },
-    )
-    # age/gender recognition
-    inputs_ = [
-        {
-            "name": "data",
-            "metadata": {
-                "type": "image",
-                "shape": [1, 3, 64, 64],
-                "layout": ["N", "H", "W", "C"],
-            }
-        }
-    ]
-    outputs_ = [
-        {
-            "name": "age_conv3",
-            "metadata": {
-                "type": "regression",
-                "shape": [1, 1, 1, 1],
-                "layout": [1, 1, 1, 1],
-                "scale": 100,
-            }
-        },
-        {
-            "name": "prob",
-            "metadata": {
-                "type": "classification",
-                "shape": [1, 2, 1, 1],
-                "layout": [1, "P", 1, 1],
-                "labels": ["female", "male"],
-            }
-        }
-    ]
-    inputs = json.dumps(inputs_)
-    outputs = json.dumps(outputs_)
-    Project.objects.update_or_create(
-        name="age_gender_recognition",
-        defaults={
-            "is_cascade": True,
-            "type": "openvino_model",
-            "openvino_model_name": "age-gender-recognition-retail-0013",
-            "inputs": inputs,
-            "outputs": outputs,
-            "category": "openvino",
-        },
-    )
+    # # emotion recognition
+    # inputs_ = [
+    #     {
+    #         "name": "data",
+    #         "metadata": {
+    #             "type": "image",
+    #             "shape": [1, 3, 64, 64],
+    #             "layout": ["N", "H", "W", "C"],
+    #             "color_format": "BGR"
+    #         }
+    #     }
+    # ]
+    # outputs_ = [
+    #     {
+    #         "name": "prob_emotion",
+    #         "metadata": {
+    #             "type": "classification",
+    #             "shape": [1, 5, 1, 1],
+    #             "layout": [1, "C", 1, 1],
+    #             "labels": ["neutral", "happy", "sad", "surprise", "anger"],
+    #         }
+    #     }
+    # ]
+    # inputs = json.dumps(inputs_)
+    # outputs = json.dumps(outputs_)
+    # Project.objects.update_or_create(
+    #     name="emotion_recognition",
+    #     defaults={
+    #         "is_cascade": True,
+    #         "type": "openvino_model",
+    #         "openvino_model_name": "emotions-recognition-retail-0003",
+    #         "inputs": inputs,
+    #         "outputs": outputs,
+    #         "category": "openvino",
+    #     },
+    # )
+    # # age/gender recognition
+    # inputs_ = [
+    #     {
+    #         "name": "data",
+    #         "metadata": {
+    #             "type": "image",
+    #             "shape": [1, 3, 64, 64],
+    #             "layout": ["N", "H", "W", "C"],
+    #         }
+    #     }
+    # ]
+    # outputs_ = [
+    #     {
+    #         "name": "age_conv3",
+    #         "metadata": {
+    #             "type": "regression",
+    #             "shape": [1, 1, 1, 1],
+    #             "layout": [1, 1, 1, 1],
+    #             "scale": 100,
+    #         }
+    #     },
+    #     {
+    #         "name": "prob",
+    #         "metadata": {
+    #             "type": "classification",
+    #             "shape": [1, 2, 1, 1],
+    #             "layout": [1, "P", 1, 1],
+    #             "labels": ["female", "male"],
+    #         }
+    #     }
+    # ]
+    # inputs = json.dumps(inputs_)
+    # outputs = json.dumps(outputs_)
+    # Project.objects.update_or_create(
+    #     name="age_gender_recognition",
+    #     defaults={
+    #         "is_cascade": True,
+    #         "type": "openvino_model",
+    #         "openvino_model_name": "age-gender-recognition-retail-0013",
+    #         "inputs": inputs,
+    #         "outputs": outputs,
+    #         "category": "openvino",
+    #     },
+    # )
 
     # Crop
     inputs_ = [

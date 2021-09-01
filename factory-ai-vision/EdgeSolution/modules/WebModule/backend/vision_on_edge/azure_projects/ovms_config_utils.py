@@ -101,7 +101,7 @@ age_gender_recognition_config = {
             {
                 "name": "prob",
                 "metadata": {
-                    "type": "classfication",
+                    "type": "classification",
                     "shape": [1, 2, 1, 1],
                     "layout": [1, "P", 1, 1],
                     "labels": ["female", "male"],
