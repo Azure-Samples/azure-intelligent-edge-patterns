@@ -137,7 +137,7 @@ const IntelProjectDashboard = (props: Props) => {
                   )}
                   <Stack horizontal tokens={{ childrenGap: '5px' }} wrap>
                     {card.tags
-                      .filter((_, i) => i < 3)
+                      .filter((_, i) => i < CARD_PART_LIMIT)
                       .map((part, id) => (
                         <Tag key={id} id={id} text={part} />
                       ))}

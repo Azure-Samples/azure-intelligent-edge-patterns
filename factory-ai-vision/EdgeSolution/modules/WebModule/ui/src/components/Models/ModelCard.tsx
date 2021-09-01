@@ -100,7 +100,6 @@ const ModelCard: React.FC<Props> = (props) => {
         <Stack horizontal>
           <img style={{ height: '60px', width: '60px' }} src="/icons/modelCard.png" alt="icon" />
           <Stack horizontal horizontalAlign="space-between" styles={{ root: classes.titleContainer }}>
-            {/* <Icon iconName="ModelingView" className={classes.cardIcon} /> */}
             <Stack styles={{ root: classes.titleWrapper }}>
               <Label>{project.name}</Label>
             </Stack>

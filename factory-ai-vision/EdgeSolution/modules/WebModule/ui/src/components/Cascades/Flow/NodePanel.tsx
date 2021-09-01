@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useMemo } from 'react';
 import { Node, Edge } from 'react-flow-renderer';
 import {
   Panel,
@@ -14,10 +14,12 @@ import {
 } from '@fluentui/react';
 import { isNil, isEmpty } from 'ramda';
 import { useHistory } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 import { NodeType, TrainingProject } from '../../../store/trainingProjectSlice';
 import { Url } from '../../../enums';
 import { getModelId } from '../utils';
+import { trainingProjectPartsSelectorFactory } from '../../../store/partSlice';
 
 interface Props {
   selectedNode: Node;
@@ -47,8 +49,19 @@ const isExportName = (name: string) => {
   return true;
 };
 
+const getModelTags = (project: TrainingProject) => {
+  if (!project) return [];
+
+  return project.outputs
+    .filter((output) => output.metadata.labels)
+    .map((output) => output.metadata.labels.map((label) => label))[0];
+};
+
 const NodePanel = (props: Props) => {
   const { selectedNode, setSelectedNode, model, setElements, matchTargetLabels } = props;
+
+  const partSelector = useMemo(() => trainingProjectPartsSelectorFactory(model?.id), [model]);
+  const parts = useSelector(partSelector);
 
   const [exportName, setExportName] = useState<string>(null);
   const [threshold, setThreshold] = useState(null);
@@ -174,20 +187,36 @@ const NodePanel = (props: Props) => {
             <Stack>
               <Label>Objects / Tags</Label>
               <Stack horizontal tokens={{ childrenGap: 6 }}>
-                {['Red', 'Blue', 'Green'].map((tag, i) => (
-                  <Stack
-                    key={i}
-                    style={{
-                      backgroundColor: 'rgba(0, 137, 250, 0.15)',
-                      fontSize: '13px',
-                      lineHeight: '18px',
-                      padding: '3px 8px',
-                      borderRadius: '2px',
-                    }}
-                  >
-                    {tag}
-                  </Stack>
-                ))}
+                {model.category === 'customvision' &&
+                  parts.map((part, i) => (
+                    <Stack
+                      key={i}
+                      style={{
+                        backgroundColor: 'rgba(0, 137, 250, 0.15)',
+                        fontSize: '13px',
+                        lineHeight: '18px',
+                        padding: '3px 8px',
+                        borderRadius: '2px',
+                      }}
+                    >
+                      {part.name}
+                    </Stack>
+                  ))}
+                {model.category === 'openvino' &&
+                  getModelTags(model).map((part, i) => (
+                    <Stack
+                      key={i}
+                      style={{
+                        backgroundColor: 'rgba(0, 137, 250, 0.15)',
+                        fontSize: '13px',
+                        lineHeight: '18px',
+                        padding: '3px 8px',
+                        borderRadius: '2px',
+                      }}
+                    >
+                      {part}
+                    </Stack>
+                  ))}
               </Stack>
             </Stack>
           </Stack>

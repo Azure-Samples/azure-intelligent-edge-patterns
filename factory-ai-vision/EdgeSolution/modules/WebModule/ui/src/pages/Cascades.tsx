@@ -3,6 +3,7 @@ import { useDispatch } from 'react-redux';
 
 import { getTrainingProject } from '../store/trainingProjectSlice';
 import { getCascades } from '../store/cascadeSlice';
+import { getParts } from '../store/partSlice';
 
 import CascadesContainer from '../components/Cascades/CascadesContainer';
 
@@ -12,6 +13,7 @@ const Cascades = () => {
   useEffect(() => {
     dispatch(getTrainingProject(true));
     dispatch(getCascades());
+    dispatch(getParts());
   }, [dispatch]);
 
   return <CascadesContainer />;

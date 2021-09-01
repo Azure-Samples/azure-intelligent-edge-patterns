@@ -39,7 +39,7 @@ const INTEL_OVMS_CARD_DATA = [
       'https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/models/intel/face-detection-retail-0005/assets/face-detection-retail-0001.png',
     inputDescribe: 'Image, name: input, shape: 1, 3, 300, 300 in the format B, C, H, W, where:',
     createdAt: '7/3/2021',
-    tags: ['Car', 'Person', 'Bus', 'Stop Sign', 'Abc'],
+    tags: ['person'],
     metric: {
       ap: '84.52%',
       GFlops: '0.982',
@@ -57,8 +57,8 @@ const INTEL_OVMS_CARD_DATA = [
     imageUrl:
       'https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/models/intel/emotions-recognition-retail-0003/assets/emotions-recognition-retail-0003.jpg',
     inputDescribe: 'Image, name: data, shape: 1, 3, 64, 64 in 1, C, H, W format, where:',
-    createdAt: '',
-    tags: [],
+    createdAt: '7/3/2021',
+    tags: ['neutral', 'happy', 'sad', 'surprise', 'anger'],
     metric: {
       ifo: 'Frontal',
       rip: '±15˚',
@@ -81,7 +81,7 @@ const INTEL_OVMS_CARD_DATA = [
       'https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/models/intel/age-gender-recognition-retail-0013/assets/age-gender-recognition-retail-0001.jpg',
     inputDescribe: 'Image, name: input, shape: 1, 3, 62, 62 in 1, C, H, W format, where:',
     createdAt: '7/3/2021',
-    tags: ['Car', 'Person', 'Bus', 'Stop Sign', 'Abc'],
+    tags: ['female', 'male'],
     metric: {
       // ifo: 'Frontal',
       rip: '±45˚',
