@@ -307,7 +307,7 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
       const optionsList = trainingProjects
         .filter((t) => !t.isDemo || t.id === relatedScenario?.trainingProject)
         .filter((t) => t.id !== DEFAULT_PROJECT_ID)
-        .filter((t) => !t.isCascade)
+        .filter((t) => t.category === 'customvision')
         .map((e) => ({
           key: e.id,
           text: e.name,
