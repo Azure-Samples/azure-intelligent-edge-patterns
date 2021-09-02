@@ -144,7 +144,7 @@ def update_tags_helper(project_id, tags=None):
     
 
 
-def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial: bool):
+def pull_cv_project_helper(customvision_project_id: str, is_partial: bool):
     """pull_cv_project_helper.
 
     Args:
@@ -154,7 +154,6 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     """
 
     logger.info("pull_cv_project_helper")
-    logger.info("project_id %s", project_id)
     logger.info("customvision_project_id: %s", customvision_project_id)
     logger.info("is_partial %s", is_partial)
 

@@ -241,8 +241,8 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=["get"])
     def pull_cv_project(self, request, pk=None) -> Response:
         """pull_cv_project."""
-        queryset = self.get_queryset()
-        project_obj = drf_get_object_or_404(queryset, pk=pk)
+        # queryset = self.get_queryset()
+        # project_obj = drf_get_object_or_404(queryset, pk=pk)
 
         # Check Customvision Project id
         customvision_project_id = request.query_params.get(
@@ -257,7 +257,6 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
         # Pull Custom Vision Project
         pull_cv_project_helper(
-            project_id=project_obj.id,
             customvision_project_id=customvision_project_id,
             is_partial=is_partial,
         )
