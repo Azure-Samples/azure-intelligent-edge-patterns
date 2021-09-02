@@ -294,57 +294,72 @@ if [ "$isCfg" != true ]; then
     fi
 
     ################################ Check for Platform ###########################################
-    echo 1 amd64
-    echo 2 arm64v8
-    read -p "Choose the platform you're going to deploy: "
-    if [ "$REPLY" == "1" ]; then
+    #echo 1 amd64
+    #echo 2 arm64v8
+    #read -p "Choose the platform you're going to deploy: "
+    #if [ "$REPLY" == "1" ]; then
+	#platform="amd64"
+    #elif [ "$REPLY" == "2" ]; then
+	#platform="arm64v8"
+    #else
+	#echo "Unknown Platform"
+	#exit
+    #fi
+
 	platform="amd64"
-    elif [ "$REPLY" == "2" ]; then
-	platform="arm64v8"
-    else
-	echo "Unknown Platform"
-	exit
-    fi
-
-
 
     ################################ Check for Device ###########################################
-    if [ "$platform" == "amd64" ]; then
-	    PS3='Choose the number corresponding to the Azure Stack Edge device: '
-	    deviceOptions="cpu gpu vpu"
-	    select cpuGpu in $deviceOptions
-	    do
-	      echo "you chose: " $cpuGpu
-	      if [ "$cpuGpu" != "" ]; then
-		  break
-	      fi
-	    done
-	    if [ "$cpuGpu" == "cpu" ]; then
+    #if [ "$platform" == "amd64" ]; then
+	#    PS3='Choose the number corresponding to the Azure Stack Edge device: '
+	#    deviceOptions="cpu gpu vpu"
+	#    select cpuGpu in $deviceOptions
+	#    do
+	#      echo "you chose: " $cpuGpu
+	#      if [ "$cpuGpu" != "" ]; then
+	#	  break
+	#      fi
+	#    done
+	#    if [ "$cpuGpu" == "cpu" ]; then
+	#	runtime="runc"
+	#    fi
+	#    if [ "$cpuGpu" == "gpu" ]; then
+	#	runtime="nvidia"
+	#    fi
+	#    if [ "$cpuGpu" == "vpu" ]; then
+	#	runtime="runc"
+	#    fi
+    #elif [ "$platform" == "arm64v8" ]; then
+	#    PS3='Choose the number corresponding to the Azure Stack Edge device: '
+	#    deviceOptions="cpu jetson"
+	#    select cpuGpu in $deviceOptions
+	#    do
+	#      echo "you chose: " $cpuGpu
+	#      if [ "$cpuGpu" != "" ]; then
+	#	  break
+	#      fi
+	#    done
+	#    if [ "$cpuGpu" == "cpu" ]; then
+	#	runtime="runc"
+	#    fi
+	#    if [ "$cpuGpu" == "jetson" ]; then
+	#	runtime="nvidia"
+	#    fi
+    #fi
+	PS3='Choose the number corresponding to the Edge device: '
+	deviceOptions="cpu vpu"
+	select cpuGpu in $deviceOptions
+	do
+	  echo "you chose: " $cpuGpu
+	  if [ "$cpuGpu" != "" ]; then
+		 break
+	  fi
+	done
+	if [ "$cpuGpu" == "cpu" ]; then
 		runtime="runc"
-	    fi
-	    if [ "$cpuGpu" == "gpu" ]; then
-		runtime="nvidia"
-	    fi
-	    if [ "$cpuGpu" == "vpu" ]; then
+	fi
+	if [ "$cpuGpu" == "vpu" ]; then
 		runtime="runc"
-	    fi
-    elif [ "$platform" == "arm64v8" ]; then
-	    PS3='Choose the number corresponding to the Azure Stack Edge device: '
-	    deviceOptions="cpu jetson"
-	    select cpuGpu in $deviceOptions
-	    do
-	      echo "you chose: " $cpuGpu
-	      if [ "$cpuGpu" != "" ]; then
-		  break
-	      fi
-	    done
-	    if [ "$cpuGpu" == "cpu" ]; then
-		runtime="runc"
-	    fi
-	    if [ "$cpuGpu" == "jetson" ]; then
-		runtime="nvidia"
-	    fi
-    fi
+	fi
 
 fi #if [ $isCfg != true ]; then
 
