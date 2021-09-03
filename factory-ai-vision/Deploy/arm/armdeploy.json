@@ -7,7 +7,7 @@
       "allowedValues": [ "X86" ],
       "type": "string",
       "metadata": {
-        "description": "Specify the architecture of the Edge Device. Currently supported values are 'X86' and 'ARM64'."
+        "description": "Specify the architecture of the Edge Device. Currently supported values are 'X86''."
       }
     },
     "moduleRuntime": {
