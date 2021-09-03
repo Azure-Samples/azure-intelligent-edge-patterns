@@ -38,7 +38,7 @@ https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/fac
 
 
 ![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot1.3.png) 
-<br/><br/>
+<br/>
 
 
 ## Step4: Choose the resources under the account; you will see information of “Key” and “Endpoint”
