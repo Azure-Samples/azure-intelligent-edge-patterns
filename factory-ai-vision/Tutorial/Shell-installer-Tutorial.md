@@ -59,8 +59,6 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 
 12. After installation is completed, please check your device to get the IP address,
 <br/> Properties-> Networking -> Public IP address
-
-
 <br/> Open your browser, connect to http://YOUR_IP:8181
 e.g.  connect to http://168.63.246.174:8181
 
