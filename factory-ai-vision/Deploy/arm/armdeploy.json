@@ -4,7 +4,7 @@
   "parameters": {
     "deviceArchitecture": {
       "defaultValue": "X86",
-      "allowedValues": [ "X86", "ARM64" ],
+      "allowedValues": [ "X86" ],
       "type": "string",
       "metadata": {
         "description": "Specify the architecture of the Edge Device. Currently supported values are 'X86' and 'ARM64'."
