@@ -2,9 +2,9 @@
     "$schema-version": "0.0.1",
     "description": "",
     "image": {
-        "repository": "${CONTAINER_REGISTRY_NAME}/intelligentedge/modelmanagermodule",
+        "repository": "${CONTAINER_REGISTRY_NAME}/intelligentedge/ovmsadaptormodule",
         "tag": {
-            "version": "0.28.3",
+            "version": "0.0.15",
             "platforms": {
                 "amd64": "./dockerfiles/Dockerfile.amd64"
             }

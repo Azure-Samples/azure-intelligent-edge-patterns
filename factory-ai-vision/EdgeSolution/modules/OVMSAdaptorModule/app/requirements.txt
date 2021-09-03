@@ -1,0 +1,8 @@
+numpy
+opencv-python
+networkx
+pydantic==1.7.2
+fastapi
+uvicorn
+tensorflow
+tensorflow-serving-api
