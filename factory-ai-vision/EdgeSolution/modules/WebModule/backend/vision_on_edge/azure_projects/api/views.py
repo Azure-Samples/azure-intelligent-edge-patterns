@@ -238,7 +238,7 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             "400": MSStyleErrorResponseSerializer
         },
     )
-    @action(detail=True, methods=["get"])
+    @action(detail=False, methods=["get"])
     def pull_cv_project(self, request, pk=None) -> Response:
         """pull_cv_project."""
         # queryset = self.get_queryset()

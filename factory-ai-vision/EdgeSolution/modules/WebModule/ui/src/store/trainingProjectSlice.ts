@@ -14,7 +14,6 @@ import {
 import { createWrappedAsync } from './shared/createWrappedAsync';
 import { getParts } from './partSlice';
 import { thunkGetAllCvProjects } from './setting/settingAction';
-import { selectAllCascades } from './cascadeSlice';
 
 export const DEFAULT_PROJECT_ID = 15;
 
@@ -72,13 +71,13 @@ export type CreatOwnModelPayload = {
   prediction_header: string;
 };
 
-export type createCustomVisionProjectPayload = {
+export type CreateCustomVisionProjectPayload = {
   name: string;
   tags: string[];
   project_type: string;
 };
 
-export type updateCustomVisionProjectTagsPayload = {
+export type UpdateCustomVisionProjectTagsPayload = {
   id: string;
   tags: string[];
 };
@@ -104,6 +103,16 @@ const normalize = (e) => ({
   openvino_model_name: e.openvino_model_name,
   download_uri_openvino: e.download_uri_openvino,
 });
+
+const extractConvertCustomProject = (project) => {
+  return {
+    is_prediction_module: true,
+    name: project.name,
+    labels: project.labels,
+    prediction_uri: project.endPoint,
+    prediction_header: project.header,
+  };
+};
 
 export const getTrainingProject = createWrappedAsync<any, boolean, { state: State }>(
   'trainingSlice/get',
@@ -134,59 +143,18 @@ export const pullCVProjects = createWrappedAsync<
   any,
   { selectedCustomvisionId: string; loadFullImages: boolean },
   { state: State }
->(
-  'trainingProject/pullCVProjects',
-  async ({ selectedCustomvisionId, loadFullImages }, { getState, dispatch }) => {
-    const trainingProjectId = selectNonDemoProject(getState())[0].id;
-    await Axios.get(
-      `/api/projects/${trainingProjectId}/pull_cv_project?customvision_project_id=${selectedCustomvisionId}&partial=${Number(
-        !loadFullImages,
-      )}`,
-    );
-    // Get training project because the origin project name will be mutate
-    dispatch(refreshTrainingProject());
-    dispatch(getParts());
-  },
-);
+>('trainingProject/pullCVProjects', async ({ selectedCustomvisionId, loadFullImages }, { dispatch }) => {
+  await Axios.get(
+    `/api/projects/pull_cv_project?customvision_project_id=${selectedCustomvisionId}&partial=${Number(
+      !loadFullImages,
+    )}`,
+  );
+  // Get training project because the origin project name will be mutate
+  dispatch(refreshTrainingProject());
+  dispatch(getParts());
+});
 
-export const createNewTrainingProject = createWrappedAsync<any, string, { state: State }>(
-  'trainingSlice/createNew',
-  async (name, { getState, dispatch }) => {
-    const [nonDemoProject] = getState().trainingProject.nonDemo;
-    const response = await Axios.get(`/api/projects/${nonDemoProject}/reset_project?project_name=${name}`);
-
-    dispatch(refreshTrainingProject());
-
-    return normalize(response.data);
-  },
-);
-
-export const createCustomVisionProjectAndModel = createWrappedAsync<any, string, { state: State }>(
-  'trainingSlice/createNew',
-  async (name, { getState, dispatch }) => {
-    const [nonDemoProject] = getState().trainingProject.nonDemo;
-    const response = await Axios.get(`/api/projects/${nonDemoProject}/reset_project?project_name=${name}`);
-
-    // dispatch(refreshTrainingProject());
-    dispatch(
-      pullCVProjects({ selectedCustomvisionId: response.data.customvision_id, loadFullImages: false }),
-    );
-
-    return normalize(response.data);
-  },
-);
-
-const extractConvertCustomProject = (project) => {
-  return {
-    is_prediction_module: true,
-    name: project.name,
-    labels: project.labels,
-    prediction_uri: project.endPoint,
-    prediction_header: project.header,
-  };
-};
-
-export const createCustomVisionProject = createWrappedAsync<any, createCustomVisionProjectPayload>(
+export const createCustomVisionProject = createWrappedAsync<any, CreateCustomVisionProjectPayload>(
   'trainingSlice/createCustomVisionProject',
   async (payload, { dispatch }) => {
     await Axios.post(`/api/projects/9/create_cv_project/`, payload);
@@ -199,7 +167,7 @@ export const createCustomVisionProject = createWrappedAsync<any, createCustomVis
 
 export const updateCustomVisionProjectTags = createWrappedAsync<
   any,
-  updateCustomVisionProjectTagsPayload,
+  UpdateCustomVisionProjectTagsPayload,
   { state: State }
 >('trainingSlice/updateCustomVisionTags', async ({ id, tags }, { dispatch }) => {
   await Axios.post(`/api/projects/${id}/update_tags`, { tags });
@@ -258,17 +226,11 @@ const slice = createSlice({
       ...state,
       selectedProjectInfo: null,
     }),
-    // closeLabelingPage: (state) => ({
-    //   ...state,
-    //   imageIds: [],
-    //   selectedImageId: null,
-    // }),
   },
   extraReducers: (builder) => {
     builder
       .addCase(getTrainingProject.fulfilled, entityAdapter.setAll)
       .addCase(refreshTrainingProject.fulfilled, entityAdapter.setAll)
-      .addCase(createNewTrainingProject.fulfilled, entityAdapter.upsertOne)
       .addCase(createCustomProject.fulfilled, entityAdapter.upsertOne)
       .addCase(updateCustomProject.fulfilled, entityAdapter.upsertOne)
       .addCase(deleteCustomProject.fulfilled, entityAdapter.removeOne)

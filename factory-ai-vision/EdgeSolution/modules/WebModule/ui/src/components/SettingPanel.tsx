@@ -9,23 +9,19 @@ import {
   LayerHost,
   PrimaryButton,
   Stack,
-  Dropdown,
   IDropdownOption,
-  Spinner,
   ITextFieldProps,
   IconButton,
   Label,
   Dialog,
   DialogFooter,
   Text,
-  Checkbox,
   MessageBar,
   MessageBarType,
   getTheme,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
-// import { useLocation } from 'react-router-dom';
 
 import { State } from 'RootStateType';
 import {
@@ -40,7 +36,6 @@ import { selectNonDemoProject, pullCVProjects } from '../store/trainingProjectSl
 import { dummyFunction } from '../utils/dummyFunction';
 
 import { WarningDialog } from './WarningDialog';
-import { CreateProjectDialog } from './CreateProjectDialog';
 
 type SettingPanelProps = {
   isOpen: boolean;

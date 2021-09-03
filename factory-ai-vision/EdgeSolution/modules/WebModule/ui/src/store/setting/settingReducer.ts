@@ -1,6 +1,5 @@
 import { SettingActionType, Setting } from './settingType';
 import { patchIsCollectData } from './settingAction';
-import { createNewTrainingProject } from '../trainingProjectSlice';
 
 export const initialState: Setting = {
   loading: false,
@@ -40,15 +39,6 @@ const settingReducer = (state = initialState, action: SettingActionType): Settin
       return { ...state, loading: false, cvProjects: action.pyload };
     case 'settings/listAllProjects/rejected':
       return { ...state, loading: false, error: action.error };
-    case createNewTrainingProject.fulfilled.toString():
-      return {
-        ...state,
-        loading: false,
-        cvProjects: [
-          ...state.cvProjects,
-          { id: (action as any).payload.customVisionId, name: (action as any).payload.name },
-        ],
-      };
     case patchIsCollectData.pending.toString():
       return { ...state, isCollectData: (action as any).meta.arg.isCollectData, appInsightHasInit: true };
     case patchIsCollectData.rejected.toString():
