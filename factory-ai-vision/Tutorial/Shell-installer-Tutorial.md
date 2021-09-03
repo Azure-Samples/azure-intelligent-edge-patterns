@@ -46,13 +46,13 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 <br/> Please enter your AVA Provision Token
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/step6_20210902.png?raw=true)
 
-9. There will be a list of IoT hubs, please choose “customvision”.
+9. There will be a list of IoT Hubs resources listed. Please choose your desired/appropriate resource.
 <br/>It will then show a list of devices in your account, and choose the device to install your vision on edge. 
 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/step7_20210902.png?raw=true)
 
-10. Please choose 1 amd64 as the platform you're going to deploy, and 1) cpu as the Azure Stack Edge device corresponding to
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/step8_20210902.png?raw=true)
+10. Choose cpu to correspond to Edge device.
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/step8_20210904.png?raw=true)
 
 11. The installation will be scheduled to complete. Please wait. 
 <br/> You can check the deployment status on the [Azure portal](https://portal.azure.com/#home)
