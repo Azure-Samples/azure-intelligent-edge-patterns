@@ -46,6 +46,8 @@ class PartDetectionSerializer(serializers.ModelSerializer):
             "counting_start_time",
             "counting_end_time",
             "project",
+            "cascade",
+            "deployment_type",
             "send_video_to_cloud",
             "disable_video_feed",
         ]
@@ -76,6 +78,8 @@ class PartDetectionSerializer(serializers.ModelSerializer):
             # "parts",
             "prob_threshold",
             "project",
+            "cascade",
+            "deployment_type",
             # "send_video_to_cloud",
             "disable_video_feed",
             "counting_start_time",

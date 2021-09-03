@@ -36,6 +36,8 @@ export enum InferenceSource {
   CaptureModule = 'capture_module',
 }
 
+export type DeploymentType = 'model' | 'cascade';
+
 export type ProjectData = {
   id: number;
   /* --- Configured by user --- */
@@ -81,6 +83,9 @@ export type ProjectData = {
   // For want to select other model, old camera still in option component.
   // Forced add.
   oldCameras?: number[];
+
+  deployment_type: DeploymentType;
+  cascade: string;
 };
 
 // Describing the different ACTION NAMES available

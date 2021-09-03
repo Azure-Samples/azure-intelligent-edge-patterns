@@ -57,3 +57,16 @@ class SettingViewSet(viewsets.ModelViewSet):
             return Response(serializer.validated_data)
         except CustomVisionErrorException:
             raise SettingCustomVisionAccessFailed
+
+    @action(detail=True, methods=["get"])
+    def project_info(self, request, pk=None):
+        queryset = self.get_queryset()
+        setting_obj = drf_get_object_or_404(queryset, pk=pk)
+        trainer = setting_obj.get_trainer_obj()
+        customvision_id = request.query_params.get("customvision_id")
+        domain_type = trainer.get_domain(trainer.get_project(customvision_id).settings.domain_id).type
+        results = {"tags":[], "type":domain_type}
+        tag_list = trainer.get_tags(customvision_id)
+        for tag in tag_list:
+            results["tags"].append(tag.name)
+        return Response(results)

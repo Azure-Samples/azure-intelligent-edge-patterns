@@ -215,16 +215,20 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         """
         queryset = self.get_queryset()
         instance = drf_get_object_or_404(queryset, pk=pk)
-        instance.is_deployable(raise_exception=True)
+        if instance.deployment_type == 'model':
+            instance.is_deployable(raise_exception=True)
 
-        upcreate_training_status(
-            project_id=instance.project.id, **progress.PROGRESS_1_FINDING_PROJECT
-        )
-        instance.has_configured = True
-        instance.save()
+            upcreate_training_status(
+                project_id=instance.project.id, **progress.PROGRESS_1_FINDING_PROJECT
+            )
+            instance.has_configured = True
+            instance.save()
 
-        TRAINING_MANAGER.add(project_id=instance.project.id)
-        if_trained_then_deploy_helper(part_detection_id=instance.id)
+            TRAINING_MANAGER.add(project_id=instance.project.id)
+            if_trained_then_deploy_helper(part_detection_id=instance.id)
+        else:
+            instance.has_configured = True
+            instance.save()
         return Response({"status": "ok"})
 
     @swagger_auto_schema(

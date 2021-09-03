@@ -28,3 +28,5 @@ typing-extensions==3.7.4.2
 urllib3==1.25.9
 utility
 uvicorn
+tensorflow
+tensorflow-serving-api

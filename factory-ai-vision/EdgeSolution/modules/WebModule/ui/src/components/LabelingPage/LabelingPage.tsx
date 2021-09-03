@@ -85,11 +85,18 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
     (state: State) => state.labelingPage.openFrom === OpenFrom.CaptureDialog,
   );
   const noPrevAndNext = useSelector((state: State) => state.labelingPage.openFrom === OpenFrom.AfterCapture);
+  const imageProjectId = useSelector<State, number>((state) => imageSelector(state)?.project);
+
   const closeDialog = () => dispatch(closeLabelingPage());
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [loading, setLoading] = useState(false);
 
   const parts = useSelector(selectNonDemoPart);
+  // const parts = useSelector((state: State) => selectTrainingProjectById(state, part?.trainingProject));
+  // const partOptionsSelector = useMemo(() => trainingProjectPartsSelectorFactory(trainingProject), [trainingProject]);
+  // const partOptions = useSelector(partOptionsSelector);
+
+  // console.log('LabelingPage', parts);
 
   const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
 
@@ -163,7 +170,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
   const onRenderInfoOnRight = (): JSX.Element => (
     <>
       {onRenderPrediction()}
-      <PartPicker />
+      <PartPicker trainingProject={imageProjectId} />
     </>
   );
 

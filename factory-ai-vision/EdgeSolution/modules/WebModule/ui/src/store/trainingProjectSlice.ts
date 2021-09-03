@@ -13,6 +13,31 @@ import {
 } from './shared/DemoSliceUtils';
 import { createWrappedAsync } from './shared/createWrappedAsync';
 import { getParts } from './partSlice';
+import { thunkGetAllCvProjects } from './setting/settingAction';
+
+export type Params = { confidence_threshold: string; filter_label_id: string };
+
+export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink' | 'customvision_model';
+type TrainingProjectCategory = 'customvision' | 'openvino' | 'OVMS';
+type MetadataType = 'image' | 'bounding_box' | 'classification' | 'regression';
+
+export type Metadata = {
+  type: MetadataType;
+  shape: string[];
+  layout: string[];
+  color_format: string;
+  labels?: string[];
+};
+
+type Input = {
+  name: string;
+  metadata: Metadata;
+};
+
+type Output = {
+  name: string;
+  metadata: Metadata;
+};
 
 export type TrainingProject = {
   id: number;
@@ -22,6 +47,37 @@ export type TrainingProject = {
   isPredicationModel: boolean;
   predictionUri: string;
   predictionHeader: string;
+  category: TrainingProjectCategory;
+  projectType: string;
+  isCascade: boolean;
+  inputs: Input[];
+  outputs: Output[];
+  nodeType: NodeType;
+  demultiply_count: number;
+  combined: string;
+  params: Params | string;
+  openvino_library_name: string;
+  openvino_model_name: string;
+  download_uri_openvino: string;
+};
+
+export type CreatOwnModelPayload = {
+  is_prediction_module: boolean;
+  name: string;
+  labels: string;
+  prediction_uri: string;
+  prediction_header: string;
+};
+
+export type CreateCustomVisionProjectPayload = {
+  name: string;
+  tags: string[];
+  project_type: string;
+};
+
+export type UpdateCustomVisionProjectTagsPayload = {
+  id: string;
+  tags: string[];
 };
 
 const normalize = (e) => ({
@@ -32,7 +88,29 @@ const normalize = (e) => ({
   isPredicationModel: e.is_prediction_module,
   predictionUri: e.prediction_uri,
   predictionHeader: e.prediction_header,
+  category: e.category,
+  projectType: e.project_type,
+  isCascade: e.is_cascade,
+  inputs: e.inputs === '' ? [] : JSON.parse(e.inputs),
+  outputs: e.outputs === '' ? [] : JSON.parse(e.outputs),
+  nodeType: e.type,
+  demultiplyCount: e.demultiply_count,
+  combined: e.combined,
+  params: e.params === '' ? '' : JSON.parse(e.params),
+  openvino_library_name: e.openvino_library_name,
+  openvino_model_name: e.openvino_model_name,
+  download_uri_openvino: e.download_uri_openvino,
 });
+
+const extractConvertCustomProject = (project) => {
+  return {
+    is_prediction_module: true,
+    name: project.name,
+    labels: project.labels,
+    prediction_uri: project.endPoint,
+    prediction_header: project.header,
+  };
+};
 
 export const getTrainingProject = createWrappedAsync<any, boolean, { state: State }>(
   'trainingSlice/get',
@@ -63,49 +141,43 @@ export const pullCVProjects = createWrappedAsync<
   any,
   { selectedCustomvisionId: string; loadFullImages: boolean },
   { state: State }
->(
-  'trainingProject/pullCVProjects',
-  async ({ selectedCustomvisionId, loadFullImages }, { getState, dispatch }) => {
-    const trainingProjectId = selectNonDemoProject(getState())[0].id;
-    await Axios.get(
-      `/api/projects/${trainingProjectId}/pull_cv_project?customvision_project_id=${selectedCustomvisionId}&partial=${Number(
-        !loadFullImages,
-      )}`,
-    );
-    // Get training project because the origin project name will be mutate
+>('trainingProject/pullCVProjects', async ({ selectedCustomvisionId, loadFullImages }, { dispatch }) => {
+  await Axios.get(
+    `/api/projects/pull_cv_project?customvision_project_id=${selectedCustomvisionId}&partial=${Number(
+      !loadFullImages,
+    )}`,
+  );
+  // Get training project because the origin project name will be mutate
+  dispatch(refreshTrainingProject());
+  dispatch(getParts());
+});
+
+export const createCustomVisionProject = createWrappedAsync<any, CreateCustomVisionProjectPayload>(
+  'trainingSlice/createCustomVisionProject',
+  async (payload, { dispatch }) => {
+    await Axios.post(`/api/projects/9/create_cv_project/`, payload);
+
     dispatch(refreshTrainingProject());
     dispatch(getParts());
+    dispatch(thunkGetAllCvProjects());
   },
 );
 
-export const createNewTrainingProject = createWrappedAsync<any, string, { state: State }>(
-  'trainingSlice/createNew',
-  async (name, { getState, dispatch }) => {
-    const [nonDemoProject] = getState().trainingProject.nonDemo;
-    const response = await Axios.get(`/api/projects/${nonDemoProject}/reset_project?project_name=${name}`);
+export const updateCustomVisionProjectTags = createWrappedAsync<
+  any,
+  UpdateCustomVisionProjectTagsPayload,
+  { state: State }
+>('trainingSlice/updateCustomVisionTags', async ({ id, tags }, { dispatch }) => {
+  await Axios.post(`/api/projects/${id}/update_tags`, { tags });
 
-    dispatch(refreshTrainingProject());
+  dispatch(getParts());
+  dispatch(refreshTrainingProject());
+});
 
-    return normalize(response.data);
-  },
-);
-
-const extractConvertCustomProject = (project) => {
-  return {
-    is_prediction_module: true,
-    name: project.name,
-    labels: project.labels,
-    prediction_uri: project.endPoint,
-    prediction_header: project.header,
-  };
-};
-
-export const createCustomProject = createWrappedAsync<any, any, { state: State }>(
+export const createCustomProject = createWrappedAsync<any, CreatOwnModelPayload, { state: State }>(
   'trainingSlice/createNewCustom',
-  async (project) => {
-    const data = extractConvertCustomProject(project);
-
-    const response = await Axios.post(`/api/projects`, data);
+  async (payload) => {
+    const response = await Axios.post(`/api/projects`, payload);
     return normalize(response.data);
   },
 );
@@ -131,20 +203,40 @@ export const deleteCustomProject = createWrappedAsync<any, { id: number; resolve
   },
 );
 
+export const getSelectedProjectInfo = createWrappedAsync<any, string, { state: State }>(
+  'trainingSlice/GetSelectedProjectInfo',
+  async (id, { getState }) => {
+    const settingId = getState().setting.current.id;
+    // await Axios.delete(`/api/settings/9/project_info?customvision_id=${id}`);
+    const response = await Axios.get(`/api/settings/${settingId}/project_info?customvision_id=${id}`);
+
+    return response.data;
+  },
+);
+
 const entityAdapter = createEntityAdapter<TrainingProject>();
 
 const slice = createSlice({
   name: 'trainingSlice',
   initialState: getInitialDemoState(entityAdapter.getInitialState()),
-  reducers: {},
+  reducers: {
+    onEmptySelectedProjectInfo: (state) => ({
+      ...state,
+      selectedProjectInfo: null,
+    }),
+  },
   extraReducers: (builder) => {
     builder
       .addCase(getTrainingProject.fulfilled, entityAdapter.setAll)
       .addCase(refreshTrainingProject.fulfilled, entityAdapter.setAll)
-      .addCase(createNewTrainingProject.fulfilled, entityAdapter.upsertOne)
       .addCase(createCustomProject.fulfilled, entityAdapter.upsertOne)
       .addCase(updateCustomProject.fulfilled, entityAdapter.upsertOne)
       .addCase(deleteCustomProject.fulfilled, entityAdapter.removeOne)
+      .addCase(getSelectedProjectInfo.fulfilled, (state, action) => {
+        const { payload } = action;
+
+        state.selectedProjectInfo = payload;
+      })
       .addMatcher(isCRDAction, insertDemoFields);
   },
 });
@@ -157,6 +249,7 @@ export const {
   selectById: selectTrainingProjectById,
   selectEntities: selectTrainingProjectEntities,
 } = entityAdapter.getSelectors((state: State) => state.trainingProject);
+export const { onEmptySelectedProjectInfo } = slice.actions;
 
 export const selectNonDemoProject = getNonDemoSelector('trainingProject', selectTrainingProjectEntities);
 
@@ -171,16 +264,32 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
     (trainingProjects, scenarios) => {
       const relatedScenario = scenarios.find((e) => e.trainingProject === trainingProjectId);
 
-      return trainingProjects
-        .filter((t) => !t.isDemo || t.id === relatedScenario?.trainingProject)
+      const optionsList = trainingProjects
+        .filter(
+          (t) =>
+            t.id === relatedScenario?.trainingProject || (!t.isDemo && ['customvision'].includes(t.category)),
+        )
         .map((e) => ({
           key: e.id,
           text: e.name,
+          title: 'model',
         }));
+
+      return optionsList;
     },
   );
 
 export const trainingProjectIsPredictionModelFactory = () =>
   createSelector(selectAllTrainingProjects, (entities) =>
-    entities.filter((project) => project.isPredicationModel),
+    entities.filter((project) => !project.isDemo).filter((project) => project.id !== 9),
+  );
+
+export const trainingProjectIsCascadesFactory = () =>
+  createSelector(selectAllTrainingProjects, (entities) =>
+    entities.filter((project) => !project.isDemo).filter((project) => project.isCascade),
+  );
+
+export const trainingProjectIsSourceNodeFactory = () =>
+  createSelector(selectAllTrainingProjects, (entities) =>
+    entities.find((project) => !project.isDemo && project.isCascade && project.nodeType === 'source'),
   );

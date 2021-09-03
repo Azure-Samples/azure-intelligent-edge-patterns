@@ -6,6 +6,7 @@ enum Url {
   HOME_CUSTOMIZE = '/home/customize',
 
   IMAGES = '/images',
+  IMAGES_DETAIL = '/images/:id',
 
   PARTS = '/parts',
   PARTS_DETAIL = '/parts/detail',
@@ -15,6 +16,11 @@ enum Url {
 
   MODELS = '/models',
   MODELS_DETAIL = '/models/detail',
+  MODELS_OBJECTS = '/models/detail/objects',
+
+  CASCADES = '/cascades',
+  CASCADES_DETAIL = '/cascades/:id',
+  CASCADES_CREATE = '/cascades/create',
 
   DEPLOYMENT = '/deployment',
 }

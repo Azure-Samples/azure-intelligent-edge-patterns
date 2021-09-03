@@ -41,6 +41,9 @@ class Project(models.Model):
     download_uri_fp16 = models.CharField(
         max_length=1000, null=True, blank=True, default=""
     )
+    download_uri_openvino = models.CharField(
+        max_length=1000, null=True, blank=True, default=""
+    )
     is_prediction_module = models.BooleanField(default=False)
     prediction_uri = models.CharField(
         max_length=1000, null=True, blank=True, default=""
@@ -55,6 +58,19 @@ class Project(models.Model):
     maxImages = models.IntegerField(default=20)
     needRetraining = models.BooleanField(default=True)
     relabel_expired_time = models.DateTimeField(default=timezone.now)
+
+    project_type = models.CharField(max_length=1000, null=True, blank=True, default="")
+    category = models.CharField(max_length=1000, null=True, blank=True, default="")
+
+    is_cascade = models.BooleanField(default=False)
+    type = models.CharField(max_length=1000, null=True, blank=True, default="")
+    inputs = models.CharField(max_length=2000, null=True, blank=True, default="")
+    outputs = models.CharField(max_length=2000, null=True, blank=True, default="")
+    combined = models.CharField(max_length=50, null=True, blank=True, default="")
+    params = models.CharField(max_length=2000, null=True, blank=True, default="")
+    demultiply_count = models.IntegerField(blank=True, null=True)
+    openvino_library_name = models.CharField(max_length=1000, null=True, blank=True, default="")
+    openvino_model_name = models.CharField(max_length=1000, null=True, blank=True, default="")
 
     def __repr__(self):
         return self.name.__repr__()
@@ -190,17 +206,22 @@ class Project(models.Model):
             logger.exception("dequeue_iteration error")
             raise
 
-    def create_project(self):
+    def create_project(self, project_type: str = None):
         """create_project.
 
         Create a project on CustomVision.
         """
-        logger.info("Creating obj detection project")
+        logger.info("Creating {} project".format(project_type))
 
         try:
             if not self.name:
                 self.name = "VisionOnEdge-" + datetime.datetime.utcnow().isoformat()
-            project = self.setting.create_project(project_name=self.name)
+            if project_type:
+                obj_detection_domain = next(domain for domain in self.setting.get_trainer_obj().get_domains() if domain.type == project_type and domain.name == "General (compact)")
+                project = self.setting.create_project(project_name=self.name, domain_id=obj_detection_domain.id)
+            else:
+                project = self.setting.create_project(project_name=self.name)
+
             self.customvision_id = project.id
             self.name = project.name
             update_fields = ["customvision_id", "name"]
@@ -390,6 +411,7 @@ class Task(models.Model):
                 try:
                     project_obj.export_iteration(iteration.id)
                     project_obj.export_iteration(iteration.id, flavor="ONNXFloat16")
+                    project_obj.export_iteration(iteration.id, platform="OPENVINO")
                 except Exception:
                     logger.exception("Export already in queue")
                 exports = project_obj.get_exports(iteration.id)
@@ -412,17 +434,30 @@ class Task(models.Model):
                     "Successfully export model. download_uri: %s",
                     exports[1].download_uri,
                 )
+                logger.info(
+                    "Successfully export model. download_uri: %s",
+                    exports[2].download_uri,
+                )
                 self.status = "ok"
                 self.log = "Status : work done"
                 self.save()
                 # Get the latest object
                 project_obj = Project.objects.get(pk=project_obj.id)
-                if not exports[0].flavor:
-                    project_obj.download_uri = exports[0].download_uri
-                    project_obj.download_uri_fp16 = exports[1].download_uri
-                else:
-                    project_obj.download_uri = exports[1].download_uri
-                    project_obj.download_uri_fp16 = exports[0].download_uri
+                for export in exports:
+                    if export.flavor:
+                        project_obj.download_uri_fp16 = export.download_uri
+                    else:
+                        if "onnx" in export.platform.lower():
+                            project_obj.download_uri = export.download_uri
+                        else:
+                            project_obj.download_uri_openvino = export.download_uri
+
+                # if not exports[0].flavor:
+                #     project_obj.download_uri = exports[0].download_uri
+                #     project_obj.download_uri_fp16 = exports[1].download_uri
+                # else:
+                #     project_obj.download_uri = exports[1].download_uri
+                #     project_obj.download_uri_fp16 = exports[0].download_uri
                 project_obj.save()
                 break
             return

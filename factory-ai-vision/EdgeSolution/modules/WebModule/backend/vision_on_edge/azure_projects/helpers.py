@@ -1,6 +1,7 @@
 """App helpers
 """
 import logging
+import json
 
 from ..azure_iot.utils import prediction_module_url, yolo_module_url
 from ..azure_settings.constants import DEFAULT_SETTING_NAME
@@ -14,13 +15,18 @@ def create_default_objects():
     """create_default_objects"""
     logger.info("Create/update a default project.")
     setting_obj = Setting.objects.first()
-    Project.objects.update_or_create(
-        is_demo=False,
-        setting=setting_obj,
-        defaults={
-            "prediction_uri": prediction_module_url(),
-        },
-    )
+    project_obj = Project.objects.filter(is_demo=False, setting=setting_obj).first()
+    if project_obj:
+        setattr(project_obj, "prediction_uri", prediction_module_url())
+        project_obj.save()
+    else:
+        Project.objects.update_or_create(
+            is_demo=False,
+            setting=setting_obj,
+            defaults={
+                "prediction_uri": prediction_module_url(),
+            },
+        )
 
 
 def create_demo_objects():
@@ -42,7 +48,7 @@ def create_demo_objects():
         defaults={
             "is_demo": True,
             "download_uri": "default_model_6parts",
-            "prediction_uri": "ovms-app:5010/score",
+            "prediction_uri": prediction_module_url(),
         },
     )
     # =============================================
@@ -54,7 +60,7 @@ def create_demo_objects():
         defaults={
             "is_demo": True,
             "download_uri": "scenario_models/1",
-            "prediction_uri": "ovms-app:5010/score",
+            "prediction_uri": prediction_module_url(),
         },
     )
     # =============================================
@@ -66,7 +72,7 @@ def create_demo_objects():
         defaults={
             "is_demo": True,
             "download_uri": "scenario_models/2",
-            "prediction_uri": "ovms-app:5010/score",
+            "prediction_uri": prediction_module_url(),
         },
     )
     # =============================================
@@ -78,7 +84,7 @@ def create_demo_objects():
         defaults={
             "is_demo": True,
             "download_uri": "scenario_models/3",
-            "prediction_uri": "ovms-app:5010/score",
+            "prediction_uri": prediction_module_url(),
         },
     )
     logger.info("Create demo project end.")
@@ -92,7 +98,7 @@ def create_demo_objects():
         defaults={
             "is_demo": True,
             "download_uri": "scenario_models/4",
-            "prediction_uri": "ovms-app:5010/score",
+            "prediction_uri": prediction_module_url(),
         },
     )
 
@@ -105,7 +111,7 @@ def create_demo_objects():
         defaults={
             "is_demo": True,
             "download_uri": "scenario_models/5",
-            "prediction_uri": "ovms-app:5010/score",
+            "prediction_uri": prediction_module_url(),
         },
     )
 
@@ -118,6 +124,250 @@ def create_demo_objects():
         defaults={
             "is_demo": True,
             "download_uri": "scenario_models/6",
-            "prediction_uri": "ovms-app:5010/score",
+            "prediction_uri": prediction_module_url(),
+        },
+    )
+
+    # =============================================
+    # Cascade Demo Nodes                        ===
+    # =============================================
+    
+    # source
+    outputs_ = [
+        {
+            "name": "image",
+            "metadata": {
+                "type": "image",
+                "shape": [1, 3, 416, 416],
+                "layout": ["N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
+        }
+    ]
+
+    outputs = json.dumps(outputs_)
+    Project.objects.update_or_create(
+        name="request",
+        defaults={
+            "is_cascade": True,
+            "type": "source",
+            "inputs": "",
+            "outputs": outputs,
+        },
+    )
+    # # face detection
+    # inputs_ = [
+    #     {
+    #         "name": "data",
+    #         "metadata": {
+    #             "type": "image",    
+    #             "shape": [1, 3, 416, 416],
+    #             "layout": ["N", "H", "W", "C"],
+    #             "color_format": "BGR",
+    #         }
+    #     }
+    # ]
+    # outputs_ = [
+    #     {
+    #         "name": "detection_out",
+    #         "metadata": {
+    #             "type": "bounding_box",
+    #             "shape": [1, 1, 200, 7],
+    #             "layout": [1, 1, "B", "F"],
+    #             "labels": ["person"],
+    #         }
+    #     }
+    # ]
+    # inputs = json.dumps(inputs_)
+    # outputs = json.dumps(outputs_)
+    # Project.objects.update_or_create(
+    #     name="face_detection",
+    #     defaults={
+    #         "is_cascade": True,
+    #         "type": "openvino_model",
+    #         "openvino_model_name": "face-detection-retail-0004",
+    #         "inputs": inputs,
+    #         "outputs": outputs,
+    #         "category": "openvino",
+    #     },
+    # )
+
+    # # emotion recognition
+    # inputs_ = [
+    #     {
+    #         "name": "data",
+    #         "metadata": {
+    #             "type": "image",
+    #             "shape": [1, 3, 64, 64],
+    #             "layout": ["N", "H", "W", "C"],
+    #             "color_format": "BGR"
+    #         }
+    #     }
+    # ]
+    # outputs_ = [
+    #     {
+    #         "name": "prob_emotion",
+    #         "metadata": {
+    #             "type": "classification",
+    #             "shape": [1, 5, 1, 1],
+    #             "layout": [1, "C", 1, 1],
+    #             "labels": ["neutral", "happy", "sad", "surprise", "anger"],
+    #         }
+    #     }
+    # ]
+    # inputs = json.dumps(inputs_)
+    # outputs = json.dumps(outputs_)
+    # Project.objects.update_or_create(
+    #     name="emotion_recognition",
+    #     defaults={
+    #         "is_cascade": True,
+    #         "type": "openvino_model",
+    #         "openvino_model_name": "emotions-recognition-retail-0003",
+    #         "inputs": inputs,
+    #         "outputs": outputs,
+    #         "category": "openvino",
+    #     },
+    # )
+    # # age/gender recognition
+    # inputs_ = [
+    #     {
+    #         "name": "data",
+    #         "metadata": {
+    #             "type": "image",
+    #             "shape": [1, 3, 64, 64],
+    #             "layout": ["N", "H", "W", "C"],
+    #         }
+    #     }
+    # ]
+    # outputs_ = [
+    #     {
+    #         "name": "age_conv3",
+    #         "metadata": {
+    #             "type": "regression",
+    #             "shape": [1, 1, 1, 1],
+    #             "layout": [1, 1, 1, 1],
+    #             "scale": 100,
+    #         }
+    #     },
+    #     {
+    #         "name": "prob",
+    #         "metadata": {
+    #             "type": "classification",
+    #             "shape": [1, 2, 1, 1],
+    #             "layout": [1, "P", 1, 1],
+    #             "labels": ["female", "male"],
+    #         }
+    #     }
+    # ]
+    # inputs = json.dumps(inputs_)
+    # outputs = json.dumps(outputs_)
+    # Project.objects.update_or_create(
+    #     name="age_gender_recognition",
+    #     defaults={
+    #         "is_cascade": True,
+    #         "type": "openvino_model",
+    #         "openvino_model_name": "age-gender-recognition-retail-0013",
+    #         "inputs": inputs,
+    #         "outputs": outputs,
+    #         "category": "openvino",
+    #     },
+    # )
+
+    # Crop
+    inputs_ = [
+        {
+            "name": "image",
+            "metadata": {
+                "type": "image",
+                "shape": [1, 3, 416, 416],
+                "layout": ["N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
+        },
+        {
+            "name": "detection",
+            "metadata": {
+                "type": "bounding_box",
+                "shape": [1, 1, 200, 7],
+                "layout": [1, 1, "B", "F"],
+            }
+        }
+    ]
+    outputs_ = [
+        {
+            "name": "images",
+            "metadata": {
+                "type": "image",
+                "shape": [-1, 1, 3, 64, 64],
+                "layout": ["B", "N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
+        },
+        {
+            "name": "coordinates",
+            "metadata": {
+                "type": "bounding_box",
+                "shape": [-1, 1, 1, 200, 7],
+                "layout": ["B", 1, 1, "B", "F"],
+            }
+        },
+        {
+            "name": "confidences",
+            "metadata": {
+                "type": "regression",
+                "shape": [-1, 1, 1, 1, 1],
+                "layout": ["B", 1, 1, "B", "F"],
+            }
+        }
+    ]
+    inputs = json.dumps(inputs_)
+    outputs = json.dumps(outputs_)
+    Project.objects.update_or_create(
+        name="crop",
+        defaults={
+            "is_cascade": True,
+            "type": "openvino_library",
+            "openvino_library_name": "libcustom_node_model_zoo_intel_object_detection.so",
+            "inputs": inputs,
+            "outputs": outputs,
+            "demultiply_count": 0,
+            "params": json.dumps({
+                "original_image_width": "416",
+                "original_image_height": "416",
+                "target_image_width": "64",
+                "target_image_height": "64",
+                "original_image_layout": "NHWC",
+                "target_image_layout": "NHWC",
+                "convert_to_gray_scale": "false",
+                "max_output_batch": "100",
+                "confidence_threshold": "0.7",
+                "debug": "true",
+                "filter_label_id": "-1"
+            }),
+        },
+    )
+
+    # sink*1
+    # Project.objects.update_or_create(
+    #     name="face_images",
+    #     defaults={
+    #         "is_cascade": True,
+    #         "type": "sink",
+    #         "combined": "true",
+    #         "inputs": json.dumps([
+    #             {"name": "face_images"}
+    #         ])
+    #     },
+    # )
+
+    Project.objects.update_or_create(
+        name="export.json",
+        defaults={
+            "is_cascade": True,
+            "type": "sink",
+            "combined": "true",
+            "inputs": json.dumps([
+                {"name": "data"}
+            ])
         },
     )

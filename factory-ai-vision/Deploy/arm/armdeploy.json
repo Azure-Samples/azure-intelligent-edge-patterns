@@ -4,19 +4,17 @@
   "parameters": {
     "deviceArchitecture": {
       "defaultValue": "X86",
-      "allowedValues": [ "X86", "ARM64" ],
+      "allowedValues": [ "X86" ],
       "type": "string",
       "metadata": {
-        "description": "Specify the architecture of the Edge Device. Currently supported values are 'X86' and 'ARM64'."
+        "description": "Specify the architecture of the Edge Device. Currently supported values are 'X86''."
       }
     },
     "moduleRuntime": {
       "defaultValue": "cpu",
       "allowedValues": [
         "cpu",
-        "gpu (NVIDIA cuda11)",
-        "vpu (Movidius)",
-        "Jetson (Jetpack 4.4)"
+        "vpu (Movidius)"
       ],
       "type": "string",
       "metadata": {
@@ -136,8 +134,61 @@
     {
       "type": "Microsoft.Resources/deployments",
       "apiVersion": "2020-06-01",
-      "name": "ResourcesDeployment",
+      "name": "PrepareDevice",
       "dependsOn": [ "CreatingRoleAssignments", "CreatingManagedIdentity" ],
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "parameters": {
+          "edgeDeviceName": {
+            "value": "[parameters('edgeDeviceName')]"
+          },
+          "location": {
+            "value": "[resourceGroup().location]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "edgeDeviceName": {
+              "type": "String"
+            },
+            "location": {
+              "type": "String"
+            }
+          },
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.Compute/virtualMachines/extensions",
+              "apiVersion": "2020-12-01",
+              "name": "[concat(parameters('edgeDeviceName'),'/', 'PrepareDevice')]",
+              "location": "[parameters('location')]",
+              "properties": {
+                "publisher": "Microsoft.Azure.Extensions",
+                "type": "CustomScript",
+                "typeHandlerVersion": "2.0",
+                "autoUpgradeMinorVersion": true,
+                "settings": {
+                  "fileUris": [
+                    "https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/feat/cascade-dev/factory-ai-vision/Deploy/arm/scripts/prepare-device.sh"
+                  ],
+                  "commandToExecute": "[concat('./prepare-device.sh ')]"
+                }
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-06-01",
+      "name": "ResourcesDeployment",
+      "dependsOn": [ "PrepareDevice" ],
       "properties": {
         "mode": "Incremental",
         "expressionEvaluationOptions": {
@@ -261,7 +312,8 @@
               "properties": {
                 "forceUpdateTag": "1",
                 "azCliVersion": "2.9.1",
-                "primaryScriptUri": "https://raw.githubusercontent.com/Azure-Samples/azure-intelligent-edge-patterns/master/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
+                "primaryScriptUri": "https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/feat/cascade-dev/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
+
                 "supportingScriptUris": [],
                 "environmentVariables": [
                   {
@@ -318,7 +370,7 @@
                   }
                 ],
                 "retentionInterval": "P1D",
-                "timeout": "PT15M",
+                "timeout": "PT30M",
                 "containerSettings": {},
                 "cleanupPreference": "OnSuccess"
               }

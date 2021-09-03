@@ -132,8 +132,9 @@ class Setting(models.Model):
         if not self.validate():
             raise SettingCustomVisionAccessFailed
         trainer = self.get_trainer_obj()
-        domain_id = self.obj_detection_domain_id if domain_id is None else domain_id
-        logger.info("Creating object detection project.")
+        if not domain_id:
+            domain_id = self.obj_detection_domain_id if domain_id is None else domain_id
+            logger.info("Creating object detection project.")
         try:
             project = trainer.create_project(name=project_name, domain_id=domain_id)
             return project

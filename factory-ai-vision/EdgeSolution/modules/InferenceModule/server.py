@@ -42,6 +42,8 @@ from model_object import ModelObject
 from stream_manager import StreamManager
 from utility import is_edge
 
+from cascade.voe_to_ovms import load_voe_config_from_json, voe_config_to_ovms_config
+
 # sys.path.insert(0, '../lib')
 # Set logging parameters
 
@@ -112,6 +114,31 @@ async def predict(camera_id: str, request: Request):
     else:
         img = cv2.imdecode(np.frombuffer(img_raw, dtype=np.uint8), -1)
     # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    results = http_inference_engine.predict(camera_id, img)
+    if int(time.time()) % 5 == 0:
+        logger.warning(results)
+    if len(results) > 0:
+        return json.dumps({"inferences": results}), 200
+    return "", 204
+
+
+@app.post("/predict_opencv")
+async def predict_opencv(camera_id: str, edge: str, request: Request):
+    """predict."""
+    img_raw = await request.body()
+    if IS_OPENCV == "true":
+        nparr = np.frombuffer(img_raw, np.uint8)
+        if edge == '960':
+            logger.warning('960')
+            img = nparr.reshape(-1, 960, 3)
+        else:
+            logger.warning('540')
+            img = nparr.reshape(540, -1, 3)
+
+    else:
+        img = cv2.imdecode(np.frombuffer(img_raw, dtype=np.uint8), -1)
+    # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    # cv2.imwrite('grpc_inf.jpg', img)
     results = http_inference_engine.predict(camera_id, img)
     if int(time.time()) % 5 == 0:
         logger.warning(results)
@@ -206,6 +233,13 @@ def update_endpoint(request_body: UpdateEndpointBody):
         endpoint = 'http://' + endpoint
     logger.warning('SET ENDPOINT: {}'.format(endpoint))
     onnx.endpoint = endpoint
+
+    if request_body.pipeline:
+        onnx.pipeline = request_body.pipeline
+        voe_config = load_voe_config_from_json(onnx.pipeline)
+        _, metadatas = voe_config_to_ovms_config(voe_config)
+        onnx.metadatas = metadatas
+        print(metadatas)
     return 'ok', 200
 
 

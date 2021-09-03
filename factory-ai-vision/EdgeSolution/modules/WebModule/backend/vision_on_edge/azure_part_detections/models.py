@@ -10,6 +10,7 @@ from rest_framework.exceptions import APIException
 
 from ..azure_parts.models import Part
 from ..azure_projects.models import Project
+from ..azure_cascades.models import Cascade
 from ..azure_iot.utils import inference_module_url
 from ..camera_tasks.models import CameraTask
 from ..cameras.models import Camera
@@ -35,6 +36,8 @@ class PartDetection(models.Model):
 
     name = models.CharField(blank=True, max_length=200)
     project = models.ForeignKey(Project, on_delete=models.SET_NULL, null=True)
+    cascade = models.ForeignKey(Cascade, on_delete=models.SET_NULL, null=True)
+    deployment_type = models.CharField(blank=True, max_length=200)
     cameras = models.ManyToManyField(Camera, blank=True)
     inference_module = models.ForeignKey(
         InferenceModule, on_delete=models.SET_NULL, null=True
@@ -102,6 +105,7 @@ class PartDetection(models.Model):
         Returns:
             bool: is_deployable
         """
+        return True
         try:
             if not self.inference_module:
                 raise PdDeployWithoutInferenceModule

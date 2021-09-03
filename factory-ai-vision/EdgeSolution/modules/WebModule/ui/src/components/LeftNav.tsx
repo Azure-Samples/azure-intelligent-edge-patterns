@@ -32,18 +32,27 @@ const navLinks: INavLink[] = [
       },
     },
   },
+  // {
+  //   name: 'Objects',
+  //   url: Url.PARTS,
+  //   iconProps: {
+  //     imageProps: {
+  //       src: '/icons/objects.svg',
+  //     },
+  //   },
+  // },
   {
-    name: 'Objects',
-    url: Url.PARTS,
+    name: 'Models',
+    url: Url.MODELS,
     iconProps: {
       imageProps: {
-        src: '/icons/objects.svg',
+        src: '/icons/models.svg',
       },
     },
   },
   {
-    name: 'Models',
-    url: Url.MODELS,
+    name: 'Cascades',
+    url: Url.CASCADES,
     iconProps: {
       imageProps: {
         src: '/icons/models.svg',

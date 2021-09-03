@@ -2,7 +2,7 @@ import { createSelector } from '@reduxjs/toolkit';
 import { selectAllImages } from './imageSlice';
 import { selectPartEntities, selectAllParts } from './partSlice';
 import { Item as ImageListItem } from '../components/ImageList';
-import { selectNonDemoProject } from './trainingProjectSlice';
+// import { selectNonDemoProject } from './trainingProjectSlice';
 import { selectCameraEntities } from './cameraSlice';
 import { selectAllAnno } from './annotationSlice';
 import { Image, Annotation } from './type';
@@ -79,10 +79,7 @@ export const relabelImageSelector = createSelector(
   },
 );
 
-export const selectNonDemoPart = createSelector(
-  [selectAllParts, selectNonDemoProject],
-  (parts, [nonDemoProject]) => parts.filter((p) => p.trainingProject === nonDemoProject.id),
-);
+export const selectNonDemoPart = createSelector([selectAllParts], (parts) => parts);
 
 export const partsImagesSelectorFactory = createSelector(
   [selectAllImages, selectAllAnno],
@@ -94,3 +91,6 @@ export const partsImagesSelectorFactory = createSelector(
         .filter((part) => part),
     })),
 );
+
+export const selectProjectPartsFactory = (projectId) =>
+  createSelector([selectAllParts], (parts) => parts.filter((part) => part.trainingProject === projectId));

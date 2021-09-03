@@ -1,13 +1,26 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useMemo } from 'react';
 import { DetailsList, SelectionMode, CheckboxVisibility, Text, TextField } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
-import { Part, getParts, postPart } from '../../store/partSlice';
-// import { thunkChangeImgPart } from '../../store/imageSlice';
-import { selectNonDemoPart } from '../../store/selectors';
-import { changePartId } from '../../store/labelingPageSlice';
 
-export const PartPicker: React.FC = () => {
-  const parts = useSelector(selectNonDemoPart);
+import { Part, getParts, postPart, trainingProjectPartsSelectorFactory } from '../../store/partSlice';
+// import { thunkChangeImgPart } from '../../store/imageSlice';
+// import { selectNonDemoPart } from '../../store/selectors';
+import { changePartId } from '../../store/labelingPageSlice';
+// import { State } from 'RootStateType';
+
+interface Props {
+  trainingProject: number;
+}
+
+export const PartPicker: React.FC<Props> = (props) => {
+  const { trainingProject } = props;
+
+  const partOptionsSelector = useMemo(() => trainingProjectPartsSelectorFactory(trainingProject), [
+    trainingProject,
+  ]);
+  // const partOptions = useSelector(partOptionsSelector);
+  const parts = useSelector(partOptionsSelector);
+
   const dispatch = useDispatch();
 
   const [newPartName, setNewPartName] = useState('');

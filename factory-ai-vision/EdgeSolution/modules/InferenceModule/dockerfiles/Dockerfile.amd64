@@ -36,6 +36,7 @@ COPY requirements/base.txt ./requirements/base.txt
 COPY requirements/cpu.txt ./requirements/cpu.txt
 RUN pip install --upgrade pip 
 RUN pip install -r requirements/cpu.txt --ignore-installed
+RUN pip install -U pydantic==1.7.2
 
 # ENV CONDA_ENV_NAME python38
 # RUN conda create --name python38 python=3.8.5 -y &&\
@@ -84,6 +85,9 @@ COPY stream_manager.py ./
 COPY streams.py ./
 COPY tracker.py ./
 COPY utility.py ./
+COPY ovms_utils.py ./
+COPY yolo_utils.py ./
+COPY cascade/*.py ./cascade/
 
 # =========================================================
 # Run
