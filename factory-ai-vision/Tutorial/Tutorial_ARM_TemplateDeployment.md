@@ -106,19 +106,9 @@ Example: X86 or ARM64
 ### 1.2.3: Module Runtime: 
 Definition:   Select value for Runtime for detector module on Edge Device.  
 •	Set it to “CPU” to use if CPU to run detector module. 
-•	If the Edge device has Nvidia GPU  
-o	set it to NVIDIA to use GPU to run detector module  
-o	or to use movidius set it to “MOVIDIUS“
+	or to use movidius set it to “MOVIDIUS“
 
-Example:  
-o	If You selected X86 in Device Architecture in 1.2.2 then you will see below option 
-   •	cpu 
-   •  gpu (NVIDIA cude 11) 
-   •	vpu(Movidius) 
-o	If You selected ARM64 in Device Architecture in 1.2.2 then you will see below option 
-   • Jetson(Jetpack 4.4)
-
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot9.png) 
+![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/module%20runtime_20210904.png?raw=true) 
 <br/><br/>
 
 
