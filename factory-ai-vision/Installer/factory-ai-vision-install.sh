@@ -28,7 +28,7 @@ if [ -d "factoryai_configs/factoryai_cfgs" ]; then
 fi
 
 if [ "$isCfg" = true ]; then
-  PS3='Choose the number corresponding to the Azure Stack Edge device: '
+  PS3='Choose the number corresponding to the Azure IoT Edge device: '
   configs=`ls factoryai_configs/factoryai_cfgs`
   select opt in $configs
   do
@@ -186,7 +186,7 @@ if [ "$isCfg" != true ]; then
 
     # ############################## Get Streaming Type #####################################
     while true; do
-      read -p "Do you want to use Azure Video Analytics? (y or n): " -n 1 -r; echo
+      read -p "Do you want to use Azure Video Analyzer? (y or n): " -n 1 -r; echo
       case $REPLY in
           [Yy]* ) streaming="ava"; break;;
           [Nn]* ) streaming="opencv"; break;;
@@ -218,7 +218,7 @@ if [ "$isCfg" != true ]; then
 
     if [ $tLen -le 0 ]; then
       echo IoTHub not found
-      echo Sorry, this demo requires that you have an existing IoTHub and registered Azure Stack Edge Device
+      echo Sorry, this demo requires that you have an existing IoTHub and registered Azure Iot Edge Device
       read -p "Press <Enter> key to exit..."; echo
       exit 1
     fi
@@ -268,7 +268,7 @@ if [ "$isCfg" != true ]; then
 
     if [ $tLen -le 0 ]; then
       echo No edge device found
-      echo Sorry, this demo requires that you have an existing IoTHub and registered Azure Stack Edge Device
+      echo Sorry, this demo requires that you have an existing IoTHub and registered Azure IoT Edge Device
       read -p "Press any key to exit..."; echo
       exit 1
     fi
@@ -284,7 +284,7 @@ if [ "$isCfg" != true ]; then
       done
       edgeDeviceId=${outputarrdevs[0]%$CR}
     else
-      PS3='Choose the number corresponding to the Azure Stack Edge device: '
+      PS3='Choose the number corresponding to the Azure Iot Edge device: '
       select opt in "${outputarrdevs[@]}"
       do
         echo "you chose: " $opt
@@ -307,6 +307,7 @@ if [ "$isCfg" != true ]; then
     #fi
 
 	platform="amd64"
+	echo Platform: amd64
 
     ################################ Check for Device ###########################################
     #if [ "$platform" == "amd64" ]; then
@@ -345,7 +346,7 @@ if [ "$isCfg" != true ]; then
 	#	runtime="nvidia"
 	#    fi
     #fi
-	PS3='Choose the number corresponding to the Edge device: '
+	PS3='Choose the number corresponding to the Azure IoT Edge device: '
 	deviceOptions="cpu vpu"
 	select cpuGpu in $deviceOptions
 	do
@@ -407,8 +408,8 @@ fi
 
 # ############################## Deploy Edge Modules #####################################
 
-echo Deploying containers to Azure Stack Edge
-echo This will take more than 10 min at normal connection speeds.  Status can be checked on the Azure Stack Edge device
+echo Deploying containers to Azure IoT Edge Device
+echo This will take more than 10 min at normal connection speeds.  Status can be checked on the Azure IoT Edge device
 
 #echo az iot edge set-modules --device-id $edgeDeviceId --hub-name $iotHubName --content $edgeDeployJson
 output=$(az iot edge set-modules --device-id $edgeDeviceId --hub-name $iotHubName --content $edgeDeployJson)

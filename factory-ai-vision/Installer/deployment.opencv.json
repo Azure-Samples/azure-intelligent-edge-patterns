@@ -147,7 +147,7 @@
             "restartPolicy": "always",
             "startupOrder": 0,
             "settings": {
-              "image": "factoryairegistry.azurecr.io/intelligentedge/modelmanagermodule:0.28.0-<platform>",
+              "image": "intelligentedge/modelmanagermodule:0.28.0-<platform>",
               "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Target\":\"/workspace\",\"Source\":\"ovmsworkspace\",\"Type\":\"volume\"}],\"PortBindings\":{\"8585/tcp\":[{\"HostPort\":\"8585\"}]},\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}}}}"
             }
           },
