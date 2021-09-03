@@ -97,10 +97,9 @@ Example: East US
 <br/><br/>
 
 ### 1.2.2: Device Architecture: 
-Definition:   Specify the Architecture of the Edge Device. Currently supported values are “X86” and “ARM64”. 
-Example: X86 or ARM64
+Definition:   Specify the Architecture of the Edge Device. 
 
-![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot8.png) 
+![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/device%20architecure_20210904.png?raw=true) 
 <br/><br/>
 
 ### 1.2.3: Module Runtime: 
