@@ -42,12 +42,12 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step5.png)
 
 8. Once you input custom vision account information. You will be asked whether to use Azure Video Analytics (y), and then please enter your AVA Provision Token. 
-<br/>Do you want to install with Azure Video Analytics? (y or n):
+<br/>Do you want to install with Azure Video Analytics? (y or n):y
 <br/> Please enter your AVA Provision Token
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/step6_20210902.png?raw=true)
 
-9. There will be a list of IoT hubs, please choose “customvision”
-It will then show a list of devices in your account, and choose the device to install your vision on edge 
+9. There will be a list of IoT hubs, please choose “customvision”.
+<br/>It will then show a list of devices in your account, and choose the device to install your vision on edge. 
 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/step7_20210902.png?raw=true)
 
@@ -64,8 +64,8 @@ It will then show a list of devices in your account, and choose the device to in
 <br/> Open your browser, connect to http://YOUR_IP:8181
 e.g.  connect to http://168.63.246.174:8181
 
-14. Check out our tutorials on youtube channel 
-<br/> 
+13. Check out our tutorials on youtube channel 
+ 
 - Tutorial 2 - <a href="https://youtu.be/dihAdZTGj-g" target="_blank">Start with prebuilt scenario</a>
 - Tutorial 3 - <a href="https://www.youtube.com/watch?v=cCEW6nsd8xQ" target="_blank">Start with creating new project, capture images, tagging images and deploy</a>
 - Tutorial 4 - <a href="https://www.youtube.com/watch?v=OxK9feR_T3U" target="_blank">Retraining and improve your model</a>
