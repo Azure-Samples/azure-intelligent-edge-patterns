@@ -44,27 +44,28 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 8. Once you input custom vision account information. You will be asked whether to use Azure Video Analytics (y), and then please enter your AVA Provision Token. 
 <br/>Do you want to install with Azure Video Analytics? (y or n):
 <br/> Please enter your AVA Provision Token
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/azure%20va%20token_20210902.png?raw=true)
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/step6_20210902.png?raw=true)
 
 9. There will be a list of IoT hubs, please choose “customvision”
 It will then show a list of devices in your account, and choose the device to install your vision on edge 
-<br/>You will be asking if your device have a GPU or not
-![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step9.png)
 
-12. The installation will be started after. Please wait for couple minutes to complete the installation. 
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/step7_20210902.png?raw=true)
+
+10. Please choose 1 amd64 as the platform you're going to deploy, and 1) cpu as the Azure Stack Edge device corresponding to
+![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/step8_20210902.png?raw=true)
+
+11. The installation will be scheduled to complete. Please wait. 
 <br/> You can check the deployment status on the [Azure portal](https://portal.azure.com/#home)
 
-13. Go to your device --> Properties-->Networking--> 
+12. After installation is completed, please check your device to get the IP address,
+<br/> Properties-> Networking -> Public IP address
 
-Public IP address(  get your IP address)
-168.63.246.174
 
-Open your browser, connect to http://YOUR_IP:8181
+<br/> Open your browser, connect to http://YOUR_IP:8181
 e.g.  connect to http://168.63.246.174:8181
 
 14. Check out our tutorials on youtube channel 
-
-
+<br/> 
 - Tutorial 2 - <a href="https://youtu.be/dihAdZTGj-g" target="_blank">Start with prebuilt scenario</a>
 - Tutorial 3 - <a href="https://www.youtube.com/watch?v=cCEW6nsd8xQ" target="_blank">Start with creating new project, capture images, tagging images and deploy</a>
 - Tutorial 4 - <a href="https://www.youtube.com/watch?v=OxK9feR_T3U" target="_blank">Retraining and improve your model</a>
