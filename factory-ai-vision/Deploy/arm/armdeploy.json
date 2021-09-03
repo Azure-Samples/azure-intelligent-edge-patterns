@@ -313,6 +313,7 @@
                 "forceUpdateTag": "1",
                 "azCliVersion": "2.9.1",
                 "primaryScriptUri": "https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/feat/cascade-dev/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
+
                 "supportingScriptUris": [],
                 "environmentVariables": [
                   {
