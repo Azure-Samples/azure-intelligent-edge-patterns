@@ -15,8 +15,6 @@ import { createWrappedAsync } from './shared/createWrappedAsync';
 import { getParts } from './partSlice';
 import { thunkGetAllCvProjects } from './setting/settingAction';
 
-export const DEFAULT_PROJECT_ID = 15;
-
 export type Params = { confidence_threshold: string; filter_label_id: string };
 
 export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink' | 'customvision_model';

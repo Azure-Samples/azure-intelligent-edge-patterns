@@ -3,8 +3,6 @@ import { useSelector } from 'react-redux';
 import { Dropdown, IDropdownOption, Stack } from '@fluentui/react';
 import { useHistory, generatePath } from 'react-router-dom';
 
-// import { selectNonDemoProject, pullCVProjects } from '../store/trainingProjectSlice';
-// import { State as RootState } from 'RootStateType';
 import { trainingProjectIsPredictionModelFactory } from '../store/trainingProjectSlice';
 
 import { Url } from '../enums';
@@ -16,8 +14,6 @@ export const Images: React.FC = () => {
   const trainingProjectIsPredictionModel = useSelector(trainingProjectIsPredictionModelSelector);
 
   const history = useHistory();
-
-  // const [selectedProject, setSelectedProject] = useState<number>(0);
 
   const projectsOptions: IDropdownOption[] = trainingProjectIsPredictionModel.map(({ id, name }) => ({
     key: id,

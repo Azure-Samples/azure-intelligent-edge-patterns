@@ -9,7 +9,6 @@ import {
   LayerHost,
   PrimaryButton,
   Stack,
-  IDropdownOption,
   ITextFieldProps,
   IconButton,
   Label,
@@ -19,6 +18,7 @@ import {
   MessageBar,
   MessageBarType,
   getTheme,
+  Spinner,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
@@ -32,7 +32,6 @@ import {
   patchIsCollectData,
   thunkGetAllCvProjects,
 } from '../store/setting/settingAction';
-import { selectNonDemoProject, pullCVProjects } from '../store/trainingProjectSlice';
 import { dummyFunction } from '../utils/dummyFunction';
 
 import { WarningDialog } from './WarningDialog';
@@ -67,52 +66,25 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   openDataPolicyDialog,
 }) => {
   const settingData = useSelector((state: State) => state.setting.current);
-  const cvProjectOptions = useSelector((state: State) =>
-    state.setting.cvProjects.map((e) => ({ key: e.id, text: e.name })),
-  );
-  const defaultCustomvisionId = useSelector((state: State) => {
-    const [selectedTrainingProject] = selectNonDemoProject(state);
-    return state.trainingProject.entities[selectedTrainingProject?.id]?.customVisionId;
-  });
-  const [selectedCustomvisionId, setselectedCustomvisionId] = useState(null);
   const originSettingData = useSelector((state: State) => state.setting.origin);
-  const [loading, setloading] = useState(false);
   const dontNeedUpdateOrSave = R.equals(settingData, originSettingData);
-  const [loadFullImages, setLoadFullImages] = useState(false);
-  const [loadImgWarning, setloadImgWarning] = useState(false);
+  const [loading, setLoading] = useState(false);
   const isCollectingData = useSelector((state: State) => state.setting.isCollectData);
   const error = useSelector((state: State) => state.setting.error);
 
-  // const location = useLocation();
   const dispatch = useDispatch();
 
   const onSave = async () => {
     try {
+      setLoading(true);
+
       await dispatch(thunkPostSetting());
 
+      setLoading(false);
       onDismiss();
     } catch (e) {
       alert(e);
     }
-  };
-
-  const onDropdownChange = (_, option: IDropdownOption): void => {
-    setselectedCustomvisionId(option.key);
-  };
-
-  const onLoad = async () => {
-    setloading(true);
-    await dispatch(pullCVProjects({ selectedCustomvisionId, loadFullImages }));
-
-    window.location.reload();
-
-    setloading(false);
-    onDismiss();
-  };
-
-  const onLoadFullImgChange = (_, checked: boolean) => {
-    if (checked) setloadImgWarning(true);
-    else setLoadFullImages(checked);
   };
 
   const updateIsCollectData = (isCollectData, hasInit?): void => {
@@ -122,10 +94,6 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
   useEffect(() => {
     dispatch(checkSettingStatus());
   }, [dispatch]);
-
-  useEffect(() => {
-    setselectedCustomvisionId(defaultCustomvisionId);
-  }, [defaultCustomvisionId]);
 
   useEffect(() => {
     if (showProjectDropdown) dispatch(thunkGetAllCvProjects());
@@ -199,36 +167,7 @@ export const SettingPanel: React.FC<SettingPanelProps> = ({
               trigger={<PrimaryButton text="Save" disabled={dontNeedUpdateOrSave} />}
             />
           </Stack.Item>
-          {/* {showProjectDropdown && (
-            <>
-              <Dropdown
-                className={textFieldClass}
-                label="Project"
-                required
-                options={cvProjectOptions}
-                onChange={onDropdownChange}
-                selectedKey={selectedCustomvisionId}
-                calloutProps={{ calloutMaxHeight: 300 }}
-              />
-              <CreateProjectDialog />
-              <Checkbox checked={loadFullImages} label="Load Full Images" onChange={onLoadFullImgChange} />
-              <WarningDialog
-                open={loadImgWarning}
-                contentText={
-                  <Text variant="large">Depends on the number of images, loading full images takes time</Text>
-                }
-                onConfirm={() => {
-                  setLoadFullImages(true);
-                  setloadImgWarning(false);
-                }}
-                onCancel={() => setloadImgWarning(false)}
-              />
-              <Stack horizontal tokens={{ childrenGap: 10 }}>
-                <PrimaryButton text="Load" disabled={loading} onClick={onLoad} />
-                {loading && <Spinner label="loading" />}
-              </Stack>
-            </>
-          )} */}
+          {loading && <Spinner label="loading" />}
           <Toggle
             label="Allow sending usage data"
             styles={{ root: { paddingTop: 50 } }}
