@@ -105,8 +105,7 @@ Example: X86 or ARM64
 
 ### 1.2.3: Module Runtime: 
 Definition:   Select value for Runtime for detector module on Edge Device.  
-•	Set it to “CPU” to use if CPU to run detector module. 
-	or to use movidius set it to “MOVIDIUS“
+•	Set it to “CPU” to use if CPU to run detector module, or to use vpu set it to “MOVIDIUS“
 
 ![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/module%20runtime_20210904.png?raw=true) 
 <br/><br/>
