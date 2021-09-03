@@ -369,7 +369,7 @@
                   }
                 ],
                 "retentionInterval": "P1D",
-                "timeout": "PT15M",
+                "timeout": "PT30M",
                 "containerSettings": {},
                 "cleanupPreference": "OnSuccess"
               }
