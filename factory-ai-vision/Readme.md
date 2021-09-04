@@ -82,17 +82,15 @@ Check out the architecture below to see how Vision on Edge uses various services
 
 ## For Azure IoTEdge Devices (Recommended)
 
-**Follow our IoTEdge deployment options only for VM based deployments. For Kubernetes deployments please follow [this](#option-1-voe-helm-chart-recommended).**
-
 ### Option 1: Azure Shell Installer (Recommended)
 
 Please follow the [instructions given here](Tutorial/Shell-installer-Tutorial.md) to install VoE using Azure Shell.
 
 ### Option 2: Azure ARM Template
 
-please follow the document to follow instruction  https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/Tutorial_ARM_TemplateDeployment.md
-
 [![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flinkernetworks%2Fazure-intelligent-edge-patterns%2Ffeat%2Fcascade-dev%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
+
+Please follow [the following document](Tutorial/Tutorial_ARM_TemplateDeployment.md) to learn more about our Azure ARM deployment.
 
 
 # Other Tutorials 
