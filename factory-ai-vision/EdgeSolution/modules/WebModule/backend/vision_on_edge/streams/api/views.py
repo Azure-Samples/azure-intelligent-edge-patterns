@@ -24,6 +24,7 @@ from ...general.api.serializers import (
 )
 from ...images.api.serializers import ImageSerializer
 from ...images.models import Image
+from ...azure_projects.models import Project
 from ..exceptions import (
     StreamNotFoundError,
     StreamPartIdNotFound,
@@ -155,7 +156,9 @@ def video_feed(request, stream_id):
 @api_view(["GET"])
 def capture(request, stream_id):
     """Capture image."""
-    project = request.query_params.get("project") or None
+    project_id = request.query_params.get("project") or None
+    if project_id:
+        project = Project.objects.get(pk=project_id)
     stream = stream_manager.get_stream_by_id(stream_id)
     if stream:
         img_data = stream.get_frame()
