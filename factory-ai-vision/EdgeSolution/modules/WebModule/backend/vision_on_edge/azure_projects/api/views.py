@@ -279,6 +279,15 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
         return Response({"status": "ok"})
 
     @action(detail=True, methods=["get"])
+    def retrain(self, request, pk=None) -> Response:
+        """retrain."""
+        queryset = self.get_queryset()
+        project_obj = drf_get_object_or_404(queryset, pk=pk)
+        project_obj.is_trainable(raise_exception=True)
+        TRAINING_MANAGER.add(project_id=pk)
+        return Response({"status": "ok"})
+
+    @action(detail=True, methods=["get"])
     def get_default_ovms_model(self, request, pk=None) -> Response:
         """Get default OVMS model"""
         queryset = self.get_queryset()
