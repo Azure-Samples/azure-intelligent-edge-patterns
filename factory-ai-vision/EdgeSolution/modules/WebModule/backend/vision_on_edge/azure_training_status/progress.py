@@ -40,5 +40,6 @@ PROGRESS_8_EXPORTING: dict = {
 }
 # Complete
 PROGRESS_0_OK: dict = {"status": "ok", "log": "Model trained."}
+PROGRESS_9_SUCCESS: dict = {"status": "success", "log": "Model trained."}
 
 # Failed

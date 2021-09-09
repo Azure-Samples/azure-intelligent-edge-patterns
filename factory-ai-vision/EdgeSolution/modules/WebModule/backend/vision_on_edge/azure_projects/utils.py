@@ -628,7 +628,7 @@ def train_project_worker(project_id):
         project_id=project_obj.id,
         performance=json.dumps(train_performance_list),
         need_to_send_notification=True,
-        **progress.PROGRESS_0_OK,
+        **progress.PROGRESS_9_SUCCESS,
     )
     logger.info("Training Performance: %s", train_performance_list)
 
