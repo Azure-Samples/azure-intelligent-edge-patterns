@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
 import {
@@ -26,7 +26,7 @@ import Scene from './Scene';
 import { PartPicker } from './PartPicker';
 import { timeStampConverter } from '../../utils/timeStampConverter';
 import { dummyFunction } from '../../utils/dummyFunction';
-import { selectNonDemoPart } from '../../store/selectors';
+import { selectProjectPartsFactory } from '../../store/selectors';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
 export const imageSelector = createSelector(
@@ -62,6 +62,7 @@ const labelingPageStyle = mergeStyleSets({
 });
 
 type LabelingPageProps = {
+  projectId: number;
   onSaveAndGoCaptured?: () => void;
 };
 
@@ -70,8 +71,9 @@ const cameraNameSelector = (state: State) => {
   return state.camera.entities[cameraId]?.name;
 };
 
-const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
+const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId }) => {
   const dispatch = useDispatch();
+
   const imageIds = useSelector<State, number[]>((state) => state.labelingPage.imageIds);
   const selectedImageId = useSelector<State, number>((state) => state.labelingPage.selectedImageId);
   const index = imageIds.findIndex((e) => e === selectedImageId);
@@ -91,12 +93,11 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [loading, setLoading] = useState(false);
 
-  const parts = useSelector(selectNonDemoPart);
+  const partOfProjectSelector = useMemo(() => selectProjectPartsFactory(projectId), [projectId]);
+  const parts = useSelector(partOfProjectSelector);
   // const parts = useSelector((state: State) => selectTrainingProjectById(state, part?.trainingProject));
   // const partOptionsSelector = useMemo(() => trainingProjectPartsSelectorFactory(trainingProject), [trainingProject]);
   // const partOptions = useSelector(partOptionsSelector);
-
-  // console.log('LabelingPage', parts);
 
   const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
 

@@ -11,7 +11,7 @@ import {
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { trainingProjectIsPredictionModelFactory } from '../../store/trainingProjectSlice';
+import { trainingProjectModelFactory } from '../../store/trainingProjectSlice';
 import { State as RootState } from 'RootStateType';
 import { selectAllIntelProject } from '../../store/IntelProjectSlice';
 
@@ -35,8 +35,7 @@ const ModelContainer = () => {
   const [isAddIntelOvms, setIsAddIntelOvms] = useState(false);
   const [isAddUpload, setIsAddUpload] = useState(false);
 
-  const trainingProjectIsPredictionModelSelector = trainingProjectIsPredictionModelFactory();
-  const trainingProjectList = useSelector(trainingProjectIsPredictionModelSelector);
+  const trainingProjectList = useSelector(trainingProjectModelFactory());
   const intelProjectList = useSelector((state: RootState) => selectAllIntelProject(state));
 
   const history = useHistory();

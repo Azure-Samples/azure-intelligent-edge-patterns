@@ -98,9 +98,9 @@ const useKeepAlive = (isAlive) => {
 // }
 
 export const Images: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id: projectId } = useParams<{ id: string }>();
 
-  const [isCaptureDialgOpen, { setTrue: openCaptureDialog, setFalse: closeCaptureDialog }] = useBoolean(
+  const [isCaptureDialogOpen, { setTrue: openCaptureDialog, setFalse: closeCaptureDialog }] = useBoolean(
     false,
   );
   const fileInputRef = useRef(null);
@@ -189,10 +189,10 @@ export const Images: React.FC = () => {
   );
 
   useEffect(() => {
-    dispatch(getImages({ freezeRelabelImgs: true, selectedProject: parseInt(id, 10) }));
+    dispatch(getImages({ freezeRelabelImgs: true, selectedProject: parseInt(projectId, 10) }));
     // We need part info for image list items
     dispatch(getParts());
-  }, [dispatch, id]);
+  }, [dispatch, projectId]);
 
   useKeepAlive(relabelImages.length > 0);
 
@@ -319,8 +319,12 @@ export const Images: React.FC = () => {
           {onRenderMain()}
         </Stack>
       </Stack>
-      <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} />
-      <LabelingPage onSaveAndGoCaptured={openCaptureDialog} />
+      <CaptureDialog
+        isOpen={isCaptureDialogOpen}
+        onDismiss={closeCaptureDialog}
+        projectId={parseInt(projectId, 10)}
+      />
+      <LabelingPage onSaveAndGoCaptured={openCaptureDialog} projectId={parseInt(projectId, 10)} />
       <input
         ref={fileInputRef}
         type="file"

@@ -31,7 +31,6 @@ const PartDetailList: React.FC<Props> = (props) => {
 
   const [loading, setLoading] = useState(false);
   const [isOpenPanel, setIsOpenPanel] = useState(false);
-  // const parts = useSelector(selectNonDemoPart);
 
   const imgAnnoSelector = useMemo(() => selectProjectPartsFactory(projectId), [projectId]);
   const parts = useSelector(imgAnnoSelector);

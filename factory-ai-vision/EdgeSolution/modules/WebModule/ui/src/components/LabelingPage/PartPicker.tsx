@@ -27,9 +27,10 @@ export const PartPicker: React.FC<Props> = (props) => {
   const onTextFieldChange = (_, newValue: string) => {
     setNewPartName(newValue);
   };
+
   const onTextFieldEnter = async (evt: React.KeyboardEvent) => {
     if (evt.nativeEvent.code === 'Enter') {
-      await dispatch(postPart({ name: newPartName, description: '' }));
+      await dispatch(postPart({ name: newPartName, description: '', project: trainingProject }));
       setNewPartName('');
     }
   };

@@ -22,6 +22,7 @@ import { Url } from '../../enums';
 
 import ModelCard from './ModelCard';
 import EditPanel from './Panel/EditPanel';
+import EditPanelContainer from './Panel/EditPanelContainer';
 
 export type ModelType = 'custom' | 'own' | 'ovms';
 
@@ -137,7 +138,7 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
         </Stack>
       </Stack>
       {selectedProjectId && (
-        <EditPanel
+        <EditPanelContainer
           projectId={selectedProjectId}
           onDismiss={() => {
             setSelectedProjectId(null);
@@ -175,9 +176,6 @@ const NEW_MODELS = [
 export default compose(
   (BaseComponent: React.ComponentType<ModelsProps>): React.FC<PassingProps> => (props) => {
     const { onOpenCustomVision, onOpenIntelOvms, onOpenOwnUpload, trainingProjectList } = props;
-
-    // const trainingProjectIsPredictionModelSelector = trainingProjectIsPredictionModelFactory();
-    // const trainingProjectIsPredictionModel = useSelector(trainingProjectIsPredictionModelSelector);
 
     if (trainingProjectList.length === 0) {
       return (
