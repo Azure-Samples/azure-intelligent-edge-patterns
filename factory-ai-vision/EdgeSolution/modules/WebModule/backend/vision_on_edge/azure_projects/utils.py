@@ -483,7 +483,7 @@ def train_project_worker(project_id):
         upcreate_training_status(
             project_id=project_obj.id,
             need_to_send_notification=True,
-            **progress.PROGRESS_0_OK,
+            **progress.PROGRESS_10_NO_CHANGE,
         )
         return
     upcreate_training_status(
