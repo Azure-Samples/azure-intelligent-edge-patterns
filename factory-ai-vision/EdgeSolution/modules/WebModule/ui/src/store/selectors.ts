@@ -92,5 +92,20 @@ export const partsImagesSelectorFactory = createSelector(
     })),
 );
 
-export const selectProjectPartsFactory = (projectId) =>
+export const selectProjectPartsFactory = (projectId: number) =>
   createSelector([selectAllParts], (parts) => parts.filter((part) => part.trainingProject === projectId));
+
+export const isLabeledImagesSelector = (projectId: number) =>
+  createSelector([selectAllImages, selectAllAnno], (images, annotations) => {
+    return images
+      .filter((image) => image.project === projectId)
+      .filter((image) => image.labels.length !== 0)
+      .map((image) => ({
+        ...image,
+        labels: image.labels
+          .map((label) =>
+            annotations.filter((anno) => anno.part).find((annotation) => annotation.id === label),
+          )
+          .filter((label) => label),
+      }));
+  });

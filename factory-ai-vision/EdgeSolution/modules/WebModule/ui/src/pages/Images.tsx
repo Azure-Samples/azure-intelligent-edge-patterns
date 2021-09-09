@@ -3,15 +3,14 @@ import { useSelector } from 'react-redux';
 import { Dropdown, IDropdownOption, Stack } from '@fluentui/react';
 import { useHistory, generatePath } from 'react-router-dom';
 
-import { trainingProjectIsPredictionModelFactory } from '../store/trainingProjectSlice';
+import { customVisionTrainingProjectFactory } from '../store/trainingProjectSlice';
 
 import { Url } from '../enums';
 import { Images as ImagesComponent } from '../components/Images/Images';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
 
 export const Images: React.FC = () => {
-  const trainingProjectIsPredictionModelSelector = trainingProjectIsPredictionModelFactory();
-  const trainingProjectIsPredictionModel = useSelector(trainingProjectIsPredictionModelSelector);
+  const trainingProjectIsPredictionModel = useSelector(customVisionTrainingProjectFactory());
 
   const history = useHistory();
 
@@ -46,13 +45,6 @@ export const Images: React.FC = () => {
           }
         />
       </Stack>
-      {/* {
-        !selectedProject && (
-        )
-        : (
-          <ImagesComponent selectedProject={selectedProject} />
-        )
-      } */}
     </>
   );
 };

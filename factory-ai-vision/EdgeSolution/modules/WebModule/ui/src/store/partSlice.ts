@@ -11,6 +11,12 @@ export type Part = {
   trainingProject: number;
 };
 
+export type CreatePartPayload = {
+  name: string;
+  description: string;
+  project: number;
+};
+
 const normalizePart = (data): Part[] => {
   return data.map((d) => ({
     id: d.id,
@@ -27,11 +33,11 @@ export const getParts = createWrappedAsync<any, undefined, { state: State }>('pa
   return normalizePart(response.data);
 });
 
-export const postPart = createWrappedAsync<any, Omit<Part, 'id' | 'trainingProject'>, { state: State }>(
+export const postPart = createWrappedAsync<any, CreatePartPayload, { state: State }>(
   'parts/post',
-  async (data, { getState }) => {
-    const trainingProject = getState().trainingProject.nonDemo[0];
-    const response = await Axios.post(`/api/parts/`, { ...data, project: trainingProject });
+  async (payload) => {
+    // const trainingProject = getState().trainingProject.nonDemo[0];
+    const response = await Axios.post(`/api/parts/`, { ...payload });
     return { ...response.data, trainingProject: response.data.project };
   },
 );

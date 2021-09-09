@@ -41,6 +41,13 @@ type RemoveImageLabel = {
   annotationIndex: string;
 };
 
+export type CaptureImagePayload = {
+  streamId: string;
+  imageIds: number[];
+  shouldOpenLabelingPage: boolean;
+  projectId: number;
+};
+
 // Normalization
 const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
   return {
@@ -116,7 +123,7 @@ export const getImages = createWrappedAsync<
     await Axios.post(`/api/projects/${nonDemoProjectId}/relabel_keep_alive/`);
   }
 
-  let url = '/api/images/';
+  let url = '/api/images';
   if (selectedProject) {
     url = url + `?project=${selectedProject}`;
   }
@@ -130,24 +137,24 @@ export const postImages = createWrappedAsync('image/post', async (newImage: Form
   return normalizeImages([response.data]).entities;
 });
 
-export const captureImage = createWrappedAsync<
-  any,
-  { streamId: string; imageIds: number[]; shouldOpenLabelingPage: boolean }
->('image/capture', async ({ streamId, imageIds, shouldOpenLabelingPage }, { dispatch }) => {
-  const response = await Axios.get(`/api/streams/${streamId}/capture`);
-  const capturedImage = response.data.image;
+export const captureImage = createWrappedAsync<any, CaptureImagePayload>(
+  'image/capture',
+  async ({ streamId, imageIds, shouldOpenLabelingPage, projectId }, { dispatch }) => {
+    const response = await Axios.get(`/api/streams/${streamId}/capture?project=${projectId}`);
+    const capturedImage = response.data.image;
 
-  if (shouldOpenLabelingPage)
-    dispatch(
-      openLabelingPage({
-        imageIds: [...imageIds, capturedImage.id],
-        selectedImageId: capturedImage.id,
-        openFrom: OpenFrom.AfterCapture,
-      }),
-    );
+    if (shouldOpenLabelingPage)
+      dispatch(
+        openLabelingPage({
+          imageIds: [...imageIds, capturedImage.id],
+          selectedImageId: capturedImage.id,
+          openFrom: OpenFrom.AfterCapture,
+        }),
+      );
 
-  return normalizeImages([response.data.image]).entities;
-});
+    return normalizeImages([response.data.image]).entities;
+  },
+);
 
 export const saveLabelImageAnnotation = createWrappedAsync<any, undefined, { state: State }>(
   'image/saveAnno',

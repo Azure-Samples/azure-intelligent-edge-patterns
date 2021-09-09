@@ -18,8 +18,9 @@ import { thunkGetAllCvProjects } from './setting/settingAction';
 export type Params = { confidence_threshold: string; filter_label_id: string };
 
 export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink' | 'customvision_model';
-type TrainingProjectCategory = 'customvision' | 'openvino' | 'OVMS';
+type TrainingProjectCategory = 'customvision' | 'openvino';
 type MetadataType = 'image' | 'bounding_box' | 'classification' | 'regression';
+type ProjectType = 'ObjectDetection' | 'Classification';
 
 export type Metadata = {
   type: MetadataType;
@@ -48,7 +49,7 @@ export type TrainingProject = {
   predictionUri: string;
   predictionHeader: string;
   category: TrainingProjectCategory;
-  projectType: string;
+  projectType: ProjectType;
   isCascade: boolean;
   inputs: Input[];
   outputs: Output[];
@@ -126,6 +127,15 @@ export const getTrainingProject = createWrappedAsync<any, boolean, { state: Stat
   //     return true;
   //   },
   // },
+);
+
+export const getSingleTrainingProject = createWrappedAsync<any, number, { state: State }>(
+  'trainingSlice/getSingleProject',
+  async (projectId) => {
+    const response = await Axios(`/api/projects/${projectId}`);
+
+    return normalize(response.data);
+  },
 );
 
 export const refreshTrainingProject = createWrappedAsync(
@@ -214,6 +224,16 @@ export const getSelectedProjectInfo = createWrappedAsync<any, string, { state: S
   },
 );
 
+export const trainCustomVisionProject = createWrappedAsync<any, number>(
+  'trainingSlice/updateCustomVisionProject',
+  async (projectId) => {
+    const response = await Axios.get(`/api/projects/${projectId}/retrain`);
+
+    console.log('response', response.data);
+    // return response.data;
+  },
+);
+
 const entityAdapter = createEntityAdapter<TrainingProject>();
 
 const slice = createSlice({
@@ -223,11 +243,13 @@ const slice = createSlice({
     onEmptySelectedProjectInfo: (state) => ({
       ...state,
       selectedProjectInfo: null,
+      selectedProjectStatus: null,
     }),
   },
   extraReducers: (builder) => {
     builder
       .addCase(getTrainingProject.fulfilled, entityAdapter.setAll)
+      .addCase(getSingleTrainingProject.fulfilled, entityAdapter.upsertOne)
       .addCase(refreshTrainingProject.fulfilled, entityAdapter.setAll)
       .addCase(createCustomProject.fulfilled, entityAdapter.upsertOne)
       .addCase(updateCustomProject.fulfilled, entityAdapter.upsertOne)
@@ -282,6 +304,18 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
 export const trainingProjectIsPredictionModelFactory = () =>
   createSelector(selectAllTrainingProjects, (entities) =>
     entities.filter((project) => !project.isDemo).filter((project) => project.id !== 9),
+  );
+
+export const customVisionTrainingProjectFactory = () =>
+  createSelector(selectAllTrainingProjects, (entities) =>
+    entities.filter((project) => !project.isDemo).filter((project) => project.category === 'customvision'),
+  );
+
+export const trainingProjectModelFactory = () =>
+  createSelector(selectAllTrainingProjects, (entities) =>
+    entities
+      .filter((project) => !project.isDemo)
+      .filter((project) => ['customvision', 'openvino'].includes(project.category)),
   );
 
 export const trainingProjectIsCascadesFactory = () =>

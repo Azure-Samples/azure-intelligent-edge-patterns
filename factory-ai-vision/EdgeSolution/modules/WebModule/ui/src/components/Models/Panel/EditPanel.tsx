@@ -14,20 +14,29 @@ import {
 } from '@fluentui/react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useHistory, generatePath } from 'react-router-dom';
+import Axios from 'axios';
 
 import { State as RootState } from 'RootStateType';
 import {
   updateCustomVisionProjectTags,
   selectTrainingProjectById,
+  TrainingProject,
+  trainCustomVisionProject,
 } from '../../../store/trainingProjectSlice';
-import { trainingProjectPartsSelectorFactory } from '../../../store/partSlice';
+import { trainingProjectPartsSelectorFactory, Part } from '../../../store/partSlice';
 import { Url } from '../../../enums';
+import { useInterval } from '../../../hooks/useInterval';
 
 import Tag from '../Tag';
+
+type TrainingStatus = '' | 'ok' | 'training' | 'failed' | 'success' | 'finding project';
 
 type Props = {
   projectId: string;
   onDismiss: () => void;
+  project: TrainingProject;
+  parts: Part[];
+  labeledCount: number;
 };
 
 const getClasses = () =>
@@ -41,23 +50,58 @@ const getClasses = () =>
     tagsWrapper: {
       marginTop: '20px',
     },
+    tips: { fontSize: '14px', lineHeight: '20px', color: '#A19F9D' },
   });
 
-const EditPanel: React.FC<Props> = (props) => {
-  const { projectId, onDismiss } = props;
+const convertProjectType = (project: TrainingProject): string => {
+  if (project.projectType === 'ObjectDetection') return 'Object Detector';
+  return 'Classification';
+};
 
-  const project = useSelector((state: RootState) => selectTrainingProjectById(state, projectId));
-  const partSelector = useMemo(() => trainingProjectPartsSelectorFactory(project.id), [project]);
-  const parts = useSelector(partSelector);
+const EditPanel: React.FC<Props> = (props) => {
+  const { project, parts, onDismiss, labeledCount } = props;
 
   const [localTag, setLocalTag] = useState('');
   const [localTags, setLocalTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState(project.name);
+  const [localStatus, setLocalStatus] = useState<TrainingStatus>('');
 
   const dispatch = useDispatch();
   const history = useHistory();
   const classes = getClasses();
+
+  useEffect(() => {
+    Axios.get(`/api/training_status/${project.id}`)
+      .then(({ data }) => {
+        console.log('useEffect', data.status);
+        setLocalStatus(data.status);
+        // if (data.status === 'failed') throw new Error(data.log);
+        // else if (data.status === 'ok' || data.status === 'demo ok') dispatch(trainSuccess());
+        // else setTrainingInfo({ progress: TrainingStatus[data.status], log: data.log });
+        return void 0;
+      })
+      .catch((err) => {
+        // dispatch(trainFailed());
+        // alert(getErrorLog(err));
+      });
+  }, []);
+
+  useInterval(() => {
+    Axios.get(`/api/training_status/${project.id}`)
+      .then(({ data }) => {
+        console.log('data', data.status);
+        setLocalStatus(data.status);
+        // if (data.status === 'failed') throw new Error(data.log);
+        // else if (data.status === 'ok' || data.status === 'demo ok') dispatch(trainSuccess());
+        // else setTrainingInfo({ progress: TrainingStatus[data.status], log: data.log });
+        return void 0;
+      })
+      .catch((err) => {
+        // dispatch(trainFailed());
+        // alert(getErrorLog(err));
+      });
+  }, 5000);
 
   useEffect(() => {
     setLocalTags([...parts].map((part) => part.name));
@@ -104,6 +148,19 @@ const EditPanel: React.FC<Props> = (props) => {
     setIsLoading(false);
     onDismiss();
   }, [dispatch, project, localTags, onDismiss]);
+
+  const onDirectToImages = useCallback(() => {
+    history.push(
+      generatePath(Url.IMAGES_DETAIL, {
+        id: project.id,
+      }),
+    );
+  }, [history, project]);
+
+  const onTrainClick = useCallback(() => {
+    dispatch(trainCustomVisionProject(project.id));
+    setLocalStatus('finding project');
+  }, []);
 
   return (
     <Panel
@@ -154,7 +211,7 @@ const EditPanel: React.FC<Props> = (props) => {
             <TextField label="Name" value={name} onChange={(_, newValue) => setName(newValue)} required />
           </Stack>
         )}
-        {project.customVisionId && (
+        {project.category === 'customvision' && (
           <>
             <Stack>
               <Label styles={{ root: classes.itemTitle }}>Name</Label>
@@ -171,20 +228,65 @@ const EditPanel: React.FC<Props> = (props) => {
               </Stack>
             </Stack>
             <Stack>
+              <Label styles={{ root: classes.itemTitle }}>Type</Label>
+              <Text styles={{ root: classes.item }}>{convertProjectType(project)}</Text>
+            </Stack>
+            <div>
               <Label styles={{ root: classes.itemTitle }}>Images</Label>
+              <Text styles={{ root: classes.tips }}>At least 15 images must be tagged per object</Text>
               <Stack>
-                <Link onClick={onLinkClick}>
-                  <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 5 }}>
-                    <Text>Placeholder</Text>
-                    <Icon styles={{ root: { color: '#0078D4' } }} iconName="OpenInNewWindow" />
+                <Link onClick={onDirectToImages}>
+                  <Stack
+                    styles={{ root: { color: '#0078D4' } }}
+                    horizontal
+                    verticalAlign="center"
+                    tokens={{ childrenGap: 5 }}
+                  >
+                    <Text>{labeledCount === 0 ? `Tag Images` : `${labeledCount} tagged`}</Text>
+                    <Icon iconName="OpenInNewWindow" />
                   </Stack>
                 </Link>
               </Stack>
-            </Stack>
+              <DefaultButton
+                styles={{ root: { marginTop: '14px' } }}
+                // disabled={project.trainingStatus === 'training'}
+                onClick={onTrainClick}
+              >
+                Train
+              </DefaultButton>
+              {!['failed', 'ok', 'success'].includes(localStatus) && (
+                <Stack>
+                  <ProgressIndicator
+                    styles={{
+                      progressBar: {
+                        background:
+                          'linear-gradient(to right, rgb(237, 235, 233) 0%, rgba(19, 138, 0) 50%, rgb(237, 235, 233) 100%)',
+                      },
+                    }}
+                  />
+                  <Text>{localStatus}</Text>
+                </Stack>
+              )}
+              {localStatus === 'failed' && (
+                <Stack horizontal styles={{ root: { marginTop: '7px' } }} tokens={{ childrenGap: 12 }}>
+                  <Icon
+                    iconName="StatusErrorFull"
+                    styles={{ root: { color: '#D83B01', fontSize: '20px' } }}
+                  />
+                  <Text styles={{ root: classes.item }}>Model retraining failed</Text>
+                </Stack>
+              )}
+              {localStatus === 'success' && (
+                <Stack horizontal styles={{ root: { marginTop: '7px' } }} tokens={{ childrenGap: 12 }}>
+                  <Icon iconName="CompletedSolid" styles={{ root: { color: '#138A00', fontSize: '20px' } }} />
+                  <Text styles={{ root: classes.item }}>Model was successfully trained</Text>
+                </Stack>
+              )}
+            </div>
           </>
         )}
       </Stack>
-      {project.customVisionId !== '' && (
+      {project.category === 'customvision' && (
         <Stack styles={{ root: classes.tagsWrapper }} tokens={{ childrenGap: '10px' }}>
           <TextField
             label="Objects/Tags"
