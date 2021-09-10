@@ -100,6 +100,7 @@ export const isLabeledImagesSelector = (projectId: number) =>
     return images
       .filter((image) => image.project === projectId)
       .filter((image) => image.labels.length !== 0)
+      .filter((image) => !image.uploaded)
       .map((image) => ({
         ...image,
         labels: image.labels
