@@ -4,7 +4,7 @@
 
 ## Prerequisites
 
-To install the Vision on Edge Solution Accelerator, the following prerequisites are required:
+To install the Vision on Edge Solution Accelerator, the following three prerequisites are required:
 
 <br/>1. An IoT device with key and endpoint.
 <br/>See the below link to find your training key [here](https://www.customvision.ai/projects#/settings) and learn more [here](https://azure.microsoft.com/en-us/services/cognitive-services/custom-vision-service/)
@@ -15,7 +15,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 ![arch_img](https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/feat/cascade-dev/factory-ai-vision/assets/create%20va%20account_20210902.png)
 <br/>
 <br/>
-<br/>3. An IoT hub with edge device
+<br/>3. An IoT Hub with edge device
 
 To deploy the solution to an Azure Stack Edge device, your subscription must contain Azure Stack Edge with compute enabled as per [documentaton here](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-deploy-configure-compute) or IoT hub Edge device with port 8181 opened. Please follow this [documentation](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/CreateIoTEdgeDevice.md) for deployment information
 
