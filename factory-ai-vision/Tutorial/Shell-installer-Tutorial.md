@@ -6,17 +6,22 @@
 
 To install the Vision on Edge Solution Accelerator, the following prerequisites are required:
 
-1. You must have an Azure subscription.
-<br/> if you don’t have one, you can create one here: https://azure.microsoft.com/en-us/pricing/purchase-options/pay-as-you-go/
-2. If you are deploying the solution to an Azure Stack Edge device, your subscription must contain Azure Stack Edge with compute enabled as per [documentaton here](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-deploy-configure-compute) or IoT hub Edge device with port 8181 opened. please follow this [documentation](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/CreateIoTEdgeDevice.md) for deployment information
-3. Azure Custom Vision account. See the below link to find your training key [here](https://www.customvision.ai/projects#/settings) and learn more [here](https://azure.microsoft.com/en-us/services/cognitive-services/custom-vision-service/)
+<br/>1. An IoT device with key and endpoint.
+<br/>See the below link to find your training key [here](https://www.customvision.ai/projects#/settings) and learn more [here](https://azure.microsoft.com/en-us/services/cognitive-services/custom-vision-service/)
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/customvisioninfo.png)
-
-<br/> 4. Create Video Analyzers account to get AVA Provision Token: 
-<br/> Login your account—>Click Edge module—>+Add edge modules—>Copy the provisioning token
+<br/>
+<br/>
+<br/>2. AVA account to get AVA Provision Token. 
 ![arch_img](https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/feat/cascade-dev/factory-ai-vision/assets/create%20va%20account_20210902.png)
-<br/> 5. (Optional) Azure Video Analyzer. Please follow the "Create Video Analyzer Account" section of this document to create one https://docs.microsoft.com/en-us/azure/azure-video-analyzer/video-analyzer-docs/get-started-detect-motion-emit-events-portal#create-a-video-analyzer-account-in-the-azure-portal
-<br/> 6. (Optional) Azure Time Series Insight environment. If you would like to use the Azure portal to add an event source that reads data from Azure IoT Hub to your Azure Time Series Insights environment, please follow this instruction https://docs.microsoft.com/en-us/azure/time-series-insights/how-to-ingest-data-iot-hub    
+<br/>
+<br/>
+<br/>3. An IoT hub with edge device
+
+To deploy the solution to an Azure Stack Edge device, your subscription must contain Azure Stack Edge with compute enabled as per [documentaton here](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-gpu-deploy-configure-compute) or IoT hub Edge device with port 8181 opened. Please follow this [documentation](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/CreateIoTEdgeDevice.md) for deployment information
+
+
+
+
 
    
 ## Get Started 
@@ -24,7 +29,7 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 1. Open your browser and paste the link https://shell.azure.com/  to open the shell installer. 
 2. You will need a Azure subscription to continue. Choose your Azure account.
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/step1.png)
-3. To download installer (acs.zip) from github by putting the following command `wget -O acs.zip https://go.microsoft.com/fwlink/?linkid=2163300`
+3. To download installer (acs.zip) from github by putting the following command `wget -O acs.zip https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/feat/cascade-dev/factory-ai-vision/Installer/acs.zip`
 ![arch_img](https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/feat/cascade-dev/factory-ai-vision/assets/step2_20210902.png)
 4. Unzip it `unzip -o acs.zip`. 
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/step3_20210902.png?raw=true)
@@ -56,8 +61,9 @@ To install the Vision on Edge Solution Accelerator, the following prerequisites 
 10. Choose cpu to correspond to Edge device.
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/step8_20210904.png?raw=true)
 
-11. The installation will be scheduled to complete. Please wait. 
+11. The installation will be scheduled to complete.
 <br/> You can check the deployment status on the [Azure portal](https://portal.azure.com/#home)
+<br/>It takes to get everything deployed and till then the IOT console will temporarily show error, please wait. 
 
 12. After installation is completed, please check your device to get the IP address,
 <br/> Properties-> Networking -> Public IP address
