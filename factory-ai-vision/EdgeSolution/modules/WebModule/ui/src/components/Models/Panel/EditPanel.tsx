@@ -29,7 +29,7 @@ import { useInterval } from '../../../hooks/useInterval';
 
 import Tag from '../Tag';
 
-type TrainingStatus = '' | 'ok' | 'training' | 'failed' | 'success' | 'finding project';
+type TrainingStatus = 'ok' | 'training' | 'failed' | 'success' | 'No change';
 
 type Props = {
   projectId: string;
@@ -58,6 +58,11 @@ const convertProjectType = (project: TrainingProject): string => {
   return 'Classification';
 };
 
+const isDisableTrainButton = (status: TrainingStatus, labeledCount: number): boolean => {
+  if (!['ok', 'training', 'failed', 'success'].includes(status) || labeledCount < 15) return true;
+  return false;
+};
+
 const EditPanel: React.FC<Props> = (props) => {
   const { project, parts, onDismiss, labeledCount } = props;
 
@@ -65,42 +70,25 @@ const EditPanel: React.FC<Props> = (props) => {
   const [localTags, setLocalTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState(project.name);
-  const [localStatus, setLocalStatus] = useState<TrainingStatus>('');
+  const [localStatus, setLocalStatus] = useState<TrainingStatus>(null);
 
   const dispatch = useDispatch();
   const history = useHistory();
   const classes = getClasses();
 
   useEffect(() => {
-    Axios.get(`/api/training_status/${project.id}`)
-      .then(({ data }) => {
-        console.log('useEffect', data.status);
-        setLocalStatus(data.status);
-        // if (data.status === 'failed') throw new Error(data.log);
-        // else if (data.status === 'ok' || data.status === 'demo ok') dispatch(trainSuccess());
-        // else setTrainingInfo({ progress: TrainingStatus[data.status], log: data.log });
-        return void 0;
-      })
-      .catch((err) => {
-        // dispatch(trainFailed());
-        // alert(getErrorLog(err));
-      });
+    Axios.get(`/api/training_status/${project.id}`).then(({ data }) => {
+      console.log('useEffect', data.status);
+      setLocalStatus(data.status);
+      return;
+    });
   }, []);
 
   useInterval(() => {
-    Axios.get(`/api/training_status/${project.id}`)
-      .then(({ data }) => {
-        console.log('data', data.status);
-        setLocalStatus(data.status);
-        // if (data.status === 'failed') throw new Error(data.log);
-        // else if (data.status === 'ok' || data.status === 'demo ok') dispatch(trainSuccess());
-        // else setTrainingInfo({ progress: TrainingStatus[data.status], log: data.log });
-        return void 0;
-      })
-      .catch((err) => {
-        // dispatch(trainFailed());
-        // alert(getErrorLog(err));
-      });
+    Axios.get(`/api/training_status/${project.id}`).then(({ data }) => {
+      console.log('data', data.status);
+      setLocalStatus(data.status);
+    });
   }, 5000);
 
   useEffect(() => {
@@ -132,14 +120,6 @@ const EditPanel: React.FC<Props> = (props) => {
     [localTags],
   );
 
-  const onLinkClick = useCallback(() => {
-    history.push(
-      generatePath(Url.IMAGES_DETAIL, {
-        id: project.id,
-      }),
-    );
-  }, [history, project]);
-
   const onSaveModelClick = useCallback(async () => {
     setIsLoading(true);
 
@@ -159,7 +139,6 @@ const EditPanel: React.FC<Props> = (props) => {
 
   const onTrainClick = useCallback(() => {
     dispatch(trainCustomVisionProject(project.id));
-    setLocalStatus('finding project');
   }, []);
 
   return (
@@ -249,7 +228,7 @@ const EditPanel: React.FC<Props> = (props) => {
               </Stack>
               <DefaultButton
                 styles={{ root: { marginTop: '14px' } }}
-                // disabled={project.trainingStatus === 'training'}
+                disabled={isDisableTrainButton(localStatus, labeledCount)}
                 onClick={onTrainClick}
               >
                 Train
@@ -280,6 +259,12 @@ const EditPanel: React.FC<Props> = (props) => {
                 <Stack horizontal styles={{ root: { marginTop: '7px' } }} tokens={{ childrenGap: 12 }}>
                   <Icon iconName="CompletedSolid" styles={{ root: { color: '#138A00', fontSize: '20px' } }} />
                   <Text styles={{ root: classes.item }}>Model was successfully trained</Text>
+                </Stack>
+              )}
+              {localStatus === 'No change' && (
+                <Stack horizontal styles={{ root: { marginTop: '7px' } }} tokens={{ childrenGap: 12 }}>
+                  <Icon iconName="ExploreContent" styles={{ root: { color: '#D83B01', fontSize: '20px' } }} />
+                  <Text styles={{ root: classes.item }}>No newly-tagged images for retraining model</Text>
                 </Stack>
               )}
             </div>
