@@ -631,12 +631,6 @@ def train_project_worker(project_id):
         need_to_send_notification=True,
         **progress.PROGRESS_9_SUCCESS,
     )
-    Notification.objects.create(
-        notification_type="",
-        sender="system",
-        title="training status",
-        details="Success",
-    )
     logger.info("Training Performance: %s", train_performance_list)
 
     # =====================================================
