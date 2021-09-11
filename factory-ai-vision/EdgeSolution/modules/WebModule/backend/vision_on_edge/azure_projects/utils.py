@@ -19,6 +19,7 @@ from ..azure_training_status import progress
 from ..azure_training_status.utils import upcreate_training_status
 from ..images.models import Image
 from ..images.utils import upload_images_to_customvision_helper
+from ..notifications.models import Notification
 from .exceptions import ProjectAlreadyTraining, ProjectRemovedError
 from .models import Project, Task
 
@@ -629,6 +630,12 @@ def train_project_worker(project_id):
         performance=json.dumps(train_performance_list),
         need_to_send_notification=True,
         **progress.PROGRESS_9_SUCCESS,
+    )
+    Notification.objects.create(
+        notification_type="",
+        sender="system",
+        title="training status",
+        details="Success",
     )
     logger.info("Training Performance: %s", train_performance_list)
 
