@@ -52,7 +52,7 @@
             "restartPolicy": "always",
             "startupOrder": 2,
             "settings": {
-              "image": "intelligentedge/ovmsadaptormodule:0.28.1.1-amd64",
+              "image": "intelligentedge/ovmsadaptormodule:0.28.1.2-amd64",
               "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Target\":\"/workspace\",\"Source\":\"ovmsworkspace\",\"Type\":\"volume\"}],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"IpcMode\":\"host\",\"ShmSize\":1536870912}}"
             }
           },
