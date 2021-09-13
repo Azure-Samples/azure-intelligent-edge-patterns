@@ -1,0 +1,475 @@
+{
+    "name": "Default Cascade",
+    "nodes": [
+        {
+            "node_id": "0_9",
+            "name": "request",
+            "type": "source",
+            "inputs": [],
+            "outputs": [
+                {
+                    "name": "image",
+                    "metadata": {
+                        "type": "image",
+                        "shape": [
+                            1,
+                            3,
+                            416,
+                            416
+                        ],
+                        "layout": [
+                            "N",
+                            "H",
+                            "W",
+                            "C"
+                        ],
+                        "color_format": "BGR"
+                    }
+                }
+            ],
+            "openvino_model_name": "",
+            "openvino_library_name": "",
+            "download_uri_openvino": "",
+            "params": "",
+            "combined": ""
+        },
+        {
+            "node_id": "1_10",
+            "name": "face_detection",
+            "type": "openvino_model",
+            "inputs": [
+                {
+                    "name": "data",
+                    "metadata": {
+                        "type": "image",
+                        "shape": [
+                            1,
+                            3,
+                            416,
+                            416
+                        ],
+                        "layout": [
+                            "N",
+                            "H",
+                            "W",
+                            "C"
+                        ],
+                        "color_format": "BGR"
+                    }
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "detection_out",
+                    "metadata": {
+                        "type": "bounding_box",
+                        "shape": [
+                            1,
+                            1,
+                            200,
+                            7
+                        ],
+                        "layout": [
+                            1,
+                            1,
+                            "B",
+                            "F"
+                        ],
+                        "labels": [
+                            "face"
+                        ]
+                    }
+                }
+            ],
+            "openvino_model_name": "face-detection-retail-0004",
+            "openvino_library_name": "",
+            "download_uri_openvino": "",
+            "params": "",
+            "combined": ""
+        },
+        {
+            "node_id": "3_13",
+            "name": "crop",
+            "type": "openvino_library",
+            "inputs": [
+                {
+                    "name": "image",
+                    "metadata": {
+                        "type": "image",
+                        "shape": [
+                            1,
+                            3,
+                            416,
+                            416
+                        ],
+                        "layout": [
+                            "N",
+                            "H",
+                            "W",
+                            "C"
+                        ],
+                        "color_format": "BGR"
+                    }
+                },
+                {
+                    "name": "detection",
+                    "metadata": {
+                        "type": "bounding_box",
+                        "shape": [
+                            1,
+                            1,
+                            200,
+                            7
+                        ],
+                        "layout": [
+                            1,
+                            1,
+                            "B",
+                            "F"
+                        ]
+                    }
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "images",
+                    "metadata": {
+                        "type": "image",
+                        "shape": [
+                            -1,
+                            1,
+                            3,
+                            64,
+                            64
+                        ],
+                        "layout": [
+                            "B",
+                            "N",
+                            "H",
+                            "W",
+                            "C"
+                        ],
+                        "color_format": "BGR"
+                    }
+                },
+                {
+                    "name": "coordinates",
+                    "metadata": {
+                        "type": "bounding_box",
+                        "shape": [
+                            -1,
+                            1,
+                            1,
+                            200,
+                            7
+                        ],
+                        "layout": [
+                            "B",
+                            1,
+                            1,
+                            "B",
+                            "F"
+                        ]
+                    }
+                },
+                {
+                    "name": "confidences",
+                    "metadata": {
+                        "type": "regression",
+                        "shape": [
+                            -1,
+                            1,
+                            1,
+                            1,
+                            1
+                        ],
+                        "layout": [
+                            "B",
+                            1,
+                            1,
+                            "B",
+                            "F"
+                        ]
+                    }
+                }
+            ],
+            "openvino_model_name": "",
+            "openvino_library_name": "libcustom_node_model_zoo_intel_object_detection.so",
+            "download_uri_openvino": "",
+            "params": {
+                "original_image_width": "416",
+                "original_image_height": "416",
+                "target_image_width": "64",
+                "target_image_height": "64",
+                "original_image_layout": "NHWC",
+                "target_image_layout": "NHWC",
+                "convert_to_gray_scale": "false",
+                "max_output_batch": "100",
+                "confidence_threshold": "0.7",
+                "debug": "true",
+                "filter_label_id": "-1"
+            },
+            "combined": ""
+        },
+        {
+            "node_id": "6_11",
+            "name": "emotion_recognition",
+            "type": "openvino_model",
+            "inputs": [
+                {
+                    "name": "data",
+                    "metadata": {
+                        "type": "image",
+                        "shape": [
+                            1,
+                            3,
+                            64,
+                            64
+                        ],
+                        "layout": [
+                            "N",
+                            "H",
+                            "W",
+                            "C"
+                        ]
+                    }
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "prob_emotion",
+                    "metadata": {
+                        "type": "classification",
+                        "shape": [
+                            1,
+                            5,
+                            1,
+                            1
+                        ],
+                        "layout": [
+                            1,
+                            "C",
+                            1,
+                            1
+                        ],
+                        "labels": [
+                            "neutral",
+                            "happy",
+                            "sad",
+                            "surprise",
+                            "anger"
+                        ]
+                    }
+                }
+            ],
+            "openvino_model_name": "emotions-recognition-retail-0003",
+            "openvino_library_name": "",
+            "download_uri_openvino": "",
+            "params": "",
+            "combined": ""
+        },
+        {
+            "node_id": "7_12",
+            "name": "age_gender_recognition",
+            "type": "openvino_model",
+            "inputs": [
+                {
+                    "name": "data",
+                    "metadata": {
+                        "type": "image",
+                        "shape": [
+                            1,
+                            3,
+                            64,
+                            64
+                        ],
+                        "layout": [
+                            "N",
+                            "H",
+                            "W",
+                            "C"
+                        ]
+                    }
+                }
+            ],
+            "outputs": [
+                {
+                    "name": "age_conv3",
+                    "metadata": {
+                        "type": "regression",
+                        "shape": [
+                            1,
+                            1,
+                            1,
+                            1
+                        ],
+                        "layout": [
+                            1,
+                            1,
+                            1,
+                            1
+                        ],
+                        "scale": 100
+                    }
+                },
+                {
+                    "name": "prob",
+                    "metadata": {
+                        "type": "classfication",
+                        "shape": [
+                            1,
+                            2,
+                            1,
+                            1
+                        ],
+                        "layout": [
+                            1,
+                            "P",
+                            1,
+                            1
+                        ],
+                        "labels": [
+                            "female",
+                            "male"
+                        ]
+                    }
+                }
+            ],
+            "openvino_model_name": "age-gender-recognition-retail-0013",
+            "openvino_library_name": "",
+            "download_uri_openvino": "",
+            "params": "",
+            "combined": ""
+        },
+        {
+            "node_id": "8_14",
+            "name": "a",
+            "type": "sink",
+            "inputs": [
+                {
+                    "name": "data"
+                }
+            ],
+            "outputs": [],
+            "openvino_model_name": "",
+            "openvino_library_name": "",
+            "download_uri_openvino": "",
+            "params": "",
+            "combined": "true"
+        },
+        {
+            "node_id": "11_14",
+            "name": "b",
+            "type": "sink",
+            "inputs": [
+                {
+                    "name": "data"
+                }
+            ],
+            "outputs": [],
+            "openvino_model_name": "",
+            "openvino_library_name": "",
+            "download_uri_openvino": "",
+            "params": "",
+            "combined": "true"
+        },
+        {
+            "node_id": "12_14",
+            "name": "c",
+            "type": "sink",
+            "inputs": [
+                {
+                    "name": "data"
+                }
+            ],
+            "outputs": [],
+            "openvino_model_name": "",
+            "openvino_library_name": "",
+            "download_uri_openvino": "",
+            "params": "",
+            "combined": "true"
+        }
+    ],
+    "edges": [
+        {
+            "source": {
+                "node_id": "0_9",
+                "output_name": "image"
+            },
+            "target": {
+                "node_id": "1_10",
+                "input_name": "data"
+            }
+        },
+        {
+            "source": {
+                "node_id": "0_9",
+                "output_name": "image"
+            },
+            "target": {
+                "node_id": "3_13",
+                "input_name": "image"
+            }
+        },
+        {
+            "source": {
+                "node_id": "1_10",
+                "output_name": "detection_out"
+            },
+            "target": {
+                "node_id": "3_13",
+                "input_name": "detection"
+            }
+        },
+        {
+            "source": {
+                "node_id": "6_11",
+                "output_name": "prob_emotion"
+            },
+            "target": {
+                "node_id": "8_14",
+                "input_name": "data"
+            }
+        },
+        {
+            "source": {
+                "node_id": "3_13",
+                "output_name": "images"
+            },
+            "target": {
+                "node_id": "6_11",
+                "input_name": "data"
+            }
+        },
+        {
+            "source": {
+                "node_id": "7_12",
+                "output_name": "age_conv3"
+            },
+            "target": {
+                "node_id": "11_14",
+                "input_name": "data"
+            }
+        },
+        {
+            "source": {
+                "node_id": "7_12",
+                "output_name": "prob"
+            },
+            "target": {
+                "node_id": "12_14",
+                "input_name": "data"
+            }
+        },
+        {
+            "source": {
+                "node_id": "3_13",
+                "output_name": "images"
+            },
+            "target": {
+                "node_id": "7_12",
+                "input_name": "data"
+            }
+        }
+    ]
+}
