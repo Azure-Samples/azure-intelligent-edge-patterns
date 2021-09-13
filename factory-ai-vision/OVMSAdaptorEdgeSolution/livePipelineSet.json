@@ -1,0 +1,14 @@
+{
+        "@apiVersion": "1.0",
+        "name": "pipeline1",
+        "properties": {
+			"topologyName": "grpcovms",
+			"description": "Sample pipeline description",
+			"parameters": [
+				{
+					"name": "rtspUrl",
+					"value": "rtsp://13.67.75.126/test.mkv"
+				}
+			]
+        }
+}
