@@ -6,7 +6,7 @@
 
 To install the Vision on Edge Solution Accelerator, the following three prerequisites are required:
 
-<br/>1. An IoT device with key and endpoint.
+<br/>1. A Custom Vision Account with key and endpoint.
 <br/>See the below link to find your training key [here](https://www.customvision.ai/projects#/settings) and learn more [here](https://azure.microsoft.com/en-us/services/cognitive-services/custom-vision-service/)
 ![arch_img](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/assets/customvisioninfo.png)
 <br/>
