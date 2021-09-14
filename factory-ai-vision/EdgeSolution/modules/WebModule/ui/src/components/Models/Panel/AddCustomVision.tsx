@@ -14,16 +14,16 @@ import {
   IDropdownOption,
 } from '@fluentui/react';
 import { assocPath } from 'ramda';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { isEmpty } from 'ramda';
 
-import { State as RootState } from 'RootStateType';
 import {
   pullCVProjects,
   createCustomVisionProject,
   getSelectedProjectInfo,
   onEmptySelectedProjectInfo,
 } from '../../../store/trainingProjectSlice';
+import { ProjectInfo } from '../../../store/shared/DemoSliceUtils';
 import { CreateCustomVisionForm } from '../type';
 
 import Tag from '../Tag';
@@ -43,7 +43,9 @@ const getClasses = () =>
 
 type Props = {
   isOpen: boolean;
-  onDissmiss: () => void;
+  customVisionProjectOptions: IDropdownOption[];
+  selectedProjectInfo: ProjectInfo;
+  onDismiss: () => void;
 };
 
 const initialForm: CreateCustomVisionForm = {
@@ -73,13 +75,9 @@ const isValid = (isExisting: boolean, formData: CreateCustomVisionForm): boolean
 };
 
 const AddModelPanel: React.FC<Props> = (props) => {
-  const { isOpen, onDissmiss } = props;
+  const { isOpen, onDismiss, customVisionProjectOptions, selectedProjectInfo } = props;
 
   const classes = getClasses();
-  const customVisionProjectOptions = useSelector((state: RootState) =>
-    state.setting.cvProjects.map((e) => ({ key: e.id, text: e.name })),
-  );
-  const { selectedProjectInfo } = useSelector((state: RootState) => state.trainingProject);
 
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -93,10 +91,10 @@ const AddModelPanel: React.FC<Props> = (props) => {
   const onClosePanel = useCallback(() => {
     setIsExistingProject(false);
     setFormData(initialForm);
-    onDissmiss();
+    onDismiss();
     setErrorMsg('');
     dispatch(onEmptySelectedProjectInfo());
-  }, [onDissmiss, dispatch]);
+  }, [onDismiss, dispatch]);
 
   const onCreateCustomVisionProject = useCallback(async () => {
     if (formData.name === '' || formData.tags.length < 2) {

@@ -14,13 +14,14 @@ import {
 import { createWrappedAsync } from './shared/createWrappedAsync';
 import { getParts } from './partSlice';
 import { thunkGetAllCvProjects } from './setting/settingAction';
+import { getTrainingProjectStatusList } from './trainingProjectStatusSlice';
 
 export type Params = { confidence_threshold: string; filter_label_id: string };
 
 export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink' | 'customvision_model';
 type TrainingProjectCategory = 'customvision' | 'openvino';
 type MetadataType = 'image' | 'bounding_box' | 'classification' | 'regression';
-type ProjectType = 'ObjectDetection' | 'Classification';
+export type ProjectType = 'ObjectDetection' | 'Classification';
 
 export type Metadata = {
   type: MetadataType;
@@ -160,6 +161,7 @@ export const pullCVProjects = createWrappedAsync<
   // Get training project because the origin project name will be mutate
   dispatch(refreshTrainingProject());
   dispatch(getParts());
+  dispatch(getTrainingProjectStatusList());
 });
 
 export const createCustomVisionProject = createWrappedAsync<any, CreateCustomVisionProjectPayload>(
@@ -170,6 +172,7 @@ export const createCustomVisionProject = createWrappedAsync<any, CreateCustomVis
     dispatch(refreshTrainingProject());
     dispatch(getParts());
     dispatch(thunkGetAllCvProjects());
+    dispatch(getTrainingProjectStatusList());
   },
 );
 
@@ -227,10 +230,7 @@ export const getSelectedProjectInfo = createWrappedAsync<any, string, { state: S
 export const trainCustomVisionProject = createWrappedAsync<any, number>(
   'trainingSlice/updateCustomVisionProject',
   async (projectId) => {
-    const response = await Axios.get(`/api/projects/${projectId}/retrain`);
-
-    console.log('response', response.data);
-    // return response.data;
+    await Axios.get(`/api/projects/${projectId}/retrain`);
   },
 );
 

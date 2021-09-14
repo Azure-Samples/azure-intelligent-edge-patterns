@@ -18,7 +18,7 @@ type DemoStateType = {
   isDemo: boolean;
 };
 
-interface ProjectInfo {
+export interface ProjectInfo {
   tags: string[];
   type: string;
 }

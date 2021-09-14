@@ -12,31 +12,28 @@ import {
   Link,
   Icon,
 } from '@fluentui/react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { useHistory, generatePath } from 'react-router-dom';
-import Axios from 'axios';
 
-import { State as RootState } from 'RootStateType';
 import {
   updateCustomVisionProjectTags,
-  selectTrainingProjectById,
   TrainingProject,
   trainCustomVisionProject,
 } from '../../../store/trainingProjectSlice';
-import { trainingProjectPartsSelectorFactory, Part } from '../../../store/partSlice';
+import { TrainingStatus, getOneTrainingProjectStatus } from '../../../store/trainingProjectStatusSlice';
+import { Part } from '../../../store/partSlice';
 import { Url } from '../../../enums';
 import { useInterval } from '../../../hooks/useInterval';
+import { EnhanceImage } from './type';
 
 import Tag from '../Tag';
 
-type TrainingStatus = 'ok' | 'training' | 'failed' | 'success' | 'No change';
-
 type Props = {
-  projectId: string;
   onDismiss: () => void;
   project: TrainingProject;
   parts: Part[];
-  labeledCount: number;
+  imageList: EnhanceImage[];
+  status: TrainingStatus;
 };
 
 const getClasses = () =>
@@ -58,37 +55,47 @@ const convertProjectType = (project: TrainingProject): string => {
   return 'Classification';
 };
 
-const isDisableTrainButton = (status: TrainingStatus, labeledCount: number): boolean => {
-  if (!['ok', 'training', 'failed', 'success'].includes(status) || labeledCount < 15) return true;
-  return false;
+const getUpdatedImageList = (imageList: EnhanceImage[]) =>
+  imageList.filter((image) => !image.uploaded).filter((image) => image.labels.length !== 0);
+
+const isDisableObjectDetectionTrainButton = (status: TrainingStatus, imageList: EnhanceImage[]): boolean => {
+  const updatedImageList = imageList.filter((image) => image.uploaded);
+  const unUpdatedImageList = getUpdatedImageList(imageList);
+
+  if (
+    updatedImageList.length > 0 &&
+    unUpdatedImageList.length > 0 &&
+    ['ok', 'failed', 'success', 'No change'].includes(status)
+  )
+    return false;
+
+  return true;
+};
+
+const getObjectDetectionTrainButtonText = (imageList: EnhanceImage[]): string => {
+  if (getUpdatedImageList(imageList).length > 0) return `${getUpdatedImageList(imageList).length} tagged`;
+  return 'Tag images';
 };
 
 const EditPanel: React.FC<Props> = (props) => {
-  const { project, parts, onDismiss, labeledCount } = props;
+  const { project, parts, onDismiss, imageList, status } = props;
 
   const [localTag, setLocalTag] = useState('');
   const [localTags, setLocalTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState(project.name);
-  const [localStatus, setLocalStatus] = useState<TrainingStatus>(null);
+  const [localStatus, setLocalStatus] = useState<TrainingStatus>(status);
 
   const dispatch = useDispatch();
   const history = useHistory();
   const classes = getClasses();
 
-  useEffect(() => {
-    Axios.get(`/api/training_status/${project.id}`).then(({ data }) => {
-      console.log('useEffect', data.status);
-      setLocalStatus(data.status);
-      return;
-    });
-  }, []);
+  useInterval(async () => {
+    const response = await dispatch(getOneTrainingProjectStatus(project.id));
+    // @ts-ignore
+    const { status } = response.payload;
 
-  useInterval(() => {
-    Axios.get(`/api/training_status/${project.id}`).then(({ data }) => {
-      console.log('data', data.status);
-      setLocalStatus(data.status);
-    });
+    setLocalStatus(status);
   }, 5000);
 
   useEffect(() => {
@@ -212,7 +219,11 @@ const EditPanel: React.FC<Props> = (props) => {
             </Stack>
             <div>
               <Label styles={{ root: classes.itemTitle }}>Images</Label>
-              <Text styles={{ root: classes.tips }}>At least 15 images must be tagged per object</Text>
+              <Text styles={{ root: classes.tips }}>
+                {project.projectType === 'ObjectDetection'
+                  ? 'At least 15 images must be tagged per object'
+                  : 'At least 15 images must be classified'}
+              </Text>
               <Stack>
                 <Link onClick={onDirectToImages}>
                   <Stack
@@ -221,19 +232,19 @@ const EditPanel: React.FC<Props> = (props) => {
                     verticalAlign="center"
                     tokens={{ childrenGap: 5 }}
                   >
-                    <Text>{labeledCount === 0 ? `Tag Images` : `${labeledCount} tagged`}</Text>
+                    <Text>{getObjectDetectionTrainButtonText(imageList)}</Text>
                     <Icon iconName="OpenInNewWindow" />
                   </Stack>
                 </Link>
               </Stack>
               <DefaultButton
                 styles={{ root: { marginTop: '14px' } }}
-                disabled={isDisableTrainButton(localStatus, labeledCount)}
+                disabled={isDisableObjectDetectionTrainButton(localStatus, imageList)}
                 onClick={onTrainClick}
               >
                 Train
               </DefaultButton>
-              {!['failed', 'ok', 'success'].includes(localStatus) && (
+              {!['failed', 'ok', 'success', 'No change'].includes(localStatus) && (
                 <Stack>
                   <ProgressIndicator
                     styles={{
