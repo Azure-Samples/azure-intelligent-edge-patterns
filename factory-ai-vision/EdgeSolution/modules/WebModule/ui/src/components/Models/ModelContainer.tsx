@@ -16,7 +16,7 @@ import { State as RootState } from 'RootStateType';
 import { selectAllIntelProject } from '../../store/IntelProjectSlice';
 
 import Model from './Model';
-import AddCustomVision from './Panel/AddCustomVision';
+import AddCustomVisionContainer from './Panel/AddCustomVisionContainer';
 import IntelProjectDashboard from './IntelProjectDashboard';
 
 const getClasses = () =>
@@ -172,7 +172,7 @@ const ModelContainer = () => {
           )}
         </Stack>
       </Stack>
-      <AddCustomVision isOpen={isAddCustomVision} onDissmiss={() => setIsAddCustomVision(false)} />
+      <AddCustomVisionContainer isOpen={isAddCustomVision} onDismiss={() => setIsAddCustomVision(false)} />
     </>
   );
 };

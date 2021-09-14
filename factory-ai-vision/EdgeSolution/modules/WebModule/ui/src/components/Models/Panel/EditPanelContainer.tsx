@@ -4,25 +4,20 @@ import { useDispatch, useSelector } from 'react-redux';
 import { State as RootState } from 'RootStateType';
 import { selectTrainingProjectById, getSingleTrainingProject } from '../../../store/trainingProjectSlice';
 import { trainingProjectPartsSelectorFactory } from '../../../store/partSlice';
+import {
+  getOneTrainingProjectStatus,
+  selectAllTrainingProjectsStatus,
+} from '../../../store/trainingProjectStatusSlice';
+import { getImages } from '../../../store/imageSlice';
 import { isLabeledImagesSelector } from '../../../store/selectors';
-import { Annotation, Image } from '../../../store/type';
+import { EnhanceImage } from './type';
 
 import EditPanel from './EditPanel';
 
 interface Props {
-  projectId: string;
+  projectId: number;
   onDismiss: () => void;
 }
-
-type EnhanceImage = Exclude<Image, 'labels'> & {
-  labels: Annotation[];
-};
-
-const labeledImagesCount = (enhanceImages: EnhanceImage[]) =>
-  enhanceImages.reduce((acc, image) => {
-    if (image.labels.length > 0) return acc + 1;
-    return acc;
-  }, 0);
 
 const EditPanelContainer = (props: Props) => {
   const { projectId, onDismiss } = props;
@@ -30,22 +25,34 @@ const EditPanelContainer = (props: Props) => {
   const project = useSelector((state: RootState) => selectTrainingProjectById(state, projectId));
   const partSelector = useMemo(() => trainingProjectPartsSelectorFactory(project.id), [project]);
   const parts = useSelector(partSelector);
-  const imagesSelector = useMemo(() => isLabeledImagesSelector(parseInt(projectId, 10)), [projectId]);
+  const imagesSelector = useMemo(() => isLabeledImagesSelector(projectId), [projectId]);
   const images = useSelector(imagesSelector);
+  const projectStatusList = useSelector((state: RootState) => selectAllTrainingProjectsStatus(state));
+
+  const projectStatus = projectStatusList.find((status) => status.project === projectId);
 
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getSingleTrainingProject(parseInt(projectId, 10)));
+    dispatch(getSingleTrainingProject(projectId));
+    dispatch(getOneTrainingProjectStatus(projectId));
+    dispatch(getImages({ freezeRelabelImgs: true, selectedProject: projectId }));
   }, [dispatch]);
+
+  if (!projectStatus) return <></>;
 
   return (
     <EditPanel
-      projectId={projectId}
       onDismiss={onDismiss}
       project={project}
       parts={parts}
-      labeledCount={labeledImagesCount(images as EnhanceImage[])}
+      imageList={images as EnhanceImage[]}
+      // imageCount={
+      //   project.projectType === 'ObjectDetection'
+      //     ? labeledImagesCount(images as EnhanceImage[])
+      //     : images.length
+      // }
+      status={projectStatus.status}
     />
   );
 };

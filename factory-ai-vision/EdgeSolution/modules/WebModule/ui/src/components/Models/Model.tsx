@@ -17,10 +17,9 @@ import {
 
 import { TrainingProject } from '../../store/trainingProjectSlice';
 import { useQuery } from '../../hooks/useQuery';
-
 import { Url } from '../../enums';
 
-import ModelCard from './ModelCard';
+import ModelCardContainer from './ModelCard/ModelCardContainer';
 import EditPanel from './Panel/EditPanel';
 import EditPanelContainer from './Panel/EditPanelContainer';
 
@@ -54,6 +53,8 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
 
   const intelProjectList = trainingProjectList.filter((project) => project.category === 'openvino');
   const ownProjectList = trainingProjectList.filter((project) => project.category === 'customvision');
+
+  console.log('ownProjectList', ownProjectList);
 
   useEffect(() => {
     if (modelId) {
@@ -96,7 +97,7 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
           {isIntelProjectClick && (
             <Stack horizontal tokens={{ childrenGap: '10px' }} wrap>
               {intelProjectList.map((project, i) => (
-                <ModelCard
+                <ModelCardContainer
                   key={i}
                   project={project}
                   onSelectedProject={() => {
@@ -120,7 +121,7 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
           {isOwnProject && (
             <Stack horizontal tokens={{ childrenGap: '10px' }} wrap>
               {ownProjectList.map((project, i) => (
-                <ModelCard
+                <ModelCardContainer
                   key={i}
                   project={project}
                   onSelectedProject={() => {
@@ -139,7 +140,7 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
       </Stack>
       {selectedProjectId && (
         <EditPanelContainer
-          projectId={selectedProjectId}
+          projectId={parseInt(selectedProjectId, 10)}
           onDismiss={() => {
             setSelectedProjectId(null);
             history.push(Url.MODELS);
