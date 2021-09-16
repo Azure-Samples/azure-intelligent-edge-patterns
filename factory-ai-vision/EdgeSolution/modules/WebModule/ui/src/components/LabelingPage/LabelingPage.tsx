@@ -17,10 +17,16 @@ import {
 import { State } from 'RootStateType';
 import { LabelingType, WorkState } from './type';
 import { closeLabelingPage, OpenFrom } from '../../store/labelingPageSlice';
-import { selectImageEntities, saveLabelImageAnnotation } from '../../store/imageSlice';
+import {
+  selectImageEntities,
+  saveLabelImageAnnotation,
+  selectImageById,
+  saveClassificationImageTag,
+} from '../../store/imageSlice';
+import { createClassification } from '../../store/annotationSlice';
 import { labelPageAnnoSelector } from '../../store/annotationSlice';
 import { Annotation } from '../../store/type';
-import { selectPartEntities, Part } from '../../store/partSlice';
+import { selectPartEntities, Part, getParts } from '../../store/partSlice';
 import { deleteImage, thunkGoNextImage, thunkGoPrevImage } from '../../store/actions';
 import { PartPicker } from './PartPicker';
 import { timeStampConverter } from '../../utils/timeStampConverter';
@@ -37,7 +43,14 @@ export const imageSelector = createSelector(
 );
 const imagePartSelector = createSelector([imageSelector, selectPartEntities], (img, partEntities) => {
   if (img) return partEntities[img.part];
-  return { id: null, name: '', description: '', trainingProject: null };
+  return {
+    id: null,
+    name: '',
+    description: '',
+    trainingProject: null,
+    local_image_count: 0,
+    remote_image_count: 0,
+  };
 });
 
 const selectImageTimeStamp = (state: State) => {
@@ -54,7 +67,20 @@ const modalProps: IModalProps = {
 
 const labelingPageStyle = mergeStyleSets({
   imgContainer: { position: 'relative', width: '70%', height: '540px', backgroundColor: '#F3F2F1' },
-  imgCover: { position: 'absolute', height: '100%', width: '100%', zIndex: 2, cursor: 'not-allowed' },
+  imgCover: {
+    position: 'absolute',
+    height: '540px',
+    width: '100%',
+    zIndex: 2,
+    cursor: 'not-allowed',
+    justifyContent: 'center',
+    alignItems: 'center',
+    display: 'flex',
+    fontSize: '80px',
+    fontWeight: 600,
+    color: '#FFF',
+  },
+  covertText: { width: '80%', wordBreak: 'break-all', textAlign: 'center' },
   imgInfoContainer: { width: '30%' },
 });
 
@@ -67,6 +93,8 @@ const cameraNameSelector = (state: State) => {
   const cameraId = imageSelector(state)?.camera;
   return state.camera.entities[cameraId]?.name;
 };
+
+const getPart = (parts: Part[], selectedPart: number) => parts.find((part) => part.id === selectedPart);
 
 const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId }) => {
   const dispatch = useDispatch();
@@ -94,6 +122,12 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
   const partOfProjectSelector = useMemo(() => selectProjectPartsFactory(projectId), [projectId]);
   const parts = useSelector(partOfProjectSelector);
   const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
+  const { selectedPartId } = useSelector((state: State) => state.labelingPage);
+  const image = useSelector((state: State) => selectImageById(state, selectedImageId));
+
+  console.log('selectedPartId', selectedPartId);
+  console.log(getPart(parts, selectedPartId));
+  console.log('image', image);
 
   const isOnePointBox = checkOnePointBox(annotations);
 
@@ -128,6 +162,27 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
     onSaveAndGoCaptured();
   };
 
+  const saveClassification = async () => {
+    setLoading(true);
+    await dispatch(createClassification({ x: -100, y: -100 }, selectedImageId, selectedPartId));
+    await dispatch(saveClassificationImageTag());
+    setLoading(false);
+  };
+
+  const saveClassificationAndDone = async () => {
+    await saveClassification();
+    closeDialog();
+  };
+
+  const saveClassificationAndNext = async () => {
+    await saveClassification();
+    dispatch(thunkGoNextImage());
+  };
+  const saveClassificationAndPrev = async () => {
+    await saveClassification();
+    dispatch(thunkGoPrevImage());
+  };
+
   const onDeleteImage = async () => {
     setLoading(true);
     await dispatch(deleteImage(selectedImageId));
@@ -136,7 +191,18 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
 
   const onRenderImage = (): JSX.Element => (
     <>
-      {project.projectType === 'Classification' && <Stack className={labelingPageStyle.imgCover} />}
+      {project.projectType === 'Classification' && (
+        <Stack className={labelingPageStyle.imgCover}>
+          {selectedPartId === 0 && image?.part_ids.length === 1 && (
+            <Stack className={labelingPageStyle.covertText}>
+              {getPart(parts, parseInt(image.part_ids[0], 10)).name}
+            </Stack>
+          )}
+          {selectedPartId !== 0 && (
+            <Stack className={labelingPageStyle.covertText}>{getPart(parts, selectedPartId).name}</Stack>
+          )}
+        </Stack>
+      )}
       <Scene
         url={imageUrl}
         annotations={annotations}
@@ -191,21 +257,21 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
       );
 
     const isLastImg = index === imageIds.length - 1;
-    const previousDisabled = index === 0 || loading;
-    const nextDisabled = isLastImg || loading;
+    const previousDisabled = index === 0 || selectedPartId === 0 || loading;
+    const nextDisabled = isLastImg || selectedPartId === 0 || loading;
     return (
       <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
         <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />
         <Text style={{ marginLeft: 'auto' }}>
           Image {index + 1} of {imageIds.length}
         </Text>
-        <DefaultButton text="Previous" onClick={saveAndPrev} disabled={previousDisabled} />
-        <PrimaryButton text="Next" disabled={nextDisabled} onClick={saveAndNext} />
+        <DefaultButton text="Previous" onClick={saveClassificationAndPrev} disabled={previousDisabled} />
+        <PrimaryButton text="Next" onClick={saveClassificationAndNext} disabled={nextDisabled} />
         <Separator vertical />
         {canBackToCapture && (
           <DefaultButton text="Save and capture another image" onClick={saveAndGoCapture} />
         )}
-        <DefaultButton text="Done" primary={isLastImg} onClick={saveAndDone} />
+        <DefaultButton text="Done" primary={isLastImg} onClick={saveClassificationAndDone} />
       </Stack>
     );
   };

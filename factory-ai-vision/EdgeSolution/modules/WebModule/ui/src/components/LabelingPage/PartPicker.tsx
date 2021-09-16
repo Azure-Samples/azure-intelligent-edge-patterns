@@ -3,10 +3,7 @@ import { DetailsList, SelectionMode, CheckboxVisibility, Text, TextField } from 
 import { useSelector, useDispatch } from 'react-redux';
 
 import { Part, getParts, postPart, trainingProjectPartsSelectorFactory } from '../../store/partSlice';
-// import { thunkChangeImgPart } from '../../store/imageSlice';
-// import { selectNonDemoPart } from '../../store/selectors';
 import { changePartId } from '../../store/labelingPageSlice';
-// import { State } from 'RootStateType';
 
 interface Props {
   trainingProject: number;

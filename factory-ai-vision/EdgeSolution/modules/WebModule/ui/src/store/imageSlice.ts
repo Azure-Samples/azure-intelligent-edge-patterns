@@ -32,6 +32,7 @@ type ImageFromServer = {
   timestamp: string;
   camera: number;
   manual_checked: boolean;
+  part_ids: string;
 };
 
 type ImageFromServerWithSerializedLabels = Omit<ImageFromServer, 'labels'> & { labels: Annotation[] };
@@ -63,6 +64,7 @@ const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
     uploaded: response.uploaded,
     manualChecked: response.manual_checked,
     project: response.project,
+    part_ids: JSON.parse(response.part_ids),
   };
 };
 
@@ -176,6 +178,22 @@ export const saveLabelImageAnnotation = createWrappedAsync<any, undefined, { sta
   },
 );
 
+export const saveClassificationImageTag = createWrappedAsync<any, undefined, { state: State }>(
+  'image/saveClassification',
+  async (_, { getState }) => {
+    const { selectedImageId } = getState().labelingPage;
+    const annoEntities = getState().annotations.entities;
+    const labels = Object.values(annoEntities).filter((e: Annotation) => e.image === selectedImageId);
+
+    await Axios.patch(`/api/images/${selectedImageId}/`, {
+      labels: JSON.stringify(labels.map((e: Annotation) => ({ ...e.label, part: e.part }))),
+      manual_checked: true,
+    });
+
+    return { id: selectedImageId, manualChecked: true, labels: labels.map((label) => label.id) };
+  },
+);
+
 const imageAdapter = createEntityAdapter<Image>();
 
 const slice = createSlice({
@@ -200,6 +218,12 @@ const slice = createSlice({
       .addCase(saveLabelImageAnnotation.fulfilled, (state, action) => {
         imageAdapter.updateOne(state, {
           id: action.payload.imageId,
+          changes: { manualChecked: action.payload.manualChecked, labels: action.payload.labels },
+        });
+      })
+      .addCase(saveClassificationImageTag.fulfilled, (state, action) => {
+        imageAdapter.updateOne(state, {
+          id: action.payload.id,
           changes: { manualChecked: action.payload.manualChecked, labels: action.payload.labels },
         });
       })

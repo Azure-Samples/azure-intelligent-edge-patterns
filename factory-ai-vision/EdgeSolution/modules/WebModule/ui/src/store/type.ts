@@ -56,4 +56,5 @@ export type Image = {
   manualChecked: boolean;
   labels: string[];
   project: number;
+  part_ids: string[];
 };

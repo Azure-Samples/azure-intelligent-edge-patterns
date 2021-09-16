@@ -6,7 +6,6 @@ import { useHistory, generatePath } from 'react-router-dom';
 import { customVisionTrainingProjectFactory } from '../store/trainingProjectSlice';
 
 import { Url } from '../enums';
-import { Images as ImagesComponent } from '../components/Images/Images';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
 
 export const Images: React.FC = () => {
@@ -31,20 +30,18 @@ export const Images: React.FC = () => {
   );
 
   return (
-    <>
-      <Stack styles={{ root: { height: '100%' } }}>
-        <EmptyAddIcon
-          title="Select Model"
-          subTitle=""
-          node={
-            <Dropdown
-              styles={{ dropdown: { width: '400px' } }}
-              options={projectsOptions}
-              onChange={(_, option: IDropdownOption) => onClickDropdown(option)}
-            />
-          }
-        />
-      </Stack>
-    </>
+    <Stack styles={{ root: { height: '100%' } }}>
+      <EmptyAddIcon
+        title="Select Model"
+        subTitle=""
+        node={
+          <Dropdown
+            styles={{ dropdown: { width: '400px' } }}
+            options={projectsOptions}
+            onChange={(_, option: IDropdownOption) => onClickDropdown(option)}
+          />
+        }
+      />
+    </Stack>
   );
 };
