@@ -99,6 +99,7 @@ export const isLabeledImagesSelector = (projectId: number) =>
   createSelector([selectAllImages, selectAllAnno], (images, annotations) => {
     return images
       .filter((image) => image.project === projectId)
+      .filter((image) => !image.uploaded)
       .map((image) => ({
         ...image,
         labels: image.labels

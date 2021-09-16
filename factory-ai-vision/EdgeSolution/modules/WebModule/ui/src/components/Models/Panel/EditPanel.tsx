@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Panel,
   Stack,
@@ -13,26 +13,18 @@ import {
   Icon,
 } from '@fluentui/react';
 import { useDispatch } from 'react-redux';
-import { useHistory, generatePath } from 'react-router-dom';
 
-import {
-  updateCustomVisionProjectTags,
-  TrainingProject,
-  trainCustomVisionProject,
-} from '../../../store/trainingProjectSlice';
-import { TrainingStatus, getOneTrainingProjectStatus } from '../../../store/trainingProjectStatusSlice';
+import { updateCustomVisionProjectTags, TrainingProject } from '../../../store/trainingProjectSlice';
+import { TrainingStatus } from '../../../store/trainingProjectStatusSlice';
 import { Part } from '../../../store/partSlice';
-import { Url } from '../../../enums';
-import { useInterval } from '../../../hooks/useInterval';
-import { EnhanceImage } from './type';
 
 import Tag from '../Tag';
+import ImageLabel from './ImageLabel';
 
 type Props = {
   onDismiss: () => void;
   project: TrainingProject;
   parts: Part[];
-  imageList: EnhanceImage[];
   status: TrainingStatus;
 };
 
@@ -55,48 +47,16 @@ const convertProjectType = (project: TrainingProject): string => {
   return 'Classification';
 };
 
-const getUpdatedImageList = (imageList: EnhanceImage[]) =>
-  imageList.filter((image) => !image.uploaded).filter((image) => image.labels.length !== 0);
-
-const isDisableObjectDetectionTrainButton = (status: TrainingStatus, imageList: EnhanceImage[]): boolean => {
-  const updatedImageList = imageList.filter((image) => image.uploaded);
-  const unUpdatedImageList = getUpdatedImageList(imageList);
-
-  if (
-    updatedImageList.length > 0 &&
-    unUpdatedImageList.length > 0 &&
-    ['ok', 'failed', 'success', 'No change'].includes(status)
-  )
-    return false;
-
-  return true;
-};
-
-const getObjectDetectionTrainButtonText = (imageList: EnhanceImage[]): string => {
-  if (getUpdatedImageList(imageList).length > 0) return `${getUpdatedImageList(imageList).length} tagged`;
-  return 'Tag images';
-};
-
 const EditPanel: React.FC<Props> = (props) => {
-  const { project, parts, onDismiss, imageList, status } = props;
+  const { project, parts, onDismiss, status } = props;
 
   const [localTag, setLocalTag] = useState('');
   const [localTags, setLocalTags] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState(project.name);
-  const [localStatus, setLocalStatus] = useState<TrainingStatus>(status);
 
   const dispatch = useDispatch();
-  const history = useHistory();
   const classes = getClasses();
-
-  useInterval(async () => {
-    const response = await dispatch(getOneTrainingProjectStatus(project.id));
-    // @ts-ignore
-    const { status } = response.payload;
-
-    setLocalStatus(status);
-  }, 5000);
 
   useEffect(() => {
     setLocalTags([...parts].map((part) => part.name));
@@ -135,18 +95,6 @@ const EditPanel: React.FC<Props> = (props) => {
     setIsLoading(false);
     onDismiss();
   }, [dispatch, project, localTags, onDismiss]);
-
-  const onDirectToImages = useCallback(() => {
-    history.push(
-      generatePath(Url.IMAGES_DETAIL, {
-        id: project.id,
-      }),
-    );
-  }, [history, project]);
-
-  const onTrainClick = useCallback(() => {
-    dispatch(trainCustomVisionProject(project.id));
-  }, []);
 
   return (
     <Panel
@@ -217,68 +165,7 @@ const EditPanel: React.FC<Props> = (props) => {
               <Label styles={{ root: classes.itemTitle }}>Type</Label>
               <Text styles={{ root: classes.item }}>{convertProjectType(project)}</Text>
             </Stack>
-            <div>
-              <Label styles={{ root: classes.itemTitle }}>Images</Label>
-              <Text styles={{ root: classes.tips }}>
-                {project.projectType === 'ObjectDetection'
-                  ? 'At least 15 images must be tagged per object'
-                  : 'At least 15 images must be classified'}
-              </Text>
-              <Stack>
-                <Link onClick={onDirectToImages}>
-                  <Stack
-                    styles={{ root: { color: '#0078D4' } }}
-                    horizontal
-                    verticalAlign="center"
-                    tokens={{ childrenGap: 5 }}
-                  >
-                    <Text>{getObjectDetectionTrainButtonText(imageList)}</Text>
-                    <Icon iconName="OpenInNewWindow" />
-                  </Stack>
-                </Link>
-              </Stack>
-              <DefaultButton
-                styles={{ root: { marginTop: '14px' } }}
-                disabled={isDisableObjectDetectionTrainButton(localStatus, imageList)}
-                onClick={onTrainClick}
-              >
-                Train
-              </DefaultButton>
-              {!['failed', 'ok', 'success', 'No change'].includes(localStatus) && (
-                <Stack>
-                  <ProgressIndicator
-                    styles={{
-                      progressBar: {
-                        background:
-                          'linear-gradient(to right, rgb(237, 235, 233) 0%, rgba(19, 138, 0) 50%, rgb(237, 235, 233) 100%)',
-                      },
-                    }}
-                  />
-                  <Text>{localStatus}</Text>
-                </Stack>
-              )}
-              {localStatus === 'failed' && (
-                <Stack horizontal styles={{ root: { marginTop: '7px' } }} tokens={{ childrenGap: 12 }}>
-                  <Icon
-                    iconName="StatusErrorFull"
-                    styles={{ root: { color: '#D83B01', fontSize: '20px' } }}
-                  />
-                  <Text styles={{ root: classes.item }}>Model retraining failed</Text>
-                </Stack>
-              )}
-              {localStatus === 'success' && (
-                <Stack horizontal styles={{ root: { marginTop: '7px' } }} tokens={{ childrenGap: 12 }}>
-                  <Icon iconName="CompletedSolid" styles={{ root: { color: '#138A00', fontSize: '20px' } }} />
-                  <Text styles={{ root: classes.item }}>Model was successfully trained</Text>
-                </Stack>
-              )}
-              {localStatus === 'No change' && (
-                <Stack horizontal styles={{ root: { marginTop: '7px' } }} tokens={{ childrenGap: 12 }}>
-                  <Icon iconName="ExploreContent" styles={{ root: { color: '#D83B01', fontSize: '20px' } }} />
-                  <Text styles={{ root: classes.item }}>No newly-tagged images for retraining model</Text>
-                </Stack>
-              )}
-            </div>
+            <ImageLabel project={project} status={status} parts={parts} />
           </>
         )}
       </Stack>

@@ -9,6 +9,8 @@ export type Part = {
   name: string;
   description: string;
   trainingProject: number;
+  local_image_count: number;
+  remote_image_count: number;
 };
 
 export type CreatePartPayload = {
@@ -23,6 +25,8 @@ const normalizePart = (data): Part[] => {
     name: d.name,
     description: d.description,
     trainingProject: d.project,
+    local_image_count: d.local_image_count,
+    remote_image_count: d.remote_image_count,
   }));
 };
 

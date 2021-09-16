@@ -13,6 +13,7 @@ import CameraDetails from '../pages/CameraDetails';
 import { PartDetails } from '../pages/PartDetails';
 import { Parts } from '../pages/Parts';
 import { Images } from '../pages/Images';
+
 import { DeploymentPage } from '../pages/Deployment';
 import { Models } from '../pages/Models';
 import { ModelDetail } from '../pages/ModelDetail';

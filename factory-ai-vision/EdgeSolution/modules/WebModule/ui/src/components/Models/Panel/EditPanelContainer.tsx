@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { State as RootState } from 'RootStateType';
@@ -8,9 +8,7 @@ import {
   getOneTrainingProjectStatus,
   selectAllTrainingProjectsStatus,
 } from '../../../store/trainingProjectStatusSlice';
-import { getImages } from '../../../store/imageSlice';
-import { isLabeledImagesSelector } from '../../../store/selectors';
-import { EnhanceImage } from './type';
+import { getParts } from '../../../store/partSlice';
 
 import EditPanel from './EditPanel';
 
@@ -25,36 +23,40 @@ const EditPanelContainer = (props: Props) => {
   const project = useSelector((state: RootState) => selectTrainingProjectById(state, projectId));
   const partSelector = useMemo(() => trainingProjectPartsSelectorFactory(project.id), [project]);
   const parts = useSelector(partSelector);
-  const imagesSelector = useMemo(() => isLabeledImagesSelector(projectId), [projectId]);
-  const images = useSelector(imagesSelector);
+  // const imagesSelector = useMemo(() => isLabeledImagesSelector(projectId), [projectId]);
+  // const images = useSelector(imagesSelector);
   const projectStatusList = useSelector((state: RootState) => selectAllTrainingProjectsStatus(state));
 
   const projectStatus = projectStatusList.find((status) => status.project === projectId);
 
+  // const dispatch = useDispatch();
+
+  const [loading, setLoading] = useState(true);
+
   const dispatch = useDispatch();
 
   useEffect(() => {
-    dispatch(getSingleTrainingProject(projectId));
-    dispatch(getOneTrainingProjectStatus(projectId));
-    dispatch(getImages({ freezeRelabelImgs: true, selectedProject: projectId }));
+    (async () => {
+      await Promise.all([
+        dispatch(getSingleTrainingProject(projectId)),
+        dispatch(getOneTrainingProjectStatus(projectId)),
+        dispatch(getParts()),
+      ]);
+      setLoading(false);
+    })();
   }, [dispatch]);
 
-  if (!projectStatus) return <></>;
+  if (loading) return <></>;
 
-  return (
-    <EditPanel
-      onDismiss={onDismiss}
-      project={project}
-      parts={parts}
-      imageList={images as EnhanceImage[]}
-      // imageCount={
-      //   project.projectType === 'ObjectDetection'
-      //     ? labeledImagesCount(images as EnhanceImage[])
-      //     : images.length
-      // }
-      status={projectStatus.status}
-    />
-  );
+  // useEffect(() => {
+  //   dispatch(getSingleTrainingProject(projectId));
+  //   dispatch(getOneTrainingProjectStatus(projectId));
+  //   dispatch(getParts());
+  // }, [dispatch]);
+
+  // if (!projectStatus) return <></>;
+
+  return <EditPanel onDismiss={onDismiss} project={project} parts={parts} status={projectStatus.status} />;
 };
 
 export default EditPanelContainer;

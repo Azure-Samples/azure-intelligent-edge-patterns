@@ -11,7 +11,7 @@ import {
 import * as R from 'ramda';
 
 import { State } from 'RootStateType';
-import { getImages, saveLabelImageAnnotation } from './imageSlice';
+import { getImages, saveLabelImageAnnotation, saveClassificationImageTag } from './imageSlice';
 import { Annotation, AnnotationState, Position2D } from './type';
 import { closeLabelingPage } from './labelingPageSlice';
 
@@ -101,6 +101,29 @@ const slice = createSlice({
         entityAdapter.upsertOne(state, { ...newAnno, part });
       },
     },
+    createClassification: {
+      prepare: (point: Position2D, imageId: number, part: number) => ({
+        payload: {
+          id: nanoid(),
+          point,
+          imageId,
+          part,
+        },
+      }),
+      reducer: (
+        state,
+        action: PayloadAction<{ point: Position2D; imageId: number; id: string; part: number }>,
+      ) => {
+        const { imageId, id, part } = action.payload;
+        entityAdapter.upsertOne(state, {
+          id,
+          image: imageId,
+          label: { x1: 0, y1: 0, x2: 1, y2: 1 },
+          part,
+          annotationState: AnnotationState.Finish,
+        });
+      },
+    },
     updateCreatingAnnotation: (state, action: PayloadAction<Position2D>) => {
       const idOfLastAnno = R.last(state.ids);
       const creatingAnnotation = BoxObj.add(action.payload, state.entities[idOfLastAnno]);
@@ -144,6 +167,9 @@ const addOriginEntitiesReducer: Reducer<
   if (saveLabelImageAnnotation.fulfilled.match(action)) {
     return { ...state, originEntities: R.clone(state.entities) };
   }
+  if (saveClassificationImageTag.fulfilled.match(action)) {
+    return { ...state, originEntities: R.clone(state.entities) };
+  }
   return { ...state, ...reducer(state, action) };
 };
 
@@ -154,6 +180,7 @@ export const {
   updateAnnotation,
   removeAnnotation,
   createAnnotation,
+  createClassification,
 } = slice.actions;
 
 export const thunkCreateAnnotation = (
