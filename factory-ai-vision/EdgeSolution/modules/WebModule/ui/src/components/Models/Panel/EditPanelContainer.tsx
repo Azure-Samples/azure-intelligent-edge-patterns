@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Panel, ProgressIndicator } from '@fluentui/react';
 
 import { State as RootState } from 'RootStateType';
 import { selectTrainingProjectById, getSingleTrainingProject } from '../../../store/trainingProjectSlice';
@@ -23,13 +24,9 @@ const EditPanelContainer = (props: Props) => {
   const project = useSelector((state: RootState) => selectTrainingProjectById(state, projectId));
   const partSelector = useMemo(() => trainingProjectPartsSelectorFactory(project.id), [project]);
   const parts = useSelector(partSelector);
-  // const imagesSelector = useMemo(() => isLabeledImagesSelector(projectId), [projectId]);
-  // const images = useSelector(imagesSelector);
   const projectStatusList = useSelector((state: RootState) => selectAllTrainingProjectsStatus(state));
 
   const projectStatus = projectStatusList.find((status) => status.project === projectId);
-
-  // const dispatch = useDispatch();
 
   const [loading, setLoading] = useState(true);
 
@@ -46,15 +43,12 @@ const EditPanelContainer = (props: Props) => {
     })();
   }, [dispatch]);
 
-  if (loading) return <></>;
-
-  // useEffect(() => {
-  //   dispatch(getSingleTrainingProject(projectId));
-  //   dispatch(getOneTrainingProjectStatus(projectId));
-  //   dispatch(getParts());
-  // }, [dispatch]);
-
-  // if (!projectStatus) return <></>;
+  if (loading)
+    return (
+      <Panel isOpen={true} hasCloseButton headerText="Edit Model">
+        <ProgressIndicator />
+      </Panel>
+    );
 
   return <EditPanel onDismiss={onDismiss} project={project} parts={parts} status={projectStatus.status} />;
 };
