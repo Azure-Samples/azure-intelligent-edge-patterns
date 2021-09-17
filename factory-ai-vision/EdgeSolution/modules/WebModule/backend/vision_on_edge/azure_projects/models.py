@@ -71,6 +71,7 @@ class Project(models.Model):
     demultiply_count = models.IntegerField(blank=True, null=True)
     openvino_library_name = models.CharField(max_length=1000, null=True, blank=True, default="")
     openvino_model_name = models.CharField(max_length=1000, null=True, blank=True, default="")
+    classification_type = models.CharField(max_length=1000, null=True, blank=True, default="")
 
     def __repr__(self):
         return self.name.__repr__()
@@ -206,7 +207,7 @@ class Project(models.Model):
             logger.exception("dequeue_iteration error")
             raise
 
-    def create_project(self, project_type: str = None):
+    def create_project(self, project_type: str = None, classification_type: str = None):
         """create_project.
 
         Create a project on CustomVision.
@@ -218,7 +219,7 @@ class Project(models.Model):
                 self.name = "VisionOnEdge-" + datetime.datetime.utcnow().isoformat()
             if project_type:
                 obj_detection_domain = next(domain for domain in self.setting.get_trainer_obj().get_domains() if domain.type == project_type and domain.name == "General (compact)")
-                project = self.setting.create_project(project_name=self.name, domain_id=obj_detection_domain.id)
+                project = self.setting.create_project(project_name=self.name, domain_id=obj_detection_domain.id, classification_type=classification_type)
             else:
                 project = self.setting.create_project(project_name=self.name)
 

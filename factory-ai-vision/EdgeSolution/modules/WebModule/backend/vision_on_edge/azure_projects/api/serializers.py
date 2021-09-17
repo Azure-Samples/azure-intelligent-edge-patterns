@@ -101,6 +101,7 @@ class CreateCVProjectSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=200)
     project_type = serializers.CharField(max_length=200)
     tags = serializers.ListField(child=serializers.CharField(max_length=200))
+    classification_type = serializers.CharField(max_length=200)
 
 class UpdateTagSerializer(serializers.Serializer):
     tags = serializers.ListField(child=serializers.CharField(max_length=200))
