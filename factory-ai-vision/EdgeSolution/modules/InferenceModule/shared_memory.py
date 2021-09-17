@@ -10,6 +10,8 @@ from exception_handler import PrintGetExceptionDetails
 class SharedMemoryManager:
     def __init__(self, shmFlags=None, name=None, size=None):
         try:
+            self._shmFile = None # to prevent destructor crashing if file fails to open
+            
             self._shmFilePath = '/dev/shm'
             self._shmFileName = name
             if self._shmFileName is None:
@@ -39,7 +41,13 @@ class SharedMemoryManager:
         except:
             PrintGetExceptionDetails()
             raise
+            
+    def File(self):
+        return self._shm
 
+    def Filename(self):
+        return self._shmFileFullPath
+    
     def ReadBytes(self, memorySlotOffset, memorySlotLength):
         try:
             # This is Non-Zero Copy operation
@@ -57,40 +65,29 @@ class SharedMemoryManager:
     # Returns None if no availability
     # Returns closed interval [Begin, End] address with available slot
     def GetEmptySlot(self, seqNo, sizeNeeded):
-        address = None
-
         if sizeNeeded < 1:
-            return address
+            return None
 
-        # Empty memory
-        if len(self._memSlots) < 1:
-            if self._shmFileSize >= sizeNeeded:
-                self._memSlots[seqNo] = (0, sizeNeeded - 1)
-                address = (0, sizeNeeded - 1)
-            else:
-                address = None
-        else:
-            self._memSlots = {k: v for k, v in sorted(
-                self._memSlots.items(), key=lambda item: item[1])}
+        # round size up to multiple of PAGESIZE
+        pages = (sizeNeeded + mmap.PAGESIZE - 1) // mmap.PAGESIZE
+        sizeNeeded = pages * mmap.PAGESIZE
 
-            # find an available memory gap = sizeNeeded
-            prevSlotEnd = 0
-            for k, v in self._memSlots.items():
-                if (v[0] - prevSlotEnd - 1) >= sizeNeeded:
-                    address = (prevSlotEnd + 1, prevSlotEnd + sizeNeeded)
-                    self._memSlots[seqNo] = (address[0], address[1])
-                    break
-                else:
-                    prevSlotEnd = v[1]
+        # slots in use, in order
+        sorted_used_slots = sorted(self._memSlots.values(), key=lambda slot: slot[0])
+        # add a dummy entry at the end of memory
+        sorted_used_slots.append((self._shmFileSize, self._shmFileSize))
 
-            # no gap in between, check last possible gap
-            if address is None:
-                if (self._shmFileSize - prevSlotEnd + 1) >= sizeNeeded:
-                    address = (prevSlotEnd + 1, prevSlotEnd + sizeNeeded)
-                    self._memSlots[seqNo] = (address[0], address[1])
+        # find an available memory gap
+        prevSlotEnd = -1
+        for used_slot in sorted_used_slots:
+            if (used_slot[0] - prevSlotEnd - 1) >= sizeNeeded:
+                address = (prevSlotEnd + 1, prevSlotEnd + sizeNeeded)
+                self._memSlots[seqNo] = address
+                return address
+            prevSlotEnd = used_slot[1]
 
-        # interval [Begin, End]
-        return address
+        # No space
+        return None
 
     def DeleteSlot(self, seqNo):
         try:
@@ -101,10 +98,11 @@ class SharedMemoryManager:
 
     def __del__(self):
         try:
-            if self._shmFlags is None:
-                self._shmFile.close()
-            else:
-                os.close(self._shmFile)
+            if self._shmFile:
+                if self._shmFlags is None:
+                    self._shmFile.close()
+                else:
+                    os.close(self._shmFile)
         except:
             PrintGetExceptionDetails()
             raise
