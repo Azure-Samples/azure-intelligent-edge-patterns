@@ -1,3 +1,5 @@
+import { ClassificationType } from '../../store/trainingProjectSlice';
+
 export type ModelType = 'custom' | 'own' | 'ovms';
 
 export type CreateCustomVisionForm = {
@@ -5,7 +7,7 @@ export type CreateCustomVisionForm = {
   type: 'ObjectDetection' | 'Classification';
   tags: string[];
   selectedCustomVisionId: string;
-  classification: 'Multilabel' | 'Multiclass';
+  classification: ClassificationType;
 };
 
 export type CreateOwnModelForm = {

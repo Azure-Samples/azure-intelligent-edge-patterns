@@ -167,6 +167,12 @@ const EditPanel: React.FC<Props> = (props) => {
               <Label styles={{ root: classes.itemTitle }}>Type</Label>
               <Text styles={{ root: classes.item }}>{convertProjectType(project)}</Text>
             </Stack>
+            {project.classification_type !== '' && (
+              <Stack>
+                <Label styles={{ root: classes.itemTitle }}>Classification Type</Label>
+                <Text styles={{ root: classes.item }}>{project.classification_type}</Text>
+              </Stack>
+            )}
             <ImageLabel project={project} status={status} parts={parts} />
           </>
         )}
