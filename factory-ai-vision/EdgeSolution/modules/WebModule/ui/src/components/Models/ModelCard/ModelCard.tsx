@@ -55,6 +55,7 @@ const getClasses = () =>
 const CARD_PART_LIMIT = 5;
 
 const isDeleteDisable = (project: TrainingProject, trainingStatus: Status) => {
+  if (project.category === 'openvino') return false;
   if (
     project.category === 'customvision' &&
     ['ok', 'failed', 'success', 'No change'].includes(trainingStatus.status)
@@ -90,7 +91,6 @@ const ModelCard: React.FC<Props> = (props) => {
         iconProps: { iconName: 'Delete' },
         onClick: () => setIsOpenDialog(true),
         disabled: isDeleteDisable(project, status),
-        // disabled: false,
       },
     ],
   };

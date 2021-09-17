@@ -160,6 +160,7 @@ const ModelContainer = () => {
           {isAddIntelOvms ? (
             <IntelProjectDashboard
               intelProjectList={intelProjectList}
+              openVinoProjectList={trainingProjectList.filter((project) => project.category === 'openvino')}
               onCloseIntel={() => setIsAddIntelOvms(false)}
             />
           ) : (

@@ -1,15 +1,16 @@
 import React from 'react';
-import { Icon, Stack } from '@fluentui/react';
+import { Icon, Stack, Text } from '@fluentui/react';
 
 interface Props {
   id: number;
   text: string;
   isDelete?: boolean;
   onDelete?: (id: number) => void;
+  count?: number;
 }
 
 const Tag: React.FC<Props> = (props) => {
-  const { id, text, isDelete, onDelete } = props;
+  const { id, text, isDelete, onDelete, count } = props;
 
   return (
     <Stack
@@ -21,10 +22,12 @@ const Tag: React.FC<Props> = (props) => {
         borderRadius: '2px',
       }}
       horizontal
+      tokens={{ childrenGap: 5 }}
     >
-      {text}
+      <Text>{text}</Text>
+      {count !== undefined && <Text>{count}</Text>}
       {isDelete && (
-        <Icon styles={{ root: { marginLeft: '8px' } }} iconName="Cancel" onClick={() => onDelete(id)} />
+        <Icon styles={{ root: { cursor: 'pointer' } }} iconName="Cancel" onClick={() => onDelete(id)} />
       )}
     </Stack>
   );

@@ -70,9 +70,6 @@ const ImageLabel = (props: Props) => {
   const hasTrainProject = parts.every((part) => part.remote_image_count >= 15);
   const labeledImageCounts = getUnTrainImageCounts(parts);
 
-  console.log('hasTrainProject', hasTrainProject);
-  console.log('labeledImageCounts', labeledImageCounts);
-
   const classes = getClasses();
   const history = useHistory();
   const dispatch = useDispatch();
