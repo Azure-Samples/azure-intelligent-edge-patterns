@@ -54,8 +54,6 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
   const intelProjectList = trainingProjectList.filter((project) => project.category === 'openvino');
   const ownProjectList = trainingProjectList.filter((project) => project.category === 'customvision');
 
-  console.log('ownProjectList', ownProjectList);
-
   useEffect(() => {
     if (modelId) {
       setSelectedProjectId(modelId);

@@ -27,7 +27,7 @@ const ImagesDetail = () => {
     })();
   }, [dispatch]);
 
-  if (loading) return <></>;
+  if (loading) return <h1>Loading...</h1>;
 
   return <Images />;
 };

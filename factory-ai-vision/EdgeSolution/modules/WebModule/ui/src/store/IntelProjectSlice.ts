@@ -4,6 +4,7 @@ import { State } from 'RootStateType';
 import { createWrappedAsync } from './shared/createWrappedAsync';
 
 import { refreshTrainingProject } from './trainingProjectSlice';
+import { getTrainingProjectStatusList } from './trainingProjectStatusSlice';
 
 export type IntelProject = {
   id: number;
@@ -127,6 +128,7 @@ export const createIntelProject = createWrappedAsync<
   await Axios.post(`/api/projects/${nonDemoProject}/add_ovms_model`, payload);
 
   dispatch(refreshTrainingProject());
+  dispatch(getTrainingProjectStatusList());
 });
 
 const intelSlice = createSlice({
@@ -135,7 +137,6 @@ const intelSlice = createSlice({
   reducers: {},
   extraReducers: (builder) => {
     builder.addCase(getIntelProjectList.fulfilled, intelProjectAdapter.setAll);
-    // .addCase(createIntelProject.fulfilled, intelProjectAdapter.addOne);
   },
 });
 

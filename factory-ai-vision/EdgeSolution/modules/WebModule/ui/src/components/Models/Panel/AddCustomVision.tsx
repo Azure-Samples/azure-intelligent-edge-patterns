@@ -52,12 +52,18 @@ const initialForm: CreateCustomVisionForm = {
   name: '',
   selectedCustomVisionId: '',
   tags: [],
-  type: 'object',
+  type: 'ObjectDetection',
+  classification: 'Multiclass',
 };
 
 const typeOptions: IDropdownOption[] = [
   { key: 'ObjectDetection', text: 'Object Detection' },
   { key: 'Classification', text: 'Classification' },
+];
+
+const classificationTypeOptions: IDropdownOption[] = [
+  { key: 'Multilabel', text: 'Multilabel' },
+  { key: 'Multiclass', text: 'Multiclass' },
 ];
 
 // const getAddOwnModelPayload = (formData: CreateCustomVisionForm): CreatOwnModelPayload => ({
@@ -67,12 +73,6 @@ const typeOptions: IDropdownOption[] = [
 //   prediction_uri: formData.endPoint,
 //   prediction_header: '',
 // });
-
-const isValid = (isExisting: boolean, formData: CreateCustomVisionForm): boolean => {
-  if (isExisting && formData.selectedCustomVisionId === '') return false;
-  if (!isExisting && (formData.name === '' || formData.tags.length < 2)) return false;
-  return true;
-};
 
 const AddModelPanel: React.FC<Props> = (props) => {
   const { isOpen, onDismiss, customVisionProjectOptions, selectedProjectInfo } = props;
@@ -170,6 +170,13 @@ const AddModelPanel: React.FC<Props> = (props) => {
   const onCategoryChange = useCallback(
     (_, option?: IDropdownOption) => {
       onChange('type', option!.key as string);
+    },
+    [onChange],
+  );
+
+  const onClassificationCategoryChange = useCallback(
+    (_, option?: IDropdownOption) => {
+      // onChange('type', option!.key as string);
     },
     [onChange],
   );
@@ -273,6 +280,14 @@ const AddModelPanel: React.FC<Props> = (props) => {
                     selectedKey={formData.type}
                     onChange={onCategoryChange}
                   />
+                  {formData.type === 'Classification' && (
+                    <Dropdown
+                      label="Classification Types"
+                      options={classificationTypeOptions}
+                      selectedKey={formData.classification}
+                      onChange={onClassificationCategoryChange}
+                    />
+                  )}
                   <Stack>
                     <TextField
                       label="Objects/Tags"

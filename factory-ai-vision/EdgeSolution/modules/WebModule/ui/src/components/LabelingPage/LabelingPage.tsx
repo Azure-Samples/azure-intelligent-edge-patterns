@@ -16,17 +16,17 @@ import {
 
 import { State } from 'RootStateType';
 import { LabelingType, WorkState } from './type';
-import { closeLabelingPage, OpenFrom } from '../../store/labelingPageSlice';
+import { closeLabelingPage, OpenFrom, changePartId } from '../../store/labelingPageSlice';
 import {
   selectImageEntities,
   saveLabelImageAnnotation,
   selectImageById,
   saveClassificationImageTag,
 } from '../../store/imageSlice';
-import { createClassification } from '../../store/annotationSlice';
+import { createClassification, updateAnnotation } from '../../store/annotationSlice';
 import { labelPageAnnoSelector } from '../../store/annotationSlice';
 import { Annotation } from '../../store/type';
-import { selectPartEntities, Part, getParts } from '../../store/partSlice';
+import { selectPartEntities, Part } from '../../store/partSlice';
 import { deleteImage, thunkGoNextImage, thunkGoPrevImage } from '../../store/actions';
 import { PartPicker } from './PartPicker';
 import { timeStampConverter } from '../../utils/timeStampConverter';
@@ -125,9 +125,10 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
   const { selectedPartId } = useSelector((state: State) => state.labelingPage);
   const image = useSelector((state: State) => selectImageById(state, selectedImageId));
 
-  console.log('selectedPartId', selectedPartId);
-  console.log(getPart(parts, selectedPartId));
-  console.log('image', image);
+  // console.log('selectedPartId', selectedPartId);
+  // console.log(getPart(parts, selectedPartId));
+  // console.log('image', image);
+  // console.log('annotations', annotations);
 
   const isOnePointBox = checkOnePointBox(annotations);
 
@@ -163,9 +164,19 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
   };
 
   const saveClassification = async () => {
+    if (selectedPartId === 0) return;
+
     setLoading(true);
-    await dispatch(createClassification({ x: -100, y: -100 }, selectedImageId, selectedPartId));
+
+    if (annotations.length > 0) {
+      const anno: Annotation = annotations[0];
+      await dispatch(updateAnnotation({ id: anno.id, changes: { ...anno, part: selectedPartId } }));
+    } else {
+      await dispatch(createClassification({ x: -100, y: -100 }, selectedImageId, selectedPartId));
+    }
+
     await dispatch(saveClassificationImageTag());
+    await dispatch(changePartId({ partId: 0 }));
     setLoading(false);
   };
 
@@ -178,6 +189,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
     await saveClassification();
     dispatch(thunkGoNextImage());
   };
+
   const saveClassificationAndPrev = async () => {
     await saveClassification();
     dispatch(thunkGoPrevImage());
@@ -193,10 +205,8 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
     <>
       {project.projectType === 'Classification' && (
         <Stack className={labelingPageStyle.imgCover}>
-          {selectedPartId === 0 && image?.part_ids.length === 1 && (
-            <Stack className={labelingPageStyle.covertText}>
-              {getPart(parts, parseInt(image.part_ids[0], 10)).name}
-            </Stack>
+          {selectedPartId === 0 && annotations.length === 1 && (
+            <Stack className={labelingPageStyle.covertText}>{getPart(parts, annotations[0].part).name}</Stack>
           )}
           {selectedPartId !== 0 && (
             <Stack className={labelingPageStyle.covertText}>{getPart(parts, selectedPartId).name}</Stack>
@@ -257,8 +267,8 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
       );
 
     const isLastImg = index === imageIds.length - 1;
-    const previousDisabled = index === 0 || selectedPartId === 0 || loading;
-    const nextDisabled = isLastImg || selectedPartId === 0 || loading;
+    const previousDisabled = index === 0 || loading;
+    const nextDisabled = isLastImg || loading;
     return (
       <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
         <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />

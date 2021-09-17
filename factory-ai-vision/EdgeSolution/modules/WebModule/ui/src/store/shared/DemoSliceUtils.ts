@@ -20,7 +20,7 @@ type DemoStateType = {
 
 export interface ProjectInfo {
   tags: string[];
-  type: string;
+  type: 'ObjectDetection' | 'Classification';
 }
 
 type DemoEntityState<T> = EntityState<T> & {

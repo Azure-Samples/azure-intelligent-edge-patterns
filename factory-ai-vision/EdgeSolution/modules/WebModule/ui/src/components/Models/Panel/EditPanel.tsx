@@ -51,7 +51,7 @@ const EditPanel: React.FC<Props> = (props) => {
   const { project, parts, onDismiss, status } = props;
 
   const [localTag, setLocalTag] = useState('');
-  const [localTags, setLocalTags] = useState<string[]>([]);
+  const [localTags, setLocalTags] = useState<{ name: string; remoteCount: number }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState(project.name);
 
@@ -59,18 +59,18 @@ const EditPanel: React.FC<Props> = (props) => {
   const classes = getClasses();
 
   useEffect(() => {
-    setLocalTags([...parts].map((part) => part.name));
+    setLocalTags(parts.map((part) => ({ name: part.name, remoteCount: part.remote_image_count })));
   }, [parts]);
 
   const onTagAdd = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === 'Enter' && localTag !== '') {
-        if (localTags.find((tag) => tag === localTag)) {
+        if (localTags.find((tag) => tag.name === localTag)) {
           setLocalTag('');
           return;
         }
 
-        setLocalTags((prev) => [...prev, localTag]);
+        setLocalTags((prev) => [...prev, { name: localTag, remoteCount: 0 }]);
         setLocalTag('');
       }
     },
@@ -90,7 +90,9 @@ const EditPanel: React.FC<Props> = (props) => {
   const onSaveModelClick = useCallback(async () => {
     setIsLoading(true);
 
-    await dispatch(updateCustomVisionProjectTags({ id: project.id.toString(), tags: localTags }));
+    await dispatch(
+      updateCustomVisionProjectTags({ id: project.id.toString(), tags: localTags.map((tag) => tag.name) }),
+    );
 
     setIsLoading(false);
     onDismiss();
@@ -180,7 +182,14 @@ const EditPanel: React.FC<Props> = (props) => {
           />
           <Stack horizontal tokens={{ childrenGap: '8px' }} wrap>
             {localTags.map((part, id) => (
-              <Tag key={id} id={id} text={part} isDelete onDelete={onRemoveTag} />
+              <Tag
+                key={id}
+                id={id}
+                text={part.name}
+                count={part.remoteCount}
+                isDelete
+                onDelete={onRemoveTag}
+              />
             ))}
           </Stack>
         </Stack>

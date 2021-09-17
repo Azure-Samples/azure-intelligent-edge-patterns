@@ -12,6 +12,7 @@ import {
 import { useDispatch } from 'react-redux';
 
 import { IntelProject, createIntelProject } from '../../store/IntelProjectSlice';
+import { TrainingProject } from '../../store/trainingProjectSlice';
 
 import Tag from './Tag';
 import AddIntelPanel from './Panel/AddIntel';
@@ -20,6 +21,7 @@ const CARD_PART_LIMIT = 5;
 
 interface Props {
   intelProjectList: IntelProject[];
+  openVinoProjectList: TrainingProject[];
   onCloseIntel: () => void;
 }
 
@@ -49,8 +51,14 @@ const getClasses = () =>
     },
   });
 
+const isDisableAddButton = (intel: IntelProject, openVinoProjectList: TrainingProject[]) => {
+  if (openVinoProjectList.length === 0) return false;
+  if (!openVinoProjectList.map((project) => project.name).includes(intel.create_name)) return false;
+  return true;
+};
+
 const IntelProjectDashboard = (props: Props) => {
-  const { intelProjectList, onCloseIntel } = props;
+  const { intelProjectList, onCloseIntel, openVinoProjectList } = props;
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(0);
@@ -60,8 +68,6 @@ const IntelProjectDashboard = (props: Props) => {
 
   const onCreateIntelModel = useCallback(
     async (cascade: IntelProject) => {
-      // console.log('onCreateIntelModel', modelName);
-
       await dispatch(createIntelProject({ model_name: cascade.create_name, project_type: cascade.type }));
 
       onCloseIntel();
@@ -163,6 +169,7 @@ const IntelProjectDashboard = (props: Props) => {
                     <PrimaryButton
                       id="test"
                       text="Add"
+                      disabled={isDisableAddButton(card, openVinoProjectList)}
                       onClick={(e) => {
                         e.stopPropagation();
 
@@ -187,6 +194,7 @@ const IntelProjectDashboard = (props: Props) => {
           metric: intelProjectList[selectedId].metric,
         }}
         onClickAddModel={() => onCreateIntelModel(intelProjectList[selectedId])}
+        isAddIntel={isDisableAddButton(intelProjectList[selectedId], openVinoProjectList)}
       />
     </>
   );
