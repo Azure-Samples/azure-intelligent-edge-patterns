@@ -120,7 +120,7 @@ class Setting(models.Model):
             instance.get_domain_id() if instance.is_trainer_valid else ""
         )
 
-    def create_project(self, project_name: str, domain_id: str = None) -> Project:
+    def create_project(self, project_name: str, domain_id: str = None, classification_type: str = None) -> Project:
         """Create Project on Custom Vision
 
         Args:
@@ -136,7 +136,7 @@ class Setting(models.Model):
             domain_id = self.obj_detection_domain_id if domain_id is None else domain_id
             logger.info("Creating object detection project.")
         try:
-            project = trainer.create_project(name=project_name, domain_id=domain_id)
+            project = trainer.create_project(name=project_name, domain_id=domain_id, classification_type=classification_type)
             return project
         except CustomVisionErrorException:
             raise SettingCustomVisionCannotCreateProject
