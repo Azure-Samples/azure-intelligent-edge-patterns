@@ -22,6 +22,7 @@ export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink'
 type TrainingProjectCategory = 'customvision' | 'openvino';
 type MetadataType = 'image' | 'bounding_box' | 'classification' | 'regression';
 export type ProjectType = 'ObjectDetection' | 'Classification';
+export type ClassificationType = '' | 'Multiclass' | 'Multilabel';
 
 export type Metadata = {
   type: MetadataType;
@@ -61,6 +62,7 @@ export type TrainingProject = {
   openvino_library_name: string;
   openvino_model_name: string;
   download_uri_openvino: string;
+  classification_type: ClassificationType;
 };
 
 export type CreatOwnModelPayload = {
@@ -75,6 +77,7 @@ export type CreateCustomVisionProjectPayload = {
   name: string;
   tags: string[];
   project_type: string;
+  classification_type: string;
 };
 
 export type UpdateCustomVisionProjectTagsPayload = {
@@ -102,6 +105,7 @@ const normalize = (e) => ({
   openvino_library_name: e.openvino_library_name,
   openvino_model_name: e.openvino_model_name,
   download_uri_openvino: e.download_uri_openvino,
+  classification_type: e.classification_type,
 });
 
 const extractConvertCustomProject = (project) => {

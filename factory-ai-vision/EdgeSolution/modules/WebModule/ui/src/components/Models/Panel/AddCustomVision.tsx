@@ -109,6 +109,7 @@ const AddModelPanel: React.FC<Props> = (props) => {
         name: formData.name,
         project_type: formData.type,
         tags: formData.tags,
+        classification_type: formData.classification,
       }),
     );
 
@@ -176,7 +177,7 @@ const AddModelPanel: React.FC<Props> = (props) => {
 
   const onClassificationCategoryChange = useCallback(
     (_, option?: IDropdownOption) => {
-      // onChange('type', option!.key as string);
+      onChange('classification', option!.key as string);
     },
     [onChange],
   );
