@@ -69,9 +69,9 @@ def update_app_insight_counter(
         logger.exception("update_app_insight_counter occur unexcepted error")
         raise
 
-def create_cv_project_helper(name: str, tags = None, project_type: str = None):
+def create_cv_project_helper(name: str, tags = None, project_type: str = None, classification_type: str = None):
     setting_obj = Setting.objects.first()
-    project_obj = Project.objects.create(name=name, setting=setting_obj, is_demo=False, project_type=project_type, category="customvision")
+    project_obj = Project.objects.create(name=name, setting=setting_obj, is_demo=False, project_type=project_type, category="customvision" ,classification_type=classification_type)
 
     logger.info("Creating Parts:")
     for tag in tags:
@@ -89,7 +89,7 @@ def create_cv_project_helper(name: str, tags = None, project_type: str = None):
         logger.info("Create Part: %s Success!", tag)
 
     logger.info("Creating CV project:")
-    project_obj.create_project(project_type=project_type)
+    project_obj.create_project(project_type=project_type, classification_type=classification_type)
 
     logger.info("Uploading tags to CV project:")
     part_ids = [part.id for part in Part.objects.filter(project=project_obj)]

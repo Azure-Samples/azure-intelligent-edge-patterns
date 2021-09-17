@@ -195,7 +195,8 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             project_obj = create_cv_project_helper(
                 name=serializer.validated_data["name"],
                 tags=serializer.validated_data["tags"],
-                project_type=serializer.validated_data["project_type"])
+                project_type=serializer.validated_data["project_type"],
+                classification_type=serializer.validated_data["classification_type"])
             serializer = ProjectSerializer(project_obj)
             return Response(serializer.data)
         except CustomVisionErrorException:
