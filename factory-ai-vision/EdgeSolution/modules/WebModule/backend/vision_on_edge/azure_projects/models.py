@@ -220,7 +220,7 @@ class Project(models.Model):
             if project_type == 'ObjectDetection':
                 obj_detection_domain = next(domain for domain in self.setting.get_trainer_obj().get_domains() if domain.type == project_type and domain.name == "General (compact)")
                 project = self.setting.create_project(project_name=self.name, domain_id=obj_detection_domain.id)
-            else:
+            elif project_type == 'Classification':
                 obj_detection_domain = next(domain for domain in self.setting.get_trainer_obj().get_domains() if domain.type == project_type)
                 project = self.setting.create_project(project_name=self.name, domain_id=obj_detection_domain.id, classification_type=classification_type)   
             else:
