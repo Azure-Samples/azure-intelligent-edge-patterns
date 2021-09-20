@@ -41,9 +41,6 @@ export const PartDetails: React.FC = () => {
   const part = useSelector((state: State) => selectPartById(state, partId));
   const project = useSelector((state: State) => selectTrainingProjectById(state, part?.trainingProject));
 
-  // console.log('trainingProject', trainingProject);
-  // const part = useSelector((state: State) => selectPartById(state, partId));
-
   const dispatch = useDispatch();
   const history = useHistory();
 
@@ -226,8 +223,8 @@ export const Images: React.FC<{ labeledImages; projectId: number }> = ({ labeled
           )}
         </div>
       </Stack>
-      <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} partId={partId} />
-      <LabelingPage onSaveAndGoCaptured={openCaptureDialog} />
+      {/* <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} partId={partId} /> */}
+      {/* <LabelingPage onSaveAndGoCaptured={openCaptureDialog} /> */}
       <input
         ref={fileInputRef}
         type="file"

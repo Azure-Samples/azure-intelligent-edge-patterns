@@ -14,12 +14,15 @@ import {
 import { createWrappedAsync } from './shared/createWrappedAsync';
 import { getParts } from './partSlice';
 import { thunkGetAllCvProjects } from './setting/settingAction';
+import { getTrainingProjectStatusList } from './trainingProjectStatusSlice';
 
 export type Params = { confidence_threshold: string; filter_label_id: string };
 
 export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink' | 'customvision_model';
-type TrainingProjectCategory = 'customvision' | 'openvino' | 'OVMS';
+type TrainingProjectCategory = 'customvision' | 'openvino';
 type MetadataType = 'image' | 'bounding_box' | 'classification' | 'regression';
+export type ProjectType = 'ObjectDetection' | 'Classification';
+export type ClassificationType = '' | 'Multiclass' | 'Multilabel';
 
 export type Metadata = {
   type: MetadataType;
@@ -48,7 +51,7 @@ export type TrainingProject = {
   predictionUri: string;
   predictionHeader: string;
   category: TrainingProjectCategory;
-  projectType: string;
+  projectType: ProjectType;
   isCascade: boolean;
   inputs: Input[];
   outputs: Output[];
@@ -59,6 +62,7 @@ export type TrainingProject = {
   openvino_library_name: string;
   openvino_model_name: string;
   download_uri_openvino: string;
+  classification_type: ClassificationType;
 };
 
 export type CreatOwnModelPayload = {
@@ -73,6 +77,7 @@ export type CreateCustomVisionProjectPayload = {
   name: string;
   tags: string[];
   project_type: string;
+  classification_type: string;
 };
 
 export type UpdateCustomVisionProjectTagsPayload = {
@@ -100,6 +105,7 @@ const normalize = (e) => ({
   openvino_library_name: e.openvino_library_name,
   openvino_model_name: e.openvino_model_name,
   download_uri_openvino: e.download_uri_openvino,
+  classification_type: e.classification_type,
 });
 
 const extractConvertCustomProject = (project) => {
@@ -128,6 +134,15 @@ export const getTrainingProject = createWrappedAsync<any, boolean, { state: Stat
   // },
 );
 
+export const getSingleTrainingProject = createWrappedAsync<any, number, { state: State }>(
+  'trainingSlice/getSingleProject',
+  async (projectId) => {
+    const response = await Axios(`/api/projects/${projectId}`);
+
+    return normalize(response.data);
+  },
+);
+
 export const refreshTrainingProject = createWrappedAsync(
   'trainingProject/refresh',
   async (_, { dispatch }) => {
@@ -150,6 +165,7 @@ export const pullCVProjects = createWrappedAsync<
   // Get training project because the origin project name will be mutate
   dispatch(refreshTrainingProject());
   dispatch(getParts());
+  dispatch(getTrainingProjectStatusList());
 });
 
 export const createCustomVisionProject = createWrappedAsync<any, CreateCustomVisionProjectPayload>(
@@ -160,6 +176,7 @@ export const createCustomVisionProject = createWrappedAsync<any, CreateCustomVis
     dispatch(refreshTrainingProject());
     dispatch(getParts());
     dispatch(thunkGetAllCvProjects());
+    dispatch(getTrainingProjectStatusList());
   },
 );
 
@@ -214,6 +231,13 @@ export const getSelectedProjectInfo = createWrappedAsync<any, string, { state: S
   },
 );
 
+export const trainCustomVisionProject = createWrappedAsync<any, number>(
+  'trainingSlice/updateCustomVisionProject',
+  async (projectId) => {
+    await Axios.get(`/api/projects/${projectId}/retrain`);
+  },
+);
+
 const entityAdapter = createEntityAdapter<TrainingProject>();
 
 const slice = createSlice({
@@ -223,11 +247,13 @@ const slice = createSlice({
     onEmptySelectedProjectInfo: (state) => ({
       ...state,
       selectedProjectInfo: null,
+      selectedProjectStatus: null,
     }),
   },
   extraReducers: (builder) => {
     builder
       .addCase(getTrainingProject.fulfilled, entityAdapter.setAll)
+      .addCase(getSingleTrainingProject.fulfilled, entityAdapter.upsertOne)
       .addCase(refreshTrainingProject.fulfilled, entityAdapter.setAll)
       .addCase(createCustomProject.fulfilled, entityAdapter.upsertOne)
       .addCase(updateCustomProject.fulfilled, entityAdapter.upsertOne)
@@ -282,6 +308,18 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
 export const trainingProjectIsPredictionModelFactory = () =>
   createSelector(selectAllTrainingProjects, (entities) =>
     entities.filter((project) => !project.isDemo).filter((project) => project.id !== 9),
+  );
+
+export const customVisionTrainingProjectFactory = () =>
+  createSelector(selectAllTrainingProjects, (entities) =>
+    entities.filter((project) => !project.isDemo).filter((project) => project.category === 'customvision'),
+  );
+
+export const trainingProjectModelFactory = () =>
+  createSelector(selectAllTrainingProjects, (entities) =>
+    entities
+      .filter((project) => !project.isDemo)
+      .filter((project) => ['customvision', 'openvino'].includes(project.category)),
   );
 
 export const trainingProjectIsCascadesFactory = () =>

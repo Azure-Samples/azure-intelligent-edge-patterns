@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect, useMemo } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import {
   Panel,
   Stack,
@@ -12,22 +12,20 @@ import {
   Link,
   Icon,
 } from '@fluentui/react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useHistory, generatePath } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 
-import { State as RootState } from 'RootStateType';
-import {
-  updateCustomVisionProjectTags,
-  selectTrainingProjectById,
-} from '../../../store/trainingProjectSlice';
-import { trainingProjectPartsSelectorFactory } from '../../../store/partSlice';
-import { Url } from '../../../enums';
+import { updateCustomVisionProjectTags, TrainingProject } from '../../../store/trainingProjectSlice';
+import { TrainingStatus } from '../../../store/trainingProjectStatusSlice';
+import { Part } from '../../../store/partSlice';
 
 import Tag from '../Tag';
+import ImageLabel from './ImageLabel';
 
 type Props = {
-  projectId: string;
   onDismiss: () => void;
+  project: TrainingProject;
+  parts: Part[];
+  status: TrainingStatus;
 };
 
 const getClasses = () =>
@@ -41,37 +39,38 @@ const getClasses = () =>
     tagsWrapper: {
       marginTop: '20px',
     },
+    tips: { fontSize: '14px', lineHeight: '20px', color: '#A19F9D' },
   });
 
-const EditPanel: React.FC<Props> = (props) => {
-  const { projectId, onDismiss } = props;
+const convertProjectType = (project: TrainingProject): string => {
+  if (project.projectType === 'ObjectDetection') return 'Object Detector';
+  return 'Classification';
+};
 
-  const project = useSelector((state: RootState) => selectTrainingProjectById(state, projectId));
-  const partSelector = useMemo(() => trainingProjectPartsSelectorFactory(project.id), [project]);
-  const parts = useSelector(partSelector);
+const EditPanel: React.FC<Props> = (props) => {
+  const { project, parts, onDismiss, status } = props;
 
   const [localTag, setLocalTag] = useState('');
-  const [localTags, setLocalTags] = useState<string[]>([]);
+  const [localTags, setLocalTags] = useState<{ name: string; remoteCount: number }[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [name, setName] = useState(project.name);
 
   const dispatch = useDispatch();
-  const history = useHistory();
   const classes = getClasses();
 
   useEffect(() => {
-    setLocalTags([...parts].map((part) => part.name));
+    setLocalTags(parts.map((part) => ({ name: part.name, remoteCount: part.remote_image_count })));
   }, [parts]);
 
   const onTagAdd = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === 'Enter' && localTag !== '') {
-        if (localTags.find((tag) => tag === localTag)) {
+        if (localTags.find((tag) => tag.name === localTag)) {
           setLocalTag('');
           return;
         }
 
-        setLocalTags((prev) => [...prev, localTag]);
+        setLocalTags((prev) => [...prev, { name: localTag, remoteCount: 0 }]);
         setLocalTag('');
       }
     },
@@ -88,18 +87,12 @@ const EditPanel: React.FC<Props> = (props) => {
     [localTags],
   );
 
-  const onLinkClick = useCallback(() => {
-    history.push(
-      generatePath(Url.IMAGES_DETAIL, {
-        id: project.id,
-      }),
-    );
-  }, [history, project]);
-
   const onSaveModelClick = useCallback(async () => {
     setIsLoading(true);
 
-    await dispatch(updateCustomVisionProjectTags({ id: project.id.toString(), tags: localTags }));
+    await dispatch(
+      updateCustomVisionProjectTags({ id: project.id.toString(), tags: localTags.map((tag) => tag.name) }),
+    );
 
     setIsLoading(false);
     onDismiss();
@@ -154,7 +147,7 @@ const EditPanel: React.FC<Props> = (props) => {
             <TextField label="Name" value={name} onChange={(_, newValue) => setName(newValue)} required />
           </Stack>
         )}
-        {project.customVisionId && (
+        {project.category === 'customvision' && (
           <>
             <Stack>
               <Label styles={{ root: classes.itemTitle }}>Name</Label>
@@ -171,20 +164,20 @@ const EditPanel: React.FC<Props> = (props) => {
               </Stack>
             </Stack>
             <Stack>
-              <Label styles={{ root: classes.itemTitle }}>Images</Label>
-              <Stack>
-                <Link onClick={onLinkClick}>
-                  <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 5 }}>
-                    <Text>Placeholder</Text>
-                    <Icon styles={{ root: { color: '#0078D4' } }} iconName="OpenInNewWindow" />
-                  </Stack>
-                </Link>
-              </Stack>
+              <Label styles={{ root: classes.itemTitle }}>Type</Label>
+              <Text styles={{ root: classes.item }}>{convertProjectType(project)}</Text>
             </Stack>
+            {project.classification_type !== '' && (
+              <Stack>
+                <Label styles={{ root: classes.itemTitle }}>Classification Type</Label>
+                <Text styles={{ root: classes.item }}>{project.classification_type}</Text>
+              </Stack>
+            )}
+            <ImageLabel project={project} status={status} parts={parts} />
           </>
         )}
       </Stack>
-      {project.customVisionId !== '' && (
+      {project.category === 'customvision' && (
         <Stack styles={{ root: classes.tagsWrapper }} tokens={{ childrenGap: '10px' }}>
           <TextField
             label="Objects/Tags"
@@ -195,7 +188,14 @@ const EditPanel: React.FC<Props> = (props) => {
           />
           <Stack horizontal tokens={{ childrenGap: '8px' }} wrap>
             {localTags.map((part, id) => (
-              <Tag key={id} id={id} text={part} isDelete onDelete={onRemoveTag} />
+              <Tag
+                key={id}
+                id={id}
+                text={part.name}
+                count={part.remoteCount}
+                isDelete
+                onDelete={onRemoveTag}
+              />
             ))}
           </Stack>
         </Stack>

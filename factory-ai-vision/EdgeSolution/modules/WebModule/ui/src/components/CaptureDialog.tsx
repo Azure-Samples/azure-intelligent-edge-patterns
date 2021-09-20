@@ -36,9 +36,10 @@ type OwnProps = {
   isOpen: boolean;
   onDismiss: () => void;
   partId?: number;
+  projectId: number;
 };
 
-type CaptureDialogProps = OwnProps & {
+type Props = OwnProps & {
   captureImage;
   openLabelingPage;
   getCameras;
@@ -50,14 +51,9 @@ const mapDispatch = (dispatch) => ({
   getCameras: (action) => dispatch(getCamerasAction(action)),
 });
 
-export const Component: React.FC<CaptureDialogProps> = ({
-  isOpen,
-  onDismiss,
-  partId = null,
-  captureImage,
-  openLabelingPage,
-  getCameras,
-}) => {
+export const Component = (props: Props) => {
+  const { isOpen, onDismiss, partId = null, captureImage, openLabelingPage, getCameras, projectId } = props;
+
   const cameraOptions = useSelector(cameraOptionsSelector);
   const [selectedCameraId, setSelectedCameraId] = useState(
     cameraOptions.length === 1 ? cameraOptions[0].key : null,
@@ -82,6 +78,7 @@ export const Component: React.FC<CaptureDialogProps> = ({
       streamId: streamIdRef.current,
       imageIds: [],
       shouldOpenLabelingPage: false,
+      projectId: projectId,
     });
     const { payload } = action as any;
     if (payload) capturedImgs.current.push(parseInt(Object.keys(payload.images)[0], 10));

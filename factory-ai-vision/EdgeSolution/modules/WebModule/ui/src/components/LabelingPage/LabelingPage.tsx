@@ -1,4 +1,4 @@
-import React, { FC, useState } from 'react';
+import React, { FC, useState, useMemo } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
 import {
@@ -16,17 +16,25 @@ import {
 
 import { State } from 'RootStateType';
 import { LabelingType, WorkState } from './type';
-import { closeLabelingPage, OpenFrom } from '../../store/labelingPageSlice';
-import { selectImageEntities, saveLabelImageAnnotation } from '../../store/imageSlice';
+import { closeLabelingPage, OpenFrom, changePartId } from '../../store/labelingPageSlice';
+import {
+  selectImageEntities,
+  saveLabelImageAnnotation,
+  selectImageById,
+  saveClassificationImageTag,
+} from '../../store/imageSlice';
+import { createClassification, updateAnnotation } from '../../store/annotationSlice';
 import { labelPageAnnoSelector } from '../../store/annotationSlice';
 import { Annotation } from '../../store/type';
 import { selectPartEntities, Part } from '../../store/partSlice';
 import { deleteImage, thunkGoNextImage, thunkGoPrevImage } from '../../store/actions';
-import Scene from './Scene';
 import { PartPicker } from './PartPicker';
 import { timeStampConverter } from '../../utils/timeStampConverter';
 import { dummyFunction } from '../../utils/dummyFunction';
-import { selectNonDemoPart } from '../../store/selectors';
+import { selectProjectPartsFactory } from '../../store/selectors';
+import { selectTrainingProjectById } from '../../store/trainingProjectSlice';
+
+import Scene from './Scene';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
 export const imageSelector = createSelector(
@@ -35,18 +43,19 @@ export const imageSelector = createSelector(
 );
 const imagePartSelector = createSelector([imageSelector, selectPartEntities], (img, partEntities) => {
   if (img) return partEntities[img.part];
-  return { id: null, name: '', description: '', trainingProject: null };
+  return {
+    id: null,
+    name: '',
+    description: '',
+    trainingProject: null,
+    local_image_count: 0,
+    remote_image_count: 0,
+  };
 });
 
 const selectImageTimeStamp = (state: State) => {
   const timeStampString = imageSelector(state)?.timestamp || '';
   return timeStampConverter(timeStampString);
-};
-
-const dialogContentProps: IDialogContentProps = {
-  title: 'Image detail',
-  subText: 'Drag a box around the object you want to tag',
-  styles: { content: { width: '1080px' } },
 };
 
 const modalProps: IModalProps = {
@@ -58,10 +67,25 @@ const modalProps: IModalProps = {
 
 const labelingPageStyle = mergeStyleSets({
   imgContainer: { position: 'relative', width: '70%', height: '540px', backgroundColor: '#F3F2F1' },
+  imgCover: {
+    position: 'absolute',
+    height: '540px',
+    width: '100%',
+    zIndex: 2,
+    cursor: 'not-allowed',
+    justifyContent: 'center',
+    alignItems: 'center',
+    display: 'flex',
+    fontSize: '80px',
+    fontWeight: 600,
+    color: '#FFF',
+  },
+  covertText: { width: '80%', wordBreak: 'break-all', textAlign: 'center' },
   imgInfoContainer: { width: '30%' },
 });
 
 type LabelingPageProps = {
+  projectId: number;
   onSaveAndGoCaptured?: () => void;
 };
 
@@ -70,8 +94,11 @@ const cameraNameSelector = (state: State) => {
   return state.camera.entities[cameraId]?.name;
 };
 
-const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
+const getPart = (parts: Part[], selectedPart: number) => parts.find((part) => part.id === selectedPart);
+
+const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId }) => {
   const dispatch = useDispatch();
+
   const imageIds = useSelector<State, number[]>((state) => state.labelingPage.imageIds);
   const selectedImageId = useSelector<State, number>((state) => state.labelingPage.selectedImageId);
   const index = imageIds.findIndex((e) => e === selectedImageId);
@@ -91,16 +118,28 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [loading, setLoading] = useState(false);
 
-  const parts = useSelector(selectNonDemoPart);
-  // const parts = useSelector((state: State) => selectTrainingProjectById(state, part?.trainingProject));
-  // const partOptionsSelector = useMemo(() => trainingProjectPartsSelectorFactory(trainingProject), [trainingProject]);
-  // const partOptions = useSelector(partOptionsSelector);
-
-  // console.log('LabelingPage', parts);
-
+  const project = useSelector((state: State) => selectTrainingProjectById(state, projectId));
+  const partOfProjectSelector = useMemo(() => selectProjectPartsFactory(projectId), [projectId]);
+  const parts = useSelector(partOfProjectSelector);
   const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
+  const { selectedPartId } = useSelector((state: State) => state.labelingPage);
+  const image = useSelector((state: State) => selectImageById(state, selectedImageId));
+
+  // console.log('selectedPartId', selectedPartId);
+  // console.log(getPart(parts, selectedPartId));
+  // console.log('image', image);
+  // console.log('annotations', annotations);
 
   const isOnePointBox = checkOnePointBox(annotations);
+
+  const dialogContentProps: IDialogContentProps = {
+    title: 'Image detail',
+    subText:
+      project.projectType === 'ObjectDetection'
+        ? 'Drag a box around the object you want to tag'
+        : 'Please add new tag for this image',
+    styles: { content: { width: '1080px' } },
+  };
 
   const saveAnno = async () => {
     setLoading(true);
@@ -124,6 +163,38 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
     onSaveAndGoCaptured();
   };
 
+  const saveClassification = async () => {
+    if (selectedPartId === 0) return;
+
+    setLoading(true);
+
+    if (annotations.length > 0) {
+      const anno: Annotation = annotations[0];
+      await dispatch(updateAnnotation({ id: anno.id, changes: { ...anno, part: selectedPartId } }));
+    } else {
+      await dispatch(createClassification({ x: -100, y: -100 }, selectedImageId, selectedPartId));
+    }
+
+    await dispatch(saveClassificationImageTag());
+    await dispatch(changePartId({ partId: 0 }));
+    setLoading(false);
+  };
+
+  const saveClassificationAndDone = async () => {
+    await saveClassification();
+    closeDialog();
+  };
+
+  const saveClassificationAndNext = async () => {
+    await saveClassification();
+    dispatch(thunkGoNextImage());
+  };
+
+  const saveClassificationAndPrev = async () => {
+    await saveClassification();
+    dispatch(thunkGoPrevImage());
+  };
+
   const onDeleteImage = async () => {
     setLoading(true);
     await dispatch(deleteImage(selectedImageId));
@@ -132,6 +203,16 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
 
   const onRenderImage = (): JSX.Element => (
     <>
+      {project.projectType === 'Classification' && (
+        <Stack className={labelingPageStyle.imgCover}>
+          {selectedPartId === 0 && annotations.length === 1 && (
+            <Stack className={labelingPageStyle.covertText}>{getPart(parts, annotations[0].part).name}</Stack>
+          )}
+          {selectedPartId !== 0 && (
+            <Stack className={labelingPageStyle.covertText}>{getPart(parts, selectedPartId).name}</Stack>
+          )}
+        </Stack>
+      )}
       <Scene
         url={imageUrl}
         annotations={annotations}
@@ -173,6 +254,37 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
       <PartPicker trainingProject={imageProjectId} />
     </>
   );
+
+  const onRenderClassificationFooter = (): JSX.Element => {
+    const deleteDisabled = loading;
+
+    if (noPrevAndNext)
+      return (
+        <Stack horizontal tokens={{ childrenGap: 10 }}>
+          <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />
+          <DefaultButton text="Close" onClick={closeDialog} />
+        </Stack>
+      );
+
+    const isLastImg = index === imageIds.length - 1;
+    const previousDisabled = index === 0 || loading;
+    const nextDisabled = isLastImg || loading;
+    return (
+      <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
+        <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />
+        <Text style={{ marginLeft: 'auto' }}>
+          Image {index + 1} of {imageIds.length}
+        </Text>
+        <DefaultButton text="Previous" onClick={saveClassificationAndPrev} disabled={previousDisabled} />
+        <PrimaryButton text="Next" onClick={saveClassificationAndNext} disabled={nextDisabled} />
+        <Separator vertical />
+        {canBackToCapture && (
+          <DefaultButton text="Save and capture another image" onClick={saveAndGoCapture} />
+        )}
+        <DefaultButton text="Done" primary={isLastImg} onClick={saveClassificationAndDone} />
+      </Stack>
+    );
+  };
 
   const onRenderFooter = (): JSX.Element => {
     const noAnno = annotations.length === 0;
@@ -230,7 +342,9 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured }) => {
           {onRenderInfoOnRight()}
         </Stack>
       </Stack>
-      <DialogFooter>{onRenderFooter()}</DialogFooter>
+      <DialogFooter>
+        {project.projectType === 'ObjectDetection' ? onRenderFooter() : onRenderClassificationFooter()}
+      </DialogFooter>
     </Dialog>
   );
 };

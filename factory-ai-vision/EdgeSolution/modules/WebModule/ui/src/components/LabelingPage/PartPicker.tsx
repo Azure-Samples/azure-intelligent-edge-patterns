@@ -3,10 +3,7 @@ import { DetailsList, SelectionMode, CheckboxVisibility, Text, TextField } from 
 import { useSelector, useDispatch } from 'react-redux';
 
 import { Part, getParts, postPart, trainingProjectPartsSelectorFactory } from '../../store/partSlice';
-// import { thunkChangeImgPart } from '../../store/imageSlice';
-// import { selectNonDemoPart } from '../../store/selectors';
 import { changePartId } from '../../store/labelingPageSlice';
-// import { State } from 'RootStateType';
 
 interface Props {
   trainingProject: number;
@@ -27,9 +24,10 @@ export const PartPicker: React.FC<Props> = (props) => {
   const onTextFieldChange = (_, newValue: string) => {
     setNewPartName(newValue);
   };
+
   const onTextFieldEnter = async (evt: React.KeyboardEvent) => {
     if (evt.nativeEvent.code === 'Enter') {
-      await dispatch(postPart({ name: newPartName, description: '' }));
+      await dispatch(postPart({ name: newPartName, description: '', project: trainingProject }));
       setNewPartName('');
     }
   };

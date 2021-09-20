@@ -13,18 +13,19 @@ import {
   IContextualMenuProps,
 } from '@fluentui/react';
 
-import { TrainingProject } from '../../store/trainingProjectSlice';
-import { trainingProjectPartsSelectorFactory } from '../../store/partSlice';
-import { deleteCustomProject } from '../../store/trainingProjectSlice';
+import { trainCustomVisionProject, TrainingProject } from '../../../store/trainingProjectSlice';
+import { trainingProjectPartsSelectorFactory } from '../../../store/partSlice';
+import { deleteCustomProject } from '../../../store/trainingProjectSlice';
+import { Status } from '../../../store/trainingProjectStatusSlice';
+import { Url } from '../../../enums';
 
-import { Url } from '../../enums';
-
-import Tag from './Tag';
+import Tag from '../Tag';
 
 type Props = {
   project: TrainingProject;
   onSelectedProject: () => void;
   onDismiss: () => void;
+  status: Status;
 };
 
 const getClasses = () =>
@@ -53,8 +54,19 @@ const getClasses = () =>
 
 const CARD_PART_LIMIT = 5;
 
+const isDeleteDisable = (project: TrainingProject, trainingStatus: Status) => {
+  if (project.category === 'openvino') return false;
+  if (
+    project.category === 'customvision' &&
+    ['ok', 'failed', 'success', 'No change'].includes(trainingStatus.status)
+  )
+    return false;
+
+  return true;
+};
+
 const ModelCard: React.FC<Props> = (props) => {
-  const { project, onSelectedProject } = props;
+  const { project, onSelectedProject, status } = props;
 
   const [isOpenDialog, setIsOpenDialog] = useState(false);
 
@@ -78,6 +90,7 @@ const ModelCard: React.FC<Props> = (props) => {
         text: 'Delete',
         iconProps: { iconName: 'Delete' },
         onClick: () => setIsOpenDialog(true),
+        disabled: isDeleteDisable(project, status),
       },
     ],
   };
@@ -172,7 +185,6 @@ const ModelCard: React.FC<Props> = (props) => {
           <DefaultButton text="Cancel" onClick={() => setIsOpenDialog(false)} />
         </DialogFooter>
       </Dialog>
-      {/* {isEdit && <EditPanel project={project} parts={parts} onDissmiss={() => setIsEdit(false)} />} */}
     </>
   );
 };

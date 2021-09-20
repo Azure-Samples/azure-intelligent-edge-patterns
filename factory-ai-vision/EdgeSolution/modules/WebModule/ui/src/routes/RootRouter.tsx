@@ -9,10 +9,11 @@ import { Url } from '../enums';
 
 import { Home } from '../pages/Home';
 import { Cameras } from '../pages/Cameras';
-import { CameraDetails } from '../pages/CameraDetails';
+import CameraDetails from '../pages/CameraDetails';
 import { PartDetails } from '../pages/PartDetails';
 import { Parts } from '../pages/Parts';
 import { Images } from '../pages/Images';
+
 import { DeploymentPage } from '../pages/Deployment';
 import { Models } from '../pages/Models';
 import { ModelDetail } from '../pages/ModelDetail';

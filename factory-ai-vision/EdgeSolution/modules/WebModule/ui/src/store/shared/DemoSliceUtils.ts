@@ -18,9 +18,9 @@ type DemoStateType = {
   isDemo: boolean;
 };
 
-interface ProjectInfo {
+export interface ProjectInfo {
   tags: string[];
-  type: string;
+  type: 'ObjectDetection' | 'Classification';
 }
 
 type DemoEntityState<T> = EntityState<T> & {

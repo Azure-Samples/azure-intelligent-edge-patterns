@@ -1,0 +1,114 @@
+{
+  "@apiVersion": "1.0",
+  "name": "grpcovms",
+  "properties": {
+    "description": "Analyzing live video using gRPCExtension to send video frames to the OVMS adaptor that will fowards frames to OVMS server",
+    "parameters": [
+      {
+        "name": "rtspUrl",
+        "type": "String",
+        "description": "Rtsp source Url address"
+      },
+      {
+        "name": "rtspUserName",
+        "type": "String",
+        "description": "Rtsp source user name.",
+        "default": "dummyUsername"
+      },
+      {
+        "name": "rtspPassword",
+        "type": "String",
+        "description": "Rtsp source password.",
+        "default": "dummyPassword"
+      },
+      {
+        "name": "grpcExtensionAddress",
+        "type": "String",
+        "description": "Address of the gRPC Server",
+        "default": "tcp://ovmsadaptor:5001"
+      },
+      {
+        "name": "grpcExtensionUserName",
+        "type": "String",
+        "description": "inferencing endpoint user name.",
+        "default": "dummyUserName"
+      },
+      {
+        "name": "grpcExtensionPassword",
+        "type": "String",
+        "description": "inferencing endpoint password.",
+        "default": "dummyPassword"
+      },
+      {
+        "name": "extensionConfiguration",
+        "type": "String",
+        "description": "Optional extension configuration for the gRPC server",
+        "default": "{}"
+      },
+      {
+        "name": "hubSinkOutputName",
+        "type": "String",
+        "description": "Hub sink output name",
+        "default": "iothubsinkoutput"
+      }
+    ],
+    "sources": [
+      {
+        "@type": "#Microsoft.VideoAnalyzer.RtspSource",
+        "name": "rtspSource",
+        "endpoint": {
+          "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
+          "url": "${rtspUrl}",
+          "credentials": {
+            "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
+            "username": "${rtspUserName}",
+            "password": "${rtspPassword}"
+          }
+        }
+      }
+    ],
+    "processors": [
+      {
+        "@type": "#Microsoft.VideoAnalyzer.GrpcExtension",
+        "name": "grpcExtension",
+        "endpoint": {
+          "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
+          "url": "${grpcExtensionAddress}",
+          "credentials": {
+            "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
+            "username": "${grpcExtensionUserName}",
+            "password": "${grpcExtensionPassword}"
+          }
+        },
+        "extensionConfiguration": "${extensionConfiguration}",
+          "dataTransfer": {
+              "mode": "sharedMemory",
+              "SharedMemorySizeMiB": "64"
+        },
+        "image": {
+          "format": {
+            "@type": "#Microsoft.VideoAnalyzer.ImageFormatRaw",
+            "pixelFormat": "bgr24"
+          }
+        },
+        "inputs": [
+          {
+            "nodeName": "rtspSource"
+          }
+        ]
+      }
+    ],
+    "sinks": [
+      {
+        "@type": "#Microsoft.VideoAnalyzer.IotHubMessageSink",
+        "name": "hubSink",
+        "hubOutputName": "${hubSinkOutputName}",
+        "inputs": [
+          {
+            "nodeName": "grpcExtension"
+          }
+        ]
+      }
+    ]
+  }
+}

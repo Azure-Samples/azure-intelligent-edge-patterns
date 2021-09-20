@@ -212,8 +212,8 @@ export const Images: React.FC<{ labeledImages }> = ({ labeledImages }) => {
           )}
         </div>
       </Stack>
-      <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} partId={partId} />
-      <LabelingPage onSaveAndGoCaptured={openCaptureDialog} />
+      {/* <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} partId={partId} />
+      <LabelingPage onSaveAndGoCaptured={openCaptureDialog} projectId="13" /> */}
       <input
         ref={fileInputRef}
         type="file"

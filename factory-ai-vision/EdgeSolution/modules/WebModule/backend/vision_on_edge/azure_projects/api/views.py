@@ -195,7 +195,8 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
             project_obj = create_cv_project_helper(
                 name=serializer.validated_data["name"],
                 tags=serializer.validated_data["tags"],
-                project_type=serializer.validated_data["project_type"])
+                project_type=serializer.validated_data["project_type"],
+                classification_type=serializer.validated_data["classification_type"])
             serializer = ProjectSerializer(project_obj)
             return Response(serializer.data)
         except CustomVisionErrorException:
@@ -272,6 +273,15 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
     @action(detail=True, methods=["get"])
     def train(self, request, pk=None) -> Response:
         """train."""
+        queryset = self.get_queryset()
+        project_obj = drf_get_object_or_404(queryset, pk=pk)
+        project_obj.is_trainable(raise_exception=True)
+        TRAINING_MANAGER.add(project_id=pk)
+        return Response({"status": "ok"})
+
+    @action(detail=True, methods=["get"])
+    def retrain(self, request, pk=None) -> Response:
+        """retrain."""
         queryset = self.get_queryset()
         project_obj = drf_get_object_or_404(queryset, pk=pk)
         project_obj.is_trainable(raise_exception=True)

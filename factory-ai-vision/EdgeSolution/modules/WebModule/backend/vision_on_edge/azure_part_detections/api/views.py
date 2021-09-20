@@ -224,7 +224,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             instance.has_configured = True
             instance.save()
 
-            TRAINING_MANAGER.add(project_id=instance.project.id)
+            # TRAINING_MANAGER.add(project_id=instance.project.id)
             if_trained_then_deploy_helper(part_detection_id=instance.id)
         else:
             instance.has_configured = True

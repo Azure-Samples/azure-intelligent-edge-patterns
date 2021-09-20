@@ -11,12 +11,12 @@ import {
 import { useSelector } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { trainingProjectIsPredictionModelFactory } from '../../store/trainingProjectSlice';
+import { trainingProjectModelFactory } from '../../store/trainingProjectSlice';
 import { State as RootState } from 'RootStateType';
 import { selectAllIntelProject } from '../../store/IntelProjectSlice';
 
 import Model from './Model';
-import AddCustomVision from './Panel/AddCustomVision';
+import AddCustomVisionContainer from './Panel/AddCustomVisionContainer';
 import IntelProjectDashboard from './IntelProjectDashboard';
 
 const getClasses = () =>
@@ -35,8 +35,7 @@ const ModelContainer = () => {
   const [isAddIntelOvms, setIsAddIntelOvms] = useState(false);
   const [isAddUpload, setIsAddUpload] = useState(false);
 
-  const trainingProjectIsPredictionModelSelector = trainingProjectIsPredictionModelFactory();
-  const trainingProjectList = useSelector(trainingProjectIsPredictionModelSelector);
+  const trainingProjectList = useSelector(trainingProjectModelFactory());
   const intelProjectList = useSelector((state: RootState) => selectAllIntelProject(state));
 
   const history = useHistory();
@@ -161,6 +160,7 @@ const ModelContainer = () => {
           {isAddIntelOvms ? (
             <IntelProjectDashboard
               intelProjectList={intelProjectList}
+              openVinoProjectList={trainingProjectList.filter((project) => project.category === 'openvino')}
               onCloseIntel={() => setIsAddIntelOvms(false)}
             />
           ) : (
@@ -173,7 +173,7 @@ const ModelContainer = () => {
           )}
         </Stack>
       </Stack>
-      <AddCustomVision isOpen={isAddCustomVision} onDissmiss={() => setIsAddCustomVision(false)} />
+      <AddCustomVisionContainer isOpen={isAddCustomVision} onDismiss={() => setIsAddCustomVision(false)} />
     </>
   );
 };

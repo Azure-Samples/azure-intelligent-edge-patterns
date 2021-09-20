@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useRef, useEffect } from 'react';
+import React, { useState, useMemo, useRef } from 'react';
 import {
   ICommandBarItemProps,
   Stack,
@@ -18,9 +18,8 @@ import { useBoolean } from '@uifabric/react-hooks';
 import { useParams } from 'react-router-dom';
 
 import { State } from 'RootStateType';
-import { postImages, getImages, selectAllImages } from '../../store/imageSlice';
+import { postImages, selectAllImages } from '../../store/imageSlice';
 import { imageItemSelectorFactory, relabelImageSelector, selectNonDemoPart } from '../../store/selectors';
-import { getParts } from '../../store/partSlice';
 import { selectNonDemoCameras } from '../../store/cameraSlice';
 import { Status } from '../../store/project/projectTypes';
 
@@ -98,9 +97,9 @@ const useKeepAlive = (isAlive) => {
 // }
 
 export const Images: React.FC = () => {
-  const { id } = useParams<{ id: string }>();
+  const { id: projectId } = useParams<{ id: string }>();
 
-  const [isCaptureDialgOpen, { setTrue: openCaptureDialog, setFalse: closeCaptureDialog }] = useBoolean(
+  const [isCaptureDialogOpen, { setTrue: openCaptureDialog, setFalse: closeCaptureDialog }] = useBoolean(
     false,
   );
   const fileInputRef = useRef(null);
@@ -188,11 +187,11 @@ export const Images: React.FC = () => {
     [cameraItems, filteredCameras.length, filteredParts.length, partItems],
   );
 
-  useEffect(() => {
-    dispatch(getImages({ freezeRelabelImgs: true, selectedProject: parseInt(id, 10) }));
-    // We need part info for image list items
-    dispatch(getParts());
-  }, [dispatch, id]);
+  // useEffect(() => {
+  //   dispatch(getImages({ freezeRelabelImgs: true, selectedProject: parseInt(projectId, 10) }));
+  //   // We need part info for image list items
+  //   dispatch(getParts());
+  // }, [dispatch, projectId]);
 
   useKeepAlive(relabelImages.length > 0);
 
@@ -319,8 +318,12 @@ export const Images: React.FC = () => {
           {onRenderMain()}
         </Stack>
       </Stack>
-      <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} />
-      <LabelingPage onSaveAndGoCaptured={openCaptureDialog} />
+      <CaptureDialog
+        isOpen={isCaptureDialogOpen}
+        onDismiss={closeCaptureDialog}
+        projectId={parseInt(projectId, 10)}
+      />
+      <LabelingPage onSaveAndGoCaptured={openCaptureDialog} projectId={parseInt(projectId, 10)} />
       <input
         ref={fileInputRef}
         type="file"

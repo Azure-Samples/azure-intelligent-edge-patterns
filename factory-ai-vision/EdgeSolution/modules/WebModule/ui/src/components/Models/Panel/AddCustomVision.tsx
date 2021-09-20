@@ -14,16 +14,16 @@ import {
   IDropdownOption,
 } from '@fluentui/react';
 import { assocPath } from 'ramda';
-import { useSelector, useDispatch } from 'react-redux';
+import { useDispatch } from 'react-redux';
 import { isEmpty } from 'ramda';
 
-import { State as RootState } from 'RootStateType';
 import {
   pullCVProjects,
   createCustomVisionProject,
   getSelectedProjectInfo,
   onEmptySelectedProjectInfo,
 } from '../../../store/trainingProjectSlice';
+import { ProjectInfo } from '../../../store/shared/DemoSliceUtils';
 import { CreateCustomVisionForm } from '../type';
 
 import Tag from '../Tag';
@@ -43,19 +43,27 @@ const getClasses = () =>
 
 type Props = {
   isOpen: boolean;
-  onDissmiss: () => void;
+  customVisionProjectOptions: IDropdownOption[];
+  selectedProjectInfo: ProjectInfo;
+  onDismiss: () => void;
 };
 
 const initialForm: CreateCustomVisionForm = {
   name: '',
   selectedCustomVisionId: '',
   tags: [],
-  type: 'object',
+  type: 'ObjectDetection',
+  classification: 'Multiclass',
 };
 
 const typeOptions: IDropdownOption[] = [
   { key: 'ObjectDetection', text: 'Object Detection' },
   { key: 'Classification', text: 'Classification' },
+];
+
+const classificationTypeOptions: IDropdownOption[] = [
+  { key: 'Multilabel', text: 'Multilabel' },
+  { key: 'Multiclass', text: 'Multiclass' },
 ];
 
 // const getAddOwnModelPayload = (formData: CreateCustomVisionForm): CreatOwnModelPayload => ({
@@ -66,20 +74,10 @@ const typeOptions: IDropdownOption[] = [
 //   prediction_header: '',
 // });
 
-const isValid = (isExisting: boolean, formData: CreateCustomVisionForm): boolean => {
-  if (isExisting && formData.selectedCustomVisionId === '') return false;
-  if (!isExisting && (formData.name === '' || formData.tags.length < 2)) return false;
-  return true;
-};
-
 const AddModelPanel: React.FC<Props> = (props) => {
-  const { isOpen, onDissmiss } = props;
+  const { isOpen, onDismiss, customVisionProjectOptions, selectedProjectInfo } = props;
 
   const classes = getClasses();
-  const customVisionProjectOptions = useSelector((state: RootState) =>
-    state.setting.cvProjects.map((e) => ({ key: e.id, text: e.name })),
-  );
-  const { selectedProjectInfo } = useSelector((state: RootState) => state.trainingProject);
 
   const [errorMsg, setErrorMsg] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -93,10 +91,10 @@ const AddModelPanel: React.FC<Props> = (props) => {
   const onClosePanel = useCallback(() => {
     setIsExistingProject(false);
     setFormData(initialForm);
-    onDissmiss();
+    onDismiss();
     setErrorMsg('');
     dispatch(onEmptySelectedProjectInfo());
-  }, [onDissmiss, dispatch]);
+  }, [onDismiss, dispatch]);
 
   const onCreateCustomVisionProject = useCallback(async () => {
     if (formData.name === '' || formData.tags.length < 2) {
@@ -111,6 +109,7 @@ const AddModelPanel: React.FC<Props> = (props) => {
         name: formData.name,
         project_type: formData.type,
         tags: formData.tags,
+        classification_type: formData.classification,
       }),
     );
 
@@ -172,6 +171,13 @@ const AddModelPanel: React.FC<Props> = (props) => {
   const onCategoryChange = useCallback(
     (_, option?: IDropdownOption) => {
       onChange('type', option!.key as string);
+    },
+    [onChange],
+  );
+
+  const onClassificationCategoryChange = useCallback(
+    (_, option?: IDropdownOption) => {
+      onChange('classification', option!.key as string);
     },
     [onChange],
   );
@@ -275,6 +281,14 @@ const AddModelPanel: React.FC<Props> = (props) => {
                     selectedKey={formData.type}
                     onChange={onCategoryChange}
                   />
+                  {formData.type === 'Classification' && (
+                    <Dropdown
+                      label="Classification Types"
+                      options={classificationTypeOptions}
+                      selectedKey={formData.classification}
+                      onChange={onClassificationCategoryChange}
+                    />
+                  )}
                   <Stack>
                     <TextField
                       label="Objects/Tags"
