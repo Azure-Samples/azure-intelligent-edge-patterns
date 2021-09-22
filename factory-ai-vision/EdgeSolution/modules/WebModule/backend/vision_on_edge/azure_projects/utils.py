@@ -394,7 +394,7 @@ def train_project_worker(project_id):
     # =====================================================
     if not project_obj.setting or not project_obj.setting.is_trainer_valid:
         upcreate_training_status(
-            project_id=project_obj.id, status="failed", log="Custom Vision Access Error"
+            project_id=project_obj.id, status="Failed", log="Custom Vision Access Error"
         )
         return
 

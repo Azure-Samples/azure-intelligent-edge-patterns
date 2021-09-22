@@ -41,7 +41,7 @@ def if_trained_then_deploy_worker(part_detection_id):
             time.sleep(1)
             training_status_obj = TrainingStatus.objects.get(project=project_obj)
             logger.info("Listening on Training Status: %s", training_status_obj)
-            if training_status_obj.status in ["ok", "failed"]:
+            if training_status_obj.status in ["ok", "Failed"]:
                 break
             if training_status_obj.log != last_log:
                 upcreate_deploy_status(
@@ -54,7 +54,7 @@ def if_trained_then_deploy_worker(part_detection_id):
     # =====================================================
     # 2. Project training failed                        ===
     # =====================================================
-        if training_status_obj.status == "failed":
+        if training_status_obj.status == "Failed":
             logger.info("Project train/export failed.")
             upcreate_deploy_status(
                 part_detection_id=part_detection_id,
@@ -291,7 +291,7 @@ def if_trained_then_deploy_catcher(part_detection_id):
     except Exception:
         upcreate_deploy_status(
             part_detection_id=part_detection_id,
-            status="failed",
+            status="Failed",
             log=traceback.format_exc(),
             need_to_send_notification=True,
         )

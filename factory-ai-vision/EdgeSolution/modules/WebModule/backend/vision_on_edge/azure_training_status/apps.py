@@ -30,7 +30,7 @@ class AzureTrainingStatusConfig(AppConfig):
                 except Project.trainingstatus.RelatedObjectDoesNotExist:
                     TrainingStatus.objects.create(project=project)
             for ts_obj in TrainingStatus.objects.all():
-                if ts_obj.status not in ["ok", "failed"]:
+                if ts_obj.status not in ["ok", "Failed"]:
                     ts_obj.status = "ok"
                     ts_obj.log = "reset by app"
                     ts_obj.save()
