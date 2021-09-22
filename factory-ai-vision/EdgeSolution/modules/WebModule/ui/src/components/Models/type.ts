@@ -15,3 +15,5 @@ export type CreateOwnModelForm = {
   endPoint: string;
   labels: string;
 };
+
+export const NO_LIMIt_TRAIN_STATUS = ['ok', 'Failed', 'Success', 'No change'];

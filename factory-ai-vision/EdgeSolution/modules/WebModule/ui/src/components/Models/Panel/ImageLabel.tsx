@@ -13,10 +13,11 @@ import { useHistory, generatePath } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 
 import { TrainingProject, trainCustomVisionProject } from '../../../store/trainingProjectSlice';
-import { TrainingStatus, getOneTrainingProjectStatus } from '../../../store/trainingProjectStatusSlice';
+import { TrainingStatus, getOneTrainingProjectStatus } from '../../../store/trainingProjectStatusSlice';
 import { Part } from '../../../store/partSlice';
 import { Url } from '../../../enums';
 import { useInterval } from '../../../hooks/useInterval';
+import { NO_LIMIt_TRAIN_STATUS } from '../type';
 
 interface Props {
   project: TrainingProject;
@@ -43,7 +44,7 @@ const isObjectDetectionDisable = (
   if (
     ((hasTrainProject && Math.max(...labeledImageCounts) > 0) ||
       (!hasTrainProject && Math.min(...labeledImageCounts) >= 15)) &&
-    ['ok', 'failed', 'success', 'No change'].includes(status)
+    NO_LIMIt_TRAIN_STATUS.includes(status)
   )
     return false;
 
@@ -122,19 +123,19 @@ const ImageLabel = (props: Props) => {
       >
         Train
       </DefaultButton>
-      {!['failed', 'ok', 'success', 'No change'].includes(localStatus) && (
+      {!NO_LIMIt_TRAIN_STATUS.includes(localStatus) && (
         <Stack>
           <ProgressIndicator styles={{ progressBar: classes.progressBar }} />
           <Text>{localStatus}</Text>
         </Stack>
       )}
-      {localStatus === 'failed' && (
+      {localStatus === 'Failed' && (
         <Stack horizontal styles={{ root: { marginTop: '7px' } }} tokens={{ childrenGap: 12 }}>
           <Icon iconName="StatusErrorFull" styles={{ root: { color: '#D83B01', fontSize: '20px' } }} />
           <Text styles={{ root: classes.item }}>Model retraining failed</Text>
         </Stack>
       )}
-      {localStatus === 'success' && (
+      {localStatus === 'Success' && (
         <Stack horizontal styles={{ root: { marginTop: '7px' } }} tokens={{ childrenGap: 12 }}>
           <Icon iconName="CompletedSolid" styles={{ root: { color: '#138A00', fontSize: '20px' } }} />
           <Text styles={{ root: classes.item }}>Model was successfully trained</Text>

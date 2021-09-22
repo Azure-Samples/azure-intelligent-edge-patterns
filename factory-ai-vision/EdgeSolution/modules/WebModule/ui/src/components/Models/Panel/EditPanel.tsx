@@ -15,7 +15,7 @@ import {
 import { useDispatch } from 'react-redux';
 
 import { updateCustomVisionProjectTags, TrainingProject } from '../../../store/trainingProjectSlice';
-import { TrainingStatus } from '../../../store/trainingProjectStatusSlice';
+import { TrainingStatus } from '../../../store/trainingProjectStatusSlice';
 import { Part } from '../../../store/partSlice';
 
 import Tag from '../Tag';
@@ -167,7 +167,7 @@ const EditPanel: React.FC<Props> = (props) => {
               <Label styles={{ root: classes.itemTitle }}>Type</Label>
               <Text styles={{ root: classes.item }}>{convertProjectType(project)}</Text>
             </Stack>
-            {project.classification_type !== '' && (
+            {project.projectType === 'Classification' && (
               <Stack>
                 <Label styles={{ root: classes.itemTitle }}>Classification Type</Label>
                 <Text styles={{ root: classes.item }}>{project.classification_type}</Text>

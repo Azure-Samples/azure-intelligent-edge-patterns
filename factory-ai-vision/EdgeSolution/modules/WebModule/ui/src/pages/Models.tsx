@@ -4,7 +4,7 @@ import { useDispatch } from 'react-redux';
 import { getIntelProjectList } from '../store/IntelProjectSlice';
 import { getParts } from '../store/partSlice';
 import { getImages } from '../store/imageSlice';
-import { getTrainingProjectStatusList } from '../store/trainingProjectStatusSlice';
+import { getTrainingProjectStatusList } from '../store/trainingProjectStatusSlice';
 
 import ModelContainer from '../components/Models/ModelContainer';
 

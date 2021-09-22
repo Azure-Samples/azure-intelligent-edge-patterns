@@ -14,7 +14,7 @@ import {
 import { createWrappedAsync } from './shared/createWrappedAsync';
 import { getParts } from './partSlice';
 import { thunkGetAllCvProjects } from './setting/settingAction';
-import { getTrainingProjectStatusList } from './trainingProjectStatusSlice';
+import { getTrainingProjectStatusList } from './trainingProjectStatusSlice';
 
 export type Params = { confidence_threshold: string; filter_label_id: string };
 
