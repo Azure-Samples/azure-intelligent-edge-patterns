@@ -130,7 +130,7 @@ By default it listens to port 8585, and provide the restful api ```POST HOSTIP:8
         "config": "YOUR_VOE_CONFIG_AS_JSON"
     }
     
-You can use following example to send the post request
+You can use following python script to send the post request
 
     import json
     import requests
