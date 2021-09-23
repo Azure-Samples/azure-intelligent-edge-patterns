@@ -152,8 +152,8 @@ Since Openvino model server mount the same volume at /workspace, it'll reload th
 ## How the overall AVA-Adaptor-OVMS pipeline works
 
 To enable the integration for AVA and OVMS, we need to use AVA's GRPC extension to forward images to the Adaptor, and then to OVMS.
-
 The images sent from the AVA via GRPC are only the addresses but not the images themselves (to avoid extra memory copy). 
+Please check this [documentation](https://docs.microsoft.com/en-us/azure/azure-video-analyzer/video-analyzer-docs/analyze-live-video-use-your-model-grpc?pivots=programming-language-csharp) for more details
 
 In Adaptor, we use Python's sharedmemory library to implement the functionality to fetch the images via addresses, and then forward to OVMS via GRPC protocol as well. Note that the images sent to OVMS are in tensorflow serving data format, this will be converted in the adaptor internally.
 
