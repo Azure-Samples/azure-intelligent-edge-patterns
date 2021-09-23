@@ -111,5 +111,46 @@ Edges are directed, each edge represent one type of the data come from the sourc
 &nbsp;&nbsp;&nbsp;&nbsp;```input_name```: specify the output for the target node where data sent to
 
 
+## How Voe Config works
+
+The structure of Voe Config is a [DAG](https://en.wikipedia.org/wiki/Directed_acyclic_graph).
+There're 4 kinds of nodes, ```source```, ```openvino_model```, ```openvino_library```, and ```sink```.
+There will be only 1 source node which represent the data (raw image) in the request received by the openvino model server. To process the data we need to forward the data to the next node (can be more than 1) by the edges.
 
 
+## How Model Manager works
+
+Model manager in charge of c
+1. Converting VoE Config to OVMS Config
+2. Manage the models for Openvino model server (to enable this model manager need to mount the same volume as Openvino Model server at ```/workspace```)
+
+By default it listens to port 8585, and provide the restful api ```POST HOSTIP:8585 /set_voe_config```. The parameters is a json with following format
+
+    {
+        "config": "YOUR_VOE_CONFIG_AS_JSON"
+    }
+    
+You can use following example to send the post request
+
+    import json
+    import requests
+
+    j = json.load(open('voe_config.json'))
+    js = json.dumps(j)
+
+    requests.post('http://YOUR_DEVICE_IP:8585/set_voe_config', json={'config': js})
+
+Upon the request is received, model manager will
+
+1. Convert the VoE config to OVMS config, and put into ```/workspace/config.json```
+2. Download the model or library if the url field for some models aren't empty
+3. Model will be downloaded and unziped at /workspace/MODEL_NAME/1/
+
+Since Openvino model server mount the same volume at /workspace, it'll reload the model whenever the ```/workspace/config.json``` is changed
+
+
+## How the overall AVA-Adaptor-OVMS pipeline works
+
+To enable the integration for AVA and OVMS, we need to use AVA's GRPC extension to forward images to the Adaptor, and then to OVMS.
+
+The images sent from the AVA via GRPC are only the addresses but not the images themselves (to avoid extra memory copy). In Adaptor, we use Python's sharedmemory library to implement the functionality to fetch the images via addresses, and then forward to OVMS via GRPC protocol as well. Note that the images sent to OVMS are in tensorflow serving data format, this will be converted in the adaptor internally. The original prediction result from OVMS is tensorflow serving tensor format as well, in the adaptor it will use the metadata in the VoE config (e.g. shape, color format, ...) to convert it to AVA's format [inference metadata schema](https://docs.microsoft.com/en-us/azure/azure-video-analyzer/video-analyzer-docs/inference-metadata-schema) and then return to the AVA
