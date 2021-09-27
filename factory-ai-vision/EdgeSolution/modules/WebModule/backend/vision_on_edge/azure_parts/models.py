@@ -12,7 +12,7 @@ from .constants import OBJECTDETECTION_LEAST_IMAGE_TO_TRAIN, CASSIFICATION_LEAST
 from .exceptions import PartNotEnoughImagesToTrain
 
 logger = logging.getLogger(__name__)
-
+CUSTOMVISION_LEAST_IMAGE_TO_TRAIN = 15
 
 class Part(models.Model):
     """Part Model"""
@@ -41,7 +41,7 @@ class Part(models.Model):
                 CUSTOMVISION_LEAST_IMAGE_TO_TRAIN = OBJECTDETECTION_LEAST_IMAGE_TO_TRAIN
             else:
                 CUSTOMVISION_LEAST_IMAGE_TO_TRAIN = CASSIFICATION_LEAST_IMAGE_TO_TRAIN
-                
+
             if self.project.is_demo:
                 return True
             local_count = self.get_tagged_images_count_local()
