@@ -111,7 +111,7 @@ Edges are directed, each edge represent one type of the data come from the sourc
 &nbsp;&nbsp;&nbsp;&nbsp;```input_name```: specify the output for the target node where data sent to
 
 
-## How Voe Config works
+## How VoE Config works
 
 The structure of Voe Config is a [DAG](https://en.wikipedia.org/wiki/Directed_acyclic_graph).
 There're 4 kinds of nodes, ```source```, ```openvino_model```, ```openvino_library```, and ```sink```.
