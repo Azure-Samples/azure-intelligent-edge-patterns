@@ -113,9 +113,14 @@ Edges are directed, each edge represent one type of the data come from the sourc
 
 ## How VoE Config works
 
-The structure of Voe Config is a [DAG](https://en.wikipedia.org/wiki/Directed_acyclic_graph).
+The structure of VoE Config is a [DAG](https://en.wikipedia.org/wiki/Directed_acyclic_graph).
 There're 4 kinds of nodes, ```source```, ```openvino_model```, ```openvino_library```, and ```sink```.
 There will be only 1 source node which represent the data (raw image) in the request received by the openvino model server. To process the data we need to forward the data to the next node (can be more than 1) by the edges.
+
+![arch_img](../assets/Cascade1_ovms%20model_20210927.png?raw=true)
+
+![arch_img](../assets/Cascade2_w:%20custom%20node_20210927.png?raw=true)
+![arch_img](../assets/Cascade3_cv%20model_20210927.png?raw=true)
 
 
 ## How Model Manager works
@@ -158,3 +163,6 @@ Please check this [documentation](https://docs.microsoft.com/en-us/azure/azure-v
 In Adaptor, we use Python's sharedmemory library to implement the functionality to fetch the images via addresses, and then forward to OVMS via GRPC protocol as well. Note that the images sent to OVMS are in tensorflow serving data format, this will be converted in the adaptor internally.
 
 The original prediction result from OVMS is tensorflow serving tensor format as well, in the adaptor it will use the metadata in the VoE config (e.g. shape, color format, ...) to convert it to AVA's format [inference metadata schema](https://docs.microsoft.com/en-us/azure/azure-video-analyzer/video-analyzer-docs/inference-metadata-schema) and then return to the AVA
+
+
+![arch_img](../assets/Diagram_20210927.png?raw=true)
