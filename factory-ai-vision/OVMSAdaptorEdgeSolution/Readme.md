@@ -117,7 +117,7 @@ The structure of VoE Config is a [DAG](https://en.wikipedia.org/wiki/Directed_ac
 There're 4 kinds of nodes, ```source```, ```openvino_model```, ```openvino_library```, and ```sink```.
 There will be only 1 source node which represent the data (raw image) in the request received by the openvino model server. To process the data we need to forward the data to the next node (can be more than 1) by the edges.
 
-![arch_img](../assets/Cascade1_ovms%20model_20210927.png?raw=true)
+![arch_img](../assets/Cascade1_20210927.png?raw=true)
 
 ![arch_img](../assets/Cascade2_%20custom%20node_20210927.png?raw=true)
 ![arch_img](../assets/Cascade3_cv%20model_20210927.png?raw=true)
