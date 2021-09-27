@@ -197,7 +197,10 @@ def pull_cv_project_helper(customvision_project_id: str, is_partial: bool):
 
     # Invalid CustomVision Project ID handled by exception
     project_obj.name = trainer.get_project(project_id=customvision_project_id).name
+    project_obj.setting.domain_id = trainer.get_project(customvision_project_id).settings.domain_id
     project_obj.project_type = trainer.get_domain(trainer.get_project(customvision_project_id).settings.domain_id).type
+    if project_obj.project_type == "Classification":
+        project_obj.classification_type = trainer.get_project(customvision_project_id).settings.classification_type
     project_obj.customvision_id = customvision_project_id
 
     # Delete parts and images
