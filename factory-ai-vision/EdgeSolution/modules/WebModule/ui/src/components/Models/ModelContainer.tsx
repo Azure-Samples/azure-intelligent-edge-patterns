@@ -55,7 +55,7 @@ const ModelContainer = () => {
     },
     {
       key: 'browse',
-      text: 'Browse',
+      text: 'Browse Zoo',
       iconProps: {
         iconName: 'OfficeStoreLogo',
       },

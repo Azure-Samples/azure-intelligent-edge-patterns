@@ -323,7 +323,7 @@ def create_demo_objects():
     inputs = json.dumps(inputs_)
     outputs = json.dumps(outputs_)
     Project.objects.update_or_create(
-        name="crop",
+        name="Crop",
         defaults={
             "is_cascade": True,
             "type": "openvino_library",

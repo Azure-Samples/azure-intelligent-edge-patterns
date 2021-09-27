@@ -42,6 +42,14 @@ type Output = {
   metadata: Metadata;
 };
 
+const convertOpenVinoName = (project: TrainingProject) => {
+  if (project.category === 'openvino' && project.name === 'face_detection') return 'Face Detection';
+  if (project.category === 'openvino' && project.name === 'emotion_recognition') return 'Emotion Recognition';
+  if (project.category === 'openvino' && project.name === 'age_gender_recognition')
+    return 'Age / Gender Recognition';
+  return project.name;
+};
+
 export type TrainingProject = {
   id: number;
   name: string;
@@ -87,7 +95,7 @@ export type UpdateCustomVisionProjectTagsPayload = {
 
 const normalize = (e) => ({
   id: e.id,
-  name: e.name,
+  name: convertOpenVinoName(e),
   customVisionId: e.customvision_id,
   isDemo: e.is_demo,
   isPredicationModel: e.is_prediction_module,

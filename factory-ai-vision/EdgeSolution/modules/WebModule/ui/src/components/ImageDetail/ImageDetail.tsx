@@ -92,11 +92,7 @@ const useKeepAlive = (isAlive) => {
   );
 };
 
-// interface Props {
-//   selectedProject: number;
-// }
-
-export const Images: React.FC = () => {
+const ImageDetail: React.FC = () => {
   const { id: projectId } = useParams<{ id: string }>();
 
   const [isCaptureDialogOpen, { setTrue: openCaptureDialog, setFalse: closeCaptureDialog }] = useBoolean(
@@ -130,6 +126,7 @@ export const Images: React.FC = () => {
     for (let i = 0; i < e.target.files.length; i++) {
       const formData = new FormData();
       formData.append('image', e.target.files[i]);
+      formData.append('project', projectId);
       dispatch(postImages(formData));
     }
   }
@@ -186,12 +183,6 @@ export const Images: React.FC = () => {
     ],
     [cameraItems, filteredCameras.length, filteredParts.length, partItems],
   );
-
-  // useEffect(() => {
-  //   dispatch(getImages({ freezeRelabelImgs: true, selectedProject: parseInt(projectId, 10) }));
-  //   // We need part info for image list items
-  //   dispatch(getParts());
-  // }, [dispatch, projectId]);
 
   useKeepAlive(relabelImages.length > 0);
 
@@ -335,3 +326,5 @@ export const Images: React.FC = () => {
     </>
   );
 };
+
+export default ImageDetail;

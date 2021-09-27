@@ -1,8 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React from 'react';
 import { IDropdownOption } from '@fluentui/react';
-import { assocPath } from 'ramda';
-import { useSelector, useDispatch } from 'react-redux';
-import { isEmpty } from 'ramda';
+import { useSelector } from 'react-redux';
 
 import { State as RootState } from 'RootStateType';
 import { customVisionTrainingProjectFactory } from '../../../store/trainingProjectSlice';

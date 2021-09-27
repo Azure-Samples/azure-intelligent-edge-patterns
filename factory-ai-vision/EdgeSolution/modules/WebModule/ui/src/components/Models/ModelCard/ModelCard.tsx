@@ -13,7 +13,7 @@ import {
   IContextualMenuProps,
 } from '@fluentui/react';
 
-import { trainCustomVisionProject, TrainingProject } from '../../../store/trainingProjectSlice';
+import { TrainingProject } from '../../../store/trainingProjectSlice';
 import { trainingProjectPartsSelectorFactory } from '../../../store/partSlice';
 import { deleteCustomProject } from '../../../store/trainingProjectSlice';
 import { Status } from '../../../store/trainingProjectStatusSlice';

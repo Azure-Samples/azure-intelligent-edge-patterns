@@ -25,6 +25,9 @@ interface Props {
   parts: Part[];
 }
 
+const OBJECT_DETECTION_TRAIN_LIMIT = 15;
+const CLASSIFICATION_TRAIN_LIMIT = 5;
+
 const getClasses = () =>
   mergeStyleSets({
     itemTitle: { fontSize: '13px', lineHeight: '18px', color: '#605E5C' },
@@ -36,14 +39,20 @@ const getClasses = () =>
     },
   });
 
-const isObjectDetectionDisable = (
+const getTrainingImageLimit = (project: TrainingProject): number => {
+  if (project.projectType === 'Classification') return CLASSIFICATION_TRAIN_LIMIT;
+  return OBJECT_DETECTION_TRAIN_LIMIT;
+};
+
+const isTrainingBDisable = (
   status: TrainingStatus,
   labeledImageCounts: number[],
   hasTrainProject: boolean,
+  limit: number,
 ): boolean => {
   if (
     ((hasTrainProject && Math.max(...labeledImageCounts) > 0) ||
-      (!hasTrainProject && Math.min(...labeledImageCounts) >= 15)) &&
+      (!hasTrainProject && Math.min(...labeledImageCounts) >= limit)) &&
     NO_LIMIt_TRAIN_STATUS.includes(status)
   )
     return false;
@@ -68,8 +77,12 @@ const ImageLabel = (props: Props) => {
 
   const [localStatus, setLocalStatus] = useState<TrainingStatus>(status);
 
-  const hasTrainProject = parts.every((part) => part.remote_image_count >= 15);
+  const hasTrainProject =
+    project.projectType === 'ObjectDetection'
+      ? parts.every((part) => part.remote_image_count >= 15)
+      : parts.every((part) => part.remote_image_count >= 5);
   const labeledImageCounts = getUnTrainImageCounts(parts);
+  const trainingLimit = getTrainingImageLimit(project);
 
   const classes = getClasses();
   const history = useHistory();
@@ -93,7 +106,7 @@ const ImageLabel = (props: Props) => {
 
   const onTrainClick = useCallback(() => {
     dispatch(trainCustomVisionProject(project.id));
-  }, []);
+  }, [dispatch, project]);
 
   return (
     <div>
@@ -101,7 +114,7 @@ const ImageLabel = (props: Props) => {
       <Text styles={{ root: classes.tips }}>
         {project.projectType === 'ObjectDetection'
           ? 'At least 15 images must be tagged per object'
-          : 'At least 15 images must be classified'}
+          : 'At least 5 images must be tagged per classification'}
       </Text>
       <Stack>
         <Link onClick={onDirectToImages}>
@@ -118,7 +131,7 @@ const ImageLabel = (props: Props) => {
       </Stack>
       <DefaultButton
         styles={{ root: { marginTop: '14px' } }}
-        disabled={isObjectDetectionDisable(localStatus, labeledImageCounts, hasTrainProject)}
+        disabled={isTrainingBDisable(localStatus, labeledImageCounts, hasTrainProject, trainingLimit)}
         onClick={onTrainClick}
       >
         Train

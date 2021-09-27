@@ -41,7 +41,7 @@ const EditPanelContainer = (props: Props) => {
       ]);
       setLoading(false);
     })();
-  }, [dispatch]);
+  }, [dispatch, projectId]);
 
   if (loading)
     return (

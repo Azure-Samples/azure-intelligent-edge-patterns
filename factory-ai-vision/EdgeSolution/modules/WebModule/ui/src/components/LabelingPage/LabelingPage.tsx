@@ -1,4 +1,4 @@
-import React, { FC, useState, useMemo } from 'react';
+import React, { FC, useState, useMemo, useCallback } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
 import { createSelector } from '@reduxjs/toolkit';
 import {
@@ -16,14 +16,13 @@ import {
 
 import { State } from 'RootStateType';
 import { LabelingType, WorkState } from './type';
-import { closeLabelingPage, OpenFrom, changePartId } from '../../store/labelingPageSlice';
+import { closeLabelingPage, OpenFrom } from '../../store/labelingPageSlice';
 import {
   selectImageEntities,
   saveLabelImageAnnotation,
-  selectImageById,
   saveClassificationImageTag,
 } from '../../store/imageSlice';
-import { createClassification, updateAnnotation } from '../../store/annotationSlice';
+import { removeAnnotation } from '../../store/annotationSlice';
 import { labelPageAnnoSelector } from '../../store/annotationSlice';
 import { Annotation } from '../../store/type';
 import { selectPartEntities, Part } from '../../store/partSlice';
@@ -35,6 +34,7 @@ import { selectProjectPartsFactory } from '../../store/selectors';
 import { selectTrainingProjectById } from '../../store/trainingProjectSlice';
 
 import Scene from './Scene';
+import { PartTag, Status } from '../PartTag';
 
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
 export const imageSelector = createSelector(
@@ -73,14 +73,7 @@ const labelingPageStyle = mergeStyleSets({
     width: '100%',
     zIndex: 2,
     cursor: 'not-allowed',
-    justifyContent: 'center',
-    alignItems: 'center',
-    display: 'flex',
-    fontSize: '80px',
-    fontWeight: 600,
-    color: '#FFF',
   },
-  covertText: { width: '80%', wordBreak: 'break-all', textAlign: 'center' },
   imgInfoContainer: { width: '30%' },
 });
 
@@ -112,7 +105,6 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
     (state: State) => state.labelingPage.openFrom === OpenFrom.CaptureDialog,
   );
   const noPrevAndNext = useSelector((state: State) => state.labelingPage.openFrom === OpenFrom.AfterCapture);
-  const imageProjectId = useSelector<State, number>((state) => imageSelector(state)?.project);
 
   const closeDialog = () => dispatch(closeLabelingPage());
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
@@ -122,13 +114,6 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
   const partOfProjectSelector = useMemo(() => selectProjectPartsFactory(projectId), [projectId]);
   const parts = useSelector(partOfProjectSelector);
   const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
-  const { selectedPartId } = useSelector((state: State) => state.labelingPage);
-  const image = useSelector((state: State) => selectImageById(state, selectedImageId));
-
-  // console.log('selectedPartId', selectedPartId);
-  // console.log(getPart(parts, selectedPartId));
-  // console.log('image', image);
-  // console.log('annotations', annotations);
 
   const isOnePointBox = checkOnePointBox(annotations);
 
@@ -164,19 +149,11 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
   };
 
   const saveClassification = async () => {
-    if (selectedPartId === 0) return;
+    if (annotations.length === 0) return;
 
     setLoading(true);
 
-    if (annotations.length > 0) {
-      const anno: Annotation = annotations[0];
-      await dispatch(updateAnnotation({ id: anno.id, changes: { ...anno, part: selectedPartId } }));
-    } else {
-      await dispatch(createClassification({ x: -100, y: -100 }, selectedImageId, selectedPartId));
-    }
-
     await dispatch(saveClassificationImageTag());
-    await dispatch(changePartId({ partId: 0 }));
     setLoading(false);
   };
 
@@ -201,18 +178,16 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
     setLoading(false);
   };
 
+  const onRemoveAnnotation = useCallback(
+    (annoId: string) => {
+      dispatch(removeAnnotation(annoId));
+    },
+    [dispatch],
+  );
+
   const onRenderImage = (): JSX.Element => (
     <>
-      {project.projectType === 'Classification' && (
-        <Stack className={labelingPageStyle.imgCover}>
-          {selectedPartId === 0 && annotations.length === 1 && (
-            <Stack className={labelingPageStyle.covertText}>{getPart(parts, annotations[0].part).name}</Stack>
-          )}
-          {selectedPartId !== 0 && (
-            <Stack className={labelingPageStyle.covertText}>{getPart(parts, selectedPartId).name}</Stack>
-          )}
-        </Stack>
-      )}
+      {project.projectType === 'Classification' && <Stack className={labelingPageStyle.imgCover} />}
       <Scene
         url={imageUrl}
         annotations={annotations}
@@ -251,7 +226,27 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
   const onRenderInfoOnRight = (): JSX.Element => (
     <>
       {onRenderPrediction()}
-      <PartPicker trainingProject={imageProjectId} />
+      <PartPicker trainingProject={project} selectedImageId={selectedImageId} annotationList={annotations} />
+      {project.projectType === 'Classification' && annotations.length > 0 && (
+        <Stack>
+          <Text>
+            {project.classification_type === 'Multiclass'
+              ? `Classification Model (Multiclass): Only one tag per image`
+              : `Classification Model (Multilabel): Multiple tags per image`}
+          </Text>
+          <Stack horizontal tokens={{ childrenGap: '5px' }}>
+            {annotations.map((anno, i) => (
+              <PartTag
+                key={i}
+                text={getPart(parts, anno.part).name}
+                status={Status.Active}
+                isDelete
+                onDelete={() => onRemoveAnnotation(anno.id)}
+              ></PartTag>
+            ))}
+          </Stack>
+        </Stack>
+      )}
     </>
   );
 
@@ -268,7 +263,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
 
     const isLastImg = index === imageIds.length - 1;
     const previousDisabled = index === 0 || loading;
-    const nextDisabled = isLastImg || loading;
+    const nextDisabled = isLastImg || loading || annotations.length === 0;
     return (
       <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
         <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />
