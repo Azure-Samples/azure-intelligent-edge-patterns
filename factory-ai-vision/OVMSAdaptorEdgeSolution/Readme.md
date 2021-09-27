@@ -119,7 +119,7 @@ There will be only 1 source node which represent the data (raw image) in the req
 
 ![arch_img](../assets/Cascade1_ovms%20model_20210927.png?raw=true)
 
-![arch_img](../assets/Cascade2_w:%20custom%20node_20210927.png?raw=true)
+![arch_img](../assets/Cascade2_%20custom%20node_20210927.png?raw=true)
 ![arch_img](../assets/Cascade3_cv%20model_20210927.png?raw=true)
 
 
