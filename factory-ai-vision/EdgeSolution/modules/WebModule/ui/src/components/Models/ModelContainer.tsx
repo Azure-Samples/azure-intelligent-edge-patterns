@@ -100,7 +100,10 @@ const ModelContainer = () => {
       iconProps: {
         iconName: 'Emoji2',
       },
-      onClick: () => {},
+      onClick: () => {
+        const win = window.open('https://go.microsoft.com/fwlink/?linkid=2173530', '_blank');
+        win.focus();
+      },
     },
     {
       key: 'learnMore',

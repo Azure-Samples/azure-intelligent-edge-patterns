@@ -65,7 +65,10 @@ const CascadesContainer = () => {
       buttonStyles: {
         root: { borderLeft: '1px solid #C8C6C4' },
       },
-      onClick: () => {},
+      onClick: () => {
+        const win = window.open('https://go.microsoft.com/fwlink/?linkid=2173531', '_blank');
+        win.focus();
+      },
     },
     {
       key: 'learnMore',
