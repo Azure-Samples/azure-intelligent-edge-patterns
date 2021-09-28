@@ -8,7 +8,7 @@ import { trainingProjectPartsSelectorFactory } from '../../../store/partSlice';
 import {
   getOneTrainingProjectStatus,
   selectAllTrainingProjectsStatus,
-} from '../../../store/trainingProjectStatusSlice';
+} from '../../../store/trainingProjectStatusSlice';
 import { getParts } from '../../../store/partSlice';
 
 import EditPanel from './EditPanel';
@@ -41,7 +41,7 @@ const EditPanelContainer = (props: Props) => {
       ]);
       setLoading(false);
     })();
-  }, [dispatch]);
+  }, [dispatch, projectId]);
 
   if (loading)
     return (

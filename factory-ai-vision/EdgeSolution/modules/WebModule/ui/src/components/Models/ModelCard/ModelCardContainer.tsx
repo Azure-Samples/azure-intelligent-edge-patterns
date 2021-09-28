@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 
 import { State as RootState } from 'RootStateType';
 import { TrainingProject } from '../../../store/trainingProjectSlice';
-import { selectAllTrainingProjectsStatus } from '../../../store/trainingProjectStatusSlice';
+import { selectAllTrainingProjectsStatus } from '../../../store/trainingProjectStatusSlice';
 
 import ModelCard from './ModelCard';
 

@@ -400,9 +400,9 @@ class Task(models.Model):
                 time.sleep(1)
                 iterations = trainer.get_iterations(customvision_id)
                 if len(iterations) == 0:
-                    logger.error("failed: not yet trained")
+                    logger.error("Failed: not yet trained")
                     self.status = "running"
-                    self.log = "failed: not yet trained"
+                    self.log = "Failed: not yet trained"
                     self.save()
                     return
 

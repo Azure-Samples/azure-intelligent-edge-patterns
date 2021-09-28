@@ -1,5 +1,5 @@
 import React from 'react';
-import { mergeStyleSets, getTheme } from '@fluentui/react';
+import { mergeStyleSets, getTheme, Icon } from '@fluentui/react';
 
 const { palette } = getTheme();
 
@@ -12,6 +12,8 @@ export enum Status {
 type PartTagProps = {
   status: Status;
   text: string;
+  isDelete?: boolean;
+  onDelete?: () => void;
 };
 
 const tagStyles = mergeStyleSets({
@@ -20,7 +22,7 @@ const tagStyles = mergeStyleSets({
     border: '1px solid ',
     borderRadius: '16px',
     textAlign: 'center',
-    display: 'inline-block',
+    display: 'inline-flex',
     padding: '1px 8px 3px 8px',
   },
   default: {
@@ -38,6 +40,11 @@ const tagStyles = mergeStyleSets({
     borderColor: palette.neutralSecondary,
     borderStyle: 'dashed',
   },
+  deleteIcon: {
+    marginLeft: '5px',
+    paddingTop: '3px',
+    cursor: 'pointer',
+  },
 });
 
 const getTagStyles = (status: Status): string => {
@@ -46,6 +53,13 @@ const getTagStyles = (status: Status): string => {
   return tagStyles.inactive;
 };
 
-export const PartTag: React.FC<PartTagProps> = ({ text, status }) => {
-  return <div className={`${tagStyles.basic} ${getTagStyles(status)}`}>{text}</div>;
+export const PartTag = (props: PartTagProps) => {
+  const { status, text, isDelete, onDelete } = props;
+
+  return (
+    <div className={`${tagStyles.basic} ${getTagStyles(status)}`}>
+      <span>{text}</span>
+      {isDelete && <Icon iconName="Cancel" className={tagStyles.deleteIcon} onClick={onDelete} />}
+    </div>
+  );
 };

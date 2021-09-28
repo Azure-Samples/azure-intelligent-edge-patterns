@@ -151,7 +151,8 @@ def get_model_info():
     model_list = []
     model_infos = {}
     for model in os.listdir(model_path):
-        model_name = ' '.join(c.capitalize() for c in model.split('-'))
+        # model_name = ' '.join(c.capitalize() for c in model.split('-'))
+        model_name = model
 
         if glob.glob('{}/{}/1/*.xml'.format(model_path, model)):
             cur_path = '{}/{}/1/'.format(model_path, model)

@@ -4,7 +4,7 @@ import { createSlice, createEntityAdapter } from '@reduxjs/toolkit';
 import { State } from 'RootStateType';
 import { createWrappedAsync } from './shared/createWrappedAsync';
 
-export type TrainingStatus = 'ok' | 'training' | 'failed' | 'success' | 'No change';
+export type TrainingStatus = 'ok' | 'Training' | 'Failed' | 'Success' | 'No change';
 
 export interface Status {
   id: number;

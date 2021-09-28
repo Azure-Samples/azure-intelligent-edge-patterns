@@ -17,7 +17,7 @@ import { selectAllIntelProject } from '../../store/IntelProjectSlice';
 
 import Model from './Model';
 import AddCustomVisionContainer from './Panel/AddCustomVisionContainer';
-import IntelProjectDashboard from './IntelProjectDashboard';
+import OpenVinoDashboard from './OpenVinoDashboard';
 
 const getClasses = () =>
   mergeStyleSets({
@@ -55,7 +55,7 @@ const ModelContainer = () => {
     },
     {
       key: 'browse',
-      text: 'Browse',
+      text: 'Browse Zoo',
       iconProps: {
         iconName: 'OfficeStoreLogo',
       },
@@ -100,7 +100,10 @@ const ModelContainer = () => {
       iconProps: {
         iconName: 'Emoji2',
       },
-      onClick: () => {},
+      onClick: () => {
+        const win = window.open('https://go.microsoft.com/fwlink/?linkid=2173530', '_blank');
+        win.focus();
+      },
     },
     {
       key: 'learnMore',
@@ -158,7 +161,7 @@ const ModelContainer = () => {
         <Stack tokens={{ childrenGap: '65px' }}>
           <CommandBar styles={{ root: { marginTop: '24px' } }} items={newCommandBarItems} />
           {isAddIntelOvms ? (
-            <IntelProjectDashboard
+            <OpenVinoDashboard
               intelProjectList={intelProjectList}
               openVinoProjectList={trainingProjectList.filter((project) => project.category === 'openvino')}
               onCloseIntel={() => setIsAddIntelOvms(false)}

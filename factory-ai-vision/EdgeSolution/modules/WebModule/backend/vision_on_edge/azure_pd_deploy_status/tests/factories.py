@@ -10,7 +10,7 @@ from ...azure_training_status.models import TrainingStatus
 class TrainingStatusFactory(DjangoModelFactory):
     """TrainingStatusFactory."""
 
-    my_status_list = ["ok", "failed", "preparing", "training", "exporting"]
+    my_status_list = ["ok", "Failed", "Preparing", "Training", "Exporting"]
 
     name = Faker("city")
     status = Faker("word", ext_word_list=my_status_list)

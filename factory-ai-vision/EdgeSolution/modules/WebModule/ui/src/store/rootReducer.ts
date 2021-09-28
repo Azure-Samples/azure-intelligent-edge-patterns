@@ -17,7 +17,7 @@ import cameraSettingReducer from './cameraSetting/cameraSettingReducer';
 import cascadeReducer from './cascadeSlice';
 
 import intelProjectReducer from './IntelProjectSlice';
-import trainingProjectStatusReducer from './trainingProjectStatusSlice';
+import trainingProjectStatusReducer from './trainingProjectStatusSlice';
 
 export const rootReducer = combineReducers({
   project: projectReducer,

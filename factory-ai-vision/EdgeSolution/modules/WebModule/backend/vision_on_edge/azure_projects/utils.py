@@ -71,7 +71,20 @@ def update_app_insight_counter(
 
 def create_cv_project_helper(name: str, tags = None, project_type: str = None, classification_type: str = None):
     setting_obj = Setting.objects.first()
-    project_obj = Project.objects.create(name=name, setting=setting_obj, is_demo=False, project_type=project_type, category="customvision" ,classification_type=classification_type)
+    inputs_ = [
+        {
+            "name": "data",
+            "metadata": {
+                "type": "image",    
+                "shape": [1, 3, 416, 416],
+                "layout": ["N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
+        }
+    ]
+    
+    inputs = json.dumps(inputs_)
+    project_obj = Project.objects.create(name=name, setting=setting_obj, is_demo=False, project_type=project_type, category="customvision", classification_type=classification_type, is_cascade=True, type="customvision_model", inputs=inputs)
 
     logger.info("Creating Parts:")
     for tag in tags:
@@ -197,7 +210,10 @@ def pull_cv_project_helper(customvision_project_id: str, is_partial: bool):
 
     # Invalid CustomVision Project ID handled by exception
     project_obj.name = trainer.get_project(project_id=customvision_project_id).name
+    project_obj.setting.domain_id = trainer.get_project(customvision_project_id).settings.domain_id
     project_obj.project_type = trainer.get_domain(trainer.get_project(customvision_project_id).settings.domain_id).type
+    if project_obj.project_type == "Classification":
+        project_obj.classification_type = trainer.get_project(customvision_project_id).settings.classification_type
     project_obj.customvision_id = customvision_project_id
 
     # Delete parts and images
@@ -394,7 +410,7 @@ def train_project_worker(project_id):
     # =====================================================
     if not project_obj.setting or not project_obj.setting.is_trainer_valid:
         upcreate_training_status(
-            project_id=project_obj.id, status="failed", log="Custom Vision Access Error"
+            project_id=project_obj.id, status="Failed", log="Custom Vision Access Error"
         )
         return
 

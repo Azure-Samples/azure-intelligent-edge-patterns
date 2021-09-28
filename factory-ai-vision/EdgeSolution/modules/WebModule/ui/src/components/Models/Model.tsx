@@ -20,7 +20,6 @@ import { useQuery } from '../../hooks/useQuery';
 import { Url } from '../../enums';
 
 import ModelCardContainer from './ModelCard/ModelCardContainer';
-import EditPanel from './Panel/EditPanel';
 import EditPanelContainer from './Panel/EditPanelContainer';
 
 export type ModelType = 'custom' | 'own' | 'ovms';

@@ -55,7 +55,7 @@ const navLinks: INavLink[] = [
     url: Url.CASCADES,
     iconProps: {
       imageProps: {
-        src: '/icons/models.svg',
+        src: '/icons/cascades.svg',
       },
     },
   },

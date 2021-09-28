@@ -4,7 +4,7 @@ import { State } from 'RootStateType';
 import { createWrappedAsync } from './shared/createWrappedAsync';
 
 import { refreshTrainingProject } from './trainingProjectSlice';
-import { getTrainingProjectStatusList } from './trainingProjectStatusSlice';
+import { getTrainingProjectStatusList } from './trainingProjectStatusSlice';
 
 export type IntelProject = {
   id: number;

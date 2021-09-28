@@ -6,7 +6,7 @@ import { getImages } from '../store/imageSlice';
 import { getParts } from '../store/partSlice';
 import { getCameras } from '../store/cameraSlice';
 
-import { Images } from '../components/ImageDetail/Images';
+import ImageDetailComponent from '../components/ImageDetail/ImageDetail';
 
 const ImagesDetail = () => {
   const { id: projectId } = useParams<{ id: string }>();
@@ -25,11 +25,11 @@ const ImagesDetail = () => {
       ]);
       setLoading(false);
     })();
-  }, [dispatch]);
+  }, [dispatch, projectId]);
 
   if (loading) return <h1>Loading...</h1>;
 
-  return <Images />;
+  return <ImageDetailComponent />;
 };
 
 export default ImagesDetail;

@@ -28,7 +28,7 @@ class AzurePDDeployStatusConfig(AppConfig):
                 except PartDetection.deploystatus.RelatedObjectDoesNotExist:
                     DeployStatus.objects.create(part_detection=pd)
             for ds_obj in DeployStatus.objects.all():
-                if ds_obj.status not in ["ok", "failed"]:
+                if ds_obj.status not in ["ok", "Failed"]:
                     ds_obj.status = "ok"
                     ds_obj.log = "reset by app"
                     ds_obj.save()

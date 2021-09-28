@@ -15,7 +15,7 @@ import { IntelProject, createIntelProject } from '../../store/IntelProjectSlice'
 import { TrainingProject } from '../../store/trainingProjectSlice';
 
 import Tag from './Tag';
-import AddIntelPanel from './Panel/AddIntel';
+import AddOpenVinoPanel from './Panel/AddOpenVino';
 
 const CARD_PART_LIMIT = 5;
 
@@ -51,9 +51,9 @@ const getClasses = () =>
     },
   });
 
-const isDisableAddButton = (intel: IntelProject, openVinoProjectList: TrainingProject[]) => {
-  if (openVinoProjectList.length === 0) return false;
-  if (!openVinoProjectList.map((project) => project.name).includes(intel.create_name)) return false;
+const isDisableAddButton = (intel: IntelProject, openVinoList: TrainingProject[]) => {
+  if (openVinoList.length === 0) return false;
+  if (!openVinoList.map((project) => project.openvino_model_name).includes(intel.model_name)) return false;
   return true;
 };
 
@@ -182,7 +182,7 @@ const IntelProjectDashboard = (props: Props) => {
             ))}
         </Stack>
       </Stack>
-      <AddIntelPanel
+      <AddOpenVinoPanel
         isOpen={isOpen}
         onDissmiss={() => setIsOpen(false)}
         intel={{
