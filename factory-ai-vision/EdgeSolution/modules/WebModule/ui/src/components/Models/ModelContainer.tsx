@@ -17,7 +17,7 @@ import { selectAllIntelProject } from '../../store/IntelProjectSlice';
 
 import Model from './Model';
 import AddCustomVisionContainer from './Panel/AddCustomVisionContainer';
-import IntelProjectDashboard from './IntelProjectDashboard';
+import OpenVinoDashboard from './OpenVinoDashboard';
 
 const getClasses = () =>
   mergeStyleSets({
@@ -158,7 +158,7 @@ const ModelContainer = () => {
         <Stack tokens={{ childrenGap: '65px' }}>
           <CommandBar styles={{ root: { marginTop: '24px' } }} items={newCommandBarItems} />
           {isAddIntelOvms ? (
-            <IntelProjectDashboard
+            <OpenVinoDashboard
               intelProjectList={intelProjectList}
               openVinoProjectList={trainingProjectList.filter((project) => project.category === 'openvino')}
               onCloseIntel={() => setIsAddIntelOvms(false)}
