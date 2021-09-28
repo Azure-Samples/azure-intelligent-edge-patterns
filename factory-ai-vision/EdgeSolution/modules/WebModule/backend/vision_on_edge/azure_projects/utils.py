@@ -71,7 +71,20 @@ def update_app_insight_counter(
 
 def create_cv_project_helper(name: str, tags = None, project_type: str = None, classification_type: str = None):
     setting_obj = Setting.objects.first()
-    project_obj = Project.objects.create(name=name, setting=setting_obj, is_demo=False, project_type=project_type, category="customvision" ,classification_type=classification_type)
+    inputs_ = [
+        {
+            "name": "data",
+            "metadata": {
+                "type": "image",    
+                "shape": [1, 3, 416, 416],
+                "layout": ["N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
+        }
+    ]
+    
+    inputs = json.dumps(inputs_)
+    project_obj = Project.objects.create(name=name, setting=setting_obj, is_demo=False, project_type=project_type, category="customvision", classification_type=classification_type, is_cascade=True, type="customvision_model", inputs=inputs)
 
     logger.info("Creating Parts:")
     for tag in tags:
