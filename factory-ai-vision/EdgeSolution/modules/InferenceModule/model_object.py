@@ -63,20 +63,21 @@ class ModelObject():
         return self.get_device() == 'vpu'
 
     def get_device(self):
-        while True:
-            try:
-                response = requests.get(
-                    "http://" + predict_module_url() + "/get_device")
-                device = response.json()["device"]
-                if device == 'CPU-OPENVINO_MYRIAD':
-                    device = 'vpu'
-                break
-            except:
-                time.sleep(2)
-                continue
-        # device = onnxruntime.get_device()
-        # if device == 'CPU-OPENVINO_MYRIAD':
-        #     device = 'vpu'
+        # while True:
+        #     try:
+        #         response = requests.get(
+        #             "http://" + predict_module_url() + "/get_device")
+        #         device = response.json()["device"]
+        #         if device == 'CPU-OPENVINO_MYRIAD':
+        #             device = 'vpu'
+        #         break
+        #     except:
+        #         time.sleep(2)
+        #         continue
+        # # device = onnxruntime.get_device()
+        # # if device == 'CPU-OPENVINO_MYRIAD':
+        # #     device = 'vpu'
+        device = 'cpu'
         return device.lower()
 
     def set_is_scenario(self, is_scenario):
