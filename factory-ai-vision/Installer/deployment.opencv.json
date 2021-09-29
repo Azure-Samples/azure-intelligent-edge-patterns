@@ -92,24 +92,6 @@
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5000/tcp\":[{\"HostPort\":\"5000\"}],\"44000/tcp\":[{\"HostPort\":\"44000\"}],\"5558/tcp\":[{\"HostPort\":\"5558\"}]},\"IpcMode\":\"host\",\"runtime\":\"<Docker Runtime>\"}}"
             }
           },
-          "predictmodule": {
-            "version": "1.0",
-            "type": "docker",
-            "status": "running",
-            "restartPolicy": "always",
-            "env": {
-              "IOTHUB_CONNECTION_STRING": {
-                "value": "$IOTHUB_CONNECTION_STRING"
-              },
-              "LVA_MODE": {
-                "value": "grpc"
-              }
-            },
-            "settings": {
-              "image": "intelligentedge/predictmodule:0.30.0-<cpu or gpu><platform>",
-              "createOptions": "{\"HostConfig\":{\"Binds\":[\"/dev/bus/usb:/dev/bus/usb\"],\"DeviceCgroupRules\":[\"c 189:* rmw\"],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"7777/tcp\":[{\"HostPort\":\"7777\"}]},\"IpcMode\":\"host\",\"runtime\":\"<Docker Runtime>\"}}"
-            }
-          },
           "cvcapturemodule": {
             "version": "1.0",
             "type": "docker",

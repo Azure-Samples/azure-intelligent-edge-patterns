@@ -37,7 +37,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "intelligentedge/nginxmodule:0.30.0-<platform>",
+              "image": "intelligentedge/nginxmodule:0.29.1-<platform>",
               "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8181/tcp\":[{\"HostPort\":\"8181\"}]}}}"
             }
           },
@@ -64,14 +64,35 @@
               },
               "DBPASS": {
                 "value": "vision_on_edge"
+              },
+              "DF_PD_VIDEO_SOURCE": {
+                "value": "opencv"
               }
             },
             "settings": {
-              "image": "intelligentedge/webmodule:0.30.0-<platform>",
-              "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Target\":\"/workspace\",\"Source\":\"ovmsworkspace\",\"Type\":\"volume\"}],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"8000/tcp\":[{\"HostPort\":\"8000\"}]}}}"
+              "image": "intelligentedge/webmodule:0.29.1-<platform>",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8000/tcp\":[{\"HostPort\":\"8000\"}]}}}"
             }
           },
           "inferencemodule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "IS_OPENCV": {
+                "value": "true"
+              }
+            },
+            "settings": {
+              "image": "intelligentedge/inferencemodule:0.29.1-<platform>",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5000/tcp\":[{\"HostPort\":\"5000\"}],\"44000/tcp\":[{\"HostPort\":\"44000\"}],\"5558/tcp\":[{\"HostPort\":\"5558\"}]},\"IpcMode\":\"host\",\"runtime\":\"<Docker Runtime>\"}}"
+            }
+          },
+          "predictmodule": {
             "version": "1.0",
             "type": "docker",
             "status": "running",
@@ -85,18 +106,18 @@
               }
             },
             "settings": {
-              "image": "intelligentedge/inferencemodule:0.30.0-<platform>",
-              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5000/tcp\":[{\"HostPort\":\"5000\"}],\"44000/tcp\":[{\"HostPort\":\"44000\"}],\"5558/tcp\":[{\"HostPort\":\"5558\"}]},\"IpcMode\":\"host\",\"runtime\":\"<Docker Runtime>\"}}"
+              "image": "intelligentedge/predictmodule:0.29.1-<cpu or gpu><platform>",
+              "createOptions": "{\"HostConfig\":{\"Binds\":[\"/dev/bus/usb:/dev/bus/usb\"],\"DeviceCgroupRules\":[\"c 189:* rmw\"],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"7777/tcp\":[{\"HostPort\":\"7777\"}]},\"IpcMode\":\"host\",\"runtime\":\"<Docker Runtime>\"}}"
             }
           },
-          "avaedge": {
-            "version": "1.1",
+          "cvcapturemodule": {
+            "version": "1.0",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/media/video-analyzer:1",
-              "createOptions": "{\"HostConfig\":{\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"Binds\":[],\"IpcMode\":\"host\"}}"
+              "image": "intelligentedge/cameramodule:0.29.1-<platform>",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"9000/tcp\":[{\"HostPort\":\"9000\"}],\"5559/tcp\":[{\"HostPort\":\"5559\"}]},\"runtime\":\"runc\"}}"
             }
           },
           "rtspsim": {
@@ -105,7 +126,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "intelligentedge/rtspsimmodule:0.30.0-<platform>",
+              "image": "intelligentedge/rtspsimmodule:0.29.1-<platform>",
               "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Target\":\"/live/mediaServer/media/upload\",\"Source\":\"upload_data\",\"Type\":\"volume\"}],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"554/tcp\":[{\"HostPort\":\"554\"}]}}}"
             }
           },
@@ -115,7 +136,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "intelligentedge/uploadmodule:0.30.0-<platform>",
+              "image": "intelligentedge/uploadmodule:0.29.1-<platform>",
               "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Target\":\"/app/upload\",\"Source\":\"upload_data\",\"Type\":\"volume\"}],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"7000/tcp\":[{\"HostPort\":\"7000\"}]}}}"
             }
           },
@@ -126,7 +147,7 @@
             "restartPolicy": "always",
             "startupOrder": 0,
             "settings": {
-              "image": "intelligentedge/modelmanagermodule:0.30.0-<platform>",
+              "image": "intelligentedge/modelmanagermodule:0.29.1-<platform>",
               "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Target\":\"/workspace\",\"Source\":\"ovmsworkspace\",\"Type\":\"volume\"}],\"PortBindings\":{\"8585/tcp\":[{\"HostPort\":\"8585\"}]},\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}}}}"
             }
           },
@@ -148,8 +169,8 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "routes": {
-          "metrics": "FROM /messages/modules/inferencemodule/outputs/metrics INTO $upstream",
-          "InferenceToLVA": "FROM /messages/modules/inferencemodule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/lvaEdge/inputs/recordingTrigger\")"
+          "metrics": "FROM /messages/modules/InferenceModule/outputs/metrics INTO $upstream",
+          "InferenceToLVA": "FROM /messages/modules/InferenceModule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/lvaEdge/inputs/recordingTrigger\")"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
@@ -158,18 +179,6 @@
     },
     "webmodule": {
       "properties.desired": {}
-    },
-    "avaedge": {
-      "properties.desired": {
-        "ProvisioningToken": "$AVA_PROVISIONING_TOKEN",
-        "ApplicationDataDirectory": "/var/lib/videoanalyzer",
-        "DiagnosticsEventsOutputName": "diagnostics",
-        "OperationalEventsOutputName": "operational",
-        "LogLevel": "information",
-        "LogCategories": "Application,Events",
-        "AllowUnsecuredEndpoints": true,
-        "TelemetryOptOut": false
-      }
     }
   }
 }
