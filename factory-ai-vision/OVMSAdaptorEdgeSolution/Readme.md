@@ -297,7 +297,7 @@ To build the video pipeline with customvision's object detection model, you need
             "combined": ""
         },
 
-Note that the you need to export the model on customvision with the openvino format, and the paste the link in the ```download_uri_openvino``` field
+Note that the you need to export the model on customvision with the openvino format, and the paste the link in the ```download_uri_openvino``` field; learn more from [here](../Tutorial/export_cv_model.md)
 
 
 ### Cascase Face Detection Result to Classification Models
