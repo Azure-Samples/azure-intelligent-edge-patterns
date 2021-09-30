@@ -7,11 +7,8 @@
 1. After the project is trained, goes to Performance Page to click Export.
 ![arch_img](../assets/step1_20210929.png?raw=true)
 2. Then, choose your platform as OpenVivo
- <br>
 ![arch_img](../assets/step2_20210929.png?raw=true)
 3. Right-click Download Icon to save the link 
- <br>
 ![arch_img](../assets/step3_20210929.png?raw=true)
 4. You can get the link of Custom Model with OpenVivo Format
- <br>
 ![arch_img](../assets/step4_20210929.png?raw=true) 
