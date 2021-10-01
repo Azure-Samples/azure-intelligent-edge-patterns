@@ -65,7 +65,10 @@ class SettingViewSet(viewsets.ModelViewSet):
         trainer = setting_obj.get_trainer_obj()
         customvision_id = request.query_params.get("customvision_id")
         domain_type = trainer.get_domain(trainer.get_project(customvision_id).settings.domain_id).type
-        results = {"tags":[], "type":domain_type}
+        classification_type = ""
+        if domain_type == "Classification":
+            classification_type = trainer.get_project(customvision_id).settings.classification_type
+        results = {"tags":[], "type":domain_type, "classification_type":classification_type}
         tag_list = trainer.get_tags(customvision_id)
         for tag in tag_list:
             results["tags"].append(tag.name)
