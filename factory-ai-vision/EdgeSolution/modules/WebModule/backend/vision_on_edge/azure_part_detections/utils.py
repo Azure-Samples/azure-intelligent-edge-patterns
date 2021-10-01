@@ -66,12 +66,14 @@ def if_trained_then_deploy_worker(part_detection_id):
     # =====================================================
     # 2. Project training success                       ===
     # =====================================================
-        logger.info("Project train/export success.")
-        logger.info("Deploying...")
+        # logger.info("Project train/export success.")
+        # logger.info("Deploying...")
 
     # =====================================================
     # 3. Deploy Model and params                        ===
     # =====================================================
+    logger.info("Project train/export success.")
+    logger.info("Deploying...")
     try:
         deploy_worker(part_detection_id=part_detection_obj.id)
         logger.info("Part Detection successfully deployed to inference_module!")
