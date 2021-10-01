@@ -35,7 +35,7 @@
 
 6. Register a pipeline topology to Azure Video Analzyer which contains a grpc extension that forward images to ```tcp://ovmsadaptor:5001```, pipelineTopologySet.json is a working example. After setting the topology, you need to set a live pipeline (e.g. ```livePipelineSet.json```) and activate it
 
-7. If everything work successfully, you should be able to see the detected result on the Azure IoT Explorer (from Prerequisite 4)
+7. If everything works successfully, you should be able to see the detected result on the Azure IoT Explorer (from Prerequisite 4)
 
 
 
@@ -119,7 +119,7 @@ There will be only 1 source node which represent the data (raw image) in the req
 
 
 ### Openvino Face Detection
-Bellow is a simple case that only use the model from openvino model zoo to do the face detection
+The following is a simple case that only use the model from openvino model zoo to do the face detection
 
 ![arch_img](../assets/Cascade1_ovms%20model_20210927.png?raw=true)
 
@@ -297,7 +297,7 @@ To build the video pipeline with customvision's object detection model, you need
             "combined": ""
         },
 
-Note that the you need to export the model on customvision with the openvino format, and the paste the link in the ```download_uri_openvino``` field
+Note that the you need to export the model on customvision with the openvino format, and the paste the link in the ```download_uri_openvino``` field; learn more from [here](../Tutorial/export_cv_model.md)
 
 
 ### Cascase Face Detection Result to Classification Models
