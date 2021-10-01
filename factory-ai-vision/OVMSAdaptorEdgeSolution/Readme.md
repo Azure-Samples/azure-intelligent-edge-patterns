@@ -35,7 +35,7 @@
 
 6. Register a pipeline topology to Azure Video Analzyer which contains a grpc extension that forward images to ```tcp://ovmsadaptor:5001```, pipelineTopologySet.json is a working example. After setting the topology, you need to set a live pipeline (e.g. ```livePipelineSet.json```) and activate it
 
-7. If everything work successfully, you should be able to see the detected result on the Azure IoT Explorer (from Prerequisite 4)
+7. If everything works successfully, you should be able to see the detected result on the Azure IoT Explorer (from Prerequisite 4)
 
 
 
