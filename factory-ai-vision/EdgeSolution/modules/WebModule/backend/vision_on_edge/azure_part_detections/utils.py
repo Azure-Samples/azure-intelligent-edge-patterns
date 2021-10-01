@@ -29,39 +29,39 @@ def if_trained_then_deploy_worker(part_detection_id):
     part_detection_obj = PartDetection.objects.get(pk=part_detection_id)
     project_obj = part_detection_obj.project
 
-    # =====================================================
-    # 1. Wait for project to be trained                 ===
-    # =====================================================
-    if project_obj.download_uri:
-        logger.warning('Deploy the latest trained model')
-    else:
-        logger.info("Wait for project to be trained")
-        last_log = None
-        while True:
-            time.sleep(1)
-            training_status_obj = TrainingStatus.objects.get(project=project_obj)
-            logger.info("Listening on Training Status: %s", training_status_obj)
-            if training_status_obj.status in ["ok", "Failed"]:
-                break
-            if training_status_obj.log != last_log:
-                upcreate_deploy_status(
-                    part_detection_id=part_detection_id,
-                    status=training_status_obj.status,
-                    log=training_status_obj.log,
-                )
-                last_log = training_status_obj.log
+    # # =====================================================
+    # # 1. Wait for project to be trained                 ===
+    # # =====================================================
+    # if project_obj.download_uri:
+    #     logger.warning('Deploy the latest trained model')
+    # else:
+    #     logger.info("Wait for project to be trained")
+    #     last_log = None
+    #     while True:
+    #         time.sleep(1)
+    #         training_status_obj = TrainingStatus.objects.get(project=project_obj)
+    #         logger.info("Listening on Training Status: %s", training_status_obj)
+    #         if training_status_obj.status in ["ok", "Failed"]:
+    #             break
+    #         if training_status_obj.log != last_log:
+    #             upcreate_deploy_status(
+    #                 part_detection_id=part_detection_id,
+    #                 status=training_status_obj.status,
+    #                 log=training_status_obj.log,
+    #             )
+    #             last_log = training_status_obj.log
 
-    # =====================================================
-    # 2. Project training failed                        ===
-    # =====================================================
-        if training_status_obj.status == "Failed":
-            logger.info("Project train/export failed.")
-            upcreate_deploy_status(
-                part_detection_id=part_detection_id,
-                status=training_status_obj.status,
-                log=training_status_obj.log,
-            )
-            return
+    # # =====================================================
+    # # 2. Project training failed                        ===
+    # # =====================================================
+    #     if training_status_obj.status == "Failed":
+    #         logger.info("Project train/export failed.")
+    #         upcreate_deploy_status(
+    #             part_detection_id=part_detection_id,
+    #             status=training_status_obj.status,
+    #             log=training_status_obj.log,
+    #         )
+    #         return
 
     # =====================================================
     # 2. Project training success                       ===
