@@ -5,7 +5,7 @@ import { Node, Edge } from 'react-flow-renderer';
 import { CommandBar, ICommandBarItemProps, Stack, Label, IconButton } from '@fluentui/react';
 import domtoimage from 'dom-to-image';
 
-import { Url } from '../../enums';
+import { Url } from '../../constant';
 import { TrainingProject } from '../../store/trainingProjectSlice';
 import { Cascade } from '../../store/cascadeSlice';
 import { getCascadePayload, getBlobToBase64, isDuplicateNodeName } from './utils';

@@ -22,12 +22,16 @@ import { isBefore, isSameDay, isAfter } from 'date-fns';
 import { getCameras, cameraOptionsSelectorFactoryInConfig } from '../../store/cameraSlice';
 import { partOptionsSelectorFactory, getParts } from '../../store/partSlice';
 import { ProjectData, DeploymentType } from '../../store/project/projectTypes';
-import { getTrainingProject, trainingProjectOptionsSelectorFactory } from '../../store/trainingProjectSlice';
+import {
+  getTrainingProject,
+  TrainingProject,
+  trainingProjectOptionsSelectorFactory,
+} from '../../store/trainingProjectSlice';
 import { getAppInsights } from '../../TelemetryService';
 import { getConfigure, thunkPostProject } from '../../store/project/projectActions';
 import { getScenario } from '../../store/scenarioSlice';
 import { OnChangeType } from './type';
-import { Url } from '../../enums';
+import { Url } from '../../constant';
 import { getCascades, selectAllCascades } from '../../store/cascadeSlice';
 
 import { extractRecommendFps } from '../../utils/projectUtils';
@@ -87,6 +91,8 @@ const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChange
         }, []);
         cloneProject.oldCameras = newCameras;
         cloneProject.deployment_type = optional.type as DeploymentType;
+
+        console.log('optional.type', optional.type);
         if ((optional.type as DeploymentType) === 'cascade') {
           cloneProject.cascade = optional.value;
         }
@@ -165,6 +171,11 @@ type ConfigTaskPanelProps = {
   isEdit?: boolean;
 };
 
+const getEditSelectedProjectKey = (projectData: ProjectData) => {
+  if (!projectData.trainingProject) return `cascade_${projectData.cascade}`;
+  return projectData.trainingProject;
+};
+
 export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   isOpen,
   onDismiss,
@@ -196,7 +207,12 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const trainingProjectOptionsSelector = trainingProjectOptionsSelectorFactory(
     isEdit ? initialProjectData.trainingProject : trainingProjectOfSelectedScenario,
   );
+  console.log('isEdit', isEdit);
+  console.log('initialProjectData', initialProjectData);
+
   const trainingProjectOptions = useSelector(trainingProjectOptionsSelector);
+  console.log('trainingProjectOptions', trainingProjectOptions);
+  console.log('projectData.trainingProject', projectData);
 
   const cascadeList = useSelector(selectAllCascades);
 
@@ -273,7 +289,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
               label="Model"
               options={modelOptions}
               required
-              selectedKey={projectData.trainingProject}
+              selectedKey={isEdit ? getEditSelectedProjectKey(projectData) : projectData.trainingProject}
               onChange={(_, options) => {
                 onChange('trainingProject', options.key as number, {
                   type: options.title,

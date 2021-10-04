@@ -22,6 +22,7 @@ import {
   createCustomVisionProject,
   getSelectedProjectInfo,
   onEmptySelectedProjectInfo,
+  ProjectType,
 } from '../../../store/trainingProjectSlice';
 import { ProjectInfo } from '../../../store/shared/DemoSliceUtils';
 import { CreateCustomVisionForm } from '../type';
@@ -74,6 +75,12 @@ const classificationTypeOptions: IDropdownOption[] = [
 //   prediction_header: '',
 // });
 
+const isTagsFulfil = (type: ProjectType, tags: string[]): boolean => {
+  if (type === 'ObjectDetection' && tags.length > 0) return true;
+  if (type === 'Classification' && tags.length > 1) return true;
+  return false;
+};
+
 const AddModelPanel: React.FC<Props> = (props) => {
   const { isOpen, onDismiss, customVisionProjectOptions, selectedProjectInfo } = props;
 
@@ -97,7 +104,7 @@ const AddModelPanel: React.FC<Props> = (props) => {
   }, [onDismiss, dispatch]);
 
   const onCreateCustomVisionProject = useCallback(async () => {
-    if (formData.name === '' || formData.tags.length < 2) {
+    if (formData.name === '' || !isTagsFulfil(formData.type, formData.tags)) {
       setErrorMsg('This field is required');
       return;
     }
@@ -266,6 +273,14 @@ const AddModelPanel: React.FC<Props> = (props) => {
                     selectedKey={selectedProjectInfo?.type}
                     disabled={true}
                   />
+                  {selectedProjectInfo?.classification_type !== '' && (
+                    <Dropdown
+                      label="Classification Types"
+                      options={classificationTypeOptions}
+                      selectedKey={selectedProjectInfo?.classification_type}
+                      disabled={true}
+                    />
+                  )}
                   <Stack horizontal wrap styles={{ root: { marginTop: '5px' } }} tokens={{ childrenGap: 8 }}>
                     {selectedProjectInfo?.tags?.map((tag, id) => (
                       <Tag key={id} id={id} text={tag} />
@@ -298,23 +313,24 @@ const AddModelPanel: React.FC<Props> = (props) => {
                       onKeyPress={onTagAdd}
                       errorMessage={errorMsg}
                     />
-                    {
-                      <Stack>
-                        {formData.tags.length < 2 && (
-                          <Text styles={{ root: classes.tip }}>Add at least 2 tags to Save</Text>
-                        )}
-                        <Stack
-                          horizontal
-                          wrap
-                          styles={{ root: { marginTop: '5px' } }}
-                          tokens={{ childrenGap: 8 }}
-                        >
-                          {formData.tags.map((tag, id) => (
-                            <Tag key={id} id={id} text={tag} isDelete onDelete={onRemoveTag} />
-                          ))}
-                        </Stack>
+                    <Stack>
+                      {formData.type === 'ObjectDetection' && formData.tags.length < 1 && (
+                        <Text styles={{ root: classes.tip }}>Add at least 1 tags to Save</Text>
+                      )}
+                      {formData.type === 'Classification' && formData.tags.length < 2 && (
+                        <Text styles={{ root: classes.tip }}>Add at least 2 tags to Save</Text>
+                      )}
+                      <Stack
+                        horizontal
+                        wrap
+                        styles={{ root: { marginTop: '5px' } }}
+                        tokens={{ childrenGap: 8 }}
+                      >
+                        {formData.tags.map((tag, id) => (
+                          <Tag key={id} id={id} text={tag} isDelete onDelete={onRemoveTag} />
+                        ))}
                       </Stack>
-                    }
+                    </Stack>
                   </Stack>
                 </>
               )}

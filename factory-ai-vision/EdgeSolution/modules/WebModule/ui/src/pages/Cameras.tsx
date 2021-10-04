@@ -14,7 +14,7 @@ import { useSelector, useDispatch } from 'react-redux';
 
 import { State } from 'RootStateType';
 
-import { Url } from '../enums';
+import { Url } from '../constant';
 import { thunkCancelCameraSetting } from '../store/cameraSetting/cameraSettingActions';
 
 import AddCameraPanel, { PanelMode } from '../components/AddCameraPanel';

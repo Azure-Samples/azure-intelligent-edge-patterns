@@ -19,7 +19,7 @@ import { TrainingStatus } from '../../../store/trainingProjectStatusSlice';
 import { Part } from '../../../store/partSlice';
 
 import Tag from '../Tag';
-import ImageLabel from './ImageLabel';
+import TrainLabel from './TrainLabel';
 
 type Props = {
   onDismiss: () => void;
@@ -173,7 +173,7 @@ const EditPanel: React.FC<Props> = (props) => {
                 <Text styles={{ root: classes.item }}>{project.classification_type}</Text>
               </Stack>
             )}
-            <ImageLabel project={project} status={status} parts={parts} />
+            <TrainLabel project={project} status={status} parts={parts} />
           </>
         )}
       </Stack>

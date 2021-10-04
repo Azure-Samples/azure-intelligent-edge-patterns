@@ -4,6 +4,7 @@ export const getClasses = () =>
   mergeStyleSets({
     root: {
       boxShadow: '0px 0.3px 0.9px rgba(0, 0, 0, 0.1), 0px 1.6px 3.6px rgba(0, 0, 0, 0.13)',
+      position: 'relative',
     },
     titleWrapper: {
       padding: '5px 10px',
@@ -39,5 +40,13 @@ export const getClasses = () =>
     addLabel: {
       fontSize: '13px',
       lineHeight: '18px',
+    },
+    disableCover: {
+      backgroundColor: 'rgba(255, 255, 255, 0.6)',
+      cursor: 'not-allowed',
+      position: 'absolute',
+      width: '100%',
+      height: '100%',
+      zIndex: 2,
     },
   });

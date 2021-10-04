@@ -4,7 +4,7 @@ import { Route, Switch, useHistory, useRouteMatch } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import { State as RootState } from 'RootStateType';
-import { Url } from '../../enums';
+import { Url } from '../../constant';
 import { trainingProjectIsCascadesFactory } from '../../store/trainingProjectSlice';
 import { selectAllCascades } from '../../store/cascadeSlice';
 

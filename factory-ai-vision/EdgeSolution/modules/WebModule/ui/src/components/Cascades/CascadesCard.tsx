@@ -3,7 +3,7 @@ import { Stack, Text, mergeStyleSets, IContextualMenuProps, IconButton } from '@
 import { useDispatch } from 'react-redux';
 import { useHistory } from 'react-router-dom';
 
-import { Url } from '../../enums';
+import { Url } from '../../constant';
 import { Cascade, deleteCascade, updateCascade, createCascade } from '../../store/cascadeSlice';
 
 import NameModal from './NameModal';

@@ -111,8 +111,8 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   maxPeople: data?.max_people,
 
   oldCameras: [],
-  cascade: '',
-  deployment_type: 'model',
+  cascade: data.cascade,
+  deployment_type: data.deployment_type,
 });
 
 const getProjectData = (state: State): ProjectData => state.project.data;

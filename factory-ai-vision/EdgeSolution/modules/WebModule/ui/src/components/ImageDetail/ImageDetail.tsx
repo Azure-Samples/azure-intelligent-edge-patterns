@@ -24,7 +24,7 @@ import { selectNonDemoCameras } from '../../store/cameraSlice';
 import { Status } from '../../store/project/projectTypes';
 
 import { useInterval } from '../../hooks/useInterval';
-import { Url } from '../../enums';
+import { Url } from '../../constant';
 
 import LabelingPage from '../LabelingPage/LabelingPage';
 import { CaptureDialog } from '../CaptureDialog';

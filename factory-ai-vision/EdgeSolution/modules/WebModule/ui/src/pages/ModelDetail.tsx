@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { Route, Switch } from 'react-router-dom';
 
 import { State } from 'RootStateType';
-import { Url } from '../enums';
+import { Url } from '../constant';
 
 import {
   selectTrainingProjectById,

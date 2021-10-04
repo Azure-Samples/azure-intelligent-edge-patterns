@@ -5,7 +5,7 @@ import { useHistory, generatePath } from 'react-router-dom';
 
 import { customVisionTrainingProjectFactory } from '../store/trainingProjectSlice';
 
-import { Url } from '../enums';
+import { Url } from '../constant';
 import { EmptyAddIcon } from '../components/EmptyAddIcon';
 
 export const Images: React.FC = () => {

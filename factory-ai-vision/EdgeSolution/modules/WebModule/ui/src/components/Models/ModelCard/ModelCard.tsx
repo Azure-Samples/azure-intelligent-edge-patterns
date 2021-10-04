@@ -17,8 +17,8 @@ import { TrainingProject } from '../../../store/trainingProjectSlice';
 import { trainingProjectPartsSelectorFactory } from '../../../store/partSlice';
 import { deleteCustomProject } from '../../../store/trainingProjectSlice';
 import { Status } from '../../../store/trainingProjectStatusSlice';
-import { Url } from '../../../enums';
-import { NO_LIMIt_TRAIN_STATUS } from '../type';
+import { Url } from '../../../constant';
+import { NO_LIMIT_TRAIN_STATUS } from '../type';
 
 import Tag from '../Tag';
 
@@ -57,7 +57,7 @@ const CARD_PART_LIMIT = 5;
 
 const isDeleteDisable = (project: TrainingProject, trainingStatus: Status) => {
   if (project.category === 'openvino') return false;
-  if (project.category === 'customvision' && NO_LIMIt_TRAIN_STATUS.includes(trainingStatus.status))
+  if (project.category === 'customvision' && NO_LIMIT_TRAIN_STATUS.includes(trainingStatus.status))
     return false;
 
   return true;

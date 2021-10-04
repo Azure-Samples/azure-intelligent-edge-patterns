@@ -87,14 +87,6 @@ const ModelContainer = () => {
       onClick: () => history.go(0),
     },
     {
-      key: 'filter',
-      text: 'Filter',
-      iconProps: {
-        iconName: 'Filter',
-      },
-      onClick: () => {},
-    },
-    {
       key: 'feedback',
       text: 'Feedback',
       iconProps: {

@@ -2,7 +2,7 @@ import React, { useCallback } from 'react';
 import { Link } from '@fluentui/react';
 import { useHistory } from 'react-router-dom';
 
-import { Url } from '../enums';
+import { Url } from '../constant';
 
 export const CreateProjectDialog: React.FC = () => {
   const history = useHistory();

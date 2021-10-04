@@ -8,7 +8,7 @@ import { getCameras, Camera, selectNonDemoCameras } from '../store/cameraSlice';
 import { selectLocationEntities } from '../store/locationSlice';
 
 import { maskRtsp } from '../utils/maskRTSP';
-import { Url } from '../enums';
+import { Url } from '../constant';
 
 import { EmptyAddIcon } from './EmptyAddIcon';
 

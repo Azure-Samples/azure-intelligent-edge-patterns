@@ -13,7 +13,7 @@ import { thunkGetProject } from '../store/project/projectActions';
 import { getParts } from '../store/partSlice';
 
 import { Status } from '../store/project/projectTypes';
-import { Url } from '../enums';
+import { Url } from '../constant';
 
 import { Customize } from '../components/Home/Customize';
 import { GetStarted } from '../components/Home/GetStarted';
