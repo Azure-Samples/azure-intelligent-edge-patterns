@@ -4,6 +4,7 @@ import { Stack, Text, Label, Link, IContextualMenuProps, IconButton } from '@flu
 import { TrainingProject, NodeType } from '../../../../store/trainingProjectSlice';
 import { getClasses } from './style';
 import { getNodeImage } from '../../utils';
+import { convertProjectType } from '../../../utils';
 
 interface Props {
   model: TrainingProject;
@@ -56,7 +57,7 @@ const Model = (props: Props) => {
             ) : (
               <Stack>
                 <Label styles={{ root: classes.title }}>{model.name}</Label>
-                <Text styles={{ root: classes.label }}>{model.projectType}</Text>
+                <Text styles={{ root: classes.label }}>{convertProjectType(model.projectType)}</Text>
               </Stack>
             )}
             <Stack verticalAlign="center">

@@ -11,6 +11,7 @@ import {
   Dialog,
   IconButton,
   IContextualMenuProps,
+  Text,
 } from '@fluentui/react';
 
 import { TrainingProject } from '../../../store/trainingProjectSlice';
@@ -19,6 +20,7 @@ import { deleteCustomProject } from '../../../store/trainingProjectSlice';
 import { Status } from '../../../store/trainingProjectStatusSlice';
 import { Url } from '../../../constant';
 import { NO_LIMIT_TRAIN_STATUS } from '../type';
+import { convertProjectType } from '../../utils';
 
 import Tag from '../Tag';
 
@@ -40,7 +42,8 @@ const getClasses = () =>
       },
     },
     titleContainer: { borderBottom: '1px solid rgba(0, 0, 0, 0.13)', width: '100%' },
-    titleWrapper: { padding: '10px 12px' },
+    titleWrapper: { padding: '7px 12px' },
+    titleType: { fontSize: '12px', lineHeight: '16px', color: '#605E5C' },
     deleteIcon: {
       padding: '10px',
       marginRight: '12px',
@@ -113,6 +116,7 @@ const ModelCard: React.FC<Props> = (props) => {
           <Stack horizontal horizontalAlign="space-between" styles={{ root: classes.titleContainer }}>
             <Stack styles={{ root: classes.titleWrapper }}>
               <Label>{project.name}</Label>
+              <Text styles={{ root: classes.titleType }}>{convertProjectType(project.projectType)}</Text>
             </Stack>
             <Stack horizontalAlign="center" verticalAlign="center">
               <IconButton
