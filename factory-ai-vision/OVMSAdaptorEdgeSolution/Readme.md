@@ -40,7 +40,7 @@
 
 
 
-## VoE Config
+## How VoE Config works
 
 The structure of VoE Config is a [DAG](https://en.wikipedia.org/wiki/Directed_acyclic_graph) that each node represent a model or a customized library, and each edge represent the data flow.
 There're 4 kinds of nodes, ```source```, ```openvino_model```, ```openvino_library```, and ```sink```.
@@ -48,7 +48,7 @@ There will be only 1 source node which represent the data (raw image) in the req
 
 For more information about the field in VoE Config, please check this [documnetation](docs/voe_config.md)
 
-### VoE Config Examples
+#### VoE Config Examples
 
 1. [Openvino Face Detection](openvino_face_detection.md)
 2. [Custom Vision Object Detection(cutom_vision_object_detection.md)
