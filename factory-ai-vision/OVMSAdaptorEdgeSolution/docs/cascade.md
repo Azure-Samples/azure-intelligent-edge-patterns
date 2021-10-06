@@ -2,7 +2,7 @@
 
 To cascade object detection with classification, we need a more complicated graph. We're here using openvino model zoo's face detection, emotion recognition, gender/age recognition as example here.
 
-![arch_img](../assets/Cascade2_%20custom%20node_20210927.png?raw=true)
+![arch_img](../../assets/Cascade2_%20custom%20node_20210927.png?raw=true)
 
 
 Since the output for the detection model is the position/confidence of the bounding boxes but not the image for the face, we need to crop the faces and then forward them to classification models. To do so, we add a new `crop` node that need not only the result from the detection model but also the original source image
