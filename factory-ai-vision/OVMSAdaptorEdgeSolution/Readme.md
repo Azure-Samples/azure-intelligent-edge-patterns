@@ -50,9 +50,9 @@ For more information about the field in VoE Config, please check this [documneta
 
 #### VoE Config Examples
 
-1. [Openvino Face Detection](openvino_face_detection.md)
-2. [Custom Vision Object Detection(cutom_vision_object_detection.md)
-3. [Cascade Openvino Face Detection with Classification Models](cascade.md)
+1. [Openvino Face Detection](docs/openvino_face_detection.md)
+2. [Custom Vision Object Detection](docs/cutom_vision_object_detection.md)
+3. [Cascade Openvino Face Detection with Classification Models](docs/cascade.md)
 
 
 ## How Model Manager works
