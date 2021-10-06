@@ -1,6 +1,6 @@
 # Custom Vision Object Detection
 
-![arch_img](../assets/Cascade3_cv%20model_20210927.png?raw=true)
+![arch_img](../../assets/Cascade3_cv%20model_20210927.png?raw=true)
 
 Here we assume you've already finished the tutorial from the [OpenVino Face Detection](openvino_face_detection.md)
 
