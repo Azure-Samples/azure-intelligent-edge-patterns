@@ -2,7 +2,7 @@
 
 The following is a simple case that only use the model from openvino model zoo to do the face detection
 
-![arch_img](../assets/Cascade1_ovms%20model_20210927.png?raw=true)
+![arch_img](../../assets/Cascade1_ovms%20model_20210927.png?raw=true)
 
 
 We need 2 nodes to for this case
