@@ -6,6 +6,8 @@ import { createWrappedAsync } from './shared/createWrappedAsync';
 import { refreshTrainingProject } from './trainingProjectSlice';
 import { getTrainingProjectStatusList } from './trainingProjectStatusSlice';
 
+export type OpenVinoType = 'ObjectDetection' | 'Classification';
+
 export type IntelProject = {
   id: number;
   name: string;
@@ -27,6 +29,7 @@ export type IntelProject = {
   tags: string[];
   type: string;
   create_name: string;
+  model_type: OpenVinoType;
 };
 
 const INTEL_OVMS_CARD_DATA = [
@@ -105,6 +108,7 @@ const normalize = (e) => {
   return {
     ...matchData,
     model_name: e.model_name,
+    model_type: e.model_type,
   };
 };
 export const getIntelProjectList = createWrappedAsync<any, undefined, { state: State }>(

@@ -21,6 +21,7 @@ type DemoStateType = {
 export interface ProjectInfo {
   tags: string[];
   type: 'ObjectDetection' | 'Classification';
+  classification_type: '' | 'Multiclass' | 'Multilabel';
 }
 
 type DemoEntityState<T> = EntityState<T> & {

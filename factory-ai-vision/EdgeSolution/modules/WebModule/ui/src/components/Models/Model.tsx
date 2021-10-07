@@ -17,7 +17,7 @@ import {
 
 import { TrainingProject } from '../../store/trainingProjectSlice';
 import { useQuery } from '../../hooks/useQuery';
-import { Url } from '../../enums';
+import { Url } from '../../constant';
 
 import ModelCardContainer from './ModelCard/ModelCardContainer';
 import EditPanelContainer from './Panel/EditPanelContainer';

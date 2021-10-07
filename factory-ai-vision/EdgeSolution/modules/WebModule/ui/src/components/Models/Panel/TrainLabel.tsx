@@ -15,9 +15,9 @@ import { useDispatch } from 'react-redux';
 import { TrainingProject, trainCustomVisionProject } from '../../../store/trainingProjectSlice';
 import { TrainingStatus, getOneTrainingProjectStatus } from '../../../store/trainingProjectStatusSlice';
 import { Part } from '../../../store/partSlice';
-import { Url } from '../../../enums';
+import { Url } from '../../../constant';
 import { useInterval } from '../../../hooks/useInterval';
-import { NO_LIMIt_TRAIN_STATUS } from '../type';
+import { NO_LIMIT_TRAIN_STATUS } from '../type';
 
 interface Props {
   project: TrainingProject;
@@ -53,7 +53,7 @@ const isTrainingBDisable = (
   if (
     ((hasTrainProject && Math.max(...labeledImageCounts) > 0) ||
       (!hasTrainProject && Math.min(...labeledImageCounts) >= limit)) &&
-    NO_LIMIt_TRAIN_STATUS.includes(status)
+    NO_LIMIT_TRAIN_STATUS.includes(status)
   )
     return false;
 
@@ -136,7 +136,7 @@ const ImageLabel = (props: Props) => {
       >
         Train
       </DefaultButton>
-      {!NO_LIMIt_TRAIN_STATUS.includes(localStatus) && (
+      {!NO_LIMIT_TRAIN_STATUS.includes(localStatus) && (
         <Stack>
           <ProgressIndicator styles={{ progressBar: classes.progressBar }} />
           <Text>{localStatus}</Text>

@@ -17,7 +17,7 @@ import { connect } from 'react-redux';
 
 import { State } from 'RootStateType';
 
-import { Url } from '../../enums';
+import { Url } from '../../constant';
 
 import { CreateProjectDialog } from '../CreateProjectDialog';
 import { selectNonDemoCameras } from '../../store/cameraSlice';

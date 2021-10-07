@@ -15,7 +15,7 @@ import { useSelector } from 'react-redux';
 
 import { State } from 'RootStateType';
 import { selectUnreadNotification } from '../store/notificationSlice';
-import { Url } from '../enums';
+import { Url } from '../constant';
 
 import { NotificationPanel } from './NotificationPanel';
 

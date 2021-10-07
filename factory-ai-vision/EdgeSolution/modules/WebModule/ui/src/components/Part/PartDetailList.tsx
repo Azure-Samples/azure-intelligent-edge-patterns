@@ -6,7 +6,7 @@ import { DetailsList, CheckboxVisibility, Spinner, SpinnerSize } from '@fluentui
 import { getParts, Part } from '../../store/partSlice';
 import { selectNonDemoPart } from '../../store/selectors';
 
-import { Url } from '../../enums';
+import { Url } from '../../constant';
 
 import { EmptyAddIcon } from '../EmptyAddIcon';
 

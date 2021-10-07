@@ -17,9 +17,10 @@ import { useDispatch } from 'react-redux';
 import { updateCustomVisionProjectTags, TrainingProject } from '../../../store/trainingProjectSlice';
 import { TrainingStatus } from '../../../store/trainingProjectStatusSlice';
 import { Part } from '../../../store/partSlice';
+import { convertProjectType } from '../../utils';
 
 import Tag from '../Tag';
-import ImageLabel from './ImageLabel';
+import TrainLabel from './TrainLabel';
 
 type Props = {
   onDismiss: () => void;
@@ -41,11 +42,6 @@ const getClasses = () =>
     },
     tips: { fontSize: '14px', lineHeight: '20px', color: '#A19F9D' },
   });
-
-const convertProjectType = (project: TrainingProject): string => {
-  if (project.projectType === 'ObjectDetection') return 'Object Detector';
-  return 'Classification';
-};
 
 const EditPanel: React.FC<Props> = (props) => {
   const { project, parts, onDismiss, status } = props;
@@ -165,7 +161,7 @@ const EditPanel: React.FC<Props> = (props) => {
             </Stack>
             <Stack>
               <Label styles={{ root: classes.itemTitle }}>Type</Label>
-              <Text styles={{ root: classes.item }}>{convertProjectType(project)}</Text>
+              <Text styles={{ root: classes.item }}>{convertProjectType(project.projectType)}</Text>
             </Stack>
             {project.projectType === 'Classification' && (
               <Stack>
@@ -173,7 +169,7 @@ const EditPanel: React.FC<Props> = (props) => {
                 <Text styles={{ root: classes.item }}>{project.classification_type}</Text>
               </Stack>
             )}
-            <ImageLabel project={project} status={status} parts={parts} />
+            <TrainLabel project={project} status={status} parts={parts} />
           </>
         )}
       </Stack>

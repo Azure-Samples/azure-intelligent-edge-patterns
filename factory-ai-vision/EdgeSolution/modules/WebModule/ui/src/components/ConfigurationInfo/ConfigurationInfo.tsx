@@ -2,7 +2,7 @@ import React from 'react';
 import './ConfigurationInfo.style.css';
 import { Stack, TextField, IconButton, DefaultButton } from '@fluentui/react';
 
-import { InferenceMode } from '../../store/project/projectTypes';
+import { InferenceMode, DeploymentType } from '../../store/project/projectTypes';
 import { PartTag, Status as PartTagStatus } from '../PartTag';
 
 type PropsType = {
@@ -29,6 +29,7 @@ type PropsType = {
   changeMaxPeople: (value: number) => void;
   saveMaxPeople: () => void;
   inferenceMode: InferenceMode;
+  deploymentType: DeploymentType;
 };
 
 const getCloudMessageTxt = (sendMessageToCloud: boolean, framesPerMin: number): string => {
@@ -69,34 +70,38 @@ export const ConfigurationInfo: React.FC<PropsType> = (props) => {
                 <b>{props.fps} fps per camera</b>
               </td>
             </tr>
-            <tr>
-              <td>Objects</td>
-              <td>
-                {props.partNames.map((e) => (
-                  <PartTag key={e} text={e} status={PartTagStatus.Default} />
-                ))}
-              </td>
-            </tr>
-            <tr>
-              <td>Confirmation threshold</td>
-              <td>
-                <Stack horizontal>
-                  <TextField
-                    type="number"
-                    value={props.probThreshold?.toString()}
-                    onChange={(_, newValue) => props.updateProbThreshold(parseInt(newValue, 10))}
-                    underlined
-                    suffix="%"
-                    styles={{ root: { display: 'inline-block' } }}
-                  />
-                  <IconButton
-                    disabled={props.originProbThreshold === props.probThreshold}
-                    iconProps={{ iconName: 'Save' }}
-                    onClick={props.saveProbThreshold}
-                  />
-                </Stack>
-              </td>
-            </tr>
+            {props.deploymentType === 'model' && (
+              <>
+                <tr>
+                  <td>Objects</td>
+                  <td>
+                    {props.partNames.map((e) => (
+                      <PartTag key={e} text={e} status={PartTagStatus.Default} />
+                    ))}
+                  </td>
+                </tr>
+                <tr>
+                  <td>Confirmation threshold</td>
+                  <td>
+                    <Stack horizontal>
+                      <TextField
+                        type="number"
+                        value={props.probThreshold?.toString()}
+                        onChange={(_, newValue) => props.updateProbThreshold(parseInt(newValue, 10))}
+                        underlined
+                        suffix="%"
+                        styles={{ root: { display: 'inline-block' } }}
+                      />
+                      <IconButton
+                        disabled={props.originProbThreshold === props.probThreshold}
+                        iconProps={{ iconName: 'Save' }}
+                        onClick={props.saveProbThreshold}
+                      />
+                    </Stack>
+                  </td>
+                </tr>
+              </>
+            )}
           </tbody>
         </table>
         <table>

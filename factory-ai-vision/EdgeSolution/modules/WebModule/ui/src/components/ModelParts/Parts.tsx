@@ -15,7 +15,7 @@ import {
 import { getParts, Part } from '../../store/partSlice';
 import { selectProjectPartsFactory } from '../../store/selectors';
 
-import { Url } from '../../enums';
+import { Url } from '../../constant';
 
 import { EmptyAddIcon } from '../EmptyAddIcon';
 import { AddEditPartPanel, PanelMode } from '../AddPartPanel';

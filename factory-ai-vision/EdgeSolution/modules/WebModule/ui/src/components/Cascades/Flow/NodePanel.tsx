@@ -17,7 +17,7 @@ import { useHistory } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 
 import { NodeType, TrainingProject } from '../../../store/trainingProjectSlice';
-import { Url } from '../../../enums';
+import { Url } from '../../../constant';
 import { getModelId } from '../utils';
 import { trainingProjectPartsSelectorFactory } from '../../../store/partSlice';
 

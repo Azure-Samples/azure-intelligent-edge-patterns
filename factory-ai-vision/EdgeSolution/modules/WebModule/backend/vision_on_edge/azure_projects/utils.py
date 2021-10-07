@@ -545,7 +545,7 @@ def train_project_worker(project_id):
             logger.info("Something went wrong...")
             upcreate_training_status(
                 project_id=project_obj.id,
-                status="failed",
+                status="Failed",
                 log="Get iteration from Custom Vision occurs error.",
                 need_to_send_notification=True,
             )
@@ -674,7 +674,7 @@ def train_project_catcher(project_id):
     except Exception:
         upcreate_training_status(
             project_id=project_id,
-            status="failed",
+            status="Failed",
             log=traceback.format_exc(),
             need_to_send_notification=True,
         )

@@ -5,7 +5,7 @@ import { useSelector } from 'react-redux';
 import { State } from 'RootStateType';
 
 import { Status } from '../store/project/projectTypes';
-import { Url } from '../enums';
+import { Url } from '../constant';
 
 import { Home } from '../pages/Home';
 import { Cameras } from '../pages/Cameras';

@@ -13,6 +13,7 @@ import { useDispatch } from 'react-redux';
 
 import { IntelProject, createIntelProject } from '../../store/IntelProjectSlice';
 import { TrainingProject } from '../../store/trainingProjectSlice';
+import { convertProjectType } from '../utils';
 
 import Tag from './Tag';
 import AddOpenVinoPanel from './Panel/AddOpenVino';
@@ -68,7 +69,9 @@ const IntelProjectDashboard = (props: Props) => {
 
   const onCreateIntelModel = useCallback(
     async (cascade: IntelProject) => {
-      await dispatch(createIntelProject({ model_name: cascade.create_name, project_type: cascade.type }));
+      await dispatch(
+        createIntelProject({ model_name: cascade.create_name, project_type: cascade.model_type }),
+      );
 
       onCloseIntel();
     },
@@ -113,7 +116,7 @@ const IntelProjectDashboard = (props: Props) => {
                   <Stack horizontal horizontalAlign="space-between" styles={{ root: classes.titleContainer }}>
                     <Stack styles={{ root: classes.titleWrapper }}>
                       <Label>{card.name}</Label>
-                      <Text styles={{ root: classes.titleType }}>{card.type}</Text>
+                      <Text styles={{ root: classes.titleType }}>{convertProjectType(card.model_type)}</Text>
                     </Stack>
                     <Stack horizontalAlign="center" verticalAlign="center">
                       <IconButton

@@ -1,6 +1,6 @@
 /* eslint react/display-name: "off" */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   Stack,
   Text,
@@ -25,7 +25,6 @@ import {
   updateProjectData,
   updateProbThreshold,
   updateMaxPeople,
-  getConfigure,
 } from '../../store/project/projectActions';
 import { ConfigurationInfo } from '../ConfigurationInfo/ConfigurationInfo';
 import { camerasSelectorFactory } from '../../store/cameraSlice';
@@ -37,8 +36,7 @@ import { ConfigTaskPanel } from '../ConfigTaskPanel/ConfigTaskPanel';
 import { EmptyAddIcon } from '../EmptyAddIcon';
 import { getTrainingProject } from '../../store/trainingProjectSlice';
 import { Insights } from './DeploymentInsights';
-import { Instruction } from '../Instruction';
-import { getImages, selectAllImages } from '../../store/imageSlice';
+import { getImages } from '../../store/imageSlice';
 import { initialProjectData } from '../../store/project/projectReducer';
 import { Progress } from './Progress';
 import { VideoAnnosControls } from './VideoControls';
@@ -79,9 +77,6 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
   const partOptions = useSelector(partOptionsSelector);
   const partNames = useSelector(partNamesSelector);
   const deployTimeStamp = useSelector((state: State) => state.project.data.deployTimeStamp);
-  const newImagesCount = useSelector(
-    (state: State) => selectAllImages(state).filter((e) => !e.uploaded && e.manualChecked).length,
-  );
 
   const dispatch = useDispatch();
 
@@ -97,10 +92,6 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
 
   const changeMaxPeople = (newValue: number) => dispatch(updateProjectData({ maxPeople: newValue }));
   const saveMaxPeople = () => dispatch(updateMaxPeople());
-
-  const updateModel = useCallback(async () => {
-    await dispatch(getConfigure(projectId));
-  }, [dispatch, projectId]);
 
   const commandBarItems: ICommandBarItemProps[] = useMemo(() => {
     const items = [
@@ -122,18 +113,8 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
       },
     ];
 
-    if (newImagesCount)
-      items.splice(1, 0, {
-        key: 'update',
-        text: 'Update model',
-        iconProps: {
-          iconName: 'Edit',
-        },
-        onClick: updateModel,
-      });
-
     return items;
-  }, [newImagesCount, onOpenCreatePanel, onOpenEditPanel, updateModel]);
+  }, [onOpenCreatePanel, onOpenEditPanel]);
 
   if (status === Status.None)
     return (
@@ -149,7 +130,6 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
   return (
     <Stack styles={{ root: { height: '100%' } }}>
       <CommandBar items={commandBarItems} style={{ display: 'block' }} />
-      <UpdateModelInstruction newImagesCount={newImagesCount} updateModel={updateModel} />
       <Stack horizontal grow>
         <Stack grow>
           <Stack tokens={{ childrenGap: 17, padding: 25 }} grow>
@@ -206,6 +186,7 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
               saveMaxPeople={saveMaxPeople}
               maxPeople={projectData.maxPeople}
               inferenceMode={projectData.inferenceMode}
+              deploymentType={projectData.deployment_type}
             />
           </Stack>
         </Stack>
@@ -265,25 +246,3 @@ export const Deployment = R.compose(
     );
   },
 )(BaseDeployment);
-
-// Extract this component so when every time the instruction being show,
-// It will get the latest images
-const UpdateModelInstruction = ({ newImagesCount, updateModel }) => {
-  const dispatch = useDispatch();
-
-  useEffect(() => {
-    dispatch(getImages({ freezeRelabelImgs: false }));
-  }, [dispatch]);
-
-  if (newImagesCount)
-    return (
-      <Instruction
-        title={`${newImagesCount} new images have been added to your model!`}
-        subtitle="Update the model to improve your current deployment"
-        button={{ text: 'Update model', onClick: updateModel }}
-        styles={{ root: { margin: '0px 25px' } }}
-      />
-    );
-
-  return null;
-};

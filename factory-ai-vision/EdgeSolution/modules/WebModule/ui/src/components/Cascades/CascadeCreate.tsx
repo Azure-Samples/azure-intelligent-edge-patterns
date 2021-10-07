@@ -5,7 +5,7 @@ import { Node, Edge } from 'react-flow-renderer';
 import { useDispatch } from 'react-redux';
 import domtoimage from 'dom-to-image';
 
-import { Url } from '../../enums';
+import { Url } from '../../constant';
 import { NodeType, TrainingProject } from '../../store/trainingProjectSlice';
 import { getCascadePayload, getBlobToBase64, isDuplicateNodeName } from './utils';
 import { createCascade } from '../../store/cascadeSlice';

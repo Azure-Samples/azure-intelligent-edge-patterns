@@ -77,6 +77,7 @@ class ModelObject():
         # device = onnxruntime.get_device()
         # if device == 'CPU-OPENVINO_MYRIAD':
         #     device = 'vpu'
+        # device = 'cpu'
         return device.lower()
 
     def set_is_scenario(self, is_scenario):

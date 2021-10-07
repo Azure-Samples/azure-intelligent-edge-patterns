@@ -2,7 +2,7 @@ import React, { useRef } from 'react';
 import { Stack, Text, ActionButton } from '@fluentui/react';
 import { useHistory } from 'react-router-dom';
 
-import { Url } from '../../enums';
+import { Url } from '../../constant';
 
 import { RTSPVideo } from '../../components/RTSPVideo';
 

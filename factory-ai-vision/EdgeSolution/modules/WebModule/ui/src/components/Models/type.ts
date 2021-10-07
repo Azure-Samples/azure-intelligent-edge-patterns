@@ -1,10 +1,11 @@
-import { ClassificationType } from '../../store/trainingProjectSlice';
+import { ClassificationType, ProjectType } from '../../store/trainingProjectSlice';
+import { TrainStatus } from '../../constant';
 
 export type ModelType = 'custom' | 'own' | 'ovms';
 
 export type CreateCustomVisionForm = {
   name: string;
-  type: 'ObjectDetection' | 'Classification';
+  type: ProjectType;
   tags: string[];
   selectedCustomVisionId: string;
   classification: ClassificationType;
@@ -16,4 +17,4 @@ export type CreateOwnModelForm = {
   labels: string;
 };
 
-export const NO_LIMIt_TRAIN_STATUS = ['ok', 'Failed', 'Success', 'No change'];
+export const NO_LIMIT_TRAIN_STATUS: TrainStatus[] = ['ok', 'Failed', 'Success', 'No change'];

@@ -2,7 +2,7 @@ import { INavLinkGroup, Nav, INavLink } from '@fluentui/react';
 import React, { useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import { Url } from '../enums';
+import { Url } from '../constant';
 
 const navLinks: INavLink[] = [
   {

@@ -18,7 +18,7 @@ import {
   deleteCustomProject,
 } from '../../store/trainingProjectSlice';
 
-import { Url } from '../../enums';
+import { Url } from '../../constant';
 
 import AddModelPanel, { PanelMode } from '../../components/Models/AddModelPanel';
 import ModelParts from '../ModelParts/Parts';
