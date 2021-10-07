@@ -839,7 +839,7 @@ if __name__ == "__main__":
 
     if is_edge():
         print('==== Benchmark start ====', flush=True)
-        # benchmark()
+        benchmark()
         print('==== Benchmark  end  ====', flush=True)
         main()
     else:
