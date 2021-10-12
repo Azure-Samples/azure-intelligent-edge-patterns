@@ -4,7 +4,7 @@
   "image": {
     "repository": "${CONTAINER_REGISTRY_NAME}/intelligentedge/rtspsimmodule",
     "tag": {
-      "version": "0.30.3",
+      "version": "0.30.4",
       "platforms": {
         "amd64": "./dockerfiles/Dockerfile.amd64",
         "arm64v8": "./dockerfiles/Dockerfile.arm64v8"
