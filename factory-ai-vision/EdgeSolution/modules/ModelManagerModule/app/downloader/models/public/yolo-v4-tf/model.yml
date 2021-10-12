@@ -1,0 +1,58 @@
+# Copyright (c) 2020 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  YOLO v4 is a real-time object detection model based on "YOLOv4: Optimal Speed and
+  Accuracy of Object Detection" <https://arxiv.org/abs/2004.10934> paper. It was implemented
+  in Keras* framework and converted to TensorFlow* framework. For details see repository
+  <https://github.com/david8862/keras-YOLOv3-model-set>. This model was pre-trained
+  on Common Objects in Context (COCO) <https://cocodataset.org/#home> dataset with
+  80 classes.
+task_type: detection
+files:
+  - name: yolov4.weights
+    size: 257717640
+    sha256: e8a4f6c62188738d86dc6898d82724ec0964d0eb9d2ae0f0a9d53d65d108d562
+    source: https://github.com/AlexeyAB/darknet/releases/download/darknet_yolo_v3_optimal/yolov4.weights
+  - name: keras-YOLOv3-model-set/tools/model_converter/convert.py
+    size: 16704
+    sha256: 677a3bdf2758d239ead8b12d8bf928c266ac476d461cbc9ed8f22b70e144464d
+    source: https://github.com/david8862/keras-YOLOv3-model-set/raw/6c9aff7bb0c1660704ad07c85739e95885676e5b/tools/model_converter/convert.py
+  - name: keras-YOLOv3-model-set/yolo4/models/layers.py
+    size: 15535
+    sha256: 22823e18615467b23eb9312584156a43e2f2870add758dc20cf48148efaf6a25
+    source: https://github.com/david8862/keras-YOLOv3-model-set/raw/6c9aff7bb0c1660704ad07c85739e95885676e5b/yolo4/models/layers.py
+  - name: keras-YOLOv3-model-set/cfg/yolov4.cfg
+    size: 12208
+    sha256: a15524ec710005add4eb672140cf15cbfe46dea0561f1aea90cb1140b466073e
+    source: https://github.com/david8862/keras-YOLOv3-model-set/raw/6c9aff7bb0c1660704ad07c85739e95885676e5b/cfg/yolov4.cfg
+postprocessing:
+  # disable imports that aren't needed for this model and code that uses them
+  - $type: regex_replace
+    file: keras-YOLOv3-model-set/yolo4/models/layers.py
+    pattern: 'from common\.backbones\b'
+    replacement: '# \g<0>'
+  - $type: regex_replace
+    file: keras-YOLOv3-model-set/yolo4/models/layers.py
+    pattern: '@wraps'
+    replacement: '# \g<0>'
+model_optimizer_args:
+  - --input_shape=[1,608,608,3]
+  - --input=image_input
+  - --scale_values=image_input[255]
+  - --reverse_input_channels
+  - --saved_model_dir=$conv_dir/yolo-v4.savedmodel
+framework: tf
+quantizable: yes
+license: https://raw.githubusercontent.com/david8862/keras-YOLOv3-model-set/master/LICENSE

@@ -1,0 +1,20 @@
+models:
+  - name: product-detection-0001
+
+    launchers:
+      - framework: dlsdk
+        adapter: ssd
+
+    datasets:
+      - name: product_detection
+
+        preprocessing:
+          - type: resize
+            size: 512
+
+        postprocessing:
+          - type: resize_prediction_boxes
+          - type: cast_to_int
+          - type: filter
+            min_confidence: 0.02
+            apply_to: prediction

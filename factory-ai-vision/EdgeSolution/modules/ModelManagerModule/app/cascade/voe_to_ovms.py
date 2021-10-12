@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 
 import networkx
@@ -46,6 +47,25 @@ def process_openvino_model(node, g):
             base_path=MODEL_DIR+'/'+node.openvino_model_name
             
     )
+
+    #
+    # Download Model
+    #
+    model_name = node.openvino_model_name
+    need_download = True
+    if os.path.isdir(MODEL_DIR+'/'+model_name):
+        if os.path.isfile(MODEL_DIR+'/'+model_name+'/1/'+model_name+'.xml') and os.path.isfile(MODEL_DIR+'/'+model_name+'/1/'+model_name+'.bin'):
+            need_download = False
+        else:
+            subprocess.run(['rm', '-rf', MODEL_DIR+'/'+model_name])
+
+    if need_download:
+        subprocess.run(['python', 'downloader/tools/downloader/downloader.py ', '-o', TMP_DIR, '--name', model_name, '--precision', 'FP32'])
+        subprocess.run(['mkdir', '-p', MODEL_DIR+'/'+model_name])
+        subprocess.run(['mkdir', '-p', MODEL_DIR+'/'+model_name+'/1'])
+        subprocess.run(['mv', TMP_DIR+'/intel/'+model_name+'/FP32/'+model_name+'.xml', MODEL_DIR+'/'+model_name+'/1/'+model_name+'.xml'])
+        subprocess.run(['mv', TMP_DIR+'/intel/'+model_name+'/FP32/'+model_name+'.xml', MODEL_DIR+'/'+model_name+'/1/'+model_name+'.bin'])
+
     
     if node.inputs[0].metadata['type'] != 'image': raise Exception('Not a model')
 
