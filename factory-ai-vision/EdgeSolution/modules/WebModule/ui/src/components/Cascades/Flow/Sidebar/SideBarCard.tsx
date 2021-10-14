@@ -74,7 +74,6 @@ const Model = (props: Props) => {
           {type === 'customvision_model' && (
             <Label styles={{ root: classes.smallLabel }}>By Microsoft Custom Vision</Label>
           )}
-          <Link styles={{ root: classes.addLabel }}>add</Link>
         </Stack>
       </Stack>
     </>
