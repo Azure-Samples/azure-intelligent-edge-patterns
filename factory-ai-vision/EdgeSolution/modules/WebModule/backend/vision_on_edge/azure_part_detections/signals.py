@@ -49,7 +49,7 @@ def azure_part_detection_post_save_deploy_handler(**kwargs):
 
     if instance.deployment_type == "cascade":
         url = "http://" + str(model_manager_module_url()) + "/set_voe_config"
-        data = {"config": instance.cascade.flow}
+        data = {"name": instance.cascade.name, "config": instance.cascade.flow}
         res = requests.post(url, json=data)
         logger.warning(res.text)
 

@@ -174,4 +174,5 @@ class UpdateCamBodySerializer(serializers.Serializer):
 
     lva_mode = serializers.ChoiceField(INFERENCE_PROTOCOL_CHOICES)
     fps = serializers.FloatField()
+    cascade_name = serializers.CharField()
     cameras = CameraItem(many=True)

@@ -310,6 +310,7 @@ def process_sink(node, g):
 
 
 def voe_config_to_ovms_config(voe_config,
+        name,
         model_dir=MODEL_DIR,
         lib_dir=LIB_DIR):
 
@@ -332,7 +333,7 @@ def voe_config_to_ovms_config(voe_config,
     model_config_list = []
     library_config_list = []
     pipeline_config = {
-        'name': voe_config.name,
+        'name': name,
         'inputs': [],
         'nodes': [],
         'outputs': []

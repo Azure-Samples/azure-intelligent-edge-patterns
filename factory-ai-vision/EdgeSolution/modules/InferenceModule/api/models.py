@@ -65,5 +65,6 @@ class CameraModel(BaseModel):
 
 class CamerasModel(BaseModel):
     lva_mode: Literal["http", "grpc"]
+    cascade_name: str
     fps: float
     cameras: List[CameraModel]
