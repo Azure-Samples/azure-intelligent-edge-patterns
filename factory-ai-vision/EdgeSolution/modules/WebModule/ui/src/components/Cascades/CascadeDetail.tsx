@@ -111,7 +111,9 @@ const CascadeDetail = (props: Props) => {
           existingCascadeNameList={cascadeList.map((cascade) => cascade.name)}
         />
       )}
-      {isDuplicate && <DuplicationModal onClose={() => setIsDuplicate(false)} />}
+      {isDuplicate && (
+        <DuplicationModal title="No same export name accepted" onClose={() => setIsDuplicate(false)} />
+      )}
     </>
   );
 };
