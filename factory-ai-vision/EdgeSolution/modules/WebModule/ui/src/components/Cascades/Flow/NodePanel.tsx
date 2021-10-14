@@ -65,7 +65,6 @@ const NodePanel = (props: Props) => {
 
   const [exportName, setExportName] = useState<string>(null);
   const [threshold, setThreshold] = useState(null);
-  const [type, setType] = useState('crop');
   const [tagId, setTagId] = useState(-1);
 
   const history = useHistory();
@@ -223,7 +222,7 @@ const NodePanel = (props: Props) => {
         )}
         {(selectedNode.type as NodeType) === 'openvino_library' && (
           <Stack tokens={{ childrenGap: 20 }}>
-            <Dropdown label="Type" options={typeOptions} selectedKey={type} required disabled />
+            <Dropdown label="Type" options={typeOptions} selectedKey="crop" required disabled />
             <Dropdown
               label="Objects / Tags"
               options={tagsOptions}
