@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Stack, Text, Label, Link, IContextualMenuProps, IconButton } from '@fluentui/react';
+import { Stack, Text, Label, IContextualMenuProps, IconButton } from '@fluentui/react';
 
 import { TrainingProject, NodeType } from '../../../../store/trainingProjectSlice';
 import { getClasses } from './style';

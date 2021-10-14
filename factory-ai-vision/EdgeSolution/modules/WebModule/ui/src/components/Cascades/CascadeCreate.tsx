@@ -17,6 +17,7 @@ import DuplicationModal from './DuplicationModal';
 interface Props {
   modelList: TrainingProject[];
   defaultCommandBarItems: ICommandBarItemProps[];
+  existingCascadeNameList: string[];
 }
 
 const getSourceElements = (modelList: TrainingProject[]) => {
@@ -33,7 +34,7 @@ const getSourceElements = (modelList: TrainingProject[]) => {
 };
 
 const CascadeCreate = (props: Props) => {
-  const { modelList, defaultCommandBarItems } = props;
+  const { modelList, defaultCommandBarItems, existingCascadeNameList } = props;
 
   const [elements, setElements] = useState<(Node | Edge)[]>([]);
   const [cascadeName, setCascadeName] = useState('Default Cascade');
@@ -113,6 +114,7 @@ const CascadeCreate = (props: Props) => {
           onClose={() => setIsPopup(false)}
           cascadeName={cascadeName}
           onSave={(name) => setCascadeName(name)}
+          existingCascadeNameList={existingCascadeNameList}
         />
       )}
       {isDuplicate && <DuplicationModal onClose={() => setIsDuplicate(false)} />}
