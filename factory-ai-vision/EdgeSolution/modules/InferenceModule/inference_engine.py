@@ -136,24 +136,31 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
 
             ih, iw, _ = imgShape
 
-            for prediction in predictions:
-                confidenceScore = prediction["probability"]
-                if confidenceScore >= confidenceThreshold:
-                    objectLabel = prediction["tagName"]
+            if predictions is not None:
+                for prediction in predictions:
+                    
+                    if 'probability' in prediction:
 
-                    inference = msg.media_sample.inferences.add()
-                    inference.type = inferencing_pb2.Inference.InferenceType.ENTITY
-                    inference.entity.CopyFrom(
-                        inferencing_pb2.Entity(
-                            tag=inferencing_pb2.Tag(
-                                value=objectLabel, confidence=confidenceScore),
-                            box=inferencing_pb2.Rectangle(
-                                l=prediction["boundingBox"]["left"],
-                                t=prediction["boundingBox"]["top"],
-                                w=prediction["boundingBox"]["width"],
-                                h=prediction["boundingBox"]["height"],
-                            ),
-                        ))
+                        confidenceScore = prediction["probability"]
+                        if confidenceScore >= confidenceThreshold:
+                            objectLabel = prediction["tagName"]
+
+                            inference = msg.media_sample.inferences.add()
+                            inference.type = inferencing_pb2.Inference.InferenceType.ENTITY
+                            inference.entity.CopyFrom(
+                                inferencing_pb2.Entity(
+                                    tag=inferencing_pb2.Tag(
+                                        value=objectLabel, confidence=confidenceScore),
+                                    box=inferencing_pb2.Rectangle(
+                                        l=prediction["boundingBox"]["left"],
+                                        t=prediction["boundingBox"]["top"],
+                                        w=prediction["boundingBox"]["width"],
+                                        h=prediction["boundingBox"]["height"],
+                                    ),
+                                ))
+                    else:
+                        pass
+                    
             return msg
         except:
             PrintGetExceptionDetails()
