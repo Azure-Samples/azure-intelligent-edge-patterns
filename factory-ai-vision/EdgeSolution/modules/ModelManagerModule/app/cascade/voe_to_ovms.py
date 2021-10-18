@@ -271,6 +271,10 @@ def process_openvino_library(node, g):
                 if parent_node.type == 'customvision_model':
                     parent_node_name = 'cv_post'
 
+                # FIXME better move this policy to front-end
+                if parent_node.type == 'openvino_model':
+                    node.params['filter_label_id'] = str(int(node.params['filter_label_id'])+1)
+
                 inputs.append(
                     {input.name: ovms.PipelineConfigNodeInput(
                         node_name=parent_node_name,
@@ -282,9 +286,6 @@ def process_openvino_library(node, g):
 
         if not found_parent: raise Exception('Unfulfilled inputs')
 
-    # FIXME better move this policy to front-end
-    node.params['filter_label_id'] = str(int(node.params['filter_label_id'])+1)
-    #print(node.params)
 
     pipeline_config_node = ovms.PipelineConfigCustomNode(
         name=node.name,
