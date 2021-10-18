@@ -218,8 +218,13 @@ def deploy_worker(part_detection_id):
     # =====================================================
     logger.info("Update Cam!!!")
     cameras = instance.cameras.all()
+    if instance.deployment_type == "cascade":
+        cascade_name = instance.cascade.name
+    else:
+        cascade_name = ""
     res_data = {
         "fps": instance.fps,
+        "cascade_name": cascade_name,
         "lva_mode": instance.inference_protocol,
         "cameras": [],
     }

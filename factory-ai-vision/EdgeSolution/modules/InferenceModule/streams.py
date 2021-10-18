@@ -152,6 +152,7 @@ class Stream:
         self.is_benchmark = False
         self.use_tracker = False
         self.stub = None
+        self.cascade_name = None
 
     def set_is_benchmark(self, is_benchmark):
         self.is_benchmark = is_benchmark
@@ -745,7 +746,8 @@ class Stream:
         self.last_update = time.time()
 
     def ovms_score(self, stub, image):
-        model_name = "Default Cascade"
+        # model_name = "Default Cascade"
+        model_name = self.cascade_name
         input_layer = "image"
         output_layers = [
             "detector/yolo-v3/Conv_14/BiasAdd/YoloRegion",

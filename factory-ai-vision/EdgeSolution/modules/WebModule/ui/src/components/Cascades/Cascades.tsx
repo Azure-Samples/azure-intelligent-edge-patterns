@@ -71,7 +71,11 @@ const Cascades: React.FC<Props> = (props) => {
       ) : (
         <Stack styles={{ root: { padding: '25px 20px' } }} horizontal tokens={{ childrenGap: 20 }}>
           {cascadeList.map((cascade, id) => (
-            <CascadeCard key={id} cascade={cascade} />
+            <CascadeCard
+              key={id}
+              cascade={cascade}
+              existingCascadeNameList={cascadeList.map((cascade) => cascade.name)}
+            />
           ))}
         </Stack>
       )}

@@ -1,4 +1,5 @@
 import json
+import os
 import subprocess
 
 import networkx
@@ -46,6 +47,25 @@ def process_openvino_model(node, g):
             base_path=MODEL_DIR+'/'+node.openvino_model_name
             
     )
+
+    #
+    # Download Model
+    #
+    model_name = node.openvino_model_name
+    need_download = True
+    if os.path.isdir(MODEL_DIR+'/'+model_name):
+        if os.path.isfile(MODEL_DIR+'/'+model_name+'/1/'+model_name+'.xml') and os.path.isfile(MODEL_DIR+'/'+model_name+'/1/'+model_name+'.bin'):
+            need_download = False
+        else:
+            subprocess.run(['rm', '-rf', MODEL_DIR+'/'+model_name])
+
+    if need_download:
+        subprocess.run(['python', 'downloader/tools/downloader/downloader.py ', '-o', TMP_DIR, '--name', model_name, '--precision', 'FP32'])
+        subprocess.run(['mkdir', '-p', MODEL_DIR+'/'+model_name])
+        subprocess.run(['mkdir', '-p', MODEL_DIR+'/'+model_name+'/1'])
+        subprocess.run(['mv', TMP_DIR+'/intel/'+model_name+'/FP32/'+model_name+'.xml', MODEL_DIR+'/'+model_name+'/1/'+model_name+'.xml'])
+        subprocess.run(['mv', TMP_DIR+'/intel/'+model_name+'/FP32/'+model_name+'.xml', MODEL_DIR+'/'+model_name+'/1/'+model_name+'.bin'])
+
     
     if node.inputs[0].metadata['type'] != 'image': raise Exception('Not a model')
 
@@ -251,6 +271,10 @@ def process_openvino_library(node, g):
                 if parent_node.type == 'customvision_model':
                     parent_node_name = 'cv_post'
 
+                # FIXME better move this policy to front-end
+                if parent_node.type == 'openvino_model':
+                    node.params['filter_label_id'] = str(int(node.params['filter_label_id'])+1)
+
                 inputs.append(
                     {input.name: ovms.PipelineConfigNodeInput(
                         node_name=parent_node_name,
@@ -261,6 +285,7 @@ def process_openvino_library(node, g):
                 break
 
         if not found_parent: raise Exception('Unfulfilled inputs')
+
 
     pipeline_config_node = ovms.PipelineConfigCustomNode(
         name=node.name,
@@ -290,6 +315,7 @@ def process_sink(node, g):
 
 
 def voe_config_to_ovms_config(voe_config,
+        name,
         model_dir=MODEL_DIR,
         lib_dir=LIB_DIR):
 
@@ -312,7 +338,7 @@ def voe_config_to_ovms_config(voe_config,
     model_config_list = []
     library_config_list = []
     pipeline_config = {
-        'name': voe_config.name,
+        'name': name,
         'inputs': [],
         'nodes': [],
         'outputs': []
@@ -384,9 +410,9 @@ def voe_config_to_ovms_config(voe_config,
     return ovms_config, metadatas
 
 if __name__ == '__main__':
-    j = json.load(open('cascade/test/voe_config2.json'))
+    j = json.load(open('cascade/test/voe_config.json'))
     voe_config = load_voe_config_from_dict(j)
-    c, metadatas = voe_config_to_ovms_config(voe_config)
+    c, metadatas = voe_config_to_ovms_config(voe_config, 'wew')
     #json.dump(c.dict(exclude_none=True), open('cascade/test/ovms_config2.json', 'w+'))
     #import pprint
     #pprint.pprint(c.dict())

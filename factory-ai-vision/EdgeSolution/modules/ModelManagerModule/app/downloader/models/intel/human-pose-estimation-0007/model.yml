@@ -1,0 +1,36 @@
+# Copyright (c) 2021 Intel Corporation
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#      http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+description: >-
+  2D human pose estimation based on EfficientHRNet.
+task_type: human_pose_estimation
+files:
+  - name: FP32/human-pose-estimation-0007.xml
+    size: 1084057
+    sha256: 135107e2e20ad548e4427eb5bf31f8d8c1daa5be7b78eabe8ee3d60447245b6d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/human-pose-estimation-0007/FP32/human-pose-estimation-0007.xml
+  - name: FP32/human-pose-estimation-0007.bin
+    size: 32601740
+    sha256: 51f8f34dbd3a2eab1265b8fa7aa9cbfb4a5c65c8beaadda92c9e3b4e311689ed
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/human-pose-estimation-0007/FP32/human-pose-estimation-0007.bin
+  - name: FP16/human-pose-estimation-0007.xml
+    size: 1083800
+    sha256: fae71ac22a1b59d4d86a628210e9e77aea634ced154e1eab88f496dc07ea0b0d
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/human-pose-estimation-0007/FP16/human-pose-estimation-0007.xml
+  - name: FP16/human-pose-estimation-0007.bin
+    size: 16300908
+    sha256: 8d99a9efaf9b5df8bcc8d25811dcd595b6461ab28b8d60a03cea0f238eb7b813
+    source: https://storage.openvinotoolkit.org/repositories/open_model_zoo/2021.4/models_bin/3/human-pose-estimation-0007/FP16/human-pose-estimation-0007.bin
+framework: dldt
+license: https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/LICENSE

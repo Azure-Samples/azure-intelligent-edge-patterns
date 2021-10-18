@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Stack, Text, Label, Link, IContextualMenuProps, IconButton } from '@fluentui/react';
+import { Stack, Text, Label, IContextualMenuProps, IconButton } from '@fluentui/react';
 
 import { TrainingProject, NodeType } from '../../../../store/trainingProjectSlice';
 import { getClasses } from './style';
@@ -74,7 +74,6 @@ const Model = (props: Props) => {
           {type === 'customvision_model' && (
             <Label styles={{ root: classes.smallLabel }}>By Microsoft Custom Vision</Label>
           )}
-          <Link styles={{ root: classes.addLabel }}>add</Link>
         </Stack>
       </Stack>
     </>

@@ -135,7 +135,11 @@ const CascadesContainer = () => {
             exact
             path={Url.CASCADES_CREATE}
             render={() => (
-              <CascadeCreate modelList={modelList} defaultCommandBarItems={defaultCommandBarItems} />
+              <CascadeCreate
+                modelList={modelList}
+                defaultCommandBarItems={defaultCommandBarItems}
+                existingCascadeNameList={cascadeList.map((cascade) => cascade.name)}
+              />
             )}
           />
           <Route

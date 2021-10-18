@@ -1,17 +1,17 @@
 #WEBDB_MODULE_VERSION=0.0.1
-WEB_MODULE_VERSION=0.30.3
-INFERENCE_MODULE_VERSION=0.30.3
-RTSPSIM_MODULE_VERSION=0.30.3
-CAMERA_MODULE_VERSION=0.30.3
-NGINX_MODULE_VERSION=0.30.3
-UPLOAD_MODULE_VERSION=0.30.3
-PREDICT_MODULE_VERSION=0.30.3
-MODELMANAGER_MODEULE_VERSION=0.30.3
+WEB_MODULE_VERSION=0.30.5
+INFERENCE_MODULE_VERSION=0.30.5
+RTSPSIM_MODULE_VERSION=0.30.5
+CAMERA_MODULE_VERSION=0.30.5
+NGINX_MODULE_VERSION=0.30.5
+UPLOAD_MODULE_VERSION=0.30.5
+PREDICT_MODULE_VERSION=0.30.5
+MODELMANAGER_MODEULE_VERSION=0.30.5
 
 DEV_REGISTRY=factoryairegistry
 
 #DEV_VERSION=0.8.0
-RELEASE_VERSION=0.30.3
+RELEASE_VERSION=0.30.5
 
 
 # ===================
@@ -21,7 +21,7 @@ docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/webmodule:$WEB_MODULE_VERSIO
 #docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/webdbmodule:$WEBDB_MODULE_VERSION-amd64     intelligentedge/webdbmodule:$RELEASE_VERSION-amd64  
 docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/inferencemodule:$INFERENCE_MODULE_VERSION-amd64  intelligentedge/inferencemodule:$RELEASE_VERSION-amd64
 
-docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-gpuamd64  intelligentedge/predictmodule:$RELEASE_VERSION-gpuamd64
+#docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-gpuamd64  intelligentedge/predictmodule:$RELEASE_VERSION-gpuamd64
 docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-cpuamd64  intelligentedge/predictmodule:$RELEASE_VERSION-cpuamd64
 docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-cpuamd64  intelligentedge/predictmodule:$RELEASE_VERSION-vpuamd64
 
@@ -41,7 +41,7 @@ docker push intelligentedge/webmodule:$RELEASE_VERSION-amd64
 
 docker push intelligentedge/inferencemodule:$RELEASE_VERSION-amd64
 
-docker push intelligentedge/predictmodule:$RELEASE_VERSION-gpuamd64
+#docker push intelligentedge/predictmodule:$RELEASE_VERSION-gpuamd64
 docker push intelligentedge/predictmodule:$RELEASE_VERSION-cpuamd64
 docker push intelligentedge/predictmodule:$RELEASE_VERSION-vpuamd64
 

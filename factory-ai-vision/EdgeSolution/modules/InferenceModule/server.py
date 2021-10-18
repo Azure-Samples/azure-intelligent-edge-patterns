@@ -362,6 +362,7 @@ def update_cams(request_body: CamerasModel):
             line_info,
             zone_info,
         )
+        stream.cascade_name = request_body.cascade_name
         stream.send_video_to_cloud = cam.send_video_to_cloud
         stream.send_video_to_cloud_parts = [
             part.name for part in cam.send_video_to_cloud_parts

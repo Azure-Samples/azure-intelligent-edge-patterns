@@ -414,7 +414,13 @@ class Task(models.Model):
                     continue
                 try:
                     project_obj.export_iteration(iteration.id)
+                except Exception:
+                    logger.exception("Export already in queue")
+                try:
                     project_obj.export_iteration(iteration.id, flavor="ONNXFloat16")
+                except Exception:
+                    logger.exception("Export already in queue")
+                try:
                     project_obj.export_iteration(iteration.id, platform="OPENVINO")
                 except Exception:
                     logger.exception("Export already in queue")

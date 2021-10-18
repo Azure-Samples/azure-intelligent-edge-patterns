@@ -17,7 +17,10 @@ import DuplicationModal from './DuplicationModal';
 interface Props {
   modelList: TrainingProject[];
   defaultCommandBarItems: ICommandBarItemProps[];
+  existingCascadeNameList: string[];
 }
+
+type CreateError = '' | 'nodeDuplication' | 'nameDuplication';
 
 const getSourceElements = (modelList: TrainingProject[]) => {
   const sourceNode = modelList.find((model) => model.nodeType === 'source');
@@ -33,13 +36,13 @@ const getSourceElements = (modelList: TrainingProject[]) => {
 };
 
 const CascadeCreate = (props: Props) => {
-  const { modelList, defaultCommandBarItems } = props;
+  const { modelList, defaultCommandBarItems, existingCascadeNameList } = props;
 
   const [elements, setElements] = useState<(Node | Edge)[]>([]);
   const [cascadeName, setCascadeName] = useState('Default Cascade');
   const [isPopup, setIsPopup] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isDuplicate, setIsDuplicate] = useState(false);
+  const [createError, setCreateError] = useState<CreateError>('');
 
   const flowElementRef = useRef(null);
   const dispatch = useDispatch();
@@ -53,7 +56,12 @@ const CascadeCreate = (props: Props) => {
 
   const onCreateNewCascade = useCallback(async () => {
     if (isDuplicateNodeName(elements)) {
-      setIsDuplicate(true);
+      setCreateError('nodeDuplication');
+      return;
+    }
+
+    if (existingCascadeNameList.includes(cascadeName)) {
+      setCreateError('nameDuplication');
       return;
     }
 
@@ -72,7 +80,7 @@ const CascadeCreate = (props: Props) => {
     setIsLoading(false);
 
     history.push(Url.CASCADES);
-  }, [dispatch, elements, cascadeName, history, modelList]);
+  }, [dispatch, elements, cascadeName, history, modelList, existingCascadeNameList]);
 
   const commandBarItems: ICommandBarItemProps[] = [
     {
@@ -113,9 +121,19 @@ const CascadeCreate = (props: Props) => {
           onClose={() => setIsPopup(false)}
           cascadeName={cascadeName}
           onSave={(name) => setCascadeName(name)}
+          existingCascadeNameList={existingCascadeNameList}
         />
       )}
-      {isDuplicate && <DuplicationModal onClose={() => setIsDuplicate(false)} />}
+      {createError !== '' && (
+        <DuplicationModal
+          title={
+            createError === 'nodeDuplication'
+              ? 'No same export name accepted'
+              : 'No same Cascade Map accepted'
+          }
+          onClose={() => setCreateError('')}
+        />
+      )}
     </>
   );
 };

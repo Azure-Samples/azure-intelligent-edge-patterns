@@ -10,6 +10,7 @@ import NameModal from './NameModal';
 
 interface Props {
   cascade: Cascade;
+  existingCascadeNameList: string[];
 }
 
 const getClasses = () =>
@@ -23,7 +24,7 @@ const getClasses = () =>
   });
 
 const CascadesCard = (props: Props) => {
-  const { cascade } = props;
+  const { cascade, existingCascadeNameList } = props;
 
   const [isPopup, setIsPopup] = useState(false);
 
@@ -95,7 +96,6 @@ const CascadesCard = (props: Props) => {
         <img style={{ width: '300px', height: '200px' }} src={cascade.screenshot} alt="cascadeCover" />
         <Stack styles={{ root: { padding: '12px 16px' } }} horizontal horizontalAlign="space-between">
           <Stack>
-            <Text styles={{ root: { fontSize: '10px', lineHeight: '14px' } }}>SECTION 29004</Text>
             <Text styles={{ root: { fontSize: '16px', lineHeight: '22px' } }}>{cascade.name}</Text>
           </Stack>
           <IconButton
@@ -110,6 +110,7 @@ const CascadesCard = (props: Props) => {
           onClose={() => setIsPopup(false)}
           cascadeName={cascade.name}
           onSave={(name: string) => onEditCascadeName(name)}
+          existingCascadeNameList={existingCascadeNameList}
         />
       )}
     </>

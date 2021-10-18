@@ -4,7 +4,7 @@
   "image": {
     "repository": "${CONTAINER_REGISTRY_NAME}/intelligentedge/predictmodule",
     "tag": {
-      "version": "0.30.3",
+      "version": "0.30.5",
       "platforms": {
         "cpuamd64": "./dockerfiles/Dockerfile.cpuamd64",
         "gpuamd64": "./dockerfiles/Dockerfile.gpuamd64",

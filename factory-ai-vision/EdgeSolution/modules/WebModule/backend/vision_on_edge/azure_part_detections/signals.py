@@ -2,13 +2,16 @@
 """
 
 import logging
+import requests
 
 from django.db.models.signals import m2m_changed, post_save, pre_save
 from django.dispatch import receiver
 
 from ..cameras.models import Camera
+from ..azure_cascades.models import Cascade
 from .models import PartDetection
 from .utils import deploy_all_helper
+from..azure_iot.utils import model_manager_module_url
 
 logger = logging.getLogger(__name__)
 
@@ -41,6 +44,15 @@ def azure_part_detection_has_configured_handler(**kwargs):
 def azure_part_detection_post_save_deploy_handler(**kwargs):
     """Project is_configured handler"""
     instance = kwargs["instance"]
+    # set_voe_config
+    logger.warning("cascade post save: send config to model manager")
+
+    if instance.deployment_type == "cascade":
+        url = "http://" + str(model_manager_module_url()) + "/set_voe_config"
+        data = {"name": instance.cascade.name, "config": instance.cascade.flow}
+        res = requests.post(url, json=data)
+        logger.warning(res.text)
+
     deploy_all_helper(part_detection_id=instance.id)
 
 

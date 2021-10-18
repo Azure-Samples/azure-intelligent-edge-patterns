@@ -28,22 +28,16 @@ class Cascade(models.Model):
         """get_prediction_uri"""
         return self.prediction_uri
 
-    @staticmethod
-    def post_create(**kwargs):
-        logger.warning("cascade post save: send config to model manager")
-        instance = kwargs["instance"]
+#     @staticmethod
+#     def post_create(**kwargs):
+#         logger.warning("cascade post save: send config to model manager")
+#         instance = kwargs["instance"]
 
-        url = "http://" + str(model_manager_module_url()) + "/set_voe_config"
-        data = {"config": instance.flow}
-        res = requests.post(url, json=data)
-        logger.warning(res.text)
-        # automatically add two edges: crop(coordinate, confidence)
-        # edges = json.loads(instance.flow)["edges"]
-        
+#         url = "http://" + str(model_manager_module_url()) + "/set_voe_config"
+#         data = {"config": instance.flow}
+#         res = requests.post(url, json=data)
+#         logger.warning(res.text)
 
 
-
-
-
-post_save.connect(Cascade.post_create, Cascade, dispatch_uid="Cascade_post")
+# post_save.connect(Cascade.post_create, Cascade, dispatch_uid="Cascade_post")
 

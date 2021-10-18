@@ -8,6 +8,7 @@ RUN pip install -r /app/requirements.txt
 
 COPY app/cascade/*.py /app/cascade/
 COPY app/*.py /app/
+COPY app/downloader /app/downloader/
 
 EXPOSE 8585
 
