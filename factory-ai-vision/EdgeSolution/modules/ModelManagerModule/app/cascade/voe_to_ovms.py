@@ -282,6 +282,10 @@ def process_openvino_library(node, g):
 
         if not found_parent: raise Exception('Unfulfilled inputs')
 
+    # FIXME better move this policy to front-end
+    node.params['filter_label_id'] = str(int(node.params['filter_label_id'])+1)
+    #print(node.params)
+
     pipeline_config_node = ovms.PipelineConfigCustomNode(
         name=node.name,
         #library_name=node.openvino_library_name,
@@ -405,9 +409,9 @@ def voe_config_to_ovms_config(voe_config,
     return ovms_config, metadatas
 
 if __name__ == '__main__':
-    j = json.load(open('cascade/test/voe_config2.json'))
+    j = json.load(open('cascade/test/voe_config.json'))
     voe_config = load_voe_config_from_dict(j)
-    c, metadatas = voe_config_to_ovms_config(voe_config)
+    c, metadatas = voe_config_to_ovms_config(voe_config, 'wew')
     #json.dump(c.dict(exclude_none=True), open('cascade/test/ovms_config2.json', 'w+'))
     #import pprint
     #pprint.pprint(c.dict())
