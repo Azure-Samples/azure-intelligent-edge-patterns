@@ -110,17 +110,19 @@ export const ConfigurationInfo: React.FC<PropsType> = (props) => {
               <td>Cloud message</td>
               <td>{getCloudMessageTxt(props.sendMessageToCloud, props.framesPerMin)}</td>
             </tr>
-            <tr>
-              <td>Capture retraining images</td>
-              <td>
-                {getRetrainingTxt(
-                  props.needRetraining,
-                  props.accuracyRangeMin,
-                  props.accuracyRangeMax,
-                  props.maxImages,
-                )}
-              </td>
-            </tr>
+            {props.deploymentType === 'model' && (
+              <tr>
+                <td>Capture retraining images</td>
+                <td>
+                  {getRetrainingTxt(
+                    props.needRetraining,
+                    props.accuracyRangeMin,
+                    props.accuracyRangeMax,
+                    props.maxImages,
+                  )}
+                </td>
+              </tr>
+            )}
             {props.isLVA && (
               <>
                 <tr>

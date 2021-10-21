@@ -5,7 +5,7 @@ import Axios from 'axios';
 import { format } from 'date-fns';
 
 import { useInterval } from '../../hooks/useInterval';
-import { Status, InferenceMode } from '../../store/project/projectTypes';
+import { Status, InferenceMode, DeploymentType } from '../../store/project/projectTypes';
 
 import { ExpandPanel } from '../ExpandPanel';
 import { getErrorLog } from '../../store/shared/createWrappedAsync';
@@ -19,6 +19,7 @@ type InsightsProps = {
   inferenceMode: InferenceMode;
   countingStartTime: string;
   countingEndTime: string;
+  deploymentType: DeploymentType;
 };
 
 const normalizeObjectCount = (obj: Record<string, number>): { name: string; value: number }[] =>
@@ -28,14 +29,17 @@ type ScenarioMetrics = { name: string; count: number };
 const getNumOfDefects = (scenarioMetric: ScenarioMetrics[]): ScenarioMetrics[] =>
   scenarioMetric.filter((e) => !['all_objects', 'violation'].includes(e.name));
 
-export const Insights: React.FC<InsightsProps> = ({
-  status,
-  projectId,
-  cameraId,
-  inferenceMode,
-  countingStartTime,
-  countingEndTime,
-}) => {
+export const Insights: React.FC<InsightsProps> = (props) => {
+  const {
+    status,
+    projectId,
+    cameraId,
+    inferenceMode,
+    countingStartTime,
+    countingEndTime,
+    deploymentType,
+  } = props;
+
   const [inferenceMetrics, setinferenceMetrics] = useState({
     successRate: 0,
     successfulInferences: 0,
@@ -95,56 +99,60 @@ export const Insights: React.FC<InsightsProps> = ({
           </a>
         )}
       </Stack>
-      <Stack
-        styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
-        tokens={{ childrenGap: '8px' }}
-      >
-        <Text styles={{ root: { fontWeight: 'bold' } }}>Successful inferences</Text>
-        <Text styles={{ root: { color: palette.neutralSecondary } }}>
-          {inferenceMetrics.successfulInferences}
-        </Text>
-        <ExpandPanel titleHidden="Object" suffix={inferenceMetrics.objectCounts.length.toString()}>
-          <Stack tokens={{ childrenGap: 10 }}>
-            {inferenceMetrics.objectCounts.map((e) => (
-              <Text key={e.name}>{`${e.name}: ${e.value}`}</Text>
-            ))}
-            {!!inferenceMetrics.numAccrossLine && (
-              <Text>{`Total number of object pass the line: ${inferenceMetrics.numAccrossLine}`}</Text>
-            )}
-            {!!inferenceMetrics.numOfViolation && (
-              <Text>{`Number of violation: ${inferenceMetrics.numOfViolation}`}</Text>
-            )}
-            {!!inferenceMetrics.numOfDefect.length && (
-              <>
-                <Text>{`Number of defect object: `}</Text>
-                {inferenceMetrics.numOfDefect.map((e) => (
-                  <Text key={e.name}>
-                    {e.name}: {e.count}
-                  </Text>
-                ))}
-              </>
-            )}
-          </Stack>
-        </ExpandPanel>
-      </Stack>
-      <Stack
-        styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
-        tokens={{ childrenGap: '8px' }}
-      >
-        <ExpandPanel
-          titleHidden="Unidentified images"
-          suffix={inferenceMetrics.unIdentifiedItems?.toString()}
-        >
-          <Stack horizontal tokens={{ childrenGap: 25 }}>
-            <Text variant="mediumPlus" styles={{ root: { color: palette.neutralPrimary } }}>
-              {inferenceMetrics.unIdentifiedItems} images
+      {deploymentType === 'model' && (
+        <>
+          <Stack
+            styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
+            tokens={{ childrenGap: '8px' }}
+          >
+            <Text styles={{ root: { fontWeight: 'bold' } }}>Successful inferences</Text>
+            <Text styles={{ root: { color: palette.neutralSecondary } }}>
+              {inferenceMetrics.successfulInferences}
             </Text>
-            <RRDLink to="/images" style={{ textDecoration: 'none' }}>
-              <Link styles={{ root: { textDecoration: 'none' } }}>View in images</Link>
-            </RRDLink>
+            <ExpandPanel titleHidden="Object" suffix={inferenceMetrics.objectCounts.length.toString()}>
+              <Stack tokens={{ childrenGap: 10 }}>
+                {inferenceMetrics.objectCounts.map((e) => (
+                  <Text key={e.name}>{`${e.name}: ${e.value}`}</Text>
+                ))}
+                {!!inferenceMetrics.numAccrossLine && (
+                  <Text>{`Total number of object pass the line: ${inferenceMetrics.numAccrossLine}`}</Text>
+                )}
+                {!!inferenceMetrics.numOfViolation && (
+                  <Text>{`Number of violation: ${inferenceMetrics.numOfViolation}`}</Text>
+                )}
+                {!!inferenceMetrics.numOfDefect.length && (
+                  <>
+                    <Text>{`Number of defect object: `}</Text>
+                    {inferenceMetrics.numOfDefect.map((e) => (
+                      <Text key={e.name}>
+                        {e.name}: {e.count}
+                      </Text>
+                    ))}
+                  </>
+                )}
+              </Stack>
+            </ExpandPanel>
           </Stack>
-        </ExpandPanel>
-      </Stack>
+          <Stack
+            styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
+            tokens={{ childrenGap: '8px' }}
+          >
+            <ExpandPanel
+              titleHidden="Unidentified images"
+              suffix={inferenceMetrics.unIdentifiedItems?.toString()}
+            >
+              <Stack horizontal tokens={{ childrenGap: 25 }}>
+                <Text variant="mediumPlus" styles={{ root: { color: palette.neutralPrimary } }}>
+                  {inferenceMetrics.unIdentifiedItems} images
+                </Text>
+                <RRDLink to="/images" style={{ textDecoration: 'none' }}>
+                  <Link styles={{ root: { textDecoration: 'none' } }}>View in images</Link>
+                </RRDLink>
+              </Stack>
+            </ExpandPanel>
+          </Stack>
+        </>
+      )}
       {inferenceMode === InferenceMode.TotalCustomerCounting &&
         countingStartTime !== '' &&
         countingEndTime !== '' && (
