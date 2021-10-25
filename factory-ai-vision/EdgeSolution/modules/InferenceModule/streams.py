@@ -1177,6 +1177,7 @@ def process_response(response, img, metadatas):
     if response is not None:
         coordinates = make_ndarray(response.outputs['coordinates'])
         confidences = make_ndarray(response.outputs['confidences'])
+        label_ids = make_ndarray(response.outputs['label_ids']).flatten()
         attributes = []
             
         labels = None
@@ -1219,10 +1220,14 @@ def process_response(response, img, metadatas):
             x1, y1, x2, y2 = coordinates[i, 0]
             tag = ''
             # FIXME should add model type or index beginwith here
-            if labels is not None:
-                if len(labels) == 1:
-                    # Openvino single label prediction  models
-                    tag = labels[0]
+            #if labels is not None:
+            #    if len(labels) == 1:
+            #        # Openvino single label prediction  models
+            #        tag = labels[0]
+            label_id = label_ids[i]
+            if label_id < len(labels):
+                tag = labels[label_id]
+            
                     
             prediction = {
                 'tag': tag,
