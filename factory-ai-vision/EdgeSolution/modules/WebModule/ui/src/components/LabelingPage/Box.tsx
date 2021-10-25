@@ -19,6 +19,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
   changeCursorState = dummyFunction,
   color = 'white',
   draggable = true,
+  onLeaveBoxCursorChange,
 }) => {
   const [vertices, setVertices] = useState<BoxLabel>(annotation.label);
   const anchorRadius: number = 5 / scale;
@@ -129,7 +130,11 @@ export const Box2d: FC<Box2dComponentProps> = ({
         strokeWidth={strokeWidth}
         closed={true}
         onMouseEnter={(): void => changeCursorState(LabelingCursorStates.pointer)}
-        onMouseLeave={(): void => changeCursorState(LabelingCursorStates.default)}
+        onMouseLeave={(): void =>
+          onLeaveBoxCursorChange
+            ? onLeaveBoxCursorChange()
+            : changeCursorState(LabelingCursorStates.crosshair)
+        }
       />
       <Circle
         key={'anchor-0'}
