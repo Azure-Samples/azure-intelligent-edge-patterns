@@ -106,7 +106,6 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
   );
   const noPrevAndNext = useSelector((state: State) => state.labelingPage.openFrom === OpenFrom.AfterCapture);
 
-  const closeDialog = () => dispatch(closeLabelingPage());
   const [workState, setWorkState] = useState<WorkState>(WorkState.None);
   const [loading, setLoading] = useState(false);
 
@@ -114,6 +113,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
   const partOfProjectSelector = useMemo(() => selectProjectPartsFactory(projectId), [projectId]);
   const parts = useSelector(partOfProjectSelector);
   const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
+  const selectedPartId = useSelector<State, number>((state) => state.labelingPage.selectedPartId);
 
   const isOnePointBox = checkOnePointBox(annotations);
 
@@ -121,10 +121,15 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
     title: 'Image detail',
     subText:
       project.projectType === 'ObjectDetection'
-        ? 'Drag a box around the object you want to tag'
+        ? 'Please select a tag and then draw a box around the object'
         : 'Please add new tag for this image',
     styles: { content: { width: '1080px' } },
   };
+
+  const closeDialog = useCallback(() => {
+    dispatch(closeLabelingPage());
+    setWorkState(WorkState.None);
+  }, [dispatch]);
 
   const saveAnno = async () => {
     setLoading(true);
@@ -197,6 +202,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
         onBoxCreated={dummyFunction}
         parts={parts}
         selectedImageId={selectedImageId}
+        selectedPartId={selectedPartId}
       />
       <Text variant="small" styles={{ root: { position: 'absolute', left: 5, bottom: 5 } }}>
         {cameraName}

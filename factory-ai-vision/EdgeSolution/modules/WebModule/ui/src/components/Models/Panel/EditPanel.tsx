@@ -27,6 +27,7 @@ type Props = {
   project: TrainingProject;
   parts: Part[];
   status: TrainingStatus;
+  hasLoading: boolean;
 };
 
 const getClasses = () =>
@@ -44,7 +45,7 @@ const getClasses = () =>
   });
 
 const EditPanel: React.FC<Props> = (props) => {
-  const { project, parts, onDismiss, status } = props;
+  const { project, parts, onDismiss, status, hasLoading } = props;
 
   const [localTag, setLocalTag] = useState('');
   const [localTags, setLocalTags] = useState<{ name: string; remoteCount: number }[]>([]);
@@ -57,6 +58,8 @@ const EditPanel: React.FC<Props> = (props) => {
   useEffect(() => {
     setLocalTags(parts.map((part) => ({ name: part.name, remoteCount: part.remote_image_count })));
   }, [parts]);
+
+  console.log('parts', parts);
 
   const onTagAdd = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
@@ -93,6 +96,13 @@ const EditPanel: React.FC<Props> = (props) => {
     setIsLoading(false);
     onDismiss();
   }, [dispatch, project, localTags, onDismiss]);
+
+  if (hasLoading)
+    return (
+      <Panel isOpen={true} hasCloseButton headerText="Edit Model">
+        <ProgressIndicator />
+      </Panel>
+    );
 
   return (
     <Panel

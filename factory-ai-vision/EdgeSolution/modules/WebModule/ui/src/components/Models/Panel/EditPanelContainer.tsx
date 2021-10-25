@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { Panel, ProgressIndicator } from '@fluentui/react';
 
 import { State as RootState } from 'RootStateType';
 import { selectTrainingProjectById, getSingleTrainingProject } from '../../../store/trainingProjectSlice';
@@ -43,14 +42,15 @@ const EditPanelContainer = (props: Props) => {
     })();
   }, [dispatch, projectId]);
 
-  if (loading)
-    return (
-      <Panel isOpen={true} hasCloseButton headerText="Edit Model">
-        <ProgressIndicator />
-      </Panel>
-    );
-
-  return <EditPanel onDismiss={onDismiss} project={project} parts={parts} status={projectStatus.status} />;
+  return (
+    <EditPanel
+      onDismiss={onDismiss}
+      project={project}
+      parts={parts}
+      status={projectStatus.status}
+      hasLoading={loading}
+    />
+  );
 };
 
 export default EditPanelContainer;

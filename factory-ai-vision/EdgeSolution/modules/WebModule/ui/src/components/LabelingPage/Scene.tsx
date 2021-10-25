@@ -31,6 +31,7 @@ interface SceneProps {
   onBoxCreated?: () => void;
   parts: Part[];
   selectedImageId: number;
+  selectedPartId: number;
 }
 const Scene: FC<SceneProps> = ({
   url = '',
@@ -40,6 +41,7 @@ const Scene: FC<SceneProps> = ({
   onBoxCreated,
   parts,
   selectedImageId,
+  selectedPartId,
 }) => {
   const dispatch = useDispatch();
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
@@ -56,18 +58,34 @@ const Scene: FC<SceneProps> = ({
    */
   const changeCursorState = useCallback(
     (cursorType?: LabelingCursorStates): void => {
-      if (!cursorType) {
-        if (noMoreCreate) {
-          setCursorState(LabelingCursorStates.default);
-        } else {
-          setCursorState(LabelingCursorStates.crosshair);
-        }
-      } else {
+      console.log('changeCursorState', cursorType);
+
+      if (cursorType) {
         setCursorState(cursorType);
+        return;
       }
+
+      if (selectedPartId === 0) {
+        setCursorState(LabelingCursorStates.notAllowed);
+        return;
+      }
+
+      if (noMoreCreate) {
+        setCursorState(LabelingCursorStates.default);
+        return;
+      }
+      setCursorState(LabelingCursorStates.crosshair);
     },
-    [noMoreCreate],
+    [noMoreCreate, selectedPartId],
   );
+
+  const onLeaveBoxCursorChange = useCallback(() => {
+    if (selectedPartId === 0) {
+      setCursorState(LabelingCursorStates.notAllowed);
+      return;
+    }
+    setCursorState(LabelingCursorStates.crosshair);
+  }, [selectedPartId]);
 
   const removeBox = useCallback((): void => {
     // Avoid find undefined annotation
@@ -78,12 +96,15 @@ const Scene: FC<SceneProps> = ({
     dispatch(removeAnnotation(annotations[selectedAnnotationIndex].id));
     setWorkState(WorkState.None);
     setSelectedAnnotationIndex(null);
-  }, [dispatch, annotations, selectedAnnotationIndex, setWorkState, selectedImageId]);
+
+    if (selectedPartId === 0) {
+      setCursorState(LabelingCursorStates.notAllowed);
+      return;
+    }
+    setCursorState(LabelingCursorStates.crosshair);
+  }, [dispatch, annotations, selectedAnnotationIndex, setWorkState, selectedImageId, selectedPartId]);
 
   const onMouseDown = (e: KonvaEventObject<MouseEvent>): void => {
-    // * Single bounding box labeling type condition
-    if (noMoreCreate || workState === WorkState.Creating) return;
-
     // remove selecting labeling
     if (workState === WorkState.Selecting && e.target.attrs.name === 'cancel') return;
 
@@ -91,9 +112,17 @@ const Scene: FC<SceneProps> = ({
     if (
       workState === WorkState.Selecting &&
       ['anchor-0', 'anchor-1', 'anchor-2', 'anchor-3'].includes(e.target.attrs.name)
-    ) {
+    )
+      return;
+
+    // Close selecting state when not select part
+    if (WorkState.Selecting === workState && selectedPartId === 0) {
+      setWorkState(WorkState.None);
       return;
     }
+
+    // Don't work on not select part
+    if (WorkState.None === workState && selectedPartId === 0) return;
 
     dispatch(thunkCreateAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }));
     // Select the last annotation. Use lenth instead of length -1 because the annotations here is the old one
@@ -178,6 +207,7 @@ const Scene: FC<SceneProps> = ({
                     selected={i === selectedAnnotationIndex}
                     dispatch={dispatch}
                     changeCursorState={changeCursorState}
+                    onLeaveBoxCursorChange={onLeaveBoxCursorChange}
                   />
                   <LabelText
                     x={annotation.label.x1}
