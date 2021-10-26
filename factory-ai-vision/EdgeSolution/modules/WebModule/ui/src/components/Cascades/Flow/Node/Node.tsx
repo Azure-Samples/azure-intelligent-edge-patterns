@@ -47,11 +47,11 @@ const getHandlePointer = (length: number, id) => {
   return 150;
 };
 
-const OUTPUTS_LIMIT_NAME = ['coordinates', 'confidences'];
+const LIMIT_OUTPUTS_NAME = ['coordinates', 'confidences', 'label_ids'];
 
 const getEnhanceSelectedModel = (model: TrainingProject): TrainingProject => {
   if (model.nodeType === 'openvino_library')
-    return { ...model, outputs: model.outputs.filter((output) => !OUTPUTS_LIMIT_NAME.includes(output.name)) };
+    return { ...model, outputs: model.outputs.filter((output) => !LIMIT_OUTPUTS_NAME.includes(output.name)) };
   return model;
 };
 

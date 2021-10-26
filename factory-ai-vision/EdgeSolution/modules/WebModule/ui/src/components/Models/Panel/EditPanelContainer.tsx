@@ -42,6 +42,8 @@ const EditPanelContainer = (props: Props) => {
     })();
   }, [dispatch, projectId]);
 
+  if (!projectStatus) return <></>;
+
   return (
     <EditPanel
       onDismiss={onDismiss}

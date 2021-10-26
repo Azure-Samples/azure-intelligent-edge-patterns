@@ -43,15 +43,14 @@ const getSourceMetadata = (
   if (!selectedNode) return [];
   if ((selectedNode.type as NodeType) !== 'openvino_library') return [];
 
-  const matchModel = elements
+  const matchModels = elements
     .filter((ele) => isEdge(ele))
     .filter((edge: Edge<any>) => edge.target === selectedNode.id)
     .map((edge: Edge<any>) => getModel(edge.source, modelList))
-    .map((model: TrainingProject) =>
-      model.outputs.find((output) => output.metadata.type === 'bounding_box'),
-    )[0];
+    .map((model: TrainingProject) => model.outputs.find((output) => output.metadata.type === 'bounding_box'));
 
-  return matchModel.metadata.labels;
+  if (matchModels.length === 0) return [];
+  return matchModels[0].metadata.labels;
 };
 
 const edgeTypes = {

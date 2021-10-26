@@ -39,37 +39,32 @@ const getClasses = () =>
     },
   });
 
-const getTrainingImageLimit = (project: TrainingProject): number => {
-  if (project.projectType === 'Classification') return CLASSIFICATION_TRAIN_LIMIT;
-  return OBJECT_DETECTION_TRAIN_LIMIT;
+const getIsTrainButton = (parts: Part[], limit: number): boolean => {
+  // All remote tag bigger more than limit and local have at least one labeled image.
+  const isAllTagBiggerLimit = parts.every((part) => part.remote_image_count >= limit);
+  const hasLocalTag = parts.some((part) => part.local_image_count > 0);
+  if (isAllTagBiggerLimit && hasLocalTag) return true;
+
+  // All remote tag lower than limit and local >= limit labeled images.
+  const isAllTagLowerLimit = parts.every((part) => part.remote_image_count < limit);
+  const isLocalTagMoreThanLimit = parts.every((part) => part.local_image_count >= limit);
+  if (isAllTagLowerLimit && isLocalTagMoreThanLimit) return true;
+
+  // partial remote tag lower than limit and local >= limit labeled images.
+  const isPartialTagLowerLimit = parts.some((part) => part.remote_image_count < limit);
+  const isPartialTagMoreThanLimit = parts
+    .filter((part) => part.remote_image_count < limit)
+    .every((part) => part.local_image_count >= limit);
+  if (isPartialTagLowerLimit && isPartialTagMoreThanLimit) return true;
+
+  return false;
 };
 
-const isTrainingBDisable = (
-  status: TrainingStatus,
-  labeledImageCounts: number[],
-  hasTrainProject: boolean,
-  limit: number,
-): boolean => {
-  if (
-    ((hasTrainProject && Math.max(...labeledImageCounts) > 0) ||
-      (!hasTrainProject && Math.min(...labeledImageCounts) >= limit)) &&
-    NO_LIMIT_TRAIN_STATUS.includes(status)
-  )
-    return false;
+const getLocalLabelImageCount = (parts: Part[]) => {
+  const localImageCountList = parts.map((part) => part.local_image_count);
+  if (localImageCountList.every((count) => count === 0)) return 'Tag images';
 
-  return true;
-};
-
-const getLabeledImageCount = (counts: number[], hasTrainProject: boolean): string => {
-  if (hasTrainProject && Math.max(...counts) !== 0) return `${Math.max(...counts)} tagged`;
-  if (!hasTrainProject) return `${Math.min(...counts)} tagged`;
-  return 'Tag images';
-};
-
-const getUnTrainImageCounts = (parts: Part[]) => {
-  const counts = parts.map((part) => part.local_image_count);
-
-  return counts;
+  return parts.map((part) => `${part.name}:${part.local_image_count}`).join(', ');
 };
 
 const ImageLabel = (props: Props) => {
@@ -77,12 +72,10 @@ const ImageLabel = (props: Props) => {
 
   const [localStatus, setLocalStatus] = useState<TrainingStatus>(status);
 
-  const hasTrainProject =
-    project.projectType === 'ObjectDetection'
-      ? parts.every((part) => part.remote_image_count >= 15)
-      : parts.every((part) => part.remote_image_count >= 5);
-  const labeledImageCounts = getUnTrainImageCounts(parts);
-  const trainingLimit = getTrainingImageLimit(project);
+  const trainingLimit =
+    project.projectType === 'Classification' ? CLASSIFICATION_TRAIN_LIMIT : OBJECT_DETECTION_TRAIN_LIMIT;
+  const isTrainButton = getIsTrainButton(parts, trainingLimit) && NO_LIMIT_TRAIN_STATUS.includes(status);
+  const localLabelImageCount = getLocalLabelImageCount(parts);
 
   const classes = getClasses();
   const history = useHistory();
@@ -124,14 +117,14 @@ const ImageLabel = (props: Props) => {
             verticalAlign="center"
             tokens={{ childrenGap: 5 }}
           >
-            <Text>{getLabeledImageCount(labeledImageCounts, hasTrainProject)}</Text>
+            <Text>{localLabelImageCount}</Text>
             <Icon iconName="OpenInNewWindow" />
           </Stack>
         </Link>
       </Stack>
       <DefaultButton
         styles={{ root: { marginTop: '14px' } }}
-        disabled={isTrainingBDisable(localStatus, labeledImageCounts, hasTrainProject, trainingLimit)}
+        disabled={!isTrainButton}
         onClick={onTrainClick}
       >
         Train
