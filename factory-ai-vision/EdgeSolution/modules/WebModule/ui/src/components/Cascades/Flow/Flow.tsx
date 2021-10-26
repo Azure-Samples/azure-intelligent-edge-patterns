@@ -113,97 +113,95 @@ const DnDFlow = (props: Props) => {
   );
 
   return (
-    <>
-      <div className="dndflow">
-        <ReactFlowProvider>
-          <SidebarList modelList={modelList} />
-          <div className="reactflow-wrapper" ref={reactFlowWrapper}>
-            <NodePanel
-              selectedNode={selectedNode}
-              setSelectedNode={setSelectedNode}
-              model={selectedNode && getModel(selectedNode?.id, modelList)}
-              setElements={setElements}
-              matchTargetLabels={getSourceMetadata(selectedNode, elements, modelList)}
-            />
-            <ReactFlow
-              ref={flowElementRef}
-              elements={elements}
-              nodeTypes={{
-                source: (node: Node) => {
-                  const { id } = node;
+    <div className="dndflow">
+      <ReactFlowProvider>
+        <SidebarList modelList={modelList} />
+        <div className="reactflow-wrapper" ref={reactFlowWrapper}>
+          <NodePanel
+            selectedNode={selectedNode}
+            setSelectedNode={setSelectedNode}
+            model={selectedNode && getModel(selectedNode?.id, modelList)}
+            setElements={setElements}
+            matchTargetLabels={getSourceMetadata(selectedNode, elements, modelList)}
+          />
+          <ReactFlow
+            ref={flowElementRef}
+            elements={elements}
+            nodeTypes={{
+              source: (node: Node) => {
+                const { id } = node;
 
-                  return <InitialNode id={id} setElements={setElements} modelList={modelList} />;
-                },
-                openvino_model: (node: Node) => {
-                  const { id } = node;
+                return <InitialNode id={id} setElements={setElements} modelList={modelList} />;
+              },
+              openvino_model: (node: Node) => {
+                const { id } = node;
 
-                  return (
-                    <NodeCard
-                      id={id}
-                      modelList={modelList}
-                      type="openvino_model"
-                      setElements={setElements}
-                      onDelete={() => onDeleteNode(id)}
-                      onSelected={() => setSelectedNode(node)}
-                    />
-                  );
-                },
-                customvision_model: (node: Node) => {
-                  const { id } = node;
+                return (
+                  <NodeCard
+                    id={id}
+                    modelList={modelList}
+                    type="openvino_model"
+                    setElements={setElements}
+                    onDelete={() => onDeleteNode(id)}
+                    onSelected={() => setSelectedNode(node)}
+                  />
+                );
+              },
+              customvision_model: (node: Node) => {
+                const { id } = node;
 
-                  return (
-                    <NodeCard
-                      id={id}
-                      modelList={modelList}
-                      type="customvision_model"
-                      setElements={setElements}
-                      onDelete={() => onDeleteNode(id)}
-                      onSelected={() => setSelectedNode(node)}
-                    />
-                  );
-                },
-                openvino_library: (node: Node) => {
-                  const { id } = node;
+                return (
+                  <NodeCard
+                    id={id}
+                    modelList={modelList}
+                    type="customvision_model"
+                    setElements={setElements}
+                    onDelete={() => onDeleteNode(id)}
+                    onSelected={() => setSelectedNode(node)}
+                  />
+                );
+              },
+              openvino_library: (node: Node) => {
+                const { id } = node;
 
-                  return (
-                    <NodeCard
-                      id={id}
-                      modelList={modelList}
-                      type="openvino_library"
-                      setElements={setElements}
-                      onDelete={() => onDeleteNode(id)}
-                      onSelected={() => setSelectedNode(node)}
-                    />
-                  );
-                },
-                sink: (node: Node) => {
-                  const { id, data } = node;
+                return (
+                  <NodeCard
+                    id={id}
+                    modelList={modelList}
+                    type="openvino_library"
+                    setElements={setElements}
+                    onDelete={() => onDeleteNode(id)}
+                    onSelected={() => setSelectedNode(node)}
+                  />
+                );
+              },
+              sink: (node: Node) => {
+                const { id, data } = node;
 
-                  return (
-                    <ExportNodeCard
-                      id={id}
-                      data={data}
-                      setElements={setElements}
-                      onDelete={() => onDeleteNode(id)}
-                      onSelected={() => setSelectedNode(node)}
-                    />
-                  );
-                },
-              }}
-              edgeTypes={edgeTypes}
-              // onConnect={onConnect}
-              onElementsRemove={onElementsRemove}
-              onLoad={onLoad}
-              onDrop={onDrop}
-              onDragOver={onDragOver}
-              snapToGrid={true}
-            >
-              <Controls />
-            </ReactFlow>
-          </div>
-        </ReactFlowProvider>
-      </div>
-    </>
+                return (
+                  <ExportNodeCard
+                    id={id}
+                    data={data}
+                    setElements={setElements}
+                    onDelete={() => onDeleteNode(id)}
+                    onSelected={() => setSelectedNode(node)}
+                  />
+                );
+              },
+            }}
+            edgeTypes={edgeTypes}
+            // onConnect={onConnect}
+            onElementsRemove={onElementsRemove}
+            onLoad={onLoad}
+            onDrop={onDrop}
+            onDragOver={onDragOver}
+            snapToGrid={true}
+          >
+            <Controls />
+          </ReactFlow>
+        </div>
+      </ReactFlowProvider>
+    </div>
   );
 };
 

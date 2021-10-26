@@ -3,6 +3,8 @@ import { Stack, Text, Icon, mergeStyleSets } from '@fluentui/react';
 import { Handle, addEdge, Connection } from 'react-flow-renderer';
 
 import { TrainingProject } from '../../../../store/trainingProjectSlice';
+import { getSourceMetadata, getTargetMetadata, isValidConnection } from './utils';
+import { getModel } from '../../utils';
 
 interface Props {
   id: string;
@@ -22,30 +24,6 @@ const getClasses = () =>
     title: { fontSize: '24px' },
     describe: { fontSize: '14px', lineHeight: '20px' },
   });
-
-const getModel = (id: string, modelList: TrainingProject[]) => {
-  const re = /(?<=_).*/;
-
-  const targetId = id.match(re)[0];
-  return modelList.find((model) => model.id === parseInt(targetId, 10));
-};
-
-const getSourceMetadata = (connect: Connection, model: TrainingProject) =>
-  JSON.stringify(model.outputs[connect.sourceHandle].metadata);
-
-const getTargetMetadata = (connect: Connection, model: TrainingProject) =>
-  JSON.stringify(model.inputs[connect.targetHandle].metadata);
-
-const isValidConnection = (sourceModelMetadata: string, targetModelMetadata: string) => {
-  // console.log('sourceModel', sourceModelMetadata);
-  // console.log('targetModel', targetModelMetadata);
-
-  // const sourceModel = getModel(connection.source, ModelList);
-  // const targetModel = getModel(connection.target, ModelList);
-
-  // return connection.target === 'B';
-  return true;
-};
 
 const SourceNode = (props: Props) => {
   const { id, setElements, modelList } = props;
