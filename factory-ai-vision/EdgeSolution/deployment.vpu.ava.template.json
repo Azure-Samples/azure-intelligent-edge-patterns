@@ -372,7 +372,7 @@
             "restartPolicy": "always",
             "startupOrder": 1,
             "settings": {
-              "image": "openvino/model_server",
+              "image": "openvino/model_server:2021.4.1-gpu",
               "createOptions": {
                 "ExposedPorts": {
                   "9001/tcp": {},
