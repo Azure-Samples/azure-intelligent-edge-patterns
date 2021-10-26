@@ -374,7 +374,7 @@ def voe_config_to_ovms_config(voe_config,
             pipeline_config['nodes'].append(pipeline_config_node)
 
             # hack FIXME
-            if node.name == 'Crop':
+            if node.name == 'Crop & Filter':
                 pipeline_config['outputs'].append({
                     'confidences': ovms.PipelineConfigOutput(
                         node_name=node.name,
