@@ -318,12 +318,20 @@ def create_demo_objects():
                 "shape": [-1, 1, 1, 1, 1],
                 "layout": ["B", 1, 1, "B", "F"],
             }
+        },
+        {
+            "name": "label_ids",
+            "metadata": {
+                "type": "classification",
+                "shape": [-1, 1, 1, 1, 1],
+                "layout": ["B", 1, 1, "B", "F"],
+            }
         }
     ]
     inputs = json.dumps(inputs_)
     outputs = json.dumps(outputs_)
     Project.objects.update_or_create(
-        name="Crop",
+        name="Crop & Filter",
         defaults={
             "is_cascade": True,
             "type": "openvino_library",

@@ -78,7 +78,10 @@ const NodePanel = (props: Props) => {
     }
   }, [selectedNode]);
 
-  const tagsOptions: IDropdownOption[] = matchTargetLabels.map((label, id) => ({ key: id, text: label }));
+  const tagsOptions: IDropdownOption[] = [
+    matchTargetLabels.length !== 0 && { key: -1, text: 'All' },
+    ...matchTargetLabels.map((label, id) => ({ key: id, text: label })),
+  ];
 
   const typeOptions: IDropdownOption[] = [{ key: 'crop', text: 'Crop' }];
 

@@ -1177,13 +1177,19 @@ def process_response(response, img, metadatas):
     if response is not None:
         coordinates = make_ndarray(response.outputs['coordinates'])
         confidences = make_ndarray(response.outputs['confidences'])
+        label_ids = make_ndarray(response.outputs['label_ids']).flatten()
         attributes = []
+            
+        labels = None
 
         for k in response.outputs:
             if (metadatas is not None) and (k in metadatas):
                 #print(k)
                 #print(metadatas[k])
                 metadata = metadatas[k]
+                if metadata['type'] == 'bounding_box':
+                    if 'labels' in metadata:
+                        labels = metadata['labels']
                 if metadata['type'] == 'classification':
                     ndarray = make_ndarray(response.outputs[k])
                     tag_indexes = np.argmax(ndarray, axis=2).flatten()
@@ -1212,8 +1218,19 @@ def process_response(response, img, metadatas):
         predictions = []
         for i in range(n):
             x1, y1, x2, y2 = coordinates[i, 0]
+            tag = ''
+            # FIXME should add model type or index beginwith here
+            #if labels is not None:
+            #    if len(labels) == 1:
+            #        # Openvino single label prediction  models
+            #        tag = labels[0]
+            label_id = label_ids[i]
+            if label_id < len(labels):
+                tag = labels[label_id]
+            
+                    
             prediction = {
-                'tag': 'face',
+                'tag': tag,
                 'attributes': [],
                 'box': {
                     'l': x1,
@@ -1250,7 +1267,8 @@ def process_response(response, img, metadatas):
         thickness = 1
         text = prediction['tag']
         for attribute in prediction['attributes']:
-            text += ' / ' + str(attribute['value'])
+            if text != '': text += ' / '
+            text += str(attribute['value'])
         cv2.putText(img, text, (x1, y1-10), font,
                     fontScale, color, thickness, cv2.LINE_AA)
     return img, predictions

@@ -43,7 +43,7 @@ const INTEL_OVMS_CARD_DATA = [
       'https://raw.githubusercontent.com/openvinotoolkit/open_model_zoo/master/models/intel/face-detection-retail-0005/assets/face-detection-retail-0001.png',
     inputDescribe: 'Image, name: input, shape: 1, 3, 300, 300 in the format B, C, H, W, where:',
     createdAt: '7/3/2021',
-    tags: ['person'],
+    tags: ['face'],
     metric: {
       ap: '84.52%',
       GFlops: '0.982',
@@ -87,7 +87,6 @@ const INTEL_OVMS_CARD_DATA = [
     createdAt: '7/3/2021',
     tags: ['female', 'male'],
     metric: {
-      // ifo: 'Frontal',
       rip: '±45˚',
       roop: 'Yaw: ±45˚ / Pitch: ±45˚',
       mow: '62 pixels',

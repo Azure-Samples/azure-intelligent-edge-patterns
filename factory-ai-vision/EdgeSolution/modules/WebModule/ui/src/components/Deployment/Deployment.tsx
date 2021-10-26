@@ -201,6 +201,7 @@ const BaseDeployment: React.FC<DeploymentProps> = (props) => {
               inferenceMode={projectData.inferenceMode}
               countingStartTime={projectData.countingStartTime}
               countingEndTime={projectData.countingEndTime}
+              deploymentType={projectData.deployment_type}
             />
           </PivotItem>
           <PivotItem headerText="Areas of interest">

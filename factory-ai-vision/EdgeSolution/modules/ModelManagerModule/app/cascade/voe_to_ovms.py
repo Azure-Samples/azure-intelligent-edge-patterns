@@ -82,6 +82,16 @@ def process_openvino_model(node, g):
             alias=output.name
         ))
 
+
+        # FIXME  intel openvino detection model label begin with 1 ...
+        # Need to find a better way to embed this policy
+        ##########################################################
+        if output.metadata['type'] == 'bounding_box':
+            output.metadata['labels'] = ['']+output.metadata['labels']
+        ##########################################################
+
+
+
         metadatas[node.name][output.name] = output.metadata
 
     inputs = []
@@ -273,7 +283,8 @@ def process_openvino_library(node, g):
 
                 # FIXME better move this policy to front-end
                 if parent_node.type == 'openvino_model':
-                    node.params['filter_label_id'] = str(int(node.params['filter_label_id'])+1)
+                    if node.params['filter_label_id'] != '-1':
+                        node.params['filter_label_id'] = str(int(node.params['filter_label_id'])+1)
 
                 inputs.append(
                     {input.name: ovms.PipelineConfigNodeInput(
@@ -363,7 +374,7 @@ def voe_config_to_ovms_config(voe_config,
             pipeline_config['nodes'].append(pipeline_config_node)
 
             # hack FIXME
-            if node.name == 'Crop':
+            if node.name == 'Crop & Filter':
                 pipeline_config['outputs'].append({
                     'confidences': ovms.PipelineConfigOutput(
                         node_name=node.name,
@@ -373,6 +384,11 @@ def voe_config_to_ovms_config(voe_config,
                     'coordinates': ovms.PipelineConfigOutput(
                         node_name=node.name,
                         data_item='coordinates'
+                )})
+                pipeline_config['outputs'].append({
+                    'label_ids': ovms.PipelineConfigOutput(
+                        node_name=node.name,
+                        data_item='label_ids'
                 )})
 
         elif node.type == 'customvision_model':
@@ -399,6 +415,13 @@ def voe_config_to_ovms_config(voe_config,
         pipeline_config_list=[pipeline_config]
     )
 
+    #FIXME
+    detection_metadata = None
+    for node in ori_metadatas:
+        for output_name in ori_metadatas[node]:
+            if ori_metadatas[node][output_name]['type'] == 'bounding_box':
+                detection_metadata = ori_metadatas[node][output_name]
+
     metadatas = {} 
     if len(ovms_config.pipeline_config_list) > 0:
         for output in ovms_config.pipeline_config_list[0].outputs:
@@ -406,6 +429,10 @@ def voe_config_to_ovms_config(voe_config,
                 if v.node_name in ori_metadatas:
                     if v.data_item in ori_metadatas[v.node_name]:
                         metadatas[k] = ori_metadatas[v.node_name][v.data_item]
+
+                # FIXME
+                elif v.data_item == 'label_ids' and detection_metadata is not None:
+                    metadatas[k] = detection_metadata
 
     return ovms_config, metadatas
 

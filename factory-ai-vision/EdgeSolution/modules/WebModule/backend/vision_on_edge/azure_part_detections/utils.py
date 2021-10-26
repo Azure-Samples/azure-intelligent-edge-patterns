@@ -221,7 +221,7 @@ def deploy_worker(part_detection_id):
     if instance.deployment_type == "cascade":
         cascade_name = instance.cascade.name
     else:
-        cascade_name = ""
+        cascade_name = "no cascade"
     res_data = {
         "fps": instance.fps,
         "cascade_name": cascade_name,

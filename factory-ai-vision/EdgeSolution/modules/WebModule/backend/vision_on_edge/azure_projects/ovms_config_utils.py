@@ -30,7 +30,7 @@ face_detection_config = {
                 "type": "bounding_box",
                 "shape": [1, 1, 200, 7],
                 "layout": [1, 1, "B", "F"],
-                "labels": ["person"],
+                "labels": ["face"],
             }
         }]
     }
