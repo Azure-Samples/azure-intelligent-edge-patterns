@@ -1,19 +1,33 @@
 import { Connection } from 'react-flow-renderer';
 
-import { TrainingProject } from '../../../../store/trainingProjectSlice';
+import { TrainingProject, NodeType } from '../../../../store/trainingProjectSlice';
 
-export const getSourceMetadata = (connect: Connection, model: TrainingProject) =>
-  JSON.stringify(model.outputs[connect.sourceHandle].metadata);
+type MetaDataType = {
+  type: string;
+} | null;
 
-export const getTargetMetadata = (connect: Connection, model: TrainingProject) =>
-  JSON.stringify(model.inputs[connect.targetHandle].metadata);
+type ValidationNodeType = {
+  metadata: MetaDataType;
+  nodeType: NodeType;
+};
 
-type MetaType = { type: string };
+export const getSourceMetadata = (connect: Connection, model: TrainingProject): ValidationNodeType => {
+  return {
+    metadata: model.outputs[connect.sourceHandle].metadata ?? null,
+    nodeType: model.nodeType,
+  };
+};
 
-export const isValidConnection = (sourceModelMetadata: string, targetModelMetadata: string) => {
-  const sourceOutput = JSON.parse(sourceModelMetadata) as MetaType;
-  const targetInput = JSON.parse(targetModelMetadata) as MetaType;
+export const getTargetMetadata = (connect: Connection, model: TrainingProject): ValidationNodeType => {
+  return {
+    metadata: model.inputs[connect.targetHandle].metadata ?? null,
+    nodeType: model.nodeType,
+  };
+};
 
-  if (sourceOutput.type === targetInput.type) return true;
+export const isValidConnection = (source: ValidationNodeType, target: ValidationNodeType) => {
+  if (source.nodeType === 'sink' || target.nodeType === 'sink') return true;
+  if (source.metadata.type === target.metadata.type) return true;
+
   return false;
 };
