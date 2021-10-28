@@ -112,6 +112,7 @@ def create_cv_project_helper(name: str, tags = None, project_type: str = None, c
 
     # update node outputs
     trainer = project_obj.setting.get_trainer_obj()
+    customvision_project_id = project_obj.customvision_id
     tags = trainer.get_tags(customvision_project_id)
     labels = []
     for tag in tags:
