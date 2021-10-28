@@ -111,6 +111,7 @@ def create_cv_project_helper(name: str, tags = None, project_type: str = None, c
     )
 
     # update node outputs
+    trainer = project_obj.setting.get_trainer_obj()
     tags = trainer.get_tags(customvision_project_id)
     labels = []
     for tag in tags:
@@ -193,8 +194,8 @@ def pull_cv_project_helper(customvision_project_id: str, is_partial: bool):
 
     # Get project objects
     #TODO need to resolve hard-coded pk=20
-    project_obj_template = Project.objects.get(pk=12)
-
+    # project_obj_template = Project.objects.get(pk=12)
+    setting_obj = Setting.objects.first()
     inputs_ = [
         {
             "name": "data",
@@ -209,7 +210,7 @@ def pull_cv_project_helper(customvision_project_id: str, is_partial: bool):
     
     inputs = json.dumps(inputs_)
     project_obj = Project.objects.create(
-        setting=project_obj_template.setting, 
+        setting=setting_obj, 
         is_demo=False, 
         category="customvision", 
         is_cascade=True, 
