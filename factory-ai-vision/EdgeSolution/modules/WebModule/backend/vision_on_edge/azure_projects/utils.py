@@ -109,6 +109,26 @@ def create_cv_project_helper(name: str, tags = None, project_type: str = None, c
     has_new_parts = batch_upload_parts_to_customvision(
         project_id=project_obj.id, part_ids=part_ids, tags_dict={}
     )
+
+    # update node outputs
+    tags = trainer.get_tags(customvision_project_id)
+    labels = []
+    for tag in tags:
+        labels.append(tag.name)
+    outputs_ = [
+        {
+            "name": "detection_out",
+            "metadata": {
+                "type": "bounding_box",
+                "shape": [1, 1, 200, 7],
+                "layout": [1, 1, "B", "F"],
+                "labels": labels,
+            }
+        }
+    ]
+    project_obj.outputs = json.dumps(outputs_)
+    project_obj.save()
+
     return(project_obj)
 
 def update_tags_helper(project_id, tags=None):
