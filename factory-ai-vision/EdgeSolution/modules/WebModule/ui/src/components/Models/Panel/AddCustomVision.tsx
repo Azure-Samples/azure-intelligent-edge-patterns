@@ -199,10 +199,16 @@ const AddModelPanel: React.FC<Props> = (props) => {
 
         onAddTag(localTag);
         setLocalTag('');
+        setErrorMsg('');
       }
     },
     [localTag, onAddTag, formData],
   );
+
+  const onChangeTag = useCallback((v: string) => {
+    setLocalTag(v);
+    setErrorMsg('');
+  }, []);
 
   return (
     <Panel
@@ -309,7 +315,7 @@ const AddModelPanel: React.FC<Props> = (props) => {
                       label="Objects/Tags"
                       required
                       value={localTag}
-                      onChange={(_, newValue) => setLocalTag(newValue)}
+                      onChange={(_, newValue) => onChangeTag(newValue)}
                       onKeyPress={onTagAdd}
                       errorMessage={errorMsg}
                     />
