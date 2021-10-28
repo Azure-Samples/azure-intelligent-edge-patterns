@@ -11,7 +11,8 @@ interface Props {
   type: NodeType;
 }
 
-const isDraggableModel = (model: TrainingProject) => model.classification_type !== 'Multilabel';
+const isDraggableModel = (model: TrainingProject) =>
+  model.classification_type !== 'Multilabel' && model.outputs.length !== 0;
 
 const Model = (props: Props) => {
   const { model, type } = props;
@@ -46,7 +47,7 @@ const Model = (props: Props) => {
         draggable={isDraggableModel(model)}
         styles={{ root: classes.root }}
       >
-        {model.classification_type === 'Multilabel' && <Stack className={classes.disableCover} />}
+        {!isDraggableModel(model) && <Stack className={classes.disableCover} />}
         <Stack horizontal>
           <img style={{ height: '60px', width: '60px' }} src={getNodeImage(type)} alt="icon" />
           <Stack styles={{ root: classes.titleWrapper }} horizontal horizontalAlign="space-between">
@@ -57,7 +58,9 @@ const Model = (props: Props) => {
             ) : (
               <Stack>
                 <Label styles={{ root: classes.title }}>{model.name}</Label>
-                <Text styles={{ root: classes.label }}>{convertProjectType(model.projectType)}</Text>
+                {type !== 'openvino_library' && (
+                  <Text styles={{ root: classes.label }}>{convertProjectType(model.projectType)}</Text>
+                )}
               </Stack>
             )}
             <Stack verticalAlign="center">
@@ -69,12 +72,14 @@ const Model = (props: Props) => {
             </Stack>
           </Stack>
         </Stack>
-        <Stack styles={{ root: classes.bottomWrapper }}>
-          {type === 'openvino_model' && <Label styles={{ root: classes.smallLabel }}>By Intel</Label>}
-          {type === 'customvision_model' && (
-            <Label styles={{ root: classes.smallLabel }}>By Microsoft Custom Vision</Label>
-          )}
-        </Stack>
+        {['openvino_model', 'customvision_model'].includes(type) && (
+          <Stack styles={{ root: classes.bottomWrapper }}>
+            {type === 'openvino_model' && <Label styles={{ root: classes.smallLabel }}>By Intel</Label>}
+            {type === 'customvision_model' && (
+              <Label styles={{ root: classes.smallLabel }}>By Microsoft Custom Vision</Label>
+            )}
+          </Stack>
+        )}
       </Stack>
     </>
   );
