@@ -72,6 +72,7 @@ class Project(models.Model):
     openvino_library_name = models.CharField(max_length=1000, null=True, blank=True, default="")
     openvino_model_name = models.CharField(max_length=1000, null=True, blank=True, default="")
     classification_type = models.CharField(max_length=1000, null=True, blank=True, default="")
+    is_trained = models.BooleanField(default=False)
 
     def __repr__(self):
         return self.name.__repr__()
@@ -171,9 +172,19 @@ class Project(models.Model):
             instance.name,
         )
         try:
+            # set project name
             project = instance.get_project_obj()
             instance.name = project.name
             logger.info("Project Found. Set instance.name to %s", instance.name)
+
+            # check is_trained
+            trainer = instance.get_trainer_obj()    
+            iterations = trainer.get_iterations(instance.customvision_id)
+            if len(iterations) > 0:
+                instance.is_trained = True
+            else:
+                instance.is_trained = False        
+
         except Exception:
             instance.customvision_id = ""
         logger.info(
