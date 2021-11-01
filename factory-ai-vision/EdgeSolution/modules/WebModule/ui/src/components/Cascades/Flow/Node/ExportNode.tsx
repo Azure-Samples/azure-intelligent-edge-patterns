@@ -86,13 +86,13 @@ const ExportNode = (props: Props) => {
         <Stack styles={{ root: classes.nodeWrapper }}>
           <Text styles={{ root: classes.title }}>{name}</Text>
         </Stack>
-        <Stack verticalAlign="center">
+        {/* <Stack verticalAlign="center">
           <IconButton
             className={classes.controlBtn}
             menuProps={menuProps}
             menuIconProps={{ iconName: 'MoreVertical' }}
           />
-        </Stack>
+        </Stack> */}
       </Stack>
     </>
   );

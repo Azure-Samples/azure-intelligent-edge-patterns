@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Stack, Text, Label, IContextualMenuProps, IconButton } from '@fluentui/react';
+import { Stack, Text, Label, IContextualMenuProps } from '@fluentui/react';
 
 import { TrainingProject, NodeType } from '../../../../store/trainingProjectSlice';
 import { getClasses } from './style';
@@ -11,8 +11,15 @@ interface Props {
   type: NodeType;
 }
 
-const isDraggableModel = (model: TrainingProject) =>
-  model.classification_type !== 'Multilabel' && model.outputs.length !== 0;
+const isDraggableModel = (model: TrainingProject) => {
+  const draggableNodeType = ['openvino_library', 'openvino_model', 'sink', 'source'] as NodeType[];
+
+  if (model.outputs.length === 0) return false;
+  if (model.is_trained && model.nodeType === 'customvision_model' && model.projectType === 'ObjectDetection')
+    return true;
+  if (draggableNodeType.includes(model.nodeType)) return true;
+  return false;
+};
 
 const Model = (props: Props) => {
   const { model, type } = props;
@@ -24,21 +31,6 @@ const Model = (props: Props) => {
     event.dataTransfer.setData('id', selectId);
     event.dataTransfer.effectAllowed = 'move';
   }, []);
-
-  const menuProps: IContextualMenuProps = {
-    items: [
-      {
-        key: 'properties',
-        text: 'Properties',
-        iconProps: { iconName: 'Equalizer' },
-      },
-      {
-        key: 'delete',
-        text: 'Delete',
-        iconProps: { iconName: 'Delete' },
-      },
-    ],
-  };
 
   return (
     <>
@@ -63,21 +55,13 @@ const Model = (props: Props) => {
                 )}
               </Stack>
             )}
-            <Stack verticalAlign="center">
-              <IconButton
-                className={classes.controlBtn}
-                menuProps={menuProps}
-                menuIconProps={{ iconName: 'MoreVertical' }}
-              />
-            </Stack>
           </Stack>
         </Stack>
         {['openvino_model', 'customvision_model'].includes(type) && (
           <Stack styles={{ root: classes.bottomWrapper }}>
-            {type === 'openvino_model' && <Label styles={{ root: classes.smallLabel }}>By Intel</Label>}
-            {type === 'customvision_model' && (
-              <Label styles={{ root: classes.smallLabel }}>By Microsoft Custom Vision</Label>
-            )}
+            <Label styles={{ root: classes.smallLabel }}>
+              {type === 'openvino_model' ? 'By Intel' : 'By Microsoft Custom Vision'}
+            </Label>
           </Stack>
         )}
       </Stack>

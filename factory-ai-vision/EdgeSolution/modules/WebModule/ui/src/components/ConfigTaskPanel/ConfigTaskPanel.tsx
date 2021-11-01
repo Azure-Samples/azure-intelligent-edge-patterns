@@ -22,11 +22,7 @@ import { isBefore, isSameDay, isAfter } from 'date-fns';
 import { getCameras, cameraOptionsSelectorFactoryInConfig } from '../../store/cameraSlice';
 import { partOptionsSelectorFactory, getParts } from '../../store/partSlice';
 import { ProjectData, DeploymentType } from '../../store/project/projectTypes';
-import {
-  getTrainingProject,
-  TrainingProject,
-  trainingProjectOptionsSelectorFactory,
-} from '../../store/trainingProjectSlice';
+import { getTrainingProject, trainingProjectOptionsSelectorFactory } from '../../store/trainingProjectSlice';
 import { getAppInsights } from '../../TelemetryService';
 import { getConfigure, thunkPostProject } from '../../store/project/projectActions';
 import { getScenario } from '../../store/scenarioSlice';
@@ -207,12 +203,7 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   const trainingProjectOptionsSelector = trainingProjectOptionsSelectorFactory(
     isEdit ? initialProjectData.trainingProject : trainingProjectOfSelectedScenario,
   );
-  console.log('isEdit', isEdit);
-  console.log('initialProjectData', initialProjectData);
-
   const trainingProjectOptions = useSelector(trainingProjectOptionsSelector);
-  console.log('trainingProjectOptions', trainingProjectOptions);
-  console.log('projectData.trainingProject', projectData);
 
   const cascadeList = useSelector(selectAllCascades);
 
