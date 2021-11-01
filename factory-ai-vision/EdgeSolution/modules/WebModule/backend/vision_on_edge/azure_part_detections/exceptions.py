@@ -43,7 +43,8 @@ class PdDeployWithoutCameras(APIException):
 
 class PdInferenceModuleUnreachable(APIException):
     status_code = 503
-    default_detail = "Inference module url unreachable."
+    default_detail = "Please refresh."
+    # default_detail = "Inference module url unreachable."
     default_code = "pd_inference_module_unreachable"
 
 
@@ -75,9 +76,10 @@ class PdDeployToInfereceError(APIException):
 
 class PdExportInfereceReadTimeout(APIException):
     status_code = 503
-    default_detail = (
-        "Part Detection deploy failed cause Inference Module requests timeout."
-    )
+    default_detail = "Please refresh."
+    # default_detail = (
+    #     "Part Detection deploy failed cause Inference Module requests timeout."
+    # )
     default_code = "pd_export_inference_read_timeout"
 
 

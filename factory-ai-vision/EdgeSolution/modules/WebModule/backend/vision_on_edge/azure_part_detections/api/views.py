@@ -218,9 +218,9 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         if instance.deployment_type == 'model':
             instance.is_deployable(raise_exception=True)
 
-            upcreate_training_status(
-                project_id=instance.project.id, **progress.PROGRESS_1_FINDING_PROJECT
-            )
+            # upcreate_training_status(
+            #     project_id=instance.project.id, **progress.PROGRESS_1_FINDING_PROJECT
+            # )
             instance.has_configured = True
             instance.save()
 
