@@ -44,6 +44,9 @@ class PartDetection(Scenario):
     def set_threshold(self, threshold):
         self.threshold = threshold
 
+    def set_max_people(self, max_people):
+        self.max_people = max_people
+        
     def set_parts(self, parts):
         self.parts = parts
         self.trackers = {}
