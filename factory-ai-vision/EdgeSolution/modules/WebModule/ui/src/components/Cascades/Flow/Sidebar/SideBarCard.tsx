@@ -14,8 +14,12 @@ interface Props {
 const isDraggableModel = (model: TrainingProject) => {
   const draggableNodeType = ['openvino_library', 'openvino_model', 'sink', 'source'] as NodeType[];
 
-  if (model.outputs.length === 0) return false;
-  if (model.is_trained && model.nodeType === 'customvision_model' && model.projectType === 'ObjectDetection')
+  if (
+    model.is_trained &&
+    model.nodeType === 'customvision_model' &&
+    model.projectType === 'ObjectDetection' &&
+    model.outputs.length !== 0
+  )
     return true;
   if (draggableNodeType.includes(model.nodeType)) return true;
   return false;
