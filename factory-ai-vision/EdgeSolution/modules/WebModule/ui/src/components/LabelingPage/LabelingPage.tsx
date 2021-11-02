@@ -132,8 +132,6 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
   const isOnePointBox = checkOnePointBox(annotations);
   const isLimitedBox = getIsLimitedBox(annotations);
 
-  console.log('isLimitedBox', isLimitedBox);
-
   const dialogContentProps: IDialogContentProps = {
     title: 'Image detail',
     subText:
