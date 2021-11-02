@@ -17,8 +17,6 @@ interface Props {
 export const PartPicker: React.FC<Props> = (props) => {
   const { trainingProject, selectedImageId, annotationList } = props;
 
-  console.log('trainingProject', trainingProject);
-
   const partOptionsSelector = useMemo(() => trainingProjectPartsSelectorFactory(trainingProject.id), [
     trainingProject,
   ]);

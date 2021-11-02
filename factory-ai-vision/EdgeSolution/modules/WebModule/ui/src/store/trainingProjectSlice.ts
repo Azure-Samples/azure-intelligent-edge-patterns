@@ -71,6 +71,7 @@ export type TrainingProject = {
   openvino_model_name: string;
   download_uri_openvino: string;
   classification_type: ClassificationType;
+  is_trained: boolean;
 };
 
 export type CreatOwnModelPayload = {
@@ -114,6 +115,7 @@ const normalize = (e) => ({
   openvino_model_name: e.openvino_model_name,
   download_uri_openvino: e.download_uri_openvino,
   classification_type: e.classification_type,
+  is_trained: e.is_trained,
 });
 
 const extractConvertCustomProject = (project) => {
@@ -307,6 +309,7 @@ export const trainingProjectOptionsSelectorFactory = (trainingProjectId: number)
           key: e.id,
           text: e.name,
           title: 'model',
+          disabled: !e.is_trained,
         }));
 
       return optionsList;

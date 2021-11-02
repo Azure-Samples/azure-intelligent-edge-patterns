@@ -1,5 +1,5 @@
 import React, { useCallback } from 'react';
-import { Stack, Text, Label, IContextualMenuProps, IconButton } from '@fluentui/react';
+import { Stack, Text, Label, IContextualMenuProps } from '@fluentui/react';
 
 import { TrainingProject, NodeType } from '../../../../store/trainingProjectSlice';
 import { getClasses } from './style';
@@ -11,7 +11,19 @@ interface Props {
   type: NodeType;
 }
 
-const isDraggableModel = (model: TrainingProject) => model.classification_type !== 'Multilabel';
+const isDraggableModel = (model: TrainingProject) => {
+  const draggableNodeType = ['openvino_library', 'openvino_model', 'sink', 'source'] as NodeType[];
+
+  if (
+    model.is_trained &&
+    model.nodeType === 'customvision_model' &&
+    model.projectType === 'ObjectDetection' &&
+    model.outputs.length !== 0
+  )
+    return true;
+  if (draggableNodeType.includes(model.nodeType)) return true;
+  return false;
+};
 
 const Model = (props: Props) => {
   const { model, type } = props;
@@ -24,21 +36,6 @@ const Model = (props: Props) => {
     event.dataTransfer.effectAllowed = 'move';
   }, []);
 
-  const menuProps: IContextualMenuProps = {
-    items: [
-      {
-        key: 'properties',
-        text: 'Properties',
-        iconProps: { iconName: 'Equalizer' },
-      },
-      {
-        key: 'delete',
-        text: 'Delete',
-        iconProps: { iconName: 'Delete' },
-      },
-    ],
-  };
-
   return (
     <>
       <Stack
@@ -46,7 +43,7 @@ const Model = (props: Props) => {
         draggable={isDraggableModel(model)}
         styles={{ root: classes.root }}
       >
-        {model.classification_type === 'Multilabel' && <Stack className={classes.disableCover} />}
+        {!isDraggableModel(model) && <Stack className={classes.disableCover} />}
         <Stack horizontal>
           <img style={{ height: '60px', width: '60px' }} src={getNodeImage(type)} alt="icon" />
           <Stack styles={{ root: classes.titleWrapper }} horizontal horizontalAlign="space-between">
@@ -57,24 +54,20 @@ const Model = (props: Props) => {
             ) : (
               <Stack>
                 <Label styles={{ root: classes.title }}>{model.name}</Label>
-                <Text styles={{ root: classes.label }}>{convertProjectType(model.projectType)}</Text>
+                {type !== 'openvino_library' && (
+                  <Text styles={{ root: classes.label }}>{convertProjectType(model.projectType)}</Text>
+                )}
               </Stack>
             )}
-            <Stack verticalAlign="center">
-              <IconButton
-                className={classes.controlBtn}
-                menuProps={menuProps}
-                menuIconProps={{ iconName: 'MoreVertical' }}
-              />
-            </Stack>
           </Stack>
         </Stack>
-        <Stack styles={{ root: classes.bottomWrapper }}>
-          {type === 'openvino_model' && <Label styles={{ root: classes.smallLabel }}>By Intel</Label>}
-          {type === 'customvision_model' && (
-            <Label styles={{ root: classes.smallLabel }}>By Microsoft Custom Vision</Label>
-          )}
-        </Stack>
+        {['openvino_model', 'customvision_model'].includes(type) && (
+          <Stack styles={{ root: classes.bottomWrapper }}>
+            <Label styles={{ root: classes.smallLabel }}>
+              {type === 'openvino_model' ? 'By Intel' : 'By Microsoft Custom Vision'}
+            </Label>
+          </Stack>
+        )}
       </Stack>
     </>
   );

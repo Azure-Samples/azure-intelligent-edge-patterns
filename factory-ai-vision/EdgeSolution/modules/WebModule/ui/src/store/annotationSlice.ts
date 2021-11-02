@@ -135,9 +135,19 @@ const slice = createSlice({
           (creatingAnnotation.label.y1 | 0) === (creatingAnnotation.label.y2 | 0)
         ) {
           entityAdapter.removeOne(state, idOfLastAnno);
-        } else {
-          entityAdapter.updateOne(state, { id: idOfLastAnno, changes: creatingAnnotation });
+          return;
         }
+
+        // Box > 10 * 10
+        if (
+          Math.abs(creatingAnnotation.label.x2 - creatingAnnotation.label.x1) <= 10 ||
+          Math.abs(creatingAnnotation.label.y2 - creatingAnnotation.label.y1) <= 10
+        ) {
+          entityAdapter.removeOne(state, idOfLastAnno);
+          return;
+        }
+
+        entityAdapter.updateOne(state, { id: idOfLastAnno, changes: creatingAnnotation });
       }
     },
     updateAnnotation: (state, action) => {

@@ -75,6 +75,8 @@ const labelingPageStyle = mergeStyleSets({
     cursor: 'not-allowed',
   },
   imgInfoContainer: { width: '30%' },
+  footer: { position: 'relative' },
+  errorMsg: { position: 'absolute', top: '-10px', fontSize: '14px' },
 });
 
 type LabelingPageProps = {
@@ -115,7 +117,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
   const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
   const selectedPartId = useSelector<State, number>((state) => state.labelingPage.selectedPartId);
 
-  const isOnePointBox = checkOnePointBox(annotations);
+  // const isOnePointBox = checkOnePointBox(annotations);
 
   const dialogContentProps: IDialogContentProps = {
     title: 'Image detail',
@@ -307,8 +309,8 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
       );
 
     const isLastImg = index === imageIds.length - 1;
-    const previousDisabled = index === 0 || workState === WorkState.Creating || isOnePointBox || loading;
-    const nextDisabled = isLastImg || noAnno || workState === WorkState.Creating || isOnePointBox || loading;
+    const previousDisabled = index === 0 || workState === WorkState.Creating  || loading;
+    const nextDisabled = isLastImg || noAnno || workState === WorkState.Creating  || loading;
     return (
       <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
         <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />
@@ -343,7 +345,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
           {onRenderInfoOnRight()}
         </Stack>
       </Stack>
-      <DialogFooter>
+      <DialogFooter className={labelingPageStyle.footer}>
         {project.projectType === 'ObjectDetection' ? onRenderFooter() : onRenderClassificationFooter()}
       </DialogFooter>
     </Dialog>

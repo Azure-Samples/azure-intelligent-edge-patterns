@@ -226,12 +226,12 @@ export const CustomLabel = (props: ITextFieldProps): JSX.Element => {
             </a>
           </p>
           <p>Step 2: Click on the setting icon on the top</p>
-          <img src="/icons/guide_step_2.png" style={{ width: '100%' }} />
+          <img src="/icons/guide_step_2.png" alt="guide" style={{ width: '100%' }} />
           <p>
             Step 3: Choose the resources under the account, you will see information of &quot;Key&quot; and
             &quot;Endpoint&quot;
           </p>
-          <img src="/icons/guide_step_3.png" style={{ width: '100%' }} />
+          <img src="/icons/guide_step_3.png" alt="guide" style={{ width: '100%' }} />
         </Stack>
         <DialogFooter>
           <PrimaryButton text="Close" onClick={() => setisModalOpen(false)} />

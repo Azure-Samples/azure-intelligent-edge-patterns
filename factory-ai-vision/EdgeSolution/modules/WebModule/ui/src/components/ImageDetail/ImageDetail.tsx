@@ -19,7 +19,11 @@ import { useParams } from 'react-router-dom';
 
 import { State } from 'RootStateType';
 import { postImages, selectAllImages } from '../../store/imageSlice';
-import { imageItemSelectorFactory, relabelImageSelector, selectNonDemoPart } from '../../store/selectors';
+import {
+  imageItemSelectorFactory,
+  relabelImageSelector,
+  selectProjectPartsFactory,
+} from '../../store/selectors';
 import { selectNonDemoCameras } from '../../store/cameraSlice';
 import { Status } from '../../store/project/projectTypes';
 
@@ -61,6 +65,7 @@ function useFilterItems<T extends { id: number; name: string }>(
 ): [ICommandBarItemProps[], string[]] {
   const [filterItems, setFilterItems] = useState({});
   const itemsInStore = useSelector(selector);
+
   const items: ICommandBarItemProps[] = useMemo(
     () =>
       itemsInStore.map((c) => ({
@@ -68,7 +73,9 @@ function useFilterItems<T extends { id: number; name: string }>(
         text: c.name,
         canCheck: true,
         checked: filterItems[c.id],
-        onClick: () => setFilterItems(onToggleFilterItem(c.id)),
+        onClick: () => {
+          setFilterItems(onToggleFilterItem(c.id));
+        },
       })),
     [itemsInStore, filterItems],
   );
@@ -154,7 +161,8 @@ const ImageDetail: React.FC = () => {
   );
 
   const [cameraItems, filteredCameras] = useFilterItems(selectNonDemoCameras);
-  const [partItems, filteredParts] = useFilterItems(selectNonDemoPart);
+  // const [partItems, filteredParts] = useFilterItems(selectNonDemoPart);
+  const [partItems, filteredParts] = useFilterItems(selectProjectPartsFactory(parseInt(projectId, 10)));
 
   const commandBarFarItems: ICommandBarItemProps[] = useMemo(
     () => [

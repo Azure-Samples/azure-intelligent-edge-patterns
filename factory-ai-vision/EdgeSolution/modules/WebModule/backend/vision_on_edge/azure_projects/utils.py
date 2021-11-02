@@ -109,6 +109,28 @@ def create_cv_project_helper(name: str, tags = None, project_type: str = None, c
     has_new_parts = batch_upload_parts_to_customvision(
         project_id=project_obj.id, part_ids=part_ids, tags_dict={}
     )
+
+    # update node outputs
+    trainer = project_obj.setting.get_trainer_obj()
+    customvision_project_id = project_obj.customvision_id
+    tags = trainer.get_tags(customvision_project_id)
+    labels = []
+    for tag in tags:
+        labels.append(tag.name)
+    outputs_ = [
+        {
+            "name": "detection_out",
+            "metadata": {
+                "type": "bounding_box",
+                "shape": [1, 1, 200, 7],
+                "layout": [1, 1, "B", "F"],
+                "labels": labels,
+            }
+        }
+    ]
+    project_obj.outputs = json.dumps(outputs_)
+    project_obj.save()
+
     return(project_obj)
 
 def update_tags_helper(project_id, tags=None):
@@ -173,8 +195,8 @@ def pull_cv_project_helper(customvision_project_id: str, is_partial: bool):
 
     # Get project objects
     #TODO need to resolve hard-coded pk=20
-    project_obj_template = Project.objects.get(pk=12)
-
+    # project_obj_template = Project.objects.get(pk=12)
+    setting_obj = Setting.objects.first()
     inputs_ = [
         {
             "name": "data",
@@ -189,7 +211,7 @@ def pull_cv_project_helper(customvision_project_id: str, is_partial: bool):
     
     inputs = json.dumps(inputs_)
     project_obj = Project.objects.create(
-        setting=project_obj_template.setting, 
+        setting=setting_obj, 
         is_demo=False, 
         category="customvision", 
         is_cascade=True, 

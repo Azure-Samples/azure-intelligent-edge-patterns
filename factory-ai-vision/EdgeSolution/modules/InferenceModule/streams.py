@@ -110,6 +110,7 @@ class Stream:
         self.last_upload_time = 0
         # self.is_upload_image = False
         # self.current_uploaded_images = {}
+        self.edge = '960'
 
         self.detection_success_num = 0
         self.detection_unidentified_num = 0
@@ -294,24 +295,24 @@ class Stream:
                         x2 = int(lines[i]["label"][1]["x"])
                         y2 = int(lines[i]["label"][1]["y"])
                         line_id = str(lines[i]['order'])
-                        logger.warning("        line:", x1, y1, x2, y2,
-                                       line_id)
+                        logger.warning("        line: {} {} {} {} {}".format(x1, y1, x2, y2,
+                                       line_id))
                         lines_to_set.append([x1, y1, x2, y2, line_id])
                     self.scenario.set_line(lines_to_set)
                     logger.warning("Upading Line:")
-                    logger.warning("    use_line: {}", self.use_line)
+                    logger.warning("    use_line: {}".format(self.use_line))
                 else:
                     logger.warning("Upading Line:")
-                    logger.warning("    use_line: {}", self.use_line)
+                    logger.warning("    use_line: {}".format(self.use_line))
 
             except:
                 self.use_line = False
                 logger.warning("Upading Line[*]:")
-                logger.warning("    use_line   :", False)
+                logger.warning("    use_line   {}:".format(False))
 
         elif detection_mode in ["ES", "ESA", "TCC", "CQA"]:
             class_obj = [DangerZone, ShelfZone, CountingZone, QueueZone]
-            logger.warning("[INFO] Zone INFO", zone_info)
+            logger.warning("[INFO] Zone INFO: {}".format(zone_info))
             self.scenario = class_obj[["ES", "ESA", "TCC",
                                        "CQA"].index(detection_mode)]()
             self.scenario_type = self.model.detection_mode
@@ -323,7 +324,7 @@ class Stream:
                 zones = zone_info["dangerZones"]
                 _zones = []
                 logger.warning("Upading Line:")
-                logger.warning("    use_zone:", self.use_zone)
+                logger.warning("    use_zone: {}".format(self.use_zone))
                 # for zone in zones:
                 #     x1 = int(zone["label"]["x1"])
                 #     y1 = int(zone["label"]["y1"])
@@ -338,7 +339,7 @@ class Stream:
             except:
                 self.use_zone = False
                 logger.warning("Upading Zone[*]:")
-                logger.warning("    use_zone   :", False)
+                logger.warning("    use_zone   {}:".format(False))
 
         elif detection_mode == "DD":
             logger.warning("[INFO] : {}".format(line_info))
@@ -475,6 +476,7 @@ class Stream:
             height = self.IMG_HEIGHT
             ratio = self.IMG_HEIGHT / image.shape[0]
             width = int(image.shape[1] * ratio + 0.000001)
+            self.edge = '540'
 
         # prediction
         # self.mutex.acquire()
@@ -482,7 +484,8 @@ class Stream:
         if ':7777/predict' in self.model.endpoint.lower():
             image = cv2.resize(image, (width, height))
             data = image.tobytes()
-            res = requests.post(self.model.endpoint, data=data)
+            endpoint = self.model.endpoint + "?edge=" + self.edge
+            res = requests.post(endpoint, data=data)
             # logger.warning(res.json())
             if res.json()[1] == 200:
                 lva_prediction = json.loads(res.json()[0])['inferences']
@@ -797,8 +800,8 @@ class Stream:
         for prediction in predictions:
             if self.last_upload_time + UPLOAD_INTERVAL < time.time():
                 confidence = prediction["probability"]
-                logger.warning("comparing...", self.confidence_min, confidence,
-                               self.confidence_max)
+                logger.warning("comparing... {} {} {}".format(self.confidence_min, confidence,
+                               self.confidence_max))
                 if self.confidence_min <= confidence <= self.confidence_max:
                     logger.warning("preparing...")
                     # prepare the data to send
@@ -1042,7 +1045,7 @@ def send_message_to_lva(cam_id):
 
 
 def send_retrain_image_to_webmodule(jpg, tag, labels, confidence, cam_id):
-    logger.warning("[INFO] Sending Image to relabeling", tag)
+    logger.warning("[INFO] Sending Image to relabeling {}".format(tag))
     try:
         # requests.post('http://'+web_module_url()+'/api/relabel', data={
         res = requests.post(

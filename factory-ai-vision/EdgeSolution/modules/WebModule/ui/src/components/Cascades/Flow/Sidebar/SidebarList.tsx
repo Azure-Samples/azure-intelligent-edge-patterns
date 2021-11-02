@@ -1,13 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Stack, ActionButton, Icon, Link, mergeStyleSets, SearchBox } from '@fluentui/react';
 
-import { TrainingProject } from '../../../../store/trainingProjectSlice';
+import { TrainingProject, NodeType } from '../../../../store/trainingProjectSlice';
 
 import SideBardCard from './SideBarCard';
 
 interface Props {
   modelList: TrainingProject[];
 }
+
+const MODEL_NODE_TYPE = ['openvino_model', 'customvision_model'] as NodeType[];
 
 const getClasses = () =>
   mergeStyleSets({
@@ -17,20 +19,32 @@ const getClasses = () =>
     manageModels: { marginTop: '25px' },
   });
 
+const getFilterProjects = (projects: TrainingProject[], input: string) => {
+  return projects.filter(
+    (project) => MODEL_NODE_TYPE.includes(project.nodeType) && project.name.match(input),
+  );
+};
+
 export default (props: Props) => {
   const { modelList } = props;
 
-  const modelNodeList = modelList.filter((model) =>
-    ['openvino_model', 'customvision_model'].includes(model.nodeType),
-  );
+  // const modelNodeList = modelList.filter((model) => MODEL_NODE_TYPE.includes(model.nodeType));
   const transformList = modelList.filter((model) => model.nodeType === 'openvino_library');
   const exportModel = modelList.find((model) => model.nodeType === 'sink');
 
+  const [localModelNodes, setLocalModelNodes] = useState<TrainingProject[]>(getFilterProjects(modelList, ''));
   const [isModelOpen, setIsModelOpen] = useState(false);
   const [isTransformOpen, setIsTransformOpen] = useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
 
   const classes = getClasses();
+
+  const onSearch = useCallback(
+    (value: string) => {
+      setLocalModelNodes(getFilterProjects(modelList, value));
+    },
+    [modelList],
+  );
 
   return (
     <aside
@@ -42,7 +56,15 @@ export default (props: Props) => {
       }}
     >
       <Stack styles={{ root: classes.sidebarWrapper }}>
-        <SearchBox styles={{ root: classes.searchBox }} placeholder="Search" />
+        <SearchBox
+          styles={{ root: classes.searchBox }}
+          placeholder="Search"
+          onSearch={onSearch}
+          onClear={() => setLocalModelNodes(getFilterProjects(modelList, ''))}
+          onChange={(_, value) => {
+            if (value === '') setLocalModelNodes(getFilterProjects(modelList, ''));
+          }}
+        />
 
         <Stack horizontal verticalAlign="center">
           <Icon iconName={isModelOpen ? 'ChevronDown' : 'ChevronUp'} />
@@ -56,7 +78,7 @@ export default (props: Props) => {
         {isModelOpen && (
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
-              {modelNodeList.map((model, id) => (
+              {localModelNodes.map((model, id) => (
                 <SideBardCard key={id} model={model} type={model.nodeType} />
               ))}
             </Stack>
