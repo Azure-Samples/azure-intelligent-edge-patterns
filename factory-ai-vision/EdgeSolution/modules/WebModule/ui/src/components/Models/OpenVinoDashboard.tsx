@@ -58,11 +58,16 @@ const isDisableAddButton = (intel: IntelProject, openVinoList: TrainingProject[]
   return true;
 };
 
+const getFilterProjects = (projects: IntelProject[], input: string) => {
+  return projects.filter((project) => project.name.match(input));
+};
+
 const IntelProjectDashboard = (props: Props) => {
   const { intelProjectList, onCloseIntel, openVinoProjectList } = props;
 
   const [isOpen, setIsOpen] = useState(false);
   const [selectedId, setSelectedId] = useState(0);
+  const [localProjectList, setLocalProjectList] = useState<IntelProject[]>(intelProjectList);
 
   const dispatch = useDispatch();
   const classes = getClasses();
@@ -76,6 +81,13 @@ const IntelProjectDashboard = (props: Props) => {
       onCloseIntel();
     },
     [dispatch, onCloseIntel],
+  );
+
+  const onSearch = useCallback(
+    (value: string) => {
+      setLocalProjectList(getFilterProjects(intelProjectList, value));
+    },
+    [intelProjectList],
   );
 
   const menuProps: IContextualMenuProps = {
@@ -97,10 +109,18 @@ const IntelProjectDashboard = (props: Props) => {
   return (
     <>
       <Stack tokens={{ childrenGap: 45 }}>
-        <SearchBox styles={{ root: { width: '470px' } }} placeholder="Search" />
+        <SearchBox
+          styles={{ root: { width: '470px' } }}
+          placeholder="Search"
+          onSearch={onSearch}
+          onClear={() => setLocalProjectList(intelProjectList)}
+          onChange={(_, value) => {
+            if (value === '') setLocalProjectList(intelProjectList);
+          }}
+        />
         <Stack horizontal wrap tokens={{ childrenGap: 16 }}>
-          {intelProjectList.length > 0 &&
-            intelProjectList.map((card, id) => (
+          {localProjectList.length > 0 &&
+            localProjectList.map((card, id) => (
               <Stack
                 key={id}
                 className={classes.root}
