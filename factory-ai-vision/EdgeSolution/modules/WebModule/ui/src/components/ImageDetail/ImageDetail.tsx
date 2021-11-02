@@ -66,9 +66,6 @@ function useFilterItems<T extends { id: number; name: string }>(
   const [filterItems, setFilterItems] = useState({});
   const itemsInStore = useSelector(selector);
 
-  console.log('filterItems', filterItems);
-  console.log('itemsInStore', itemsInStore);
-
   const items: ICommandBarItemProps[] = useMemo(
     () =>
       itemsInStore.map((c) => ({
@@ -83,9 +80,6 @@ function useFilterItems<T extends { id: number; name: string }>(
     [itemsInStore, filterItems],
   );
   const filteredItems = useMemo(() => Object.keys(filterItems).filter((e) => filterItems[e]), [filterItems]);
-
-  console.log('items', items);
-  console.log('filteredItems', filteredItems);
 
   return [items, filteredItems];
 }

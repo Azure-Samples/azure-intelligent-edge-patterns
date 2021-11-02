@@ -36,8 +36,6 @@ import { selectTrainingProjectById } from '../../store/trainingProjectSlice';
 import Scene from './Scene';
 import { PartTag, Status } from '../PartTag';
 
-const BOUNDING_BOX_LIMIT = 10;
-
 const getSelectedImageId = (state: State) => state.labelingPage.selectedImageId;
 export const imageSelector = createSelector(
   [getSelectedImageId, selectImageEntities],
@@ -91,16 +89,6 @@ const cameraNameSelector = (state: State) => {
   return state.camera.entities[cameraId]?.name;
 };
 
-const getIsLimitedBox = (annotations: Annotation[]): boolean => {
-  if (annotations.length === 0) return false;
-
-  return annotations.some((anno) => {
-    const { x1, y1, x2, y2 } = anno.label;
-
-    return Math.abs(x2 - x1) <= BOUNDING_BOX_LIMIT || Math.abs(y2 - y1) <= BOUNDING_BOX_LIMIT;
-  });
-};
-
 const getPart = (parts: Part[], selectedPart: number) => parts.find((part) => part.id === selectedPart);
 
 const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId }) => {
@@ -129,8 +117,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
   const annotations = useSelector<State, Annotation[]>(labelPageAnnoSelector);
   const selectedPartId = useSelector<State, number>((state) => state.labelingPage.selectedPartId);
 
-  const isOnePointBox = checkOnePointBox(annotations);
-  const isLimitedBox = getIsLimitedBox(annotations);
+  // const isOnePointBox = checkOnePointBox(annotations);
 
   const dialogContentProps: IDialogContentProps = {
     title: 'Image detail',
@@ -272,9 +259,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
   );
 
   const onRenderClassificationFooter = (): JSX.Element => {
-    const noAnno = annotations.length === 0;
     const deleteDisabled = loading;
-    const saveDisabled = noAnno || isLimitedBox;
 
     if (noPrevAndNext)
       return (
@@ -285,8 +270,8 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
       );
 
     const isLastImg = index === imageIds.length - 1;
-    const previousDisabled = index === 0 || loading || isLimitedBox;
-    const nextDisabled = isLastImg || loading || annotations.length === 0 || isLimitedBox;
+    const previousDisabled = index === 0 || loading;
+    const nextDisabled = isLastImg || loading || annotations.length === 0;
     return (
       <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
         <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />
@@ -299,12 +284,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
         {canBackToCapture && (
           <DefaultButton text="Save and capture another image" onClick={saveAndGoCapture} />
         )}
-        <DefaultButton
-          text="Done"
-          primary={isLastImg}
-          onClick={saveClassificationAndDone}
-          disabled={saveDisabled}
-        />
+        <DefaultButton text="Done" primary={isLastImg} onClick={saveClassificationAndDone} />
       </Stack>
     );
   };
@@ -312,7 +292,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
   const onRenderFooter = (): JSX.Element => {
     const noAnno = annotations.length === 0;
     const deleteDisabled = loading;
-    const saveDisabled = noAnno || isLimitedBox;
+    const saveDisabled = noAnno;
 
     if (noPrevAndNext)
       return (
@@ -329,10 +309,8 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
       );
 
     const isLastImg = index === imageIds.length - 1;
-    const previousDisabled =
-      index === 0 || workState === WorkState.Creating || isOnePointBox || loading || isLimitedBox;
-    const nextDisabled =
-      isLastImg || noAnno || workState === WorkState.Creating || isOnePointBox || loading || isLimitedBox;
+    const previousDisabled = index === 0 || workState === WorkState.Creating  || loading;
+    const nextDisabled = isLastImg || noAnno || workState === WorkState.Creating  || loading;
     return (
       <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
         <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />
@@ -345,7 +323,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
         {canBackToCapture && (
           <DefaultButton text="Save and capture another image" onClick={saveAndGoCapture} />
         )}
-        <DefaultButton text="Done" primary={isLastImg} onClick={saveAndDone} disabled={saveDisabled} />
+        <DefaultButton text="Done" primary={isLastImg} onClick={saveAndDone} />
       </Stack>
     );
   };
@@ -368,11 +346,6 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
         </Stack>
       </Stack>
       <DialogFooter className={labelingPageStyle.footer}>
-        {isLimitedBox && (
-          <Stack className={labelingPageStyle.errorMsg}>
-            <Stack styles={{ root: { color: '#D83B01' } }}>One of the Bbox is too small to save</Stack>
-          </Stack>
-        )}
         {project.projectType === 'ObjectDetection' ? onRenderFooter() : onRenderClassificationFooter()}
       </DialogFooter>
     </Dialog>
