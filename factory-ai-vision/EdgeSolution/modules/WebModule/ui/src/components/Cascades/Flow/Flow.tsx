@@ -47,7 +47,8 @@ const getSourceMetadata = (
     .filter((ele) => isEdge(ele))
     .filter((edge: Edge<any>) => edge.target === selectedNode.id)
     .map((edge: Edge<any>) => getModel(edge.source, modelList))
-    .map((model: TrainingProject) => model.outputs.find((output) => output.metadata.type === 'bounding_box'));
+    .map((model: TrainingProject) => model.outputs.find((output) => output.metadata.type === 'bounding_box'))
+    .filter((model) => !!model);
 
   if (matchModels.length === 0) return [];
   return matchModels[0].metadata.labels;

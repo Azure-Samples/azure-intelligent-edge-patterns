@@ -93,9 +93,9 @@ export const Insights: React.FC<InsightsProps> = (props) => {
           <a
             href="https://software.intel.com/content/www/us/en/develop/tools/openvino-toolkit.html"
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
           >
-            <img src="/icons/openvino_logo.png" style={{ width: '100px' }} />
+            <img src="/icons/openvino_logo.png" alt="logo" style={{ width: '100px' }} />
           </a>
         )}
       </Stack>
