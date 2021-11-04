@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 
 import { useInterval } from '../../hooks/useInterval';
 import { Status, InferenceMode, DeploymentType } from '../../store/project/projectTypes';
+import { DEMO_SCENARIO_IDS } from '../../constant';
 
 import { ExpandPanel } from '../ExpandPanel';
 import { getErrorLog } from '../../store/shared/createWrappedAsync';
@@ -20,6 +21,7 @@ type InsightsProps = {
   countingStartTime: string;
   countingEndTime: string;
   deploymentType: DeploymentType;
+  modelId: number;
 };
 
 const normalizeObjectCount = (obj: Record<string, number>): { name: string; value: number }[] =>
@@ -38,6 +40,7 @@ export const Insights: React.FC<InsightsProps> = (props) => {
     countingStartTime,
     countingEndTime,
     deploymentType,
+    modelId,
   } = props;
 
   const [inferenceMetrics, setinferenceMetrics] = useState({
@@ -73,6 +76,8 @@ export const Insights: React.FC<InsightsProps> = (props) => {
     },
     status === Status.StartInference ? 5000 : null,
   );
+
+  console.log('inferenceMetrics', inferenceMetrics);
 
   return (
     <>
@@ -114,11 +119,23 @@ export const Insights: React.FC<InsightsProps> = (props) => {
                 {inferenceMetrics.objectCounts.map((e) => (
                   <Text key={e.name}>{`${e.name}: ${e.value}`}</Text>
                 ))}
-                {!!inferenceMetrics.numAccrossLine && (
-                  <Text>{`Total number of object pass the line: ${inferenceMetrics.numAccrossLine}`}</Text>
+                {!!inferenceMetrics.numAccrossLine && modelId === 3 && (
+                  <>
+                    <Text>{`Total number of object pass the line:`}</Text>
+                    {Object.keys(inferenceMetrics.numAccrossLine).map((key) => (
+                      <Text> {`Line ${key}: ${inferenceMetrics.numAccrossLine[key]}`} </Text>
+                    ))}
+                  </>
                 )}
-                {!!inferenceMetrics.numOfViolation && (
-                  <Text>{`Number of violation: ${inferenceMetrics.numOfViolation}`}</Text>
+                {!!inferenceMetrics.numOfViolation && [4, 7].includes(modelId) && (
+                  <>
+                    <Text>{`Number of violation:`}</Text>
+                    {Object.keys(inferenceMetrics.numOfViolation).map((key) => (
+                      <Text>
+                        {`Zone${key} - Current:${inferenceMetrics.numOfViolation[key].current}, Total:${inferenceMetrics.numOfViolation[key].total}`}{' '}
+                      </Text>
+                    ))}
+                  </>
                 )}
                 {!!inferenceMetrics.numOfDefect.length && (
                   <>
@@ -145,9 +162,11 @@ export const Insights: React.FC<InsightsProps> = (props) => {
                 <Text variant="mediumPlus" styles={{ root: { color: palette.neutralPrimary } }}>
                   {inferenceMetrics.unIdentifiedItems} images
                 </Text>
-                <RRDLink to="/images" style={{ textDecoration: 'none' }}>
-                  <Link styles={{ root: { textDecoration: 'none' } }}>View in images</Link>
-                </RRDLink>
+                {!DEMO_SCENARIO_IDS.includes(modelId) && (
+                  <RRDLink to={`/images/${modelId}`} style={{ textDecoration: 'none' }}>
+                    <Link styles={{ root: { textDecoration: 'none' } }}>View in images</Link>
+                  </RRDLink>
+                )}
               </Stack>
             </ExpandPanel>
           </Stack>
