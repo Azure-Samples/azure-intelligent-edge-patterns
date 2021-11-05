@@ -595,7 +595,7 @@ class Stream:
                             thickness, cv2.LINE_AA)
 
             self.last_prediction_count = len(people)
-            self.last_prediction = people
+            self.last_prediction = np.array(people).tolist()
             self.last_drawn_img = img
             self.last_update = time.time()
             return
@@ -618,6 +618,10 @@ class Stream:
             resized_image = cv2.resize(image, (416, 416))
             resized_image = resized_image
             self.predict_grpc(image, self.stub)
+
+            if self.iothub_is_send:
+                self.process_send_message_to_iothub(self.last_prediction)
+ 
             return
         else:
             # for yolo enpoint testing
@@ -675,7 +679,7 @@ class Stream:
         # update the buffer
         # no need to copy since resize already did it
         self.last_img = image
-        self.last_prediction = predictions
+        self.last_prediction = np.array(predictions).tolist()
 
         # FIXME support more scenarios
         # Update Tracker / Scenario
@@ -744,7 +748,9 @@ class Stream:
 
         # FIXME last count, last prediction
         self.last_prediction_count = 0
-        self.last_prediction = predictions
+        self.last_prediction = np.array(predictions).tolist()
+        logger.warning("save last predictions")
+        logger.warning(self.last_prediction)
         self.last_drawn_img = img
         self.last_update = time.time()
 
@@ -824,17 +830,26 @@ class Stream:
 
     def process_send_message_to_iothub(self, predictions):
         if self.iothub_last_send_time + self.iothub_interval < time.time():
-            predictions = list(p for p in predictions
-                               if p["probability"] >= self.threshold)
-            if len(predictions) > 0:
-                message_body = {
-                    'camera_name': self.name,
-                    'inferences': predictions
-                }
-                if self.get_mode() in ['ES', 'DD', 'PC', 'TCC', 'CQA']:
-                    message_body['count'] = self.counter
-                send_message_to_iothub(message_body)
-                self.iothub_last_send_time = time.time()
+            if "ovmsserver" in self.model.endpoint.lower():
+                if len(predictions) > 0:
+                    message_body = {
+                        'camera_name': self.name,
+                        'inferences': predictions
+                    }
+                    send_message_to_iothub(message_body)
+                    self.iothub_last_send_time = time.time()
+            else:
+                predictions = list(p for p in predictions
+                                if p["probability"] >= self.threshold)
+                if len(predictions) > 0:
+                    message_body = {
+                        'camera_name': self.name,
+                        'inferences': predictions
+                    }
+                    if self.get_mode() in ['ES', 'DD', 'PC', 'TCC', 'CQA']:
+                        message_body['count'] = self.counter
+                    send_message_to_iothub(message_body)
+                    self.iothub_last_send_time = time.time()
 
     def precess_send_signal_to_lva(self):
         if self.lva_last_send_time + self.lva_interval < time.time():
@@ -1236,13 +1251,13 @@ def process_response(response, img, metadatas):
                 'tag': tag,
                 'attributes': [],
                 'box': {
-                    'l': x1,
-                    't': y1,
-                    'w': x2-x1,
-                    'h': y2-y1
+                    'l': np.float(x1),
+                    't': np.float(y1),
+                    'w': np.float(x2-x1),
+                    'h': np.float(y2-y1)
                 }
             }
-            print(attributes)
+            logger.warning(attributes)
             for attribute in attributes:
                 if attribute['type'] == 'regression':
                     prediction['attributes'].append({
@@ -1253,7 +1268,7 @@ def process_response(response, img, metadatas):
                     prediction['attributes'].append({
                         'name': attribute['name'],
                         'value': attribute['values'][i],
-                        'confidence': attribute['confidences'][i]})
+                        'confidence': np.array(attribute['confidences'][i]).tolist()})
             prediction['attributes'].sort(key=lambda x:x['name'])
             predictions.append(prediction)
 

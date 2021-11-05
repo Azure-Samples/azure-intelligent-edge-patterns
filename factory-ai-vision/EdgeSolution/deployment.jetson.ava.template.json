@@ -35,21 +35,15 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [
-                      {
-                        "HostPort": "5671"
-                      }
-                    ],
-                    "8883/tcp": [
-                      {
-                        "HostPort": "8883"
-                      }
-                    ],
-                    "443/tcp": [
-                      {
-                        "HostPort": "443"
-                      }
-                    ]
+                    "5671/tcp": [{
+                      "HostPort": "5671"
+                    }],
+                    "8883/tcp": [{
+                      "HostPort": "8883"
+                    }],
+                    "443/tcp": [{
+                      "HostPort": "443"
+                    }]
                   }
                 }
               }
@@ -67,11 +61,9 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "8181/tcp": [
-                      {
-                        "HostPort": "8181"
-                      }
-                    ]
+                    "8181/tcp": [{
+                      "HostPort": "8181"
+                    }]
                   }
                 }
               }
@@ -124,16 +116,12 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5000/tcp": [
-                      {
-                        "HostPort": "5000"
-                      }
-                    ],
-                    "5558/tcp": [
-                      {
-                        "HostPort": "5558"
-                      }
-                    ]
+                    "5000/tcp": [{
+                      "HostPort": "5000"
+                    }],
+                    "5558/tcp": [{
+                      "HostPort": "5558"
+                    }]
                   },
                   "IpcMode": "host",
                   "runtime": "nvidia"
@@ -166,11 +154,9 @@
                     }
                   },
                   "PortBindings": {
-                    "7777/tcp": [
-                      {
-                        "HostPort": "7777"
-                      }
-                    ]
+                    "7777/tcp": [{
+                      "HostPort": "7777"
+                    }]
                   },
                   "IpcMode": "host",
                   "runtime": "nvidia"
@@ -221,13 +207,11 @@
               "image": "${MODULES.RtspSimModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [
-                    {
-                      "Target": "/live/mediaServer/media/upload",
-                      "Source": "upload_data",
-                      "Type": "volume"
-                    }
-                  ],
+                  "Mounts": [{
+                    "Target": "/live/mediaServer/media/upload",
+                    "Source": "upload_data",
+                    "Type": "volume"
+                  }],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -236,11 +220,9 @@
                     }
                   },
                   "PortBindings": {
-                    "554/tcp": [
-                      {
-                        "HostPort": "554"
-                      }
-                    ]
+                    "554/tcp": [{
+                      "HostPort": "554"
+                    }]
                   }
                 }
               }
@@ -255,13 +237,11 @@
               "image": "${MODULES.UploadModule.arm64v8}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [
-                    {
-                      "Target": "/app/upload",
-                      "Source": "upload_data",
-                      "Type": "volume"
-                    }
-                  ],
+                  "Mounts": [{
+                    "Target": "/app/upload",
+                    "Source": "upload_data",
+                    "Type": "volume"
+                  }],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -270,11 +250,9 @@
                     }
                   },
                   "PortBindings": {
-                    "7000/tcp": [
-                      {
-                        "HostPort": "7000"
-                      }
-                    ]
+                    "7000/tcp": [{
+                      "HostPort": "7000"
+                    }]
                   }
                 }
               }
@@ -290,19 +268,15 @@
               "image": "${MODULES.ModelManagerModule}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [
-                    {
-                      "Target": "/workspace",
-                      "Source": "ovmsworkspace",
-                      "Type": "volume"
-                    }
-                  ],
+                  "Mounts": [{
+                    "Target": "/workspace",
+                    "Source": "ovmsworkspace",
+                    "Type": "volume"
+                  }],
                   "PortBindings": {
-                    "8585/tcp": [
-                      {
-                        "HostPort": "8585"
-                      }
-                    ]
+                    "8585/tcp": [{
+                      "HostPort": "8585"
+                    }]
                   },
                   "LogConfig": {
                     "Type": "",
@@ -336,24 +310,18 @@
                   "-c"
                 ],
                 "HostConfig": {
-                  "Mounts": [
-                    {
-                      "Target": "/workspace",
-                      "Source": "ovmsworkspace",
-                      "Type": "volume"
-                    }
-                  ],
+                  "Mounts": [{
+                    "Target": "/workspace",
+                    "Source": "ovmsworkspace",
+                    "Type": "volume"
+                  }],
                   "PortBindings": {
-                    "9001/tcp": [
-                      {
-                        "HostPort": "9001"
-                      }
-                    ],
-                    "8001/tcp": [
-                      {
-                        "HostPort": "8001"
-                      }
-                    ]
+                    "9001/tcp": [{
+                      "HostPort": "9001"
+                    }],
+                    "8001/tcp": [{
+                      "HostPort": "8001"
+                    }]
                   },
                   "LogConfig": {
                     "Type": "",
@@ -373,6 +341,7 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "routes": {
+          "AVAToHub": "FROM /messages/modules/avaedge/outputs/* INTO $upstream",
           "metrics": "FROM /messages/modules/inferencemodule/outputs/metrics INTO $upstream",
           "InferenceToLVA": "FROM /messages/modules/inferencemodule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/lvaEdge/inputs/recordingTrigger\")"
         },

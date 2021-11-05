@@ -143,6 +143,9 @@ async def predict_opencv(camera_id: str, edge: str, request: Request):
     if int(time.time()) % 5 == 0:
         logger.warning(results)
     if len(results) > 0:
+        # TypeError: Object of type float32 is not JSON serializable
+        # move to streams.py
+        # results = np.array(results).tolist()
         return json.dumps({"inferences": results}), 200
     return "", 204
 
