@@ -71,7 +71,7 @@
             },
             "settings": {
               "image": "intelligentedge/webmodule:0.30.14-<platform>",
-              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8000/tcp\":[{\"HostPort\":\"8000\"}]}}}"
+              "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Target\":\"/workspace\",\"Source\":\"ovmsworkspace\",\"Type\":\"volume\"}],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"8000/tcp\":[{\"HostPort\":\"8000\"}]}}}"
             }
           },
           "inferencemodule": {
