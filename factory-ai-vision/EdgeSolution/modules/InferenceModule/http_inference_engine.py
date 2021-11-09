@@ -33,10 +33,9 @@ class HttpInferenceEngine:
             logger.error("Unexpected error: %s", sys.exc_info())
 
         results = []
-        predictions = []
-        if 'ovmsdag' in stream.model.endpoint:
-            for person in predictions:
-                results.append({'Age':person['age'], 'Gender':person['gender'], 'Emotion':person['emotion']})
+        if 'ovmsserver' in stream.model.endpoint:
+            for prediction in predictions:
+                results.append(prediction)
         else:
             for prediction in predictions:
                 tag_name = prediction["tagName"]
