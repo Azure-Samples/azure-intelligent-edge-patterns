@@ -153,10 +153,10 @@ async def predict_opencv(camera_id: str, edge: str, request: Request):
 @app.get("/metrics")
 def metrics(cam_id: str):
     """metrics."""
-    inference_num = 0
-    unidentified_num = 0
-    total = 0
-    success_rate = 0
+    inference_num = {}
+    unidentified_num = {}
+    total = {}
+    success_rate = {}
     average_inference_time = 0
     last_prediction_count = {}
     is_gpu = onnx.is_gpu
@@ -172,10 +172,16 @@ def metrics(cam_id: str):
         average_inference_time = stream.average_inference_time
         last_prediction_count = stream.last_prediction_count
         scenario_metrics = stream.get_scenario_metrics()
-        if total == 0:
-            success_rate = 0
-        else:
-            success_rate = inference_num * 100 / total
+        for tag in total.keys():
+            if total[tag] == 0:
+                success_rate[tag] = 0
+            else:
+                if tag in inference_num.keys():
+                    success_rate[tag] = inference_num[tag] * 100 / total[tag]
+                else:
+                    logger.warning("tag not found in inference_num...")
+        logger.warning("success rate")
+        logger.warning(success_rate)
     return {
         "success_rate": success_rate,
         "inference_num": inference_num,

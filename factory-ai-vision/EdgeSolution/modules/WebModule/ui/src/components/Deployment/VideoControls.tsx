@@ -107,7 +107,7 @@ export const VideoAnnosControls: React.FC<VideoAnnosControlsProps> = ({ cameraId
           dispatch(onCreateVideoAnnoBtnClick({ shape: Shape.Polygon, purpose: Purpose.AOI }));
         }}
       />
-      {[InferenceMode.PartCounting, InferenceMode.DefectDetection].includes(inferenceMode) && (
+      {[InferenceMode.PartCounting].includes(inferenceMode) && (
         <>
           <Toggle
             label="Enable counting lines"

@@ -112,10 +112,10 @@ class Stream:
         # self.current_uploaded_images = {}
         self.edge = '960'
 
-        self.detection_success_num = 0
-        self.detection_unidentified_num = 0
-        self.detection_total = 0
-        self.detections = []
+        self.detection_success_num = {}
+        self.detection_unidentified_num = {}
+        self.detection_total = {}
+        self.detections = {}
 
         self.threshold = 0.3
         self.max_people = 5
@@ -170,10 +170,10 @@ class Stream:
 
     def reset_metrics(self):
         # self.mutex.acquire()
-        self.detection_success_num = 0
-        self.detection_unidentified_num = 0
-        self.detection_total = 0
-        self.detections = []
+        self.detection_success_num = {}
+        self.detection_unidentified_num = {}
+        self.detection_total = {}
+        self.detections = {}
         self.use_tracker = False
         # self.last_prediction_count = {}
         if self.scenario:
@@ -381,37 +381,54 @@ class Stream:
     def update_detection_status(self, predictions):
         # self.mutex.acquire()
 
-        detection_type = DETECTION_TYPE_NOTHING
+        # detection_type = DETECTION_TYPE_NOTHING
+        detection_type = {}
         for prediction in predictions:
-            if detection_type != DETECTION_TYPE_SUCCESS:
+            tag = prediction["tagName"]
+            if tag not in detection_type.keys():
+                # init
+                detection_type[tag] = DETECTION_TYPE_NOTHING
+            if detection_type[tag] != DETECTION_TYPE_SUCCESS:
                 if prediction["probability"] >= self.threshold:
-                    detection_type = DETECTION_TYPE_SUCCESS
-                    break
+                    detection_type[tag] = DETECTION_TYPE_SUCCESS
+                    # need to go through every predictions
+                    # break
                 else:
-                    detection_type = DETECTION_TYPE_UNIDENTIFIED
+                    detection_type[tag] = DETECTION_TYPE_UNIDENTIFIED
 
-        if detection_type == DETECTION_TYPE_NOTHING:
-            pass
-        else:
-            if self.detection_total == DETECTION_BUFFER_SIZE:
-                oldest_detection = self.detections.pop(0)
-                if oldest_detection == DETECTION_TYPE_UNIDENTIFIED:
-                    self.detection_unidentified_num -= 1
-                elif oldest_detection == DETECTION_TYPE_SUCCESS:
-                    self.detection_success_num -= 1
-
-                self.detections.append(detection_type)
-                if detection_type == DETECTION_TYPE_UNIDENTIFIED:
-                    self.detection_unidentified_num += 1
-                elif detection_type == DETECTION_TYPE_SUCCESS:
-                    self.detection_success_num += 1
+        for tag in detection_type.keys():
+            if detection_type[tag] == DETECTION_TYPE_NOTHING:
+                pass
             else:
-                self.detections.append(detection_type)
-                if detection_type == DETECTION_TYPE_UNIDENTIFIED:
-                    self.detection_unidentified_num += 1
-                elif detection_type == DETECTION_TYPE_SUCCESS:
-                    self.detection_success_num += 1
-                self.detection_total += 1
+                # init
+                if tag not in self.detection_total.keys():
+                    self.detection_total[tag] = 0
+                if tag not in self.detection_unidentified_num.keys():
+                    self.detection_unidentified_num[tag] = 0
+                if tag not in self.detection_success_num.keys():
+                    self.detection_success_num[tag] = 0
+                if tag not in self.detections.keys():
+                    self.detections[tag] = []
+                    
+                if self.detection_total[tag] == DETECTION_BUFFER_SIZE:
+                    oldest_detection = self.detections[tag].pop(0)
+                    if oldest_detection == DETECTION_TYPE_UNIDENTIFIED:
+                        self.detection_unidentified_num[tag] -= 1
+                    elif oldest_detection == DETECTION_TYPE_SUCCESS:
+                        self.detection_success_num[tag] -= 1
+
+                    self.detections[tag].append(detection_type[tag])
+                    if detection_type[tag] == DETECTION_TYPE_UNIDENTIFIED:
+                        self.detection_unidentified_num[tag] += 1
+                    elif detection_type[tag] == DETECTION_TYPE_SUCCESS:
+                        self.detection_success_num[tag] += 1
+                else:
+                    self.detections[tag].append(detection_type[tag])
+                    if detection_type[tag] == DETECTION_TYPE_UNIDENTIFIED:
+                        self.detection_unidentified_num[tag] += 1
+                    elif detection_type[tag] == DETECTION_TYPE_SUCCESS:
+                        self.detection_success_num[tag] += 1
+                    self.detection_total[tag] += 1
 
         # self.mutex.release()
 

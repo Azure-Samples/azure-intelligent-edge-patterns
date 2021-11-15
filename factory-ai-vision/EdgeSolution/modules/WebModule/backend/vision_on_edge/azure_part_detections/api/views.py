@@ -169,7 +169,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 timeout=5,
             )
             data = res.json()
-            success_rate = int(data["success_rate"] * 100) / 100
+            success_rate = data["success_rate"]
             inference_num = data["inference_num"]
             device = inference_module_obj.device()
             unidentified_num = data["unidentified_num"]
@@ -217,7 +217,7 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         instance = drf_get_object_or_404(queryset, pk=pk)
         if instance.deployment_type == 'model':
             instance.is_deployable(raise_exception=True)
-            
+
         instance.has_configured = True
         instance.save()
         if_trained_then_deploy_helper(part_detection_id=instance.id)
