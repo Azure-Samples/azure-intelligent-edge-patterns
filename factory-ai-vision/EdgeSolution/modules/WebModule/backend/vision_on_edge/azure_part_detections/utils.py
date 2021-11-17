@@ -110,6 +110,7 @@ def deploy_worker(part_detection_id):
     confidence_max = getattr(instance, "accuracyRangeMax", 80)
     max_images = getattr(instance, "maxImages", 10)
     metrics_is_send_iothub = getattr(instance, "metrics_is_send_iothub", False)
+    ava_is_send_iothub = getattr(instance, "ava_is_send_iothub", False)
     metrics_accuracy_threshold = getattr(instance, "metrics_accuracy_threshold", 50)
     metrics_frame_per_minutes = getattr(instance, "metrics_frame_per_minutes", 6)
     need_retraining = getattr(instance, "needRetraining", False)
@@ -225,6 +226,7 @@ def deploy_worker(part_detection_id):
     res_data = {
         "fps": instance.fps,
         "cascade_name": cascade_name,
+        "ava_is_send": ava_is_send_iothub,
         "lva_mode": instance.inference_protocol,
         "cameras": [],
     }

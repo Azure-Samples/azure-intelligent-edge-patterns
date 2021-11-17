@@ -39,6 +39,7 @@ class PartDetectionSerializer(serializers.ModelSerializer):
             "maxImages",
             "metrics_frame_per_minutes",
             "metrics_is_send_iothub",
+            "ava_is_send_iothub",
             "needRetraining",
             "parts",
             "prob_threshold",
@@ -74,6 +75,7 @@ class PartDetectionSerializer(serializers.ModelSerializer):
             "maxImages",
             "metrics_frame_per_minutes",
             "metrics_is_send_iothub",
+            "ava_is_send_iothub",
             "needRetraining",
             # "parts",
             "prob_threshold",
@@ -173,6 +175,7 @@ class UpdateCamBodySerializer(serializers.Serializer):
         counting_end_time = serializers.CharField(required=False, allow_blank=True)
 
     lva_mode = serializers.ChoiceField(INFERENCE_PROTOCOL_CHOICES)
+    ava_is_send = serializers.BooleanField()
     fps = serializers.FloatField()
     cascade_name = serializers.CharField()
     cameras = CameraItem(many=True)

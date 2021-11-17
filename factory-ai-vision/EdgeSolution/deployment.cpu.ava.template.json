@@ -379,7 +379,7 @@
       "properties.desired": {
         "schemaVersion": "1.0",
         "routes": {
-          "AVAToHub": "FROM /messages/modules/avaedge/outputs/* INTO $upstream",
+          "AVAToHub": "FROM /messages/modules/avaedge/outputs/iothubsinkoutput INTO $upstream",
           "metrics": "FROM /messages/modules/inferencemodule/outputs/metrics INTO $upstream",
           "InferenceToLVA": "FROM /messages/modules/inferencemodule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/lvaEdge/inputs/recordingTrigger\")"
         },
