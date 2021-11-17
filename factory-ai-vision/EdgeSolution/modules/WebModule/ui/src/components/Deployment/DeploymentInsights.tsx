@@ -10,6 +10,7 @@ import { DEMO_SCENARIO_IDS } from '../../constant';
 import { InferenceMetrics } from './ts/Deployment';
 
 import { getErrorLog } from '../../store/shared/createWrappedAsync';
+import { ExpandPanel } from '../ExpandPanel';
 
 const { palette } = getTheme();
 
@@ -91,45 +92,87 @@ export const Insights: React.FC<InsightsProps> = (props) => {
         <>
           <Stack
             styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
-            tokens={{ childrenGap: '8px' }}
           >
-            <Text styles={{ root: { fontWeight: 'bold' } }}>Inference Matrix</Text>
-            <Text>Success Rate:</Text>
-            {!!inferenceMetrics.success_rate &&
-              Object.keys(inferenceMetrics.success_rate).map((key) => (
-                <Text key={key}> {`${key}: ${inferenceMetrics.success_rate[key]}%`} </Text>
-              ))}
+            <ExpandPanel titleHidden="Inference Metrics" iconPosition="end">
+              <Stack tokens={{ childrenGap: '8px' }}>
+                {!!inferenceMetrics.success_rate && (
+                  <>
+                    <ul style={{ margin: 0, marginTop: '8px' }}>
+                      <li>
+                        <Text>Success Rate:</Text>
+                      </li>
+                    </ul>
+                    <Stack styles={{ root: { paddingLeft: '41px' } }} tokens={{ childrenGap: '8px' }}>
+                      {Object.keys(inferenceMetrics.success_rate).map((key) => (
+                        <Text key={key}> {`${key}: ${inferenceMetrics.success_rate[key]}%`} </Text>
+                      ))}
+                    </Stack>
+                  </>
+                )}
+                {!DEMO_SCENARIO_IDS.includes(modelId) && (
+                  <>
+                    <ul style={{ margin: 0, marginTop: '8px' }}>
+                      <li>
+                        <Text>Improve Model:</Text>
+                      </li>
+                    </ul>
+                    <RRDLink to={`/images/${modelId}`} style={{ textDecoration: 'none' }}>
+                      <Link styles={{ root: { textDecoration: 'none', paddingLeft: '41px' } }}>
+                        View in images
+                      </Link>
+                    </RRDLink>
+                  </>
+                )}
+              </Stack>
+            </ExpandPanel>
           </Stack>
           <Stack
             styles={{ root: { padding: '24px 20px', borderBottom: `solid 1px ${palette.neutralLight}` } }}
-            tokens={{ childrenGap: '8px' }}
           >
-            <Text styles={{ root: { fontWeight: 'bold' } }}>Live Analytics</Text>
-            {!!inferenceMetrics.count &&
-              Object.keys(inferenceMetrics.count).map((key) => (
-                <Text key={key}> {`${key}: ${inferenceMetrics.count[key]}`} </Text>
-              ))}
-            {inferenceMetrics.scenario_metrics.length !== 0 && (
-              <>
-                {inferenceMetrics.scenario_metrics[0].name === 'all_objects' &&
-                  Object.keys(inferenceMetrics.scenario_metrics[0].count).map((countKey) => (
-                    <Text key={countKey}>
-                      {`The count of line${countKey}: ${inferenceMetrics.scenario_metrics[0].count[countKey]}`}
-                    </Text>
-                  ))}
-                {inferenceMetrics.scenario_metrics[0].name === 'violation' &&
-                  Object.keys(inferenceMetrics.scenario_metrics[0].count).map((countKey) => (
-                    <Text key={countKey}>
-                      {`The count of zone${countKey} - Current: ${inferenceMetrics.scenario_metrics[0].count[countKey].current}, Total: ${inferenceMetrics.scenario_metrics[0].count[countKey].total}`}
-                    </Text>
-                  ))}
-              </>
-            )}
-            {!DEMO_SCENARIO_IDS.includes(modelId) && (
-              <RRDLink to={`/images/${modelId}`} style={{ textDecoration: 'none' }}>
-                <Link styles={{ root: { textDecoration: 'none' } }}>View in images</Link>
-              </RRDLink>
-            )}
+            <ExpandPanel titleHidden="Live Analytics" iconPosition="end">
+              <Stack tokens={{ childrenGap: '8px' }}>
+                <Stack tokens={{ childrenGap: '8px' }}>
+                  {!!inferenceMetrics.count && (
+                    <>
+                      <ul style={{ margin: 0 }}>
+                        <li>
+                          <Text>Object Count:</Text>
+                        </li>
+                      </ul>
+                      <Stack styles={{ root: { paddingLeft: '41px' } }} tokens={{ childrenGap: '8px' }}>
+                        {Object.keys(inferenceMetrics.count).map((key) => (
+                          <Text key={key}> {`${key}: ${inferenceMetrics.count[key]}`} </Text>
+                        ))}
+                      </Stack>
+                    </>
+                  )}
+                </Stack>
+                {inferenceMetrics.scenario_metrics.length !== 0 &&
+                  ['all_objects', 'violation'].includes(inferenceMetrics.scenario_metrics[0].name) && (
+                    <>
+                      <ul style={{ margin: 0, marginTop: '8px' }}>
+                        <li>
+                          <Text>Area of Interest Insight:</Text>
+                        </li>
+                      </ul>
+                      <Stack styles={{ root: { paddingLeft: '41px' } }} tokens={{ childrenGap: '8px' }}>
+                        {inferenceMetrics.scenario_metrics[0].name === 'all_objects' &&
+                          Object.keys(inferenceMetrics.scenario_metrics[0].count).map((countKey) => (
+                            <Text key={countKey}>
+                              {`The count of line${countKey}: ${inferenceMetrics.scenario_metrics[0].count[countKey]}`}
+                            </Text>
+                          ))}
+                        {inferenceMetrics.scenario_metrics[0].name === 'violation' &&
+                          Object.keys(inferenceMetrics.scenario_metrics[0].count).map((countKey) => (
+                            <Text key={countKey}>
+                              {`The count of zone${countKey} - Current: ${inferenceMetrics.scenario_metrics[0].count[countKey].current}, Total: ${inferenceMetrics.scenario_metrics[0].count[countKey].total}`}
+                            </Text>
+                          ))}
+                      </Stack>
+                    </>
+                  )}
+              </Stack>
+            </ExpandPanel>
           </Stack>
         </>
       )}

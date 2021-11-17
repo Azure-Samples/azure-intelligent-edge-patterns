@@ -88,7 +88,6 @@ const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChange
         cloneProject.oldCameras = newCameras;
         cloneProject.deployment_type = optional.type as DeploymentType;
 
-        console.log('optional.type', optional.type);
         if ((optional.type as DeploymentType) === 'cascade') {
           cloneProject.cascade = optional.value;
         }

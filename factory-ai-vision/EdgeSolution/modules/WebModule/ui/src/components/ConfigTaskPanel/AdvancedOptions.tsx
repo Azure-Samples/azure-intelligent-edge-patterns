@@ -13,6 +13,7 @@ import { ProtocolOptions } from './ProtocolOptions';
 import { RetrainImgOption } from './RetrainImgOption';
 import { SendVideoOptions } from './SendVideoOptions';
 import { TimeInfoOption } from './TimeInfoOption';
+import EdgeMsgOption from './EdgeMsgOption';
 
 type AdvancedOptionsProps = {
   projectData: ProjectData;
@@ -40,6 +41,9 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
         probThreshold={projectData.probThreshold}
         onChange={onChange}
       />
+      {inferenceSource === InferenceSource.LVA && (
+        <EdgeMsgOption sendMessageToEdge={projectData.sendMessageToEdge} onChange={onChange} />
+      )}
       {selectedTrainProjectIsNotDemo && (
         <RetrainImgOption
           needRetraining={projectData.needRetraining}

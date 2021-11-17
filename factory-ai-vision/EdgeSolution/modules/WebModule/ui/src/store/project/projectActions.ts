@@ -113,6 +113,9 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   oldCameras: [],
   cascade: data.cascade,
   deployment_type: data.deployment_type,
+
+  // Send video to cloud ava version
+  sendMessageToEdge: data.sendMessageToEdge,
 });
 
 const getProjectData = (state: State): ProjectData => state.project.data;
@@ -137,7 +140,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         const baseCameras = partDetection.cameras?.length || 1;
         const recommendedFps = extractRecommendFps(totalRecomendedFps, baseCameras);
 
-        const uploadStatus = inferenceModule[0].upload_status === 'True' ? false : true;
+        const uploadStatus = inferenceModule[0].upload_status !== 'True';
 
         dispatch(
           getProjectSuccess(
@@ -156,6 +159,11 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
       dispatch(getProjectFailed(err));
       alert(getErrorLog(err));
     });
+};
+
+const getCascade = (cascadeId: string | number) => {
+  if (typeof cascadeId === 'string') return parseInt(cascadeId.replace('cascade_', ''), 10);
+  return cascadeId;
 };
 
 export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectThunk => (
@@ -202,10 +210,8 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
         : new Date(projectData.countingEndTime).toUTCString(),
       max_people: projectData.maxPeople,
       deployment_type: projectData.deployment_type,
-      cascade:
-        projectData.deployment_type === 'cascade'
-          ? parseInt(projectData.cascade.replace('cascade_', ''), 10)
-          : null,
+      cascade: projectData.deployment_type === 'cascade' ? getCascade(projectData.cascade) : null,
+      ava_is_send_iothub: projectData.sendMessageToEdge,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {

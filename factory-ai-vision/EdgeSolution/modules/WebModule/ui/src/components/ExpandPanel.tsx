@@ -28,7 +28,6 @@ export const ExpandPanel: React.FC<ExpandPanelProps> = ({
 
   return (
     <div>
-      {showChildren && iconPosition === 'end' && children}
       <Stack horizontal horizontalAlign="space-between" verticalAlign="center">
         <ActionButton
           iconProps={{ iconName: 'Chevrondown' }}
@@ -51,6 +50,14 @@ export const ExpandPanel: React.FC<ExpandPanelProps> = ({
               transform: 'rotate(180deg)',
               transitionDuration: '0.3s',
             },
+            textContainer: {
+              fontSize: '14px',
+              fontWeight: 700,
+              lineHeight: '20px',
+            },
+            root: {
+              padding: 0,
+            },
           }}
           text={showChildren ? titleVisible : titleHidden}
           onClick={toggleShowChildren}
@@ -60,6 +67,7 @@ export const ExpandPanel: React.FC<ExpandPanelProps> = ({
           {suffix}
         </Text>
       </Stack>
+      {showChildren && iconPosition === 'end' && children}
       {showChildren && iconPosition === 'start' && children}
       {bottomBorder && (
         <Separator
