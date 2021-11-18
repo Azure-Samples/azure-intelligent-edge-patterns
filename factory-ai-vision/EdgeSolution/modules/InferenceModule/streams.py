@@ -1307,7 +1307,7 @@ def process_response(response, img, metadatas):
         fontScale = 0.5
         color = (0, 255, 255)
         thickness = 1
-        text = prediction['tag']
+        text = prediction['tag']['value']
         for attribute in prediction['attributes']:
             if text != '': text += ' / '
             text += str(attribute['value'])
