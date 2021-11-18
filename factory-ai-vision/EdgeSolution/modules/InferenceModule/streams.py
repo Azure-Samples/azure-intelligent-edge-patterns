@@ -1271,7 +1271,7 @@ def process_response(response, img, metadatas):
             prediction = {
                 'tag': {
                     'value':tag,
-                    'confidence': box_confidences[i]
+                    'confidence': np.array(box_confidences[i]).tolist()
                 },
                 'attributes': [],
                 'box': {
