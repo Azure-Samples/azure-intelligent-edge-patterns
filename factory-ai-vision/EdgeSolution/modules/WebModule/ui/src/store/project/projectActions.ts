@@ -115,7 +115,7 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   deployment_type: data.deployment_type,
 
   // Send video to cloud ava version
-  sendMessageToEdge: data.sendMessageToEdge,
+  ava_is_send_iothub: data.ava_is_send_iothub,
 });
 
 const getProjectData = (state: State): ProjectData => state.project.data;
@@ -211,7 +211,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
       max_people: projectData.maxPeople,
       deployment_type: projectData.deployment_type,
       cascade: projectData.deployment_type === 'cascade' ? getCascade(projectData.cascade) : null,
-      ava_is_send_iothub: projectData.sendMessageToEdge,
+      ava_is_send_iothub: projectData.ava_is_send_iothub,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {
