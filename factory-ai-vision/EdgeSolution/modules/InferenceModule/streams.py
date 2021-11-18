@@ -1215,7 +1215,7 @@ def process_response(response, img, metadatas):
     #        predictions.append(prediction)
     if response is not None:
         coordinates = make_ndarray(response.outputs['coordinates'])
-        confidences = make_ndarray(response.outputs['confidences'])
+        box_confidences = make_ndarray(response.outputs['confidences']).flatten()
         label_ids = make_ndarray(response.outputs['label_ids']).flatten()
         attributes = []
             
@@ -1269,7 +1269,10 @@ def process_response(response, img, metadatas):
             
                     
             prediction = {
-                'tag': tag,
+                'tag': {
+                    'value':tag,
+                    'confidence': box_confidences[i]
+                },
                 'attributes': [],
                 'box': {
                     'l': np.float(x1),
