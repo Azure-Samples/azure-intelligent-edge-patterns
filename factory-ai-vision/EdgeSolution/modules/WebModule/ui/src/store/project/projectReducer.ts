@@ -63,7 +63,7 @@ export const initialProjectData: ProjectData = {
 
   deployment_type: 'model',
   cascade: '',
-  sendMessageToEdge: false,
+  ava_is_send_iothub: false,
 };
 
 const initialState: Project = {

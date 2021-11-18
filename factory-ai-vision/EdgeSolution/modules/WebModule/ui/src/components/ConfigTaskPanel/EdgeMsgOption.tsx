@@ -4,20 +4,20 @@ import { ProjectData } from '../../store/project/projectTypes';
 import { OptionLayout } from './OptionLayout';
 import { OnChangeType } from './type';
 
-type Props = Pick<ProjectData, 'sendMessageToEdge'> & {
+type Props = Pick<ProjectData, 'ava_is_send_iothub'> & {
   onChange: OnChangeType;
 };
 
 const EdgeMsgOption = (props: Props) => {
-  const { sendMessageToEdge, onChange } = props;
+  const { ava_is_send_iothub, onChange } = props;
 
   return (
     <OptionLayout title="Edge messaging" subTitle="Send successful inferences to AVA edge device">
       <Toggle
         label="Enable edge messages"
-        checked={sendMessageToEdge}
+        checked={ava_is_send_iothub}
         onChange={(_, checked) => {
-          onChange('sendMessageToEdge', checked);
+          onChange('ava_is_send_iothub', checked);
         }}
         inlineLabel
       />

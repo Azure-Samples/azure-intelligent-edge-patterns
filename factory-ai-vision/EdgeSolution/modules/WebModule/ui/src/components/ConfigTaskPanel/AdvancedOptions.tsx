@@ -42,7 +42,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
         onChange={onChange}
       />
       {inferenceSource === InferenceSource.LVA && (
-        <EdgeMsgOption sendMessageToEdge={projectData.sendMessageToEdge} onChange={onChange} />
+        <EdgeMsgOption ava_is_send_iothub={projectData.ava_is_send_iothub} onChange={onChange} />
       )}
       {selectedTrainProjectIsNotDemo && (
         <RetrainImgOption

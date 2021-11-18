@@ -56,7 +56,7 @@ export type ProjectData = {
   framesPerMin: number;
   probThreshold: number;
 
-  sendMessageToEdge: boolean;
+  ava_is_send_iothub: boolean;
   // Send video to cloud
   SVTCisOpen: boolean;
   SVTCcameras: number[];
