@@ -1,4 +1,5 @@
-FROM mcr.microsoft.com/azureml/onnxruntime:latest-openvino-vadm
+FROM openvino/onnxruntime_ep_ubuntu18
+# FROM mcr.microsoft.com/azureml/onnxruntime:latest-openvino-vadm
 # FROM mcr.microsoft.com/azureml/onnxruntime:latest-openvino-myriad
 # FROM waitingkuo/onnxruntime-vpu
 
@@ -11,13 +12,15 @@ ARG BUILD_DEPENDENCIES="autoconf \
     unzip \
     curl \
     udev"
+
+USER root
 RUN apt-get update && \
     apt-get install -y --no-install-recommends ${BUILD_DEPENDENCIES} && \
     rm -rf /var/lib/apt/lists/*
 #RUN usermod -aG users openvino
 WORKDIR /opt
-RUN curl -L https://github.com/libusb/libusb/archive/v1.0.22.zip --output v1.0.22.zip && \
-    unzip v1.0.22.zip
+# RUN curl -L https://github.com/libusb/libusb/archive/v1.0.22.zip --output v1.0.22.zip && \
+#     unzip v1.0.22.zip
 WORKDIR /opt/libusb-1.0.22
 RUN ./bootstrap.sh && \
     ./configure --disable-udev --enable-shared && \
@@ -66,9 +69,9 @@ COPY requirements/base.txt ./requirements/base.txt
 #RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
 #RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/base.txt --ignore-installed"]
 #RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python onnxruntime" ]
-RUN pip install --upgrade pip
-RUN pip install -r requirements/base.txt --ignore-installed
-RUN pip install opencv-python
+RUN pip3 install --upgrade pip
+RUN pip3 install -r requirements/base.txt --ignore-installed
+RUN pip3 install opencv-python
 
 # =========================================================
 # Copy Source Code
@@ -100,4 +103,4 @@ EXPOSE 7777
 #RUN [ "/bin/bash", "-c", "source activate python38 && pip install onnxruntime_openvino-1.5.2-cp38-cp38-linux_x86_64.whl"]
 
 #CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py -p 44000"]
-CMD ["python", "server.py"]
+CMD ["python3", "server.py"]
