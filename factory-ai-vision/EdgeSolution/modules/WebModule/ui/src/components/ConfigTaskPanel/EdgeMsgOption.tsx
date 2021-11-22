@@ -12,7 +12,7 @@ const EdgeMsgOption = (props: Props) => {
   const { ava_is_send_iothub, onChange } = props;
 
   return (
-    <OptionLayout title="Edge messaging" subTitle="Send successful inferences to AVA edge device">
+    <OptionLayout title="Edge messaging" subTitle="Send successful inferences to AVA edge on device">
       <Toggle
         label="Enable edge messages"
         checked={ava_is_send_iothub}
