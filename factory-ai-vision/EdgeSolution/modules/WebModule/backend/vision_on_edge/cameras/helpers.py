@@ -133,7 +133,7 @@ def create_demo_objects():
         name="Scenario 6 - Crowded Queue Alert",
         is_demo=True,
         defaults={
-            "rtsp": "rtsp://rtspsim:554/media/scenario5-total-customer-counting.mkv",
+            "rtsp": "rtsp://rtspsim:554/media/scenario5-total-customer-counting_old.mkv",
             "area": "",
             "lines": "",
             "danger_zones": gen_default_zones_cqa(),
