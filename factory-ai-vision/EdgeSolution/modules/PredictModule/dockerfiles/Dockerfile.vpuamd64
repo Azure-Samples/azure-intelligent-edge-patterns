@@ -69,9 +69,9 @@ COPY requirements/base.txt ./requirements/base.txt
 #RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
 #RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/base.txt --ignore-installed"]
 #RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python onnxruntime" ]
-RUN pip3 install --upgrade pip
-RUN pip3 install -r requirements/base.txt --ignore-installed
-RUN pip3 install opencv-python
+RUN pip install --upgrade pip
+RUN pip install -r requirements/base.txt --ignore-installed
+RUN pip install opencv-python
 
 # =========================================================
 # Copy Source Code
@@ -103,4 +103,4 @@ EXPOSE 7777
 #RUN [ "/bin/bash", "-c", "source activate python38 && pip install onnxruntime_openvino-1.5.2-cp38-cp38-linux_x86_64.whl"]
 
 #CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py -p 44000"]
-CMD ["python3", "server.py"]
+CMD ["python", "server.py"]
