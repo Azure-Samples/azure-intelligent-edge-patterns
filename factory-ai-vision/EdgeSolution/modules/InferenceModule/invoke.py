@@ -154,8 +154,12 @@ class GraphManager:
             payload = json.load(f)
         return self.invoke_method(method, payload)
 
-    def invoke_graph_grpc_instance_set(self, name, rtspUrl, frameRate, recording_duration):
+    def invoke_graph_grpc_instance_set(self, name, rtspUrl, frameRate, recording_duration, ava_is_send_iothub):
         recordingDuration = "PT{}S".format(recording_duration)
+        if ava_is_send_iothub:
+            output_name = 'iothubsinkoutput'
+        else:
+            output_name = 'nosend'
         find_cred, username, password = self.parse_rtsp_credential(rtspUrl)
         properties = {
             "topologyName": "InferencingWithGrpcExtension",
@@ -166,6 +170,7 @@ class GraphManager:
                 {"name": "rtspPassword", "value": password},
                 {"name": "frameRate", "value": frameRate},
                 {"name": "instanceId", "value": name},
+                {"name": "hubSinkOutputName", "value": output_name},
                 {"name": "recordingDuration", "value": recordingDuration},
                 {
                     "name": "grpcExtensionAddress",
@@ -184,10 +189,14 @@ class GraphManager:
             payload = json.load(f)
         return self.invoke_method(method, payload)
 
-    def invoke_graph_http_instance_set(self, name, rtspUrl, frameRate, recording_duration):
+    def invoke_graph_http_instance_set(self, name, rtspUrl, frameRate, recording_duration, ava_is_send_iothub):
         inferencingUrl = "http://inferencemodule:5000/predict?camera_id=" + \
             str(name)
         recordingDuration = "PT{}S".format(recording_duration)
+        if ava_is_send_iothub:
+            output_name = 'iothubsinkoutput'
+        else:
+            output_name = 'nosend'
         find_cred, username, password = self.parse_rtsp_credential(rtspUrl)
         properties = {
             "topologyName": "InferencingWithHttpExtension",
@@ -198,6 +207,7 @@ class GraphManager:
                 {"name": "rtspPassword", "value": password},
                 {"name": "frameRate", "value": frameRate},
                 {"name": "instanceId", "value": name},
+                {"name": "hubSinkOutputName", "value": output_name},
                 {"name": "recordingDuration", "value": recordingDuration},
                 {"name": "inferencingUrl", "value": inferencingUrl},
                 {"name": "frameHeight", "value": "540"},
@@ -214,11 +224,11 @@ class GraphManager:
         else:
             return "LVA mode error"
 
-    def invoke_instance_set(self, mode, name, rtspUrl, frameRate, recording_duration):
+    def invoke_instance_set(self, mode, name, rtspUrl, frameRate, recording_duration, ava_is_send_iothub):
         if mode == "grpc":
-            return self.invoke_graph_grpc_instance_set(name, rtspUrl, frameRate, recording_duration)
+            return self.invoke_graph_grpc_instance_set(name, rtspUrl, frameRate, recording_duration, ava_is_send_iothub)
         elif mode == "http":
-            return self.invoke_graph_http_instance_set(name, rtspUrl, frameRate, recording_duration)
+            return self.invoke_graph_http_instance_set(name, rtspUrl, frameRate, recording_duration, ava_is_send_iothub)
         else:
             return "LVA mode error"
 

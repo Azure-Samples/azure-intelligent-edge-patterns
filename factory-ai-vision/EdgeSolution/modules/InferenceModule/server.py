@@ -319,6 +319,7 @@ def update_cams(request_body: CamerasModel):
     """
     logger.info(request_body)
     frame_rate = request_body.fps
+    ava_is_send = request_body.ava_is_send
     stream_manager.update_streams([cam.id for cam in request_body.cameras])
     n = stream_manager.get_streams_num_danger()
     # frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
@@ -363,6 +364,7 @@ def update_cams(request_body: CamerasModel):
             frame_rate,
             recording_duration,
             lva_mode,
+            ava_is_send,
             cam_id,
             cam_name,
             has_aoi,
@@ -683,7 +685,7 @@ def benchmark():
     for s in stream_manager.get_streams():
         s.set_is_benchmark(True)
         s.update_cam("video", SAMPLE_VIDEO, 30,
-                     s.cam_id, False, None, "PC", [], [])
+                     s.cam_id, False, False, None, "PC", [], [])
 
     # vpu's first image take long time
     img = cv2.imread("img.png")

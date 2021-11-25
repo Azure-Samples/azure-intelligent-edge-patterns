@@ -1,17 +1,17 @@
 #WEBDB_MODULE_VERSION=0.0.1
-WEB_MODULE_VERSION=0.30.15
-INFERENCE_MODULE_VERSION=0.30.15
-RTSPSIM_MODULE_VERSION=0.30.15
-CAMERA_MODULE_VERSION=0.30.15
-NGINX_MODULE_VERSION=0.30.15
-UPLOAD_MODULE_VERSION=0.30.15
-PREDICT_MODULE_VERSION=0.30.15
-MODELMANAGER_MODEULE_VERSION=0.30.15
+WEB_MODULE_VERSION=0.31.0
+INFERENCE_MODULE_VERSION=0.31.0
+RTSPSIM_MODULE_VERSION=0.31.0
+CAMERA_MODULE_VERSION=0.31.0
+NGINX_MODULE_VERSION=0.31.0
+UPLOAD_MODULE_VERSION=0.31.0
+PREDICT_MODULE_VERSION=0.31.0
+MODELMANAGER_MODEULE_VERSION=0.31.0
 
 DEV_REGISTRY=factoryairegistry
 
 #DEV_VERSION=0.8.0
-RELEASE_VERSION=0.30.15
+RELEASE_VERSION=0.31.0
 
 
 # ===================
@@ -23,7 +23,7 @@ docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/inferencemodule:$INFERENCE_M
 
 #docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-gpuamd64  intelligentedge/predictmodule:$RELEASE_VERSION-gpuamd64
 docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-cpuamd64  intelligentedge/predictmodule:$RELEASE_VERSION-cpuamd64
-docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-cpuamd64  intelligentedge/predictmodule:$RELEASE_VERSION-vpuamd64
+docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/predictmodule:$PREDICT_MODULE_VERSION-vpuamd64  intelligentedge/predictmodule:$RELEASE_VERSION-vpuamd64
 
 docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/rtspsimmodule:$RTSPSIM_MODULE_VERSION-amd64  intelligentedge/rtspsimmodule:$RELEASE_VERSION-amd64
 docker tag $DEV_REGISTRY.azurecr.io/intelligentedge/nginxmodule:$NGINX_MODULE_VERSION-amd64  intelligentedge/nginxmodule:$RELEASE_VERSION-amd64

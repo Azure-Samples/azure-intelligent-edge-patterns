@@ -59,8 +59,6 @@ const EditPanel: React.FC<Props> = (props) => {
     setLocalTags(parts.map((part) => ({ name: part.name, remoteCount: part.remote_image_count })));
   }, [parts]);
 
-  console.log('parts', parts);
-
   const onTagAdd = useCallback(
     (event: React.KeyboardEvent<HTMLInputElement>) => {
       if (event.key === 'Enter' && localTag !== '') {

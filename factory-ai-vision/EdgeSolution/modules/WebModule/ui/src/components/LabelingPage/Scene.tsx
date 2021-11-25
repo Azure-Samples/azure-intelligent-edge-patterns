@@ -58,8 +58,6 @@ const Scene: FC<SceneProps> = ({
    */
   const changeCursorState = useCallback(
     (cursorType?: LabelingCursorStates): void => {
-      console.log('changeCursorState', cursorType);
-
       if (cursorType) {
         setCursorState(cursorType);
         return;

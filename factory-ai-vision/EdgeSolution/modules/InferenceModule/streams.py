@@ -131,6 +131,7 @@ class Stream:
 
         # IoT Hub
         self.iothub_is_send = False
+        self.iothub_ava_is_send = False
         self.iothub_threshold = 0.5
         self.iothub_fpm = 0
         self.iothub_last_send_time = time.time()
@@ -163,7 +164,7 @@ class Stream:
 
     def _set(self, rtspUrl, frameRate, recording_duration):
         gm.invoke_instance_set(self.lva_mode, self.cam_id, rtspUrl, frameRate,
-                               recording_duration)
+                               recording_duration, self.iothub_ava_is_send)
 
     def _start(self):
         gm.invoke_graph_instance_activate(self.cam_id)
@@ -235,6 +236,7 @@ class Stream:
         frameRate,
         recording_duration,
         lva_mode,
+        ava_is_send,
         cam_id,
         cam_name,
         has_aoi,
@@ -250,10 +252,12 @@ class Stream:
         if (self.cam_source != cam_source
                 or round(self.frameRate) != round(frameRate)
                 or self.lva_mode != lva_mode
+                or self.iothub_ava_is_send != ava_is_send
                 or self.recording_duration != recording_duration):
             self.cam_source = cam_source
             self.frameRate = frameRate
             self.lva_mode = lva_mode
+            self.iothub_ava_is_send = ava_is_send
             self.recording_duration = recording_duration
             if IS_OPENCV == "true":
                 logger.info("post to CVModule")
@@ -456,7 +460,7 @@ class Stream:
         self.iothub_fpm = fpm
         self.iothub_last_send_time = time.time()
         if fpm == 0:
-            self.iothub_is_send = 0
+            self.iothub_is_send = False
             self.iothub_interval = 99999999
         else:
             self.iothub_interval = 60 / fpm  # seconds
@@ -1211,7 +1215,7 @@ def process_response(response, img, metadatas):
     #        predictions.append(prediction)
     if response is not None:
         coordinates = make_ndarray(response.outputs['coordinates'])
-        confidences = make_ndarray(response.outputs['confidences'])
+        box_confidences = make_ndarray(response.outputs['confidences']).flatten()
         label_ids = make_ndarray(response.outputs['label_ids']).flatten()
         attributes = []
             
@@ -1265,7 +1269,10 @@ def process_response(response, img, metadatas):
             
                     
             prediction = {
-                'tag': tag,
+                'tag': {
+                    'value':tag,
+                    'confidence': np.array(box_confidences[i]).tolist()
+                },
                 'attributes': [],
                 'box': {
                     'l': np.float(x1),
@@ -1300,7 +1307,7 @@ def process_response(response, img, metadatas):
         fontScale = 0.5
         color = (0, 255, 255)
         thickness = 1
-        text = prediction['tag']
+        text = prediction['tag']['value']
         for attribute in prediction['attributes']:
             if text != '': text += ' / '
             text += str(attribute['value'])

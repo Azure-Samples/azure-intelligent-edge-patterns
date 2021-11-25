@@ -3,8 +3,7 @@
     "name": "InferencingWithHttpExtension",
     "properties": {
         "description": "Factory AI Video Pipeline",
-        "parameters": [
-            {
+        "parameters": [{
                 "name": "rtspUrl",
                 "type": "String",
                 "description": "Rtsp source Url address"
@@ -43,7 +42,7 @@
                 "name": "hubSinkOutputName",
                 "type": "String",
                 "description": "Hub sink output name",
-                "default": "iothubsinkoutput"
+                "default": "nosend"
             },
             {
                 "name": "imageScaleMode",
@@ -88,8 +87,7 @@
                 "default": "PT60S"
             }
         ],
-        "sources": [
-            {
+        "sources": [{
                 "@type": "#Microsoft.VideoAnalyzer.RtspSource",
                 "name": "rtspSource",
                 "endpoint": {
@@ -108,12 +106,10 @@
                 "hubInputName": "${hubSourceInput}"
             }
         ],
-        "processors": [
-            {
+        "processors": [{
                 "@type": "#Microsoft.VideoAnalyzer.SignalGateProcessor",
                 "name": "signalGateProcessor",
-                "inputs": [
-                    {
+                "inputs": [{
                         "nodeName": "iotMessageSource"
                     },
                     {
@@ -151,30 +147,23 @@
                     "skipSamplesWithoutAnnotation": "false",
                     "maximumSamplesPerSecond": "${frameRate}"
                 },
-                "inputs": [
-                    {
-                        "nodeName": "rtspSource",
-                        "outputSelectors": [
-                            {
-                                "property": "mediaType",
-                                "operator": "is",
-                                "value": "video"
-                            }
-                        ]
-                    }
-                ]
+                "inputs": [{
+                    "nodeName": "rtspSource",
+                    "outputSelectors": [{
+                        "property": "mediaType",
+                        "operator": "is",
+                        "value": "video"
+                    }]
+                }]
             }
         ],
-        "sinks": [
-            {
+        "sinks": [{
                 "@type": "#Microsoft.VideoAnalyzer.IoTHubMessageSink",
                 "name": "hubSink",
                 "hubOutputName": "${hubSinkOutputName}",
-                "inputs": [
-                    {
-                        "nodeName": "httpExtension"
-                    }
-                ]
+                "inputs": [{
+                    "nodeName": "httpExtension"
+                }]
             },
             {
                 "@type": "#Microsoft.VideoAnalyzer.VideoSink",
@@ -186,11 +175,9 @@
                 },
                 "localMediaCacheMaximumSizeMiB": "2048",
                 "localMediaCachePath": "/var/lib/azuremediaservices/tmp/",
-                "inputs": [
-                    {
-                        "nodeName": "signalGateProcessor"
-                    }
-                ]
+                "inputs": [{
+                    "nodeName": "signalGateProcessor"
+                }]
             }
         ]
     }

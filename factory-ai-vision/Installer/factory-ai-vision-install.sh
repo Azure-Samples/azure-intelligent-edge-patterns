@@ -373,6 +373,16 @@ else
 fi
 
 
+if [ "$cpuGpu" == "vpu" ]; then
+    createOptions='"createOptions": "{\"ExposedPorts\":{\"9001/tcp\":{},\"8001/tcp\":{}},\"Cmd\":[\"/ovms/bin/ovms --config_path /workspace/config.json --port 9001 --rest_port 8001 --log_level DEBUG\"],\"Devices\":[{\"PathOnHost\":\"/dev/ion\",\"PathInContainer\":\"/dev/ion\"}],\"Entrypoint\":[\"sh\",\"-c\"],\"HostConfig\":{\"Mounts\":[{\"Target\":\"/workspace\",\"Source\":\"ovmsworkspace\",\"Type\":\"volume\"},{\"Target\":\"/var/tmp\",\"Source\":\"hddldaemon\",\"Type\":\"volume\"}],\"PortBindings\":{\"9001/tcp\":[{\"HostPort\":\"9001\"}],\"8001/tcp\":[{\"HostPort\":\"8001\"}]},\"LogConfig\":{\"Type\":\"\",\"Config\":",'
+    createOptions01='"createOptions01": "{\"max-size\":\"10m\",\"max-file\":\"10\"}}}}"'
+else
+    createOptions='"createOptions": "{\"ExposedPorts\":{\"9001/tcp\":{},\"8001/tcp\":{}},\"Cmd\":[\"/ovms/bin/ovms --config_path /workspace/config.json --port 9001 --rest_port 8001 --log_level DEBUG\"],\"Entrypoint\":[\"sh\",\"-c\"],\"HostConfig\":{\"Mounts\":[{\"Target\":\"/workspace\",\"Source\":\"ovmsworkspace\",\"Type\":\"volume\"}],\"PortBindings\":{\"9001/tcp\":[{\"HostPort\":\"9001\"}],\"8001/tcp\":[{\"HostPort\":\"8001\"}]},\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}}}}"'
+    createOptions01=''
+fi  
+ 
+
+
 ################################ Write Config ############################################
 
 # Will overwrite file if it already exists
@@ -384,6 +394,8 @@ do
     prtline=${prtline//'<cpu or gpu>'/$cpuGpu}
     prtline=${prtline//'<Docker Runtime>'/$runtime}
     prtline=${prtline//'<platform>'/$platform}
+    prtline=${prtline//'<create option>'/$createOptions}
+    prtline=${prtline//'<create option 01>'/$createOptions01}
     prtline=${prtline//'$IOTHUB_CONNECTION_STRING'/$iotHubConnectionString}
     prtline=${prtline//'$AVA_PROVISIONING_TOKEN'/$avaProvisioningToken}
     echo $prtline

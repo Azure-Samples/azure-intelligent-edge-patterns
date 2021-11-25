@@ -159,7 +159,23 @@ class InferenceEngine(extension_pb2_grpc.MediaGraphExtensionServicer):
                                     ),
                                 ))
                     else:
-                        pass
+                        confidenceScore = prediction['entity']['tag']['confidence']
+                        if confidenceScore >= confidenceThreshold:
+                            objectLabel = prediction['entity']['tag']['value']
+
+                            inference = msg.media_sample.inferences.add()
+                            inference.type = inferencing_pb2.Inference.InferenceType.ENTITY
+                            inference.entity.CopyFrom(
+                                inferencing_pb2.Entity(
+                                    tag=inferencing_pb2.Tag(
+                                        value=objectLabel, confidence=confidenceScore),
+                                    box=inferencing_pb2.Rectangle(
+                                        l=prediction['entity']['box']['l'],
+                                        t=prediction['entity']['box']['t'],
+                                        w=prediction['entity']['box']['w'],
+                                        h=prediction['entity']['box']['h'],
+                                    ),
+                                ))
                     
             return msg
         except:
