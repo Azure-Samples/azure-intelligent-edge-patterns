@@ -34,7 +34,7 @@ const isAllMatchShape = (sourceShape: number[], targetShape: number[]) => {
 };
 
 const isAllowConnectType = (metaData: MetaData) => {
-  const allowType: MetadataType[] = ['bounding_box', 'classification'];
+  const allowType: MetadataType[] = ['bounding_box', 'classification', 'regression'];
   if (!metaData) return false;
 
   return allowType.includes(metaData.type);

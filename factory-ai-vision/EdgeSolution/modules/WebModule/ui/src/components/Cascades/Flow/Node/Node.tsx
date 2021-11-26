@@ -107,7 +107,9 @@ const Node = (props: Props) => {
           onDragStart={(e) => e.preventDefault()}
         />
         <Stack styles={{ root: classes.nodeWrapper }}>
-          <Text styles={{ root: classes.title }}>{selectedModel.name}</Text>
+          <Text styles={{ root: classes.title }}>
+            {selectedModel.name.length > 20 ? `${selectedModel.name.slice(0, 21)}...` : selectedModel.name}
+          </Text>
           <Text styles={{ root: classes.label }}>
             {type === 'sink' ? 'Export' : selectedModel.projectType}
           </Text>
