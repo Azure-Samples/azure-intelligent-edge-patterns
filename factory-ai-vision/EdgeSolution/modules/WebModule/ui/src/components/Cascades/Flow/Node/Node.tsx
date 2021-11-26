@@ -1,10 +1,11 @@
 import React, { memo, useState } from 'react';
-import { Stack, Text, IContextualMenuProps, IconButton, mergeStyleSets } from '@fluentui/react';
+import { Stack, Text, IContextualMenuProps, IconButton } from '@fluentui/react';
 import { Handle, addEdge, Connection } from 'react-flow-renderer';
 
 import { NodeType, TrainingProject } from '../../../../store/trainingProjectSlice';
 import { getSourceMetadata, getTargetMetadata, isValidConnection } from './utils';
 import { getModel, getNodeImage } from '../../utils';
+import { getNodeClasses } from './styles';
 
 interface Props {
   id: string;
@@ -14,31 +15,6 @@ interface Props {
   modelList: TrainingProject[];
   onSelected: () => void;
 }
-
-const getClasses = () =>
-  mergeStyleSets({
-    node: {
-      padding: 0,
-      width: '300px',
-      boxShadow: '0px 0.3px 0.9px rgba(0, 0, 0, 0.1), 0px 1.6px 3.6px rgba(0, 0, 0, 0.13)',
-      border: 'none',
-      backgroundColor: '#FFF',
-    },
-    nodeWrapper: { padding: '10px 12px', width: '220px' },
-    title: { fontSize: '14px', lineHeight: '20px' },
-    label: { fontSize: '14px', lineHeight: '20px', color: '#605E5C' },
-    controlBtn: {
-      padding: '10px',
-      marginRight: '12px',
-      justifyContent: 'center',
-      '& i': {
-        fontSize: '24px',
-      },
-      ':hover': {
-        cursor: 'pointer',
-      },
-    },
-  });
 
 const getHandlePointer = (length: number, id) => {
   if (length === 1) return 150;
@@ -61,7 +37,7 @@ const Node = (props: Props) => {
   const [selectedInput, setSelectedInput] = useState(-1);
   const [selectedOutput, setSelectedOutput] = useState(-1);
 
-  const classes = getClasses();
+  const classes = getNodeClasses();
   const selectedModel = getEnhanceSelectedModel(getModel(id, modelList));
 
   const menuProps: IContextualMenuProps = {
@@ -92,9 +68,6 @@ const Node = (props: Props) => {
           type="target"
           style={{
             left: getHandlePointer(selectedModel.inputs.length, id),
-            height: '10px',
-            width: '10px',
-            top: '-6px',
           }}
           onConnect={(params) => setElements((els) => addEdge(params, els))}
           isConnectable={true}
@@ -111,7 +84,9 @@ const Node = (props: Props) => {
       {selectedInput !== -1 && (
         <Stack styles={{ root: { position: 'absolute', top: '-45px' } }} tokens={{ childrenGap: 2 }}>
           <Stack>Type: {selectedModel.inputs[selectedInput].metadata.type}</Stack>
-          <Stack>Shape: {`[${selectedModel.inputs[selectedInput].metadata.shape.join(',')}]`}</Stack>
+          <Stack>
+            Shape: {`[${selectedModel.inputs[selectedInput].metadata.shape.filter((s) => s > 0).join(',')}]`}
+          </Stack>
         </Stack>
       )}
       {type === 'sink' && (
@@ -154,9 +129,6 @@ const Node = (props: Props) => {
           type="source"
           style={{
             left: getHandlePointer(selectedModel.outputs.length, id),
-            height: '10px',
-            width: '10px',
-            bottom: '-6px',
           }}
           isConnectable={true}
           onConnect={(params) => setElements((els) => addEdge(params, els))}
@@ -173,7 +145,10 @@ const Node = (props: Props) => {
       {selectedOutput !== -1 && (
         <Stack styles={{ root: { position: 'absolute', bottom: '-45px' } }} tokens={{ childrenGap: 2 }}>
           <Stack>Type: {selectedModel.outputs[selectedOutput].metadata.type}</Stack>
-          <Stack>Shape: {`[${selectedModel.outputs[selectedOutput].metadata.shape.join(',')}]`}</Stack>
+          <Stack>
+            Shape:{' '}
+            {`[${selectedModel.outputs[selectedOutput].metadata.shape.filter((s) => s > 0).join(',')}]`}
+          </Stack>
         </Stack>
       )}
     </>

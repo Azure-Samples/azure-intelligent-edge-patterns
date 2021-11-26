@@ -11,6 +11,7 @@ import ReactFlow, {
 
 import { TrainingProject, NodeType } from '../../../store/trainingProjectSlice';
 import { getModel } from '../utils';
+import { getFlowClasses } from './styles';
 
 import './dnd.css';
 
@@ -60,6 +61,8 @@ const edgeTypes = {
 
 const DnDFlow = (props: Props) => {
   const { elements, setElements, modelList, flowElementRef } = props;
+
+  const classes = getFlowClasses();
 
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
@@ -113,6 +116,20 @@ const DnDFlow = (props: Props) => {
     [setElements],
   );
 
+  const onDeleteEdge = useCallback(
+    (edgeId: string) => {
+      setElements((prev) => {
+        const noRemoveNodes = prev.filter((ele) => isNode(ele)) as Node[];
+
+        const allEdges = prev.filter((ele) => isEdge(ele)) as Edge[];
+        const noRemoveEdges = allEdges.filter((edge) => edge.id !== edgeId);
+
+        return [...noRemoveNodes, ...noRemoveEdges];
+      });
+    },
+    [setElements],
+  );
+
   return (
     <div className="dndflow">
       <ReactFlowProvider>
@@ -126,6 +143,7 @@ const DnDFlow = (props: Props) => {
             matchTargetLabels={getSourceMetadata(selectedNode, elements, modelList)}
           />
           <ReactFlow
+            className={classes.flow}
             ref={flowElementRef}
             elements={elements}
             nodeTypes={{
@@ -186,11 +204,16 @@ const DnDFlow = (props: Props) => {
                     setElements={setElements}
                     onDelete={() => onDeleteNode(id)}
                     onSelected={() => setSelectedNode(node)}
+                    modelList={modelList}
                   />
                 );
               },
             }}
-            edgeTypes={edgeTypes}
+            edgeTypes={{
+              default: (edge) => {
+                return <CustomEdge {...edge} onDeleteEdge={(edgeId: string) => onDeleteEdge(edgeId)} />;
+              },
+            }}
             // onConnect={onConnect}
             onElementsRemove={onElementsRemove}
             onLoad={onLoad}

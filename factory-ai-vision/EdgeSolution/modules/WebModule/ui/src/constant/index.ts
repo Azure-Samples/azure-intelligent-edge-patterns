@@ -1,6 +1,7 @@
 import Url from './Url';
+import { theme } from './theme';
 
-export { Url };
+export { Url, theme };
 
 export type TrainStatus =
   | 'Finding project'

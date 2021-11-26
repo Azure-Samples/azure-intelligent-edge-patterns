@@ -1,10 +1,11 @@
 import React, { useState } from 'react';
-import { Stack, Text, Icon, mergeStyleSets } from '@fluentui/react';
+import { Stack, Text, Icon } from '@fluentui/react';
 import { Handle, addEdge, Connection } from 'react-flow-renderer';
 
 import { TrainingProject } from '../../../../store/trainingProjectSlice';
 import { getSourceMetadata, getTargetMetadata, isValidConnection } from './utils';
 import { getModel } from '../../utils';
+import { getSourceNodeClasses } from './styles';
 
 interface Props {
   id: string;
@@ -12,25 +13,12 @@ interface Props {
   modelList: TrainingProject[];
 }
 
-const getClasses = () =>
-  mergeStyleSets({
-    root: {
-      width: '150px',
-      border: '1px solid #C4C4C4',
-      borderRadius: '2px',
-      padding: '15px',
-      backgroundColor: '#FFF',
-    },
-    title: { fontSize: '24px' },
-    describe: { fontSize: '14px', lineHeight: '20px' },
-  });
-
 const SourceNode = (props: Props) => {
   const { id, setElements, modelList } = props;
 
-  const [isBottomHandle, setIsBottomHandle] = useState(false);
+  const [isHover, setIsHover] = useState(false);
 
-  const classes = getClasses();
+  const classes = getSourceNodeClasses();
 
   const selectedModel = getModel(id, modelList);
 
@@ -47,7 +35,7 @@ const SourceNode = (props: Props) => {
         <Icon styles={{ root: classes.title }} iconName="Camera" />
         <Text styles={{ root: classes.describe }}>Camera Input</Text>
       </Stack>
-      {selectedModel.outputs.map((output, id) => (
+      {selectedModel.outputs.map((_, id) => (
         <Handle
           key={id}
           id={`${id}`}
@@ -56,19 +44,18 @@ const SourceNode = (props: Props) => {
           position="bottom"
           // @ts-ignore
           onConnect={(params) => setElements((els) => addEdge(params, els))}
-          style={{ height: '10px', width: '10px', bottom: '-6px' }}
           isValidConnection={(connection: Connection) =>
             isValidConnection(
               getSourceMetadata(connection, selectedModel),
               getTargetMetadata(connection, getModel(connection.target, modelList)),
             )
           }
-          onMouseEnter={() => setIsBottomHandle(true)}
-          onMouseLeave={() => setIsBottomHandle(false)}
+          onMouseEnter={() => setIsHover(true)}
+          onMouseLeave={() => setIsHover(false)}
         />
       ))}
-      {isBottomHandle && (
-        <Stack styles={{ root: { position: 'absolute' } }} tokens={{ childrenGap: 2 }}>
+      {isHover && (
+        <Stack styles={{ root: { position: 'absolute', bottom: '-45px' } }} tokens={{ childrenGap: 2 }}>
           <Stack>Type: {selectedModel.outputs[0].metadata.type}</Stack>
           <Stack>Shape: {`[${selectedModel.outputs[0].metadata.shape.join(',')}]`}</Stack>
         </Stack>

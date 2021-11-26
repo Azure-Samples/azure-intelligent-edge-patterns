@@ -20,13 +20,13 @@ export type Params = { confidence_threshold: string; filter_label_id: string };
 
 export type NodeType = 'source' | 'openvino_model' | 'openvino_library' | 'sink' | 'customvision_model';
 type TrainingProjectCategory = 'customvision' | 'openvino';
-type MetadataType = 'image' | 'bounding_box' | 'classification' | 'regression';
+export type MetadataType = 'image' | 'bounding_box' | 'classification' | 'regression';
 export type ProjectType = 'ObjectDetection' | 'Classification';
 export type ClassificationType = '' | 'Multiclass' | 'Multilabel';
 
 export type Metadata = {
   type: MetadataType;
-  shape: string[];
+  shape: number[];
   layout: string[];
   color_format: string;
   labels?: string[];

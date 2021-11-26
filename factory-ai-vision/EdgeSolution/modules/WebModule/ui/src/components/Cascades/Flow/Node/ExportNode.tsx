@@ -1,6 +1,11 @@
-import React, { memo } from 'react';
-import { Stack, Text, IContextualMenuProps, IconButton, mergeStyleSets } from '@fluentui/react';
-import { Handle, addEdge } from 'react-flow-renderer';
+import React, { memo, useState } from 'react';
+import { Stack, Text, IContextualMenuProps, IconButton } from '@fluentui/react';
+import { Handle, addEdge, Connection } from 'react-flow-renderer';
+
+import { TrainingProject } from '../../../../store/trainingProjectSlice';
+import { getExportNodeClasses } from './styles';
+import { getSourceMetadata, getTargetMetadata, isValidConnection } from './utils';
+import { getModel } from '../../utils';
 
 interface Props {
   id: string;
@@ -11,38 +16,17 @@ interface Props {
   setElements: any;
   onDelete: () => void;
   onSelected: () => void;
+  modelList: TrainingProject[];
 }
 
-const getClasses = () =>
-  mergeStyleSets({
-    node: {
-      padding: 0,
-      width: '300px',
-      boxShadow: '0px 0.3px 0.9px rgba(0, 0, 0, 0.1), 0px 1.6px 3.6px rgba(0, 0, 0, 0.13)',
-      border: 'none',
-      backgroundColor: '#FFF',
-    },
-    nodeWrapper: { padding: '10px 12px', width: '220px' },
-    title: { fontSize: '14px', lineHeight: '20px' },
-    label: { fontSize: '14px', lineHeight: '20px', color: '#605E5C' },
-    controlBtn: {
-      padding: '10px',
-      marginRight: '12px',
-      justifyContent: 'center',
-      '& i': {
-        fontSize: '24px',
-      },
-      ':hover': {
-        cursor: 'pointer',
-      },
-    },
-  });
-
 const ExportNode = (props: Props) => {
-  const { setElements, onDelete, onSelected, data } = props;
+  const { setElements, onDelete, onSelected, data, modelList, id } = props;
   const { name } = data;
 
-  const classes = getClasses();
+  const classes = getExportNodeClasses();
+
+  const selectedModel = getModel(id, modelList);
+  const [isHover, setIsHover] = useState(false);
 
   const menuProps: IContextualMenuProps = {
     items: [
@@ -70,12 +54,26 @@ const ExportNode = (props: Props) => {
         type="target"
         style={{
           left: 150,
-          height: '10px',
-          width: '10px',
-          top: '-6px',
         }}
         onConnect={(params) => setElements((els) => addEdge(params, els))}
+        isValidConnection={(connection: Connection) => {
+          return isValidConnection(
+            getSourceMetadata(connection, getModel(connection.source, modelList)),
+            getTargetMetadata(connection, selectedModel),
+          );
+        }}
+        onMouseEnter={() => setIsHover(true)}
+        onMouseLeave={() => setIsHover(false)}
       />
+      {isHover && (
+        <Stack styles={{ root: { position: 'absolute', top: '-60px' } }} tokens={{ childrenGap: 2 }}>
+          <Stack>
+            <Stack>only bounding_box,</Stack>
+            <Stack>classification,</Stack>
+            <Stack>regression</Stack>
+          </Stack>
+        </Stack>
+      )}
       <Stack horizontal styles={{ root: classes.node }}>
         <img
           style={{ height: '60px', width: '60px' }}
