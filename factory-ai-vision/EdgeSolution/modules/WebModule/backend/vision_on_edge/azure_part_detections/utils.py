@@ -72,6 +72,7 @@ def if_trained_then_deploy_worker(part_detection_id):
     # =====================================================
     # 3. Deploy Model and params                        ===
     # =====================================================
+
     logger.info("Project train/export success.")
     logger.info("Deploying...")
     try:
@@ -84,8 +85,8 @@ def if_trained_then_deploy_worker(part_detection_id):
     # 4. Deployed! Saving                               ===
     # =====================================================
     part_detection_obj.deployed = True
-    part_detection_obj.deploy_timestamp = timezone.now()
     part_detection_obj.has_configured = True
+    part_detection_obj.deploy_timestamp = timezone.now()
     part_detection_obj.save()
 
     logger.info("PartDetection is deployed before: %s", part_detection_obj.deployed)
@@ -102,10 +103,10 @@ def deploy_worker(part_detection_id):
     """
     REQUEST_TIMEOUT = 60
     instance: PartDetection = PartDetection.objects.get(pk=part_detection_id)
-    if not instance.has_configured:
-        logger.error("This PartDetection is not configured")
-        logger.error("Not sending any request to inference")
-        return
+    # if not instance.has_configured:
+    #     logger.error("This PartDetection is not configured")
+    #     logger.error("Not sending any request to inference")
+    #     return
     confidence_min = getattr(instance, "accuracyRangeMin", 30)
     confidence_max = getattr(instance, "accuracyRangeMax", 80)
     max_images = getattr(instance, "maxImages", 10)

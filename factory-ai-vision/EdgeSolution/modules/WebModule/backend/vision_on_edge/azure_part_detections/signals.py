@@ -47,6 +47,7 @@ def azure_part_detection_post_save_deploy_handler(**kwargs):
     # set_voe_config
     logger.warning("cascade post save: send config to model manager")
 
+    # need to move out post_save because it would be triggered many times
     if instance.deployment_type == "cascade":
         url = "http://" + str(model_manager_module_url()) + "/set_voe_config"
         data = {"name": instance.cascade.name, "config": instance.cascade.flow}
