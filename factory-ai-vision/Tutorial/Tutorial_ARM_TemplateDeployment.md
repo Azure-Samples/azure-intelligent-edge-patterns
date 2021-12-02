@@ -105,7 +105,8 @@ Definition:   Specify the Architecture of the Edge Device.
 ### 1.2.3: Module Runtime: 
 Definition:   Select value for Runtime for detector module on Edge Device.  
 
-•	Set it to “CPU” to use if CPU to run detector module, or to use vpu set it to “MOVIDIUS“
+•	Set it to “CPU” to use if CPU to run detector module, 
+<br> or to use vpu set it to “MOVIDIUS“. Please click [here](https://docs.openvino.ai/latest/openvino_docs_install_guides_installing_openvino_linux_ivad_vpu.html#doxid-openvino-docs-install-guides-installing-openvino-linux-ivad-vpu) and [here](https://docs.openvino.ai/2021.4/openvino_docs_install_guides_installing_openvino_docker_linux.html#build_docker_image_for_intel_vision_accelerator_design_with_intel_movidius_vpus) for more information.
 
 ![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/module%20runtime_20210904.png?raw=true) 
 
