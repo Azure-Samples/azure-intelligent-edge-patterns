@@ -1,9 +1,9 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { Stack, Text, IContextualMenuProps, IconButton } from '@fluentui/react';
-import { Handle, addEdge, Connection } from 'react-flow-renderer';
+import { Handle, addEdge, Connection, Edge, Node, isNode } from 'react-flow-renderer';
 
-import { NodeType, TrainingProject } from '../../../../store/trainingProjectSlice';
-import { getSourceMetadata, getTargetMetadata, isValidConnection } from './utils';
+import { NodeType, TrainingProject, MetadataType } from '../../../../store/trainingProjectSlice';
+import { isValidConnection } from './utils';
 import { getModel, getNodeImage } from '../../utils';
 import { getNodeClasses } from './styles';
 
@@ -14,6 +14,7 @@ interface Props {
   onDelete: () => void;
   modelList: TrainingProject[];
   onSelected: () => void;
+  connectMap: Connection[];
 }
 
 const getHandlePointer = (length: number, id) => {
@@ -23,16 +24,19 @@ const getHandlePointer = (length: number, id) => {
   return 150;
 };
 
-const LIMIT_OUTPUTS_NAME = ['coordinates', 'confidences', 'label_ids'];
+const LIMIT_OUTPUTS_TYPE: MetadataType[] = ['classification', 'regression'];
 
 const getEnhanceSelectedModel = (model: TrainingProject): TrainingProject => {
   if (model.nodeType === 'openvino_library')
-    return { ...model, outputs: model.outputs.filter((output) => !LIMIT_OUTPUTS_NAME.includes(output.name)) };
+    return {
+      ...model,
+      outputs: model.outputs.filter((output) => !LIMIT_OUTPUTS_TYPE.includes(output.metadata.type)),
+    };
   return model;
 };
 
-const Node = (props: Props) => {
-  const { id, type, setElements, onDelete, modelList, onSelected } = props;
+const ModelNode = (props: Props) => {
+  const { id, type, setElements, onDelete, modelList, onSelected, connectMap } = props;
 
   const [selectedInput, setSelectedInput] = useState(-1);
   const [selectedOutput, setSelectedOutput] = useState(-1);
@@ -57,6 +61,28 @@ const Node = (props: Props) => {
     ],
   };
 
+  const onConnectEdge = useCallback(
+    (params: Connection) =>
+      setElements((els: (Node<any> | Edge<any>)[]) => {
+        const newElements = els.map((element) => {
+          if (isNode(element)) {
+            return {
+              ...element,
+              data: {
+                ...element.data,
+                connectMap: [...(element.data.connectMap ?? []), params],
+              },
+            };
+          }
+
+          return element;
+        });
+
+        return addEdge(params, newElements);
+      }),
+    [setElements],
+  );
+
   return (
     <>
       {selectedModel.inputs.map((_, id) => (
@@ -69,13 +95,20 @@ const Node = (props: Props) => {
           style={{
             left: getHandlePointer(selectedModel.inputs.length, id),
           }}
-          onConnect={(params) => setElements((els) => addEdge(params, els))}
+          onConnect={onConnectEdge}
           isConnectable={true}
           isValidConnection={(connection: Connection) => {
             return isValidConnection(
-              getSourceMetadata(connection, getModel(connection.source, modelList)),
-              getTargetMetadata(connection, selectedModel),
+              getModel(connection.source, modelList),
+              selectedModel,
+              connection,
+              connectMap,
             );
+            // return isValidConnection(
+            //   getSourceMetadata(connection, getModel(connection.source, modelList)),
+            //   getTargetMetadata(connection, selectedModel),
+            // );
+            // return true;
           }}
           onMouseEnter={() => setSelectedInput(id)}
           onMouseLeave={() => setSelectedInput(-1)}
@@ -133,15 +166,21 @@ const Node = (props: Props) => {
             left: getHandlePointer(selectedModel.outputs.length, id),
           }}
           isConnectable={true}
-          onConnect={(params) => setElements((els) => addEdge(params, els))}
+          onConnect={onConnectEdge}
           onMouseEnter={() => setSelectedOutput(id)}
           onMouseLeave={() => setSelectedOutput(-1)}
-          isValidConnection={(connection: Connection) =>
-            isValidConnection(
-              getSourceMetadata(connection, selectedModel),
-              getTargetMetadata(connection, getModel(connection.target, modelList)),
-            )
-          }
+          isValidConnection={(connection: Connection) => {
+            return isValidConnection(
+              selectedModel,
+              getModel(connection.target, modelList),
+              connection,
+              connectMap,
+            );
+            // return isValidConnection(
+            //   getSourceMetadata(connection, selectedModel),
+            //   getTargetMetadata(connection, getModel(connection.target, modelList)),
+            // );
+          }}
         />
       ))}
       {selectedOutput !== -1 && (
@@ -157,4 +196,4 @@ const Node = (props: Props) => {
   );
 };
 
-export default memo(Node);
+export default memo(ModelNode);

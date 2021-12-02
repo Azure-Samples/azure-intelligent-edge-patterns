@@ -7,6 +7,7 @@ import ReactFlow, {
   isEdge,
   Node,
   Edge,
+  Connection,
 } from 'react-flow-renderer';
 
 import { TrainingProject, NodeType } from '../../../store/trainingProjectSlice';
@@ -16,7 +17,7 @@ import { getFlowClasses } from './styles';
 import './dnd.css';
 
 import SidebarList from './Sidebar/SidebarList';
-import NodeCard from './Node/Node';
+import ModelNode from './Node/ModelNode';
 import CustomEdge from './CustomEdge';
 import InitialNode from './Node/SourceNode';
 import ExportNodeCard from './Node/ExportNode';
@@ -55,10 +56,6 @@ const getSourceMetadata = (
   return matchModels[0].metadata.labels;
 };
 
-const edgeTypes = {
-  default: CustomEdge,
-};
-
 const DnDFlow = (props: Props) => {
   const { elements, setElements, modelList, flowElementRef } = props;
 
@@ -67,6 +64,8 @@ const DnDFlow = (props: Props) => {
   const reactFlowWrapper = useRef(null);
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
+
+  console.log('elements', elements);
 
   const onElementsRemove = (elementsToRemove) => setElements((els) => removeElements(elementsToRemove, els));
   const onLoad = (_reactFlowInstance) => setReactFlowInstance(_reactFlowInstance);
@@ -82,14 +81,15 @@ const DnDFlow = (props: Props) => {
     const reactFlowBounds = reactFlowWrapper.current.getBoundingClientRect();
     const type = event.dataTransfer.getData('application/reactflow') as NodeType;
     const id = event.dataTransfer.getData('id');
+    const connectMap = event.dataTransfer.getData('connectMap');
 
     const position = reactFlowInstance.project({
       x: event.clientX - reactFlowBounds.left,
       y: event.clientY - reactFlowBounds.top,
     });
 
-    setElements((es) =>
-      es.concat({
+    setElements((es) => {
+      return es.concat({
         id: getNodeId(id, es.length),
         type,
         position,
@@ -97,9 +97,10 @@ const DnDFlow = (props: Props) => {
           id,
           name: type === 'sink' ? 'Export' : null,
           params: getNodeParams(id, modelList),
+          connectMap: JSON.parse(connectMap),
         },
-      }),
-    );
+      });
+    });
   };
 
   const onDeleteNode = useCallback(
@@ -119,12 +120,30 @@ const DnDFlow = (props: Props) => {
   const onDeleteEdge = useCallback(
     (edgeId: string) => {
       setElements((prev) => {
-        const noRemoveNodes = prev.filter((ele) => isNode(ele)) as Node[];
+        const deletedEdgeIndex = prev.findIndex((element) => isEdge(element) && element.id === edgeId);
+        const deletedEdge = prev[deletedEdgeIndex] as Edge;
 
-        const allEdges = prev.filter((ele) => isEdge(ele)) as Edge[];
-        const noRemoveEdges = allEdges.filter((edge) => edge.id !== edgeId);
+        prev.splice(deletedEdgeIndex, 1);
+        const adjustedConnectMapElements = prev.map((element) => {
+          if (isNode(element)) {
+            const newConnectMap = (element.data.connectMap as Connection[]).filter(
+              (connect) =>
+                connect.source !== deletedEdge.source &&
+                connect.sourceHandle !== deletedEdge.sourceHandle &&
+                connect.target !== deletedEdge.target &&
+                connect.targetHandle !== deletedEdge.targetHandle,
+            );
 
-        return [...noRemoveNodes, ...noRemoveEdges];
+            return {
+              ...element,
+              data: { ...element.data, connectMap: newConnectMap },
+            };
+          }
+
+          return element;
+        });
+
+        return adjustedConnectMapElements;
       });
     },
     [setElements],
@@ -133,7 +152,10 @@ const DnDFlow = (props: Props) => {
   return (
     <div className="dndflow">
       <ReactFlowProvider>
-        <SidebarList modelList={modelList} />
+        <SidebarList
+          modelList={modelList}
+          connectMap={elements.length > 0 ? elements[0].data?.connectMap : []}
+        />
         <div className="reactflow-wrapper" ref={reactFlowWrapper}>
           <NodePanel
             selectedNode={selectedNode}
@@ -148,49 +170,59 @@ const DnDFlow = (props: Props) => {
             elements={elements}
             nodeTypes={{
               source: (node: Node) => {
-                const { id } = node;
-
-                return <InitialNode id={id} setElements={setElements} modelList={modelList} />;
-              },
-              openvino_model: (node: Node) => {
-                const { id } = node;
+                const { id, data } = node;
 
                 return (
-                  <NodeCard
+                  <InitialNode
+                    id={id}
+                    setElements={setElements}
+                    modelList={modelList}
+                    connectMap={data.connectMap}
+                  />
+                );
+              },
+              openvino_model: (node: Node) => {
+                const { id, data } = node;
+
+                return (
+                  <ModelNode
                     id={id}
                     modelList={modelList}
                     type="openvino_model"
                     setElements={setElements}
                     onDelete={() => onDeleteNode(id)}
                     onSelected={() => setSelectedNode(node)}
+                    connectMap={data.connectMap}
                   />
                 );
               },
               customvision_model: (node: Node) => {
-                const { id } = node;
+                const { id, data } = node;
 
                 return (
-                  <NodeCard
+                  <ModelNode
                     id={id}
                     modelList={modelList}
                     type="customvision_model"
                     setElements={setElements}
                     onDelete={() => onDeleteNode(id)}
                     onSelected={() => setSelectedNode(node)}
+                    connectMap={data.connectMap}
                   />
                 );
               },
               openvino_library: (node: Node) => {
-                const { id } = node;
+                const { id, data } = node;
 
                 return (
-                  <NodeCard
+                  <ModelNode
                     id={id}
                     modelList={modelList}
                     type="openvino_library"
                     setElements={setElements}
                     onDelete={() => onDeleteNode(id)}
                     onSelected={() => setSelectedNode(node)}
+                    connectMap={data.connectMap}
                   />
                 );
               },
@@ -205,6 +237,7 @@ const DnDFlow = (props: Props) => {
                     onDelete={() => onDeleteNode(id)}
                     onSelected={() => setSelectedNode(node)}
                     modelList={modelList}
+                    connectMap={data.connectMap}
                   />
                 );
               },
@@ -214,7 +247,6 @@ const DnDFlow = (props: Props) => {
                 return <CustomEdge {...edge} onDeleteEdge={(edgeId: string) => onDeleteEdge(edgeId)} />;
               },
             }}
-            // onConnect={onConnect}
             onElementsRemove={onElementsRemove}
             onLoad={onLoad}
             onDrop={onDrop}

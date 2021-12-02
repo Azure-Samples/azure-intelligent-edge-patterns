@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback } from 'react';
 import { Stack, Text, Icon } from '@fluentui/react';
-import { Handle, addEdge, Connection } from 'react-flow-renderer';
+import { Handle, addEdge, Connection, Node, Edge, isNode } from 'react-flow-renderer';
 
 import { TrainingProject } from '../../../../store/trainingProjectSlice';
-import { getSourceMetadata, getTargetMetadata, isValidConnection } from './utils';
+import { isValidConnection } from './utils';
 import { getModel } from '../../utils';
 import { getSourceNodeClasses } from './styles';
 
@@ -11,16 +11,39 @@ interface Props {
   id: string;
   setElements: any;
   modelList: TrainingProject[];
+  connectMap: Connection[];
 }
 
 const SourceNode = (props: Props) => {
-  const { id, setElements, modelList } = props;
+  const { id, setElements, modelList, connectMap } = props;
 
   const [isHover, setIsHover] = useState(false);
 
   const classes = getSourceNodeClasses();
 
   const selectedModel = getModel(id, modelList);
+
+  const onConnectEdge = useCallback(
+    (params: Connection) =>
+      setElements((els: (Node<any> | Edge<any>)[]) => {
+        const newElements = els.map((element) => {
+          if (isNode(element)) {
+            return {
+              ...element,
+              data: {
+                ...element.data,
+                connectMap: [...(element.data.connectMap ?? []), params],
+              },
+            };
+          }
+
+          return element;
+        });
+
+        return addEdge(params, newElements);
+      }),
+    [setElements],
+  );
 
   return (
     <>
@@ -43,12 +66,9 @@ const SourceNode = (props: Props) => {
           // @ts-ignore
           position="bottom"
           // @ts-ignore
-          onConnect={(params) => setElements((els) => addEdge(params, els))}
+          onConnect={onConnectEdge}
           isValidConnection={(connection: Connection) =>
-            isValidConnection(
-              getSourceMetadata(connection, selectedModel),
-              getTargetMetadata(connection, getModel(connection.target, modelList)),
-            )
+            isValidConnection(selectedModel, getModel(connection.target, modelList), connection, connectMap)
           }
           onMouseEnter={() => setIsHover(true)}
           onMouseLeave={() => setIsHover(false)}

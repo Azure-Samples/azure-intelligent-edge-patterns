@@ -1,5 +1,6 @@
 import React, { useCallback } from 'react';
-import { Stack, Text, Label, IContextualMenuProps } from '@fluentui/react';
+import { Stack, Text, Label } from '@fluentui/react';
+import { Connection } from 'react-flow-renderer';
 
 import { TrainingProject, NodeType } from '../../../../store/trainingProjectSlice';
 import { getClasses } from './style';
@@ -9,6 +10,7 @@ import { convertProjectType } from '../../../utils';
 interface Props {
   model: TrainingProject;
   type: NodeType;
+  connectMap: Connection[];
 }
 
 const isDraggableModel = (model: TrainingProject) => {
@@ -25,16 +27,21 @@ const isDraggableModel = (model: TrainingProject) => {
   return false;
 };
 
-const Model = (props: Props) => {
-  const { model, type } = props;
+const SideBarCard = (props: Props) => {
+  const { model, type, connectMap } = props;
 
   const classes = getClasses();
 
-  const onDragStart = useCallback((event, nodeType, selectId) => {
-    event.dataTransfer.setData('application/reactflow', nodeType);
-    event.dataTransfer.setData('id', selectId);
-    event.dataTransfer.effectAllowed = 'move';
-  }, []);
+  const onDragStart = useCallback(
+    (event, nodeType, selectId) => {
+      event.dataTransfer.setData('application/reactflow', nodeType);
+      event.dataTransfer.setData('id', selectId);
+      event.dataTransfer.setData('connectMap', JSON.stringify(connectMap));
+
+      event.dataTransfer.effectAllowed = 'move';
+    },
+    [connectMap],
+  );
 
   return (
     <>
@@ -73,4 +80,4 @@ const Model = (props: Props) => {
   );
 };
 
-export default Model;
+export default SideBarCard;

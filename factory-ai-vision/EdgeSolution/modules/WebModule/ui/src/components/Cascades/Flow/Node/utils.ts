@@ -12,14 +12,14 @@ type ValidationNode = {
   nodeType: NodeType;
 };
 
-export const getSourceMetadata = (connect: Connection, model: TrainingProject): ValidationNode => {
+const getSourceMetadata = (connect: Connection, model: TrainingProject): ValidationNode => {
   return {
     metadata: model.outputs[connect.sourceHandle].metadata ?? null,
     nodeType: model.nodeType,
   };
 };
 
-export const getTargetMetadata = (connect: Connection, model: TrainingProject): ValidationNode => {
+const getTargetMetadata = (connect: Connection, model: TrainingProject): ValidationNode => {
   return {
     metadata: model.inputs[connect.targetHandle].metadata ?? null,
     nodeType: model.nodeType,
@@ -40,10 +40,28 @@ const isAllowConnectType = (metaData: MetaData) => {
   return allowType.includes(metaData.type);
 };
 
-export const isValidConnection = (source: ValidationNode, target: ValidationNode) => {
+export const isValidConnection = (
+  sourceModel: TrainingProject,
+  targetModel: TrainingProject,
+  currentConnection: Connection,
+  connectMap: Connection[],
+) => {
+  if (connectMap.length > 0) {
+    const matchConnect = connectMap.find(
+      (connect) =>
+        connect.target === currentConnection.target &&
+        connect.targetHandle === currentConnection.targetHandle,
+    );
+
+    if (!!matchConnect) return false;
+  }
+
+  const sourceMetadata = getSourceMetadata(currentConnection, sourceModel);
+  const targetMetadata = getTargetMetadata(currentConnection, targetModel);
+
   // connect export node metadata type has includes: bounding_box,classification
-  if (source.nodeType === 'sink' || target.nodeType === 'sink') {
-    if (isAllowConnectType(target.metadata) || isAllowConnectType(source.metadata)) {
+  if (sourceMetadata.nodeType === 'sink' || targetMetadata.nodeType === 'sink') {
+    if (isAllowConnectType(targetMetadata.metadata) || isAllowConnectType(sourceMetadata.metadata)) {
       return true;
     } else {
       return false;
@@ -52,8 +70,11 @@ export const isValidConnection = (source: ValidationNode, target: ValidationNode
 
   // compare type & shape
   if (
-    source.metadata.type === target.metadata.type &&
-    isAllMatchShape(nonNegativeNumber(source.metadata.shape), nonNegativeNumber(target.metadata.shape))
+    sourceMetadata.metadata.type === targetMetadata.metadata.type &&
+    isAllMatchShape(
+      nonNegativeNumber(sourceMetadata.metadata.shape),
+      nonNegativeNumber(targetMetadata.metadata.shape),
+    )
   )
     return true;
 

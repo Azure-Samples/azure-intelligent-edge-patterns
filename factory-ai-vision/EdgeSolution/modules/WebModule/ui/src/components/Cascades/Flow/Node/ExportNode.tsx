@@ -1,10 +1,10 @@
-import React, { memo, useState } from 'react';
+import React, { memo, useState, useCallback } from 'react';
 import { Stack, Text, IContextualMenuProps, IconButton } from '@fluentui/react';
-import { Handle, addEdge, Connection } from 'react-flow-renderer';
+import { Handle, addEdge, Connection, Node, Edge, isNode } from 'react-flow-renderer';
 
 import { TrainingProject } from '../../../../store/trainingProjectSlice';
 import { getExportNodeClasses } from './styles';
-import { getSourceMetadata, getTargetMetadata, isValidConnection } from './utils';
+import { isValidConnection } from './utils';
 import { getModel } from '../../utils';
 
 interface Props {
@@ -17,10 +17,11 @@ interface Props {
   onDelete: () => void;
   onSelected: () => void;
   modelList: TrainingProject[];
+  connectMap: Connection[];
 }
 
 const ExportNode = (props: Props) => {
-  const { setElements, onDelete, onSelected, data, modelList, id } = props;
+  const { setElements, onDelete, onSelected, data, modelList, id, connectMap } = props;
   const { name } = data;
 
   const classes = getExportNodeClasses();
@@ -45,6 +46,28 @@ const ExportNode = (props: Props) => {
     ],
   };
 
+  const onConnectEdge = useCallback(
+    (params: Connection) =>
+      setElements((els: (Node<any> | Edge<any>)[]) => {
+        const newElements = els.map((element) => {
+          if (isNode(element)) {
+            return {
+              ...element,
+              data: {
+                ...element.data,
+                connectMap: [...(element.data.connectMap ?? []), params],
+              },
+            };
+          }
+
+          return element;
+        });
+
+        return addEdge(params, newElements);
+      }),
+    [setElements],
+  );
+
   return (
     <>
       <Handle
@@ -55,12 +78,19 @@ const ExportNode = (props: Props) => {
         style={{
           left: 150,
         }}
-        onConnect={(params) => setElements((els) => addEdge(params, els))}
+        onConnect={onConnectEdge}
         isValidConnection={(connection: Connection) => {
           return isValidConnection(
-            getSourceMetadata(connection, getModel(connection.source, modelList)),
-            getTargetMetadata(connection, selectedModel),
+            getModel(connection.source, modelList),
+            selectedModel,
+            connection,
+            connectMap,
           );
+
+          // return isValidConnection(
+          //   getSourceMetadata(connection, getModel(connection.source, modelList)),
+          //   getTargetMetadata(connection, selectedModel),
+          // );
         }}
         onMouseEnter={() => setIsHover(true)}
         onMouseLeave={() => setIsHover(false)}

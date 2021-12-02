@@ -29,7 +29,7 @@ const getSourceElements = (modelList: TrainingProject[]) => {
     {
       id: `0_${sourceNode.id}`,
       type: 'source' as NodeType,
-      data: { id: sourceNode.id },
+      data: { id: sourceNode.id, connectMap: [] },
       position: { x: 350, y: 50 },
     },
   ];
