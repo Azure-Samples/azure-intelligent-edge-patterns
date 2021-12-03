@@ -19,7 +19,7 @@ import './dnd.css';
 import SidebarList from './Sidebar/SidebarList';
 import ModelNode from './Node/ModelNode';
 import CustomEdge from './CustomEdge';
-import InitialNode from './Node/SourceNode';
+import SourceNode from './Node/SourceNode';
 import ExportNodeCard from './Node/ExportNode';
 import NodePanel from './NodePanel';
 
@@ -65,8 +65,6 @@ const DnDFlow = (props: Props) => {
   const [reactFlowInstance, setReactFlowInstance] = useState(null);
   const [selectedNode, setSelectedNode] = useState(null);
 
-  console.log('elements', elements);
-
   const onElementsRemove = (elementsToRemove) => setElements((els) => removeElements(elementsToRemove, els));
   const onLoad = (_reactFlowInstance) => setReactFlowInstance(_reactFlowInstance);
 
@@ -103,20 +101,40 @@ const DnDFlow = (props: Props) => {
     });
   };
 
+  /**
+   * connectMap is manual add in node card, if want to delete Node, Edge, had edge Node
+   * need to update every node card connectMap
+   */
+
   const onDeleteNode = useCallback(
     (nodeId: string) => {
       setElements((prev) => {
-        const noRemoveNodes = prev.filter((ele) => isNode(ele)).filter((ele) => ele.id !== nodeId) as Node[];
+        const deletedNode = prev.find((element) => isNode(element) && element.id === nodeId) as Node;
+        const connectMap = prev[0].data.connectMap as Connection[];
 
-        const allEdges = prev.filter((ele) => isEdge(ele)) as Edge[];
-        const noRemoveEdges = allEdges.filter((edge) => ![edge.target, edge.source].includes(nodeId));
+        const newConnectMap = connectMap.filter(
+          (connect) => connect.source !== deletedNode.id && connect.target !== deletedNode.id,
+        );
 
-        return [...noRemoveNodes, ...noRemoveEdges];
+        const newPrev: (Node<any> | Edge<any>)[] = [];
+
+        prev.forEach((element) => {
+          if (element.id === deletedNode.id) return;
+          if (isEdge(element) && [element.source, element.target].includes(nodeId)) return;
+
+          newPrev.push({ ...element, data: { ...element.data, connectMap: newConnectMap } });
+        });
+
+        return newPrev;
       });
     },
     [setElements],
   );
 
+  /**
+   * connectMap is manual add in node card, if want to delete Node, Edge, had edge Node
+   * need to update every node card connectMap
+   */
   const onDeleteEdge = useCallback(
     (edgeId: string) => {
       setElements((prev) => {
@@ -170,11 +188,11 @@ const DnDFlow = (props: Props) => {
             elements={elements}
             nodeTypes={{
               source: (node: Node) => {
-                const { id, data } = node;
+                const { data } = node;
 
                 return (
-                  <InitialNode
-                    id={id}
+                  <SourceNode
+                    id={data.id}
                     setElements={setElements}
                     modelList={modelList}
                     connectMap={data.connectMap}
@@ -186,7 +204,7 @@ const DnDFlow = (props: Props) => {
 
                 return (
                   <ModelNode
-                    id={id}
+                    id={data.id}
                     modelList={modelList}
                     type="openvino_model"
                     setElements={setElements}
@@ -201,7 +219,7 @@ const DnDFlow = (props: Props) => {
 
                 return (
                   <ModelNode
-                    id={id}
+                    id={data.id}
                     modelList={modelList}
                     type="customvision_model"
                     setElements={setElements}
@@ -216,7 +234,7 @@ const DnDFlow = (props: Props) => {
 
                 return (
                   <ModelNode
-                    id={id}
+                    id={data.id}
                     modelList={modelList}
                     type="openvino_library"
                     setElements={setElements}
@@ -231,7 +249,6 @@ const DnDFlow = (props: Props) => {
 
                 return (
                   <ExportNodeCard
-                    id={id}
                     data={data}
                     setElements={setElements}
                     onDelete={() => onDeleteNode(id)}

@@ -1,14 +1,15 @@
 import React, { memo, useState, useCallback } from 'react';
 import { Stack, Text, IContextualMenuProps, IconButton } from '@fluentui/react';
 import { Handle, addEdge, Connection, Node, Edge, isNode } from 'react-flow-renderer';
+import { useSelector } from 'react-redux';
 
-import { TrainingProject } from '../../../../store/trainingProjectSlice';
+import { TrainingProject, selectTrainingProjectById } from '../../../../store/trainingProjectSlice';
 import { getExportNodeClasses } from './styles';
 import { isValidConnection } from './utils';
 import { getModel } from '../../utils';
+import { State as RootState } from 'RootStateType';
 
 interface Props {
-  id: string;
   data: {
     id: string;
     name: string;
@@ -21,12 +22,13 @@ interface Props {
 }
 
 const ExportNode = (props: Props) => {
-  const { setElements, onDelete, onSelected, data, modelList, id, connectMap } = props;
-  const { name } = data;
+  const { setElements, onDelete, onSelected, data, modelList, connectMap } = props;
+  const { id, name } = data;
+
+  const model = useSelector((state: RootState) => selectTrainingProjectById(state, id));
 
   const classes = getExportNodeClasses();
 
-  const selectedModel = getModel(id, modelList);
   const [isHover, setIsHover] = useState(false);
 
   const menuProps: IContextualMenuProps = {
@@ -80,17 +82,7 @@ const ExportNode = (props: Props) => {
         }}
         onConnect={onConnectEdge}
         isValidConnection={(connection: Connection) => {
-          return isValidConnection(
-            getModel(connection.source, modelList),
-            selectedModel,
-            connection,
-            connectMap,
-          );
-
-          // return isValidConnection(
-          //   getSourceMetadata(connection, getModel(connection.source, modelList)),
-          //   getTargetMetadata(connection, selectedModel),
-          // );
+          return isValidConnection(getModel(connection.source, modelList), model, connection, connectMap);
         }}
         onMouseEnter={() => setIsHover(true)}
         onMouseLeave={() => setIsHover(false)}

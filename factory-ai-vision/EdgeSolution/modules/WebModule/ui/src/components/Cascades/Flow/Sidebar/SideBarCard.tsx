@@ -33,20 +33,20 @@ const SideBarCard = (props: Props) => {
   const classes = getClasses();
 
   const onDragStart = useCallback(
-    (event, nodeType, selectId) => {
+    (event, nodeType) => {
       event.dataTransfer.setData('application/reactflow', nodeType);
-      event.dataTransfer.setData('id', selectId);
+      event.dataTransfer.setData('id', model.id);
       event.dataTransfer.setData('connectMap', JSON.stringify(connectMap));
 
       event.dataTransfer.effectAllowed = 'move';
     },
-    [connectMap],
+    [connectMap, model],
   );
 
   return (
     <>
       <Stack
-        onDragStart={(event) => onDragStart(event, type, model.id)}
+        onDragStart={(event) => onDragStart(event, type)}
         draggable={isDraggableModel(model)}
         styles={{ root: classes.root }}
       >

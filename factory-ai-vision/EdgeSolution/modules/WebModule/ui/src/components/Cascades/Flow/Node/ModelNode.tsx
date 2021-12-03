@@ -1,11 +1,18 @@
 import React, { memo, useState, useCallback } from 'react';
 import { Stack, Text, IContextualMenuProps, IconButton } from '@fluentui/react';
 import { Handle, addEdge, Connection, Edge, Node, isNode } from 'react-flow-renderer';
+import { useSelector } from 'react-redux';
 
-import { NodeType, TrainingProject, MetadataType } from '../../../../store/trainingProjectSlice';
+import {
+  NodeType,
+  TrainingProject,
+  MetadataType,
+  selectTrainingProjectById,
+} from '../../../../store/trainingProjectSlice';
 import { isValidConnection } from './utils';
 import { getModel, getNodeImage } from '../../utils';
 import { getNodeClasses } from './styles';
+import { State as RootState } from 'RootStateType';
 
 interface Props {
   id: string;
@@ -24,25 +31,28 @@ const getHandlePointer = (length: number, id) => {
   return 150;
 };
 
-const LIMIT_OUTPUTS_TYPE: MetadataType[] = ['classification', 'regression'];
+const LIMIT_OUTPUTS: MetadataType[] = ['classification', 'regression'];
 
-const getEnhanceSelectedModel = (model: TrainingProject): TrainingProject => {
+const getRefinedModel = (model: TrainingProject): TrainingProject => {
   if (model.nodeType === 'openvino_library')
     return {
       ...model,
-      outputs: model.outputs.filter((output) => !LIMIT_OUTPUTS_TYPE.includes(output.metadata.type)),
+      outputs: model.outputs.filter((output) => !LIMIT_OUTPUTS.includes(output.metadata.type)),
     };
+
   return model;
 };
 
 const ModelNode = (props: Props) => {
   const { id, type, setElements, onDelete, modelList, onSelected, connectMap } = props;
 
+  const model = useSelector((state: RootState) => selectTrainingProjectById(state, id));
+
   const [selectedInput, setSelectedInput] = useState(-1);
   const [selectedOutput, setSelectedOutput] = useState(-1);
 
   const classes = getNodeClasses();
-  const selectedModel = getEnhanceSelectedModel(getModel(id, modelList));
+  const refinedModel = getRefinedModel(model);
 
   const menuProps: IContextualMenuProps = {
     items: [
@@ -85,7 +95,7 @@ const ModelNode = (props: Props) => {
 
   return (
     <>
-      {selectedModel.inputs.map((_, id) => (
+      {refinedModel.inputs.map((_, id) => (
         <Handle
           key={id}
           id={`${id}`}
@@ -93,22 +103,17 @@ const ModelNode = (props: Props) => {
           position="top"
           type="target"
           style={{
-            left: getHandlePointer(selectedModel.inputs.length, id),
+            left: getHandlePointer(refinedModel.inputs.length, id),
           }}
           onConnect={onConnectEdge}
           isConnectable={true}
           isValidConnection={(connection: Connection) => {
             return isValidConnection(
               getModel(connection.source, modelList),
-              selectedModel,
+              refinedModel,
               connection,
               connectMap,
             );
-            // return isValidConnection(
-            //   getSourceMetadata(connection, getModel(connection.source, modelList)),
-            //   getTargetMetadata(connection, selectedModel),
-            // );
-            // return true;
           }}
           onMouseEnter={() => setSelectedInput(id)}
           onMouseLeave={() => setSelectedInput(-1)}
@@ -116,9 +121,9 @@ const ModelNode = (props: Props) => {
       ))}
       {selectedInput !== -1 && (
         <Stack styles={{ root: { position: 'absolute', top: '-45px' } }} tokens={{ childrenGap: 2 }}>
-          <Stack>Type: {selectedModel.inputs[selectedInput].metadata.type}</Stack>
+          <Stack>Type: {refinedModel.inputs[selectedInput].metadata.type}</Stack>
           <Stack>
-            Shape: {`[${selectedModel.inputs[selectedInput].metadata.shape.filter((s) => s > 0).join(',')}]`}
+            Shape: {`[${refinedModel.inputs[selectedInput].metadata.shape.filter((s) => s > 0).join(',')}]`}
           </Stack>
         </Stack>
       )}
@@ -141,10 +146,10 @@ const ModelNode = (props: Props) => {
         />
         <Stack styles={{ root: classes.nodeWrapper }}>
           <Text styles={{ root: classes.title }}>
-            {selectedModel.name.length > 20 ? `${selectedModel.name.slice(0, 21)}...` : selectedModel.name}
+            {refinedModel.name.length > 20 ? `${refinedModel.name.slice(0, 21)}...` : refinedModel.name}
           </Text>
           <Text styles={{ root: classes.label }}>
-            {type === 'sink' ? 'Export' : selectedModel.projectType}
+            {type === 'sink' ? 'Export' : refinedModel.projectType}
           </Text>
         </Stack>
         <Stack verticalAlign="center">
@@ -155,7 +160,7 @@ const ModelNode = (props: Props) => {
           />
         </Stack>
       </Stack>
-      {selectedModel.outputs.map((_, id) => (
+      {refinedModel.outputs.map((_, id) => (
         <Handle
           key={id}
           id={id.toString()}
@@ -163,7 +168,7 @@ const ModelNode = (props: Props) => {
           position="bottom"
           type="source"
           style={{
-            left: getHandlePointer(selectedModel.outputs.length, id),
+            left: getHandlePointer(refinedModel.outputs.length, id),
           }}
           isConnectable={true}
           onConnect={onConnectEdge}
@@ -171,24 +176,19 @@ const ModelNode = (props: Props) => {
           onMouseLeave={() => setSelectedOutput(-1)}
           isValidConnection={(connection: Connection) => {
             return isValidConnection(
-              selectedModel,
+              refinedModel,
               getModel(connection.target, modelList),
               connection,
               connectMap,
             );
-            // return isValidConnection(
-            //   getSourceMetadata(connection, selectedModel),
-            //   getTargetMetadata(connection, getModel(connection.target, modelList)),
-            // );
           }}
         />
       ))}
       {selectedOutput !== -1 && (
         <Stack styles={{ root: { position: 'absolute', bottom: '-45px' } }} tokens={{ childrenGap: 2 }}>
-          <Stack>Type: {selectedModel.outputs[selectedOutput].metadata.type}</Stack>
+          <Stack>Type: {refinedModel.outputs[selectedOutput].metadata.type}</Stack>
           <Stack>
-            Shape:{' '}
-            {`[${selectedModel.outputs[selectedOutput].metadata.shape.filter((s) => s > 0).join(',')}]`}
+            Shape: {`[${refinedModel.outputs[selectedOutput].metadata.shape.filter((s) => s > 0).join(',')}]`}
           </Stack>
         </Stack>
       )}

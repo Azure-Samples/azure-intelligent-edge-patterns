@@ -1,16 +1,7 @@
 import { Connection } from 'react-flow-renderer';
 
-import { TrainingProject, NodeType, MetadataType } from '../../../../store/trainingProjectSlice';
-
-type MetaData = {
-  type: MetadataType;
-  shape: number[];
-} | null;
-
-type ValidationNode = {
-  metadata: MetaData;
-  nodeType: NodeType;
-};
+import { TrainingProject, MetadataType } from '../../../../store/trainingProjectSlice';
+import { ValidationNode, MetaData } from '../../types';
 
 const getSourceMetadata = (connect: Connection, model: TrainingProject): ValidationNode => {
   return {
