@@ -14,6 +14,7 @@ from ..azure_pd_deploy_status.utils import upcreate_deploy_status
 from ..azure_training_status.models import TrainingStatus
 from .api.serializers import UpdateCamBodySerializer
 from .models import PartDetection, PDScenario
+from ..azure_iot.utils import model_manager_module_url
 
 logger = logging.getLogger(__name__)
 
@@ -131,6 +132,15 @@ def deploy_worker(part_detection_id):
         params={"part_detection_mode": instance.inference_mode},
         timeout=REQUEST_TIMEOUT,
     )
+
+    # =====================================================
+    # 2.0 Update cascade config                               ===
+    # =====================================================
+    if instance.deployment_type == "cascade":
+        url = "http://" + str(model_manager_module_url()) + "/set_voe_config"
+        data = {"name": instance.cascade.name, "config": instance.cascade.flow}
+        res = requests.post(url, json=data)
+        logger.warning(res.text)
 
     # =====================================================
     # 2.1 Update endpoint                               ===

@@ -68,7 +68,7 @@ class ModelObject():
                 response = requests.get(
                     "http://" + predict_module_url() + "/get_device")
                 device = response.json()["device"]
-                if device == 'CPU-OPENVINO_MYRIAD':
+                if device == 'CPU-OPENVINO_CPU_FP32':
                     device = 'vpu'
                 break
             except:

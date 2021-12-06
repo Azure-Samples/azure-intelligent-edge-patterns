@@ -11,7 +11,7 @@ from ..cameras.models import Camera
 from ..azure_cascades.models import Cascade
 from .models import PartDetection
 from .utils import deploy_all_helper
-from..azure_iot.utils import model_manager_module_url
+from ..azure_iot.utils import model_manager_module_url
 
 logger = logging.getLogger(__name__)
 
@@ -48,11 +48,11 @@ def azure_part_detection_post_save_deploy_handler(**kwargs):
     logger.warning("cascade post save: send config to model manager")
 
     # need to move out post_save because it would be triggered many times
-    if instance.deployment_type == "cascade":
-        url = "http://" + str(model_manager_module_url()) + "/set_voe_config"
-        data = {"name": instance.cascade.name, "config": instance.cascade.flow}
-        res = requests.post(url, json=data)
-        logger.warning(res.text)
+    # if instance.deployment_type == "cascade":
+    #     url = "http://" + str(model_manager_module_url()) + "/set_voe_config"
+    #     data = {"name": instance.cascade.name, "config": instance.cascade.flow}
+    #     res = requests.post(url, json=data)
+    #     logger.warning(res.text)
 
     deploy_all_helper(part_detection_id=instance.id)
 
