@@ -11,7 +11,7 @@ import ReactFlow, {
 } from 'react-flow-renderer';
 
 import { TrainingProject, NodeType } from '../../../store/trainingProjectSlice';
-import { getModel } from '../utils';
+import { getModel, isNotExportNode } from '../utils';
 import { getFlowClasses } from './styles';
 
 import './dnd.css';

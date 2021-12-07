@@ -1,7 +1,8 @@
 import { Node, Edge, isNode, isEdge } from 'react-flow-renderer';
 
-import { TrainingProject, Params, NodeType } from '../../store/trainingProjectSlice';
+import { TrainingProject, Params, NodeType, Handler } from '../../store/trainingProjectSlice';
 import { CascadePayload } from '../../store/cascadeSlice';
+import { LIMIT_OUTPUTS } from './types';
 
 export const getModelId = (nodeId: string) => {
   const re = /(?<=_).*/;
@@ -15,6 +16,11 @@ export const getModel = (id: string, modelList: TrainingProject[]) => {
   const nodeId = getModelId(id);
   return modelList.find((model) => model.id === parseInt(nodeId, 10));
 };
+
+export const getLimitOutputs = (nodeType: NodeType, outputs: Handler[]) =>
+  nodeType === 'openvino_library'
+    ? outputs.filter((output) => !LIMIT_OUTPUTS.includes(output.metadata.type))
+    : outputs;
 
 export const getConvertNode = (node: Node, modelList: TrainingProject[]) => {
   const matchModel = getModel(node.id, modelList);
@@ -96,4 +102,121 @@ export const isDuplicateNodeName = (elements: (Node | Edge)[]) => {
     .map((node) => node.data?.name);
 
   return new Set(exportNameList).size !== exportNameList.length;
+};
+
+// FORMAT: id_modelId_(input/output)_handlerIdx_nodeType
+const parseHandlerName = (
+  name: string,
+): {
+  id: number;
+  modelId: number;
+  handlerType: 'input' | 'output';
+  handlerId: number;
+  nodeType: NodeType;
+} => ({
+  id: +name.split('_')[0],
+  modelId: +name.split('_')[1],
+  handlerType: name.split('_')[2] as 'input' | 'output',
+  handlerId: +name.split('_')[3],
+  nodeType: `${name.split('_')[4]}_${name.split('_')[5]}` as NodeType,
+});
+
+export const isNotExportNode = (elements: (Node | Edge)[], modelList: TrainingProject[]) => {
+  if (elements.length === 1) return true;
+
+  const exportNodes = elements.find((element) => {
+    if (!isNode(element)) return false;
+
+    const selectModel = modelList.find((model) => model.id === +getModelId(element.id));
+
+    if (selectModel.nodeType === 'sink') return true;
+    return false;
+  }) as Node | undefined;
+
+  return !exportNodes;
+};
+
+export const isDiscreteFlow = (elements: (Node | Edge)[], modelList: TrainingProject[]) => {
+  if (elements.length === 1) return true;
+
+  const allNodes: Node[] = [];
+  const allEdges: Edge[] = [];
+
+  elements.forEach((ele) => {
+    if (isNode(ele)) {
+      allNodes.push(ele);
+      return;
+    }
+
+    allEdges.push(ele as Edge);
+  });
+
+  // id_modelId_(input/output)_handlerIdx_nodeType: number
+  const handlerMap: Record<string, number> = allNodes.reduce((accMap, node) => {
+    const selectedModel = modelList.find((model) => model.id === +getModelId(node.id));
+
+    const inputMap = selectedModel.inputs.reduce((acc, _, idx) => {
+      acc[`${node.id}_input_${idx}_${selectedModel.nodeType}`] = 0;
+      return acc;
+    }, {});
+
+    const outputMap = getLimitOutputs(selectedModel.nodeType, selectedModel.outputs).reduce((acc, _, idx) => {
+      acc[`${node.id}_output_${idx}_${selectedModel.nodeType}`] = 0;
+      return acc;
+    }, {});
+
+    return {
+      ...accMap,
+      ...inputMap,
+      ...outputMap,
+    };
+  }, {});
+
+  let flowMap = { ...handlerMap };
+
+  allEdges.forEach((edge: Edge) => {
+    const sourceModel = getModel(edge.source, modelList);
+    const targetModel = getModel(edge.target, modelList);
+
+    flowMap = {
+      ...flowMap,
+      [`${edge.target}_input_${edge.targetHandle}_${targetModel.nodeType}`]:
+        flowMap[`${edge.target}_input_${edge.targetHandle}_${targetModel.nodeType}`] + 1,
+      [`${edge.source}_output_${edge.sourceHandle}_${sourceModel.nodeType}`]:
+        flowMap[`${edge.source}_output_${edge.sourceHandle}_${sourceModel.nodeType}`] + 1,
+    };
+  });
+
+  const allCount = Object.keys(flowMap).map((key) => flowMap[key]);
+
+  if (allCount.some((count) => count === 0)) {
+    // if some handler don't connect, need to checking nodeType `openvino_library` output handler connect one at least
+
+    const unconnectedHandlerList = Object.keys(flowMap)
+      .filter((key) => flowMap[key] === 0)
+      .map((name) => parseHandlerName(name));
+
+    if (
+      unconnectedHandlerList.find(
+        (info) => info.handlerType !== 'output' || info.nodeType !== 'openvino_library',
+      )
+    )
+      return true;
+
+    const unConnectedCropHandler = unconnectedHandlerList.filter(
+      (info) => info.handlerType === 'output' && info.nodeType === 'openvino_library',
+    );
+
+    const unConnectedCropId = unConnectedCropHandler.reduce((acc, handler) => {
+      acc[handler.id] = acc[handler.id] !== undefined ? acc[handler.id] + 1 : 1;
+      return acc;
+    }, {});
+
+    if (Object.values(unConnectedCropId).every((count) => count === 1)) return false;
+
+    return true;
+  }
+
+  // all handler has connect
+  return false;
 };

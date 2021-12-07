@@ -3,14 +3,9 @@ import { Stack, Text, IContextualMenuProps, IconButton } from '@fluentui/react';
 import { Handle, addEdge, Connection, Edge, Node, isNode } from 'react-flow-renderer';
 import { useSelector } from 'react-redux';
 
-import {
-  NodeType,
-  TrainingProject,
-  MetadataType,
-  selectTrainingProjectById,
-} from '../../../../store/trainingProjectSlice';
+import { NodeType, TrainingProject, selectTrainingProjectById } from '../../../../store/trainingProjectSlice';
 import { isValidConnection } from './utils';
-import { getModel, getNodeImage } from '../../utils';
+import { getModel, getNodeImage, getLimitOutputs } from '../../utils';
 import { getNodeClasses } from './styles';
 import { State as RootState } from 'RootStateType';
 
@@ -31,18 +26,6 @@ const getHandlePointer = (length: number, id) => {
   return 150;
 };
 
-const LIMIT_OUTPUTS: MetadataType[] = ['classification', 'regression'];
-
-const getRefinedModel = (model: TrainingProject): TrainingProject => {
-  if (model.nodeType === 'openvino_library')
-    return {
-      ...model,
-      outputs: model.outputs.filter((output) => !LIMIT_OUTPUTS.includes(output.metadata.type)),
-    };
-
-  return model;
-};
-
 const ModelNode = (props: Props) => {
   const { id, type, setElements, onDelete, modelList, onSelected, connectMap } = props;
 
@@ -52,7 +35,7 @@ const ModelNode = (props: Props) => {
   const [selectedOutput, setSelectedOutput] = useState(-1);
 
   const classes = getNodeClasses();
-  const refinedModel = getRefinedModel(model);
+  const refinedModel: TrainingProject = { ...model, outputs: getLimitOutputs(model.nodeType, model.outputs) };
 
   const menuProps: IContextualMenuProps = {
     items: [

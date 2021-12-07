@@ -32,12 +32,7 @@ export type Metadata = {
   labels?: string[];
 };
 
-type Input = {
-  name: string;
-  metadata: Metadata;
-};
-
-type Output = {
+export type Handler = {
   name: string;
   metadata: Metadata;
 };
@@ -61,8 +56,8 @@ export type TrainingProject = {
   category: TrainingProjectCategory;
   projectType: ProjectType;
   isCascade: boolean;
-  inputs: Input[];
-  outputs: Output[];
+  inputs: Handler[];
+  outputs: Handler[];
   nodeType: NodeType;
   demultiply_count: number;
   combined: string;
