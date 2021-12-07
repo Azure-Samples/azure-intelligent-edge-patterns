@@ -103,4 +103,4 @@ EXPOSE 7777
 #RUN [ "/bin/bash", "-c", "source activate python38 && pip install onnxruntime_openvino-1.5.2-cp38-cp38-linux_x86_64.whl"]
 
 #CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py -p 44000"]
-CMD ["python", "server.py"]
+CMD ["python3", "server.py"]

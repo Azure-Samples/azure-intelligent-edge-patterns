@@ -7,20 +7,25 @@ import domtoimage from 'dom-to-image';
 
 import { Url } from '../../constant';
 import { NodeType, TrainingProject } from '../../store/trainingProjectSlice';
-import { getCascadePayload, getBlobToBase64, isDuplicateNodeName } from './utils';
+import {
+  getCascadePayload,
+  getBlobToBase64,
+  isDuplicateNodeName,
+  isDiscreteFlow,
+  isNotExportNode,
+} from './utils';
+import { CascadeError } from './types';
 import { createCascade } from '../../store/cascadeSlice';
 
 import DnDFlow from './Flow/Flow';
 import NameModal from './NameModal';
-import DuplicationModal from './DuplicationModal';
+import ErrorModal from './ErrorModal';
 
 interface Props {
   modelList: TrainingProject[];
   defaultCommandBarItems: ICommandBarItemProps[];
   existingCascadeNameList: string[];
 }
-
-type CreateError = '' | 'nodeDuplication' | 'nameDuplication';
 
 const getSourceElements = (modelList: TrainingProject[]) => {
   const sourceNode = modelList.find((model) => model.nodeType === 'source');
@@ -29,7 +34,7 @@ const getSourceElements = (modelList: TrainingProject[]) => {
     {
       id: `0_${sourceNode.id}`,
       type: 'source' as NodeType,
-      data: { id: sourceNode.id },
+      data: { id: sourceNode.id, connectMap: [] },
       position: { x: 350, y: 50 },
     },
   ];
@@ -42,7 +47,7 @@ const CascadeCreate = (props: Props) => {
   const [cascadeName, setCascadeName] = useState('Default Cascade');
   const [isPopup, setIsPopup] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [createError, setCreateError] = useState<CreateError>('');
+  const [createError, setCreateError] = useState<CascadeError>('');
 
   const flowElementRef = useRef(null);
   const dispatch = useDispatch();
@@ -55,6 +60,16 @@ const CascadeCreate = (props: Props) => {
   }, [modelList]);
 
   const onCreateNewCascade = useCallback(async () => {
+    if (isNotExportNode(elements, modelList)) {
+      setCreateError('atLeastOneExport');
+      return;
+    }
+
+    if (isDiscreteFlow(elements, modelList)) {
+      setCreateError('discreteFlow');
+      return;
+    }
+
     if (isDuplicateNodeName(elements)) {
       setCreateError('nodeDuplication');
       return;
@@ -124,16 +139,7 @@ const CascadeCreate = (props: Props) => {
           existingCascadeNameList={existingCascadeNameList}
         />
       )}
-      {createError !== '' && (
-        <DuplicationModal
-          title={
-            createError === 'nodeDuplication'
-              ? 'No same export name accepted'
-              : 'No same Cascade Map accepted'
-          }
-          onClose={() => setCreateError('')}
-        />
-      )}
+      {createError !== '' && <ErrorModal cascadeError={createError} onClose={() => setCreateError('')} />}
     </>
   );
 };

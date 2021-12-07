@@ -59,6 +59,7 @@ To deploy the solution to an Azure Stack Edge device, your subscription must con
 ![arch_img](../assets/step7_20210902.png?raw=true)
 
 10. Choose cpu to correspond to Edge device.
+<br> If choosing vpu, please click [here](https://docs.openvino.ai/latest/openvino_docs_install_guides_installing_openvino_linux_ivad_vpu.html#doxid-openvino-docs-install-guides-installing-openvino-linux-ivad-vpu) and [here](https://docs.openvino.ai/2021.4/openvino_docs_install_guides_installing_openvino_docker_linux.html#build_docker_image_for_intel_vision_accelerator_design_with_intel_movidius_vpus) for more information.
 ![arch_img](../assets/step8_20210904.png?raw=true)
 
 11. The installation will be scheduled to complete.

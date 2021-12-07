@@ -1,5 +1,6 @@
 import React, { useState, useCallback } from 'react';
 import { Stack, ActionButton, Icon, Link, mergeStyleSets, SearchBox } from '@fluentui/react';
+import { Connection } from 'react-flow-renderer';
 
 import { TrainingProject, NodeType } from '../../../../store/trainingProjectSlice';
 
@@ -7,6 +8,7 @@ import SideBardCard from './SideBarCard';
 
 interface Props {
   modelList: TrainingProject[];
+  connectMap: Connection[];
 }
 
 const MODEL_NODE_TYPE = ['openvino_model', 'customvision_model'] as NodeType[];
@@ -26,7 +28,7 @@ const getFilterProjects = (projects: TrainingProject[], input: string) => {
 };
 
 export default (props: Props) => {
-  const { modelList } = props;
+  const { modelList, connectMap } = props;
 
   // const modelNodeList = modelList.filter((model) => MODEL_NODE_TYPE.includes(model.nodeType));
   const transformList = modelList.filter((model) => model.nodeType === 'openvino_library');
@@ -79,7 +81,7 @@ export default (props: Props) => {
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
               {localModelNodes.map((model, id) => (
-                <SideBardCard key={id} model={model} type={model.nodeType} />
+                <SideBardCard key={id} model={model} type={model.nodeType} connectMap={connectMap} />
               ))}
             </Stack>
             <Link styles={{ root: classes.manageModels }}>Manage Models</Link>
@@ -100,7 +102,7 @@ export default (props: Props) => {
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
               {transformList.map((transform, id) => (
-                <SideBardCard key={id} model={transform} type="openvino_library" />
+                <SideBardCard key={id} model={transform} type="openvino_library" connectMap={connectMap} />
               ))}
             </Stack>
           </div>
@@ -119,7 +121,7 @@ export default (props: Props) => {
         {isExportOpen && (
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
-              <SideBardCard type="sink" model={exportModel} />
+              <SideBardCard type="sink" model={exportModel} connectMap={connectMap} />
             </Stack>
           </div>
         )}

@@ -1,38 +1,50 @@
-import React, { useState } from 'react';
-import { Stack, Text, Icon, mergeStyleSets } from '@fluentui/react';
-import { Handle, addEdge, Connection } from 'react-flow-renderer';
+import React, { useState, useCallback } from 'react';
+import { Stack, Text, Icon } from '@fluentui/react';
+import { Handle, addEdge, Connection, Node, Edge, isNode } from 'react-flow-renderer';
+import { useSelector } from 'react-redux';
 
-import { TrainingProject } from '../../../../store/trainingProjectSlice';
-import { getSourceMetadata, getTargetMetadata, isValidConnection } from './utils';
+import { State as RootState } from 'RootStateType';
+import { TrainingProject, selectTrainingProjectById } from '../../../../store/trainingProjectSlice';
+import { isValidConnection } from './utils';
 import { getModel } from '../../utils';
+import { getSourceNodeClasses } from './styles';
 
 interface Props {
   id: string;
   setElements: any;
   modelList: TrainingProject[];
+  connectMap: Connection[];
 }
 
-const getClasses = () =>
-  mergeStyleSets({
-    root: {
-      width: '150px',
-      border: '1px solid #C4C4C4',
-      borderRadius: '2px',
-      padding: '15px',
-      backgroundColor: '#FFF',
-    },
-    title: { fontSize: '24px' },
-    describe: { fontSize: '14px', lineHeight: '20px' },
-  });
-
 const SourceNode = (props: Props) => {
-  const { id, setElements, modelList } = props;
+  const { id, setElements, modelList, connectMap } = props;
 
-  const [isBottomHandle, setIsBottomHandle] = useState(false);
+  const model = useSelector((state: RootState) => selectTrainingProjectById(state, id));
 
-  const classes = getClasses();
+  const [isHover, setIsHover] = useState(false);
+  const classes = getSourceNodeClasses();
 
-  const selectedModel = getModel(id, modelList);
+  const onConnectEdge = useCallback(
+    (params: Connection) =>
+      setElements((els: (Node<any> | Edge<any>)[]) => {
+        const newElements = els.map((element) => {
+          if (isNode(element)) {
+            return {
+              ...element,
+              data: {
+                ...element.data,
+                connectMap: [...(element.data.connectMap ?? []), params],
+              },
+            };
+          }
+
+          return element;
+        });
+
+        return addEdge(params, newElements);
+      }),
+    [setElements],
+  );
 
   return (
     <>
@@ -47,7 +59,7 @@ const SourceNode = (props: Props) => {
         <Icon styles={{ root: classes.title }} iconName="Camera" />
         <Text styles={{ root: classes.describe }}>Camera Input</Text>
       </Stack>
-      {selectedModel.outputs.map((output, id) => (
+      {model.outputs.map((_, id) => (
         <Handle
           key={id}
           id={`${id}`}
@@ -55,22 +67,18 @@ const SourceNode = (props: Props) => {
           // @ts-ignore
           position="bottom"
           // @ts-ignore
-          onConnect={(params) => setElements((els) => addEdge(params, els))}
-          style={{ height: '10px', width: '10px', bottom: '-6px' }}
+          onConnect={onConnectEdge}
           isValidConnection={(connection: Connection) =>
-            isValidConnection(
-              getSourceMetadata(connection, selectedModel),
-              getTargetMetadata(connection, getModel(connection.target, modelList)),
-            )
+            isValidConnection(model, getModel(connection.target, modelList), connection, connectMap)
           }
-          onMouseEnter={() => setIsBottomHandle(true)}
-          onMouseLeave={() => setIsBottomHandle(false)}
+          onMouseEnter={() => setIsHover(true)}
+          onMouseLeave={() => setIsHover(false)}
         />
       ))}
-      {isBottomHandle && (
-        <Stack styles={{ root: { position: 'absolute' } }} tokens={{ childrenGap: 2 }}>
-          <Stack>Type: {selectedModel.outputs[0].metadata.type}</Stack>
-          <Stack>Shape: {`[${selectedModel.outputs[0].metadata.shape.join(',')}]`}</Stack>
+      {isHover && (
+        <Stack styles={{ root: { position: 'absolute', bottom: '-45px' } }} tokens={{ childrenGap: 2 }}>
+          <Stack>Type: {model.outputs[0].metadata.type}</Stack>
+          <Stack>Shape: {`[${model.outputs[0].metadata.shape.join(',')}]`}</Stack>
         </Stack>
       )}
     </>

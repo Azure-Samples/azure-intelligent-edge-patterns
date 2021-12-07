@@ -14,6 +14,7 @@ from ..azure_pd_deploy_status.utils import upcreate_deploy_status
 from ..azure_training_status.models import TrainingStatus
 from .api.serializers import UpdateCamBodySerializer
 from .models import PartDetection, PDScenario
+from ..azure_iot.utils import model_manager_module_url
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +73,7 @@ def if_trained_then_deploy_worker(part_detection_id):
     # =====================================================
     # 3. Deploy Model and params                        ===
     # =====================================================
+
     logger.info("Project train/export success.")
     logger.info("Deploying...")
     try:
@@ -84,8 +86,8 @@ def if_trained_then_deploy_worker(part_detection_id):
     # 4. Deployed! Saving                               ===
     # =====================================================
     part_detection_obj.deployed = True
-    part_detection_obj.deploy_timestamp = timezone.now()
     part_detection_obj.has_configured = True
+    part_detection_obj.deploy_timestamp = timezone.now()
     part_detection_obj.save()
 
     logger.info("PartDetection is deployed before: %s", part_detection_obj.deployed)
@@ -102,10 +104,10 @@ def deploy_worker(part_detection_id):
     """
     REQUEST_TIMEOUT = 60
     instance: PartDetection = PartDetection.objects.get(pk=part_detection_id)
-    if not instance.has_configured:
-        logger.error("This PartDetection is not configured")
-        logger.error("Not sending any request to inference")
-        return
+    # if not instance.has_configured:
+    #     logger.error("This PartDetection is not configured")
+    #     logger.error("Not sending any request to inference")
+    #     return
     confidence_min = getattr(instance, "accuracyRangeMin", 30)
     confidence_max = getattr(instance, "accuracyRangeMax", 80)
     max_images = getattr(instance, "maxImages", 10)
@@ -130,6 +132,15 @@ def deploy_worker(part_detection_id):
         params={"part_detection_mode": instance.inference_mode},
         timeout=REQUEST_TIMEOUT,
     )
+
+    # =====================================================
+    # 2.0 Update cascade config                               ===
+    # =====================================================
+    if instance.deployment_type == "cascade":
+        url = "http://" + str(model_manager_module_url()) + "/set_voe_config"
+        data = {"name": instance.cascade.name, "config": instance.cascade.flow}
+        res = requests.post(url, json=data)
+        logger.warning(res.text)
 
     # =====================================================
     # 2.1 Update endpoint                               ===
