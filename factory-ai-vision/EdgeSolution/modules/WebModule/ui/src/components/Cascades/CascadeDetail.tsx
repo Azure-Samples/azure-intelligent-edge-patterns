@@ -8,12 +8,19 @@ import domtoimage from 'dom-to-image';
 import { Url } from '../../constant';
 import { TrainingProject } from '../../store/trainingProjectSlice';
 import { Cascade } from '../../store/cascadeSlice';
-import { getCascadePayload, getBlobToBase64, isDuplicateNodeName } from './utils';
+import {
+  getCascadePayload,
+  getBlobToBase64,
+  isDuplicateNodeName,
+  isDiscreteFlow,
+  isNotExportNode,
+} from './utils';
 import { updateCascade } from '../../store/cascadeSlice';
+import { CascadeError } from './types';
 
 import Flow from './Flow/Flow';
 import NameModal from './NameModal';
-import DuplicationModal from './DuplicationModal';
+import ErrorModal from './ErrorModal';
 
 interface Props {
   cascadeList: Cascade[];
@@ -29,7 +36,7 @@ const CascadeDetail = (props: Props) => {
   const [elements, setElements] = useState<(Node | Edge)[]>([]);
   const [isPopup, setIsPopup] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const [isDuplicate, setIsDuplicate] = useState(false);
+  const [cascadeError, setCascadeError] = useState<CascadeError>('');
 
   const flowElementRef = useRef(null);
   const dispatch = useDispatch();
@@ -44,8 +51,18 @@ const CascadeDetail = (props: Props) => {
   }, [id, cascadeList, setElements, setCascadeName]);
 
   const onSaveEditCascade = useCallback(async () => {
+    if (isNotExportNode(elements, modelList)) {
+      setCascadeError('atLeastOneExport');
+      return;
+    }
+
+    if (isDiscreteFlow(elements, modelList)) {
+      setCascadeError('discreteFlow');
+      return;
+    }
+
     if (isDuplicateNodeName(elements)) {
-      setIsDuplicate(true);
+      setCascadeError('nameDuplication');
       return;
     }
 
@@ -111,9 +128,7 @@ const CascadeDetail = (props: Props) => {
           existingCascadeNameList={cascadeList.map((cascade) => cascade.name)}
         />
       )}
-      {isDuplicate && (
-        <DuplicationModal title="No same export name accepted" onClose={() => setIsDuplicate(false)} />
-      )}
+      {cascadeError !== '' && <ErrorModal cascadeError={cascadeError} onClose={() => setCascadeError('')} />}
     </>
   );
 };

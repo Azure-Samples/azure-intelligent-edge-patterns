@@ -9,3 +9,7 @@ export type ValidationNode = {
   metadata: MetaData;
   nodeType: NodeType;
 };
+
+export const LIMIT_OUTPUTS: MetadataType[] = ['classification', 'regression'];
+
+export type CascadeError = '' | 'nodeDuplication' | 'nameDuplication' | 'discreteFlow' | 'atLeastOneExport';
