@@ -355,7 +355,7 @@ def create_demo_objects():
                 "target_image_layout": "NHWC",
                 "convert_to_gray_scale": "false",
                 "max_output_batch": "100",
-                "confidence_threshold": "0.7",
+                "confidence_threshold": "0.4",
                 "debug": "true",
                 "filter_label_id": "-1"
             }),
