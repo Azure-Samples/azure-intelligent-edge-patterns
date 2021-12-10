@@ -71,6 +71,15 @@ def if_trained_then_deploy_worker(part_detection_id):
         # logger.info("Deploying...")
 
     # =====================================================
+    # 3.0 Update cascade config                         ===
+    # =====================================================
+    if part_detection_obj.deployment_type == "cascade":
+        url = "http://" + str(model_manager_module_url()) + "/set_voe_config"
+        data = {"name": part_detection_obj.cascade.name, "config": part_detection_obj.cascade.flow}
+        res = requests.post(url, json=data)
+        logger.warning(res.text)
+
+    # =====================================================
     # 3. Deploy Model and params                        ===
     # =====================================================
 
@@ -132,15 +141,6 @@ def deploy_worker(part_detection_id):
         params={"part_detection_mode": instance.inference_mode},
         timeout=REQUEST_TIMEOUT,
     )
-
-    # =====================================================
-    # 2.0 Update cascade config                               ===
-    # =====================================================
-    if instance.deployment_type == "cascade":
-        url = "http://" + str(model_manager_module_url()) + "/set_voe_config"
-        data = {"name": instance.cascade.name, "config": instance.cascade.flow}
-        res = requests.post(url, json=data)
-        logger.warning(res.text)
 
     # =====================================================
     # 2.1 Update endpoint                               ===
