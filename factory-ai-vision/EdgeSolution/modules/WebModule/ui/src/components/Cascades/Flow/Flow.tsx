@@ -16,7 +16,7 @@ import { getFlowClasses } from './styles';
 
 import './dnd.css';
 
-import SidebarList from './Sidebar/SidebarList';
+import SideBarList from './SideBar/SidebarList';
 import ModelNode from './Node/ModelNode';
 import CustomEdge from './CustomEdge';
 import SourceNode from './Node/SourceNode';
@@ -170,9 +170,10 @@ const DnDFlow = (props: Props) => {
   return (
     <div className="dndflow">
       <ReactFlowProvider>
-        <SidebarList
+        <SideBarList
           modelList={modelList}
           connectMap={elements.length > 0 ? elements[0].data?.connectMap : []}
+          nodeList={elements.filter((element) => isNode(element)) as Node[]}
         />
         <div className="reactflow-wrapper" ref={reactFlowWrapper}>
           <NodePanel

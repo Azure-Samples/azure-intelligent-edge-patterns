@@ -11,24 +11,11 @@ interface Props {
   model: TrainingProject;
   type: NodeType;
   connectMap: Connection[];
+  isDraggable: boolean;
 }
 
-const isDraggableModel = (model: TrainingProject) => {
-  const draggableNodeType = ['openvino_library', 'openvino_model', 'sink', 'source'] as NodeType[];
-
-  if (
-    model.is_trained &&
-    model.nodeType === 'customvision_model' &&
-    model.projectType === 'ObjectDetection' &&
-    model.outputs.length !== 0
-  )
-    return true;
-  if (draggableNodeType.includes(model.nodeType)) return true;
-  return false;
-};
-
 const SideBarCard = (props: Props) => {
-  const { model, type, connectMap } = props;
+  const { model, type, connectMap, isDraggable } = props;
 
   const classes = getClasses();
 
@@ -47,10 +34,10 @@ const SideBarCard = (props: Props) => {
     <>
       <Stack
         onDragStart={(event) => onDragStart(event, type)}
-        draggable={isDraggableModel(model)}
+        draggable={isDraggable}
         styles={{ root: classes.root }}
       >
-        {!isDraggableModel(model) && <Stack className={classes.disableCover} />}
+        {!isDraggable && <Stack className={classes.disableCover} />}
         <Stack horizontal>
           <img style={{ height: '60px', width: '60px' }} src={getNodeImage(type)} alt="icon" />
           <Stack styles={{ root: classes.titleWrapper }} horizontal horizontalAlign="space-between">
