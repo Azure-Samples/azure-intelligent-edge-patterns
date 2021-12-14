@@ -16,7 +16,7 @@ import { getFlowClasses } from './styles';
 
 import './dnd.css';
 
-import SidebarList from './SideBar/SidebarList';
+import SidebarList from './Sidebar/SidebarList';
 import ModelNode from './Node/ModelNode';
 import CustomEdge from './CustomEdge';
 import SourceNode from './Node/SourceNode';
