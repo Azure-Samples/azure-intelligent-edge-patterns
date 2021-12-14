@@ -4,7 +4,7 @@ import { Connection, Node } from 'react-flow-renderer';
 
 import { TrainingProject, NodeType } from '../../../../store/trainingProjectSlice';
 
-import SidebarCard from './SidebarCard';
+import SideNavCard from './SideNavCard';
 
 interface Props {
   modelList: TrainingProject[];
@@ -105,7 +105,7 @@ export default (props: Props) => {
               {localModelNodes.map((model, id) => {
                 if (model.nodeType === 'customvision_model' && model.projectType === 'ObjectDetection')
                   return (
-                    <SidebarCard
+                    <SideNavCard
                       key={id}
                       model={model}
                       type={model.nodeType}
@@ -116,7 +116,7 @@ export default (props: Props) => {
 
                 if (model.nodeType === 'customvision_model' && model.projectType === 'Classification')
                   return (
-                    <SidebarCard
+                    <SideNavCard
                       key={id}
                       model={model}
                       type={model.nodeType}
@@ -127,7 +127,7 @@ export default (props: Props) => {
 
                 if (model.nodeType === 'openvino_model' && model.projectType === 'ObjectDetection')
                   return (
-                    <SidebarCard
+                    <SideNavCard
                       key={id}
                       model={model}
                       type={model.nodeType}
@@ -138,7 +138,7 @@ export default (props: Props) => {
 
                 if (model.nodeType === 'openvino_model' && model.projectType === 'Classification')
                   return (
-                    <SidebarCard
+                    <SideNavCard
                       key={id}
                       model={model}
                       type={model.nodeType}
@@ -168,7 +168,7 @@ export default (props: Props) => {
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
               {transformList.map((transform, id) => (
-                <SidebarCard
+                <SideNavCard
                   key={id}
                   model={transform}
                   type="openvino_library"
@@ -193,7 +193,7 @@ export default (props: Props) => {
         {isExportOpen && (
           <div>
             <Stack tokens={{ childrenGap: 16 }}>
-              <SidebarCard type="sink" model={exportModel} connectMap={connectMap} isDraggable={true} />
+              <SideNavCard type="sink" model={exportModel} connectMap={connectMap} isDraggable={true} />
             </Stack>
           </div>
         )}

@@ -14,7 +14,7 @@ interface Props {
   isDraggable: boolean;
 }
 
-const SideBarCard = (props: Props) => {
+export default (props: Props) => {
   const { model, type, connectMap, isDraggable } = props;
 
   const classes = getClasses();
@@ -66,5 +66,3 @@ const SideBarCard = (props: Props) => {
     </>
   );
 };
-
-export default SideBarCard;
