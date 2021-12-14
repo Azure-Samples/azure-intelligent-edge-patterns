@@ -480,6 +480,11 @@ class Task(models.Model):
                 #     project_obj.download_uri = exports[1].download_uri
                 #     project_obj.download_uri_fp16 = exports[0].download_uri
                 project_obj.save()
+
+                # pre-download model.zip
+                # model_name = project_obj.download_uri_openvino.split('/')[3][2:]
+                # subprocess.run(['wget', '-O', TMP_DIR+'/model.zip', node.download_uri_openvino])
+
                 break
             return
 

@@ -191,11 +191,11 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         is_scenario_model = "scenario_models" in model_dir
 
         if is_scenario_model:
-            model_dir += '/onnx'
-            # if self.is_vpu:
-            #     model_dir += '/onnxfloat16'
-            # else:
-            #     model_dir += '/onnx'
+            # model_dir += '/onnx'
+            if self.is_vpu:
+                model_dir += '/onnxfloat16'
+            else:
+                model_dir += '/onnx'
 
         model = self.load_model(model_dir, is_default_model, is_scenario_model)
 

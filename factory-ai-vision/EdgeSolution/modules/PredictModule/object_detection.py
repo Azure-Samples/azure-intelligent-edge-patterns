@@ -88,11 +88,12 @@ class ObjectDetection(object):
         print("\n Triggering Inference...")
 
         # depends on the vpu image we choose
+        # predictmodule not using vpu 
         # if onnxruntime.get_device() == 'CPU-OPENVINO_CPU_FP32':
         #     self.session = onnxruntime.InferenceSession(
-        #         str(str(model_dir) + str('/') + str(self.model_filename)), 
-        #         providers=['OpenVINOExecutionProvider'], 
-        #         provider_options=[{"device_type" : "VAD-M_FP16"}])            
+        #         str(str(model_dir) + str('/') + str(self.model_filename)),
+        #         providers=onnxruntime.get_available_providers())
+        #     self.session.set_providers(['OpenVINOExecutionProvider'], [{'device_type' : "VAD-M_FP16"}])
         # else:
         self.session = onnxruntime.InferenceSession(
             str(str(model_dir) + str('/') + str(self.model_filename)))

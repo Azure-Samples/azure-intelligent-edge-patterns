@@ -26,10 +26,11 @@ class ONNXRuntimeObjectDetection(ObjectDetection):
             model.graph.input[0].type.tensor_type.shape.dim[-2].dim_param = 'dim2'
             onnx.save(model, temp)
             # depends on the vpu image we choose
+            # predictmodule not using vpu
             # if onnxruntime.get_device() == 'CPU-OPENVINO_CPU_FP32':
             #     self.session = onnxruntime.InferenceSession(temp,
-            #     providers=['OpenVINOExecutionProvider'], 
-            #     provider_options=[{"device_type" : "VAD-M_FP16"}])
+            #         providers=onnxruntime.get_available_providers())
+            #     self.session.set_providers(['OpenVINOExecutionProvider'], [{'device_type' : "VAD-M_FP16"}])
             # else:
             self.session = onnxruntime.InferenceSession(temp)
         self.input_name = self.session.get_inputs()[0].name

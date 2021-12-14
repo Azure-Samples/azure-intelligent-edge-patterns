@@ -11,12 +11,12 @@ import ReactFlow, {
 } from 'react-flow-renderer';
 
 import { TrainingProject, NodeType } from '../../../store/trainingProjectSlice';
-import { getModel, isNotExportNode } from '../utils';
+import { getModel } from '../utils';
 import { getFlowClasses } from './styles';
 
 import './dnd.css';
 
-import SidebarList from './Sidebar/SidebarList';
+import SideNavList from './SideNav/SideNavList';
 import ModelNode from './Node/ModelNode';
 import CustomEdge from './CustomEdge';
 import SourceNode from './Node/SourceNode';
@@ -170,9 +170,10 @@ const DnDFlow = (props: Props) => {
   return (
     <div className="dndflow">
       <ReactFlowProvider>
-        <SidebarList
+        <SideNavList
           modelList={modelList}
           connectMap={elements.length > 0 ? elements[0].data?.connectMap : []}
+          nodeList={elements.filter((element) => isNode(element)) as Node[]}
         />
         <div className="reactflow-wrapper" ref={reactFlowWrapper}>
           <NodePanel

@@ -17,7 +17,6 @@ const getClasses = () =>
     title: {
       fontSize: '18px',
       lineHeight: '24px',
-      textAlign: 'center',
     },
   });
 

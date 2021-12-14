@@ -185,7 +185,18 @@
             "settings": {
               "image": "${MODULES.PredictModule.vpuamd64}",
               "createOptions": {
+                "User": "root:root",
                 "HostConfig": {
+                  "Devices": [{
+                    "PathOnHost": "/dev/ion",
+                    "PathInContainer": "/dev/ion",
+                    "CgroupPermissions": "rwm"
+                  }],
+                  "Mounts": [{
+                    "Target": "/var/tmp",
+                    "Source": "/var/tmp",
+                    "Type": "bind"
+                  }],
                   "Binds": [
                     "/dev/bus/usb:/dev/bus/usb"
                   ],
@@ -351,15 +362,16 @@
                 "Cmd": [
                   "/ovms/bin/ovms --config_path /workspace/config.json --port 9001 --rest_port 8001 --log_level DEBUG"
                 ],
-                "Devices": [{
-                  "PathOnHost": "/dev/ion",
-                  "PathInContainer": "/dev/ion"
-                }],
                 "Entrypoint": [
                   "sh",
                   "-c"
                 ],
                 "HostConfig": {
+                  "Devices": [{
+                    "PathOnHost": "/dev/ion",
+                    "PathInContainer": "/dev/ion",
+                    "CgroupPermissions": "rwm"
+                  }],
                   "Mounts": [{
                       "Target": "/workspace",
                       "Source": "ovmsworkspace",
