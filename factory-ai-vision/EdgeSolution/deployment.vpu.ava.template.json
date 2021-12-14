@@ -354,11 +354,22 @@
                   "-c"
                 ],
                 "HostConfig": {
-                  "Mounts": [{
-                    "Target": "/workspace",
-                    "Source": "ovmsworkspace",
-                    "Type": "volume"
+                  "Devices": [{
+                    "PathOnHost": "/dev/ion",
+                    "PathInContainer": "/dev/ion",
+                    "CgroupPermissions": "rwm"
                   }],
+                  "Mounts": [{
+                      "Target": "/workspace",
+                      "Source": "ovmsworkspace",
+                      "Type": "volume"
+                    },
+                    {
+                      "Target": "/var/tmp",
+                      "Source": "hddldaemon",
+                      "Type": "volume"
+                    }
+                  ],
                   "PortBindings": {
                     "9001/tcp": [{
                       "HostPort": "9001"
