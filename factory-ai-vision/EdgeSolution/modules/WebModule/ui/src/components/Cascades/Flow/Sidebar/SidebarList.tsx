@@ -4,7 +4,7 @@ import { Connection, Node } from 'react-flow-renderer';
 
 import { TrainingProject, NodeType } from '../../../../store/trainingProjectSlice';
 
-import SidebarCard from './SideBarCard';
+import SidebarCard from './SidebarCard';
 
 interface Props {
   modelList: TrainingProject[];
