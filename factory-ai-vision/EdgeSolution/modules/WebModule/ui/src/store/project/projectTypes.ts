@@ -33,7 +33,7 @@ export enum InferenceProtocol {
 
 export enum InferenceSource {
   LVA = 'lva',
-  CaptureModule = 'capture_module',
+  OpenCv = 'opencv',
 }
 
 export type DeploymentType = 'model' | 'cascade';

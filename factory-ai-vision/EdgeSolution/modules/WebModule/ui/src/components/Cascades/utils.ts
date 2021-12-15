@@ -1,6 +1,6 @@
 import { Node, Edge, isNode, isEdge } from 'react-flow-renderer';
 
-import { TrainingProject, Params, NodeType, Handler } from '../../store/trainingProjectSlice';
+import { TrainingProject, Params, NodeType, Handler, ProjectType } from '../../store/trainingProjectSlice';
 import { CascadePayload } from '../../store/cascadeSlice';
 import { LIMIT_OUTPUTS } from './types';
 
@@ -104,23 +104,6 @@ export const isDuplicateNodeName = (elements: (Node | Edge)[]) => {
   return new Set(exportNameList).size !== exportNameList.length;
 };
 
-// FORMAT: id_modelId_(input/output)_handlerIdx_nodeType
-const parseHandlerName = (
-  name: string,
-): {
-  id: number;
-  modelId: number;
-  handlerType: 'input' | 'output';
-  handlerId: number;
-  nodeType: NodeType;
-} => ({
-  id: +name.split('_')[0],
-  modelId: +name.split('_')[1],
-  handlerType: name.split('_')[2] as 'input' | 'output',
-  handlerId: +name.split('_')[3],
-  nodeType: `${name.split('_')[4]}_${name.split('_')[5]}` as NodeType,
-});
-
 export const isNotExportNode = (elements: (Node | Edge)[], modelList: TrainingProject[]) => {
   if (elements.length === 1) return true;
 
@@ -135,6 +118,25 @@ export const isNotExportNode = (elements: (Node | Edge)[], modelList: TrainingPr
 
   return !exportNodes;
 };
+
+// FORMAT: id_modelId_(input/output)_handlerIdx_nodeType_outputsCount
+const parseHandlerName = (
+  name: string,
+): {
+  id: number;
+  modelId: number;
+  handlerType: 'input' | 'output';
+  handlerId: number;
+  nodeType: NodeType;
+  projectType: ProjectType;
+} => ({
+  id: +name.split('_')[0],
+  modelId: +name.split('_')[1],
+  handlerType: name.split('_')[2] as 'input' | 'output',
+  handlerId: +name.split('_')[3],
+  nodeType: `${name.split('_')[4]}_${name.split('_')[5]}` as NodeType,
+  projectType: name.split('_')[6] as ProjectType,
+});
 
 export const isDiscreteFlow = (elements: (Node | Edge)[], modelList: TrainingProject[]) => {
   if (elements.length === 1) return true;
@@ -156,12 +158,12 @@ export const isDiscreteFlow = (elements: (Node | Edge)[], modelList: TrainingPro
     const selectedModel = modelList.find((model) => model.id === +getModelId(node.id));
 
     const inputMap = selectedModel.inputs.reduce((acc, _, idx) => {
-      acc[`${node.id}_input_${idx}_${selectedModel.nodeType}`] = 0;
+      acc[`${node.id}_input_${idx}_${selectedModel.nodeType}_${selectedModel.projectType}`] = 0;
       return acc;
     }, {});
 
     const outputMap = getLimitOutputs(selectedModel.nodeType, selectedModel.outputs).reduce((acc, _, idx) => {
-      acc[`${node.id}_output_${idx}_${selectedModel.nodeType}`] = 0;
+      acc[`${node.id}_output_${idx}_${selectedModel.nodeType}_${selectedModel.projectType}`] = 0;
       return acc;
     }, {});
 
@@ -180,10 +182,14 @@ export const isDiscreteFlow = (elements: (Node | Edge)[], modelList: TrainingPro
 
     flowMap = {
       ...flowMap,
-      [`${edge.target}_input_${edge.targetHandle}_${targetModel.nodeType}`]:
-        flowMap[`${edge.target}_input_${edge.targetHandle}_${targetModel.nodeType}`] + 1,
-      [`${edge.source}_output_${edge.sourceHandle}_${sourceModel.nodeType}`]:
-        flowMap[`${edge.source}_output_${edge.sourceHandle}_${sourceModel.nodeType}`] + 1,
+      [`${edge.target}_input_${edge.targetHandle}_${targetModel.nodeType}_${targetModel.projectType}`]:
+        flowMap[
+          `${edge.target}_input_${edge.targetHandle}_${targetModel.nodeType}_${targetModel.projectType}`
+        ] + 1,
+      [`${edge.source}_output_${edge.sourceHandle}_${sourceModel.nodeType}_${sourceModel.projectType}`]:
+        flowMap[
+          `${edge.source}_output_${edge.sourceHandle}_${sourceModel.nodeType}_${sourceModel.projectType}`
+        ] + 1,
     };
   });
 
@@ -195,6 +201,32 @@ export const isDiscreteFlow = (elements: (Node | Edge)[], modelList: TrainingPro
     const unconnectedHandlerList = Object.keys(flowMap)
       .filter((key) => flowMap[key] === 0)
       .map((name) => parseHandlerName(name));
+
+    const openvinoClassificationModelOutputHandlerList = unconnectedHandlerList.filter(
+      (info) =>
+        info.handlerType === 'output' &&
+        info.nodeType === 'openvino_model' &&
+        info.projectType === 'Classification',
+    );
+    if (openvinoClassificationModelOutputHandlerList.length > 0) {
+      // {modelId: unConnect output handler count}
+      const unconnnectOpenVinoClassificationOutputHandlerMap: Record<
+        number,
+        number
+      > = openvinoClassificationModelOutputHandlerList.reduce((acc, info) => {
+        acc[info.modelId] = acc[info.modelId] ? acc[info.modelId] + 1 : 1;
+        return acc;
+      }, {});
+
+      const hasConnectOneOutputHandler = Object.keys(unconnnectOpenVinoClassificationOutputHandlerMap).some(
+        (modelId) => {
+          const model = modelList.find((mode) => mode.id === +modelId);
+          return model.outputs.length === unconnnectOpenVinoClassificationOutputHandlerMap[modelId];
+        },
+      );
+
+      return hasConnectOneOutputHandler;
+    }
 
     if (
       unconnectedHandlerList.find(
