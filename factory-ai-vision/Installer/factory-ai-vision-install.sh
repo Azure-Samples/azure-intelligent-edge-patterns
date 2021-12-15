@@ -391,7 +391,8 @@ while read -r line
 do
     prtline=${line//'<Training Endpoint>'/$cvTrainingEndpoint}
     prtline=${prtline//'<Training API Key>'/$cvTrainingApiKey}
-    prtline=${prtline//'<cpu or gpu>'/$cpuGpu}
+    #prtline=${prtline//'<cpu or gpu>'/$cpuGpu}
+    prtline=${prtline//'<cpu or gpu>'/cpu}
     prtline=${prtline//'<Docker Runtime>'/$runtime}
     prtline=${prtline//'<platform>'/$platform}
     prtline=${prtline//'<create option>'/$createOptions}
