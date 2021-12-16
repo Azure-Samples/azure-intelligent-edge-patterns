@@ -187,12 +187,6 @@
               "image": "${MODULES.PredictModule.vpuamd64}",
               "createOptions": {
                 "HostConfig": {
-                  "Binds": [
-                    "/dev/bus/usb:/dev/bus/usb"
-                  ],
-                  "DeviceCgroupRules": [
-                    "c 189:* rmw"
-                  ],
                   "LogConfig": {
                     "Type": "",
                     "Config": {

@@ -190,22 +190,6 @@
               "createOptions": {
                 "User": "root:root",
                 "HostConfig": {
-                  "Devices": [{
-                    "PathOnHost": "/dev/ion",
-                    "PathInContainer": "/dev/ion",
-                    "CgroupPermissions": "rwm"
-                  }],
-                  "Mounts": [{
-                    "Target": "/var/tmp",
-                    "Source": "/var/tmp",
-                    "Type": "bind"
-                  }],
-                  "Binds": [
-                    "/dev/bus/usb:/dev/bus/usb"
-                  ],
-                  "DeviceCgroupRules": [
-                    "c 189:* rmw"
-                  ],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
