@@ -180,6 +180,9 @@
               },
               "LVA_MODE": {
                 "value": "$LVA_MODE"
+              },
+              "DEVICE_TYPE": {
+                "value": "vpu"
               }
             },
             "settings": {

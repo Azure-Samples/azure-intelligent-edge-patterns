@@ -3,6 +3,7 @@
 
 import datetime
 import logging
+import os
 import threading
 import time
 
@@ -28,6 +29,7 @@ from .exceptions import (
 
 logger = logging.getLogger(__name__)
 
+ROOT = '/workspace'
 
 class Project(models.Model):
     """Project Model."""
@@ -481,10 +483,13 @@ class Task(models.Model):
                 #     project_obj.download_uri_fp16 = exports[0].download_uri
                 project_obj.save()
 
-                # pre-download model.zip
+                # pre-download openvino model.zip
                 # model_name = project_obj.download_uri_openvino.split('/')[3][2:]
-                # subprocess.run(['wget', '-O', TMP_DIR+'/model.zip', node.download_uri_openvino])
-
+                # iteration_id = project_obj.download_uri_openvino.split('/')[4].split('.')[0]
+                # file_name = ROOT + '/' + iteration_id + '.zip'
+                # if not os.path.isfile(file_name):
+                #     subprocess.run(['wget', '-O', file_name, node.download_uri_openvino])
+                
                 break
             return
 
