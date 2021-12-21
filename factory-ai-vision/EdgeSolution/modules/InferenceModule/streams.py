@@ -1269,46 +1269,48 @@ def process_response(response, img, metadatas):
             
                     
             prediction = {
-                'tag': {
-                    'value':tag,
-                    'confidence': np.array(box_confidences[i]).tolist()
-                },
-                'attributes': [],
-                'box': {
-                    'l': np.float(x1),
-                    't': np.float(y1),
-                    'w': np.float(x2-x1),
-                    'h': np.float(y2-y1)
+                'entity':{
+                    'tag': {
+                        'value':tag,
+                        'confidence': np.array(box_confidences[i]).tolist()
+                    },
+                    'attributes': [],
+                    'box': {
+                        'l': np.float(x1),
+                        't': np.float(y1),
+                        'w': np.float(x2-x1),
+                        'h': np.float(y2-y1)
+                    }
                 }
             }
             logger.warning(attributes)
             for attribute in attributes:
                 if attribute['type'] == 'regression':
-                    prediction['attributes'].append({
+                    prediction['entity']['attributes'].append({
                         'name': attribute['name'],
                         'value': attribute['values'][i],
                         'confidence': -1})
                 if attribute['type'] == 'classification':
-                    prediction['attributes'].append({
+                    prediction['entity']['attributes'].append({
                         'name': attribute['name'],
                         'value': attribute['values'][i],
                         'confidence': np.array(attribute['confidences'][i]).tolist()})
-            prediction['attributes'].sort(key=lambda x:x['name'])
+            prediction['entity']['attributes'].sort(key=lambda x:x['name'])
             predictions.append(prediction)
 
     h, w, _ = img.shape
     for prediction in predictions:
-        x1 = int(prediction['box']['l'] * w)
-        y1 = int(prediction['box']['t'] * h)
-        x2 = int((prediction['box']['w'] + prediction['box']['l']) * w)
-        y2 = int((prediction['box']['h'] + prediction['box']['t']) * h)
+        x1 = int(prediction['entity']['box']['l'] * w)
+        y1 = int(prediction['entity']['box']['t'] * h)
+        x2 = int((prediction['entity']['box']['w'] + prediction['entity']['box']['l']) * w)
+        y2 = int((prediction['entity']['box']['h'] + prediction['entity']['box']['t']) * h)
         cv2.rectangle(img, (x1, y1), (x2, y2), (0, 255, 255), 3)
         font = cv2.FONT_HERSHEY_SIMPLEX
         fontScale = 0.5
         color = (0, 255, 255)
         thickness = 1
-        text = prediction['tag']['value']
-        for attribute in prediction['attributes']:
+        text = prediction['entity']['tag']['value']
+        for attribute in prediction['entity']['attributes']:
             if text != '': text += ' / '
             text += str(attribute['value'])
         cv2.putText(img, text, (x1, y1-10), font,
