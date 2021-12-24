@@ -6,6 +6,7 @@ import logging
 import os
 import threading
 import time
+import subprocess
 
 from azure.cognitiveservices.vision.customvision.training.models import (
     CustomVisionErrorException,
@@ -484,11 +485,12 @@ class Task(models.Model):
                 project_obj.save()
 
                 # pre-download openvino model.zip
-                # model_name = project_obj.download_uri_openvino.split('/')[3][2:]
-                # iteration_id = project_obj.download_uri_openvino.split('/')[4].split('.')[0]
-                # file_name = ROOT + '/' + iteration_id + '.zip'
-                # if not os.path.isfile(file_name):
-                #     subprocess.run(['wget', '-O', file_name, node.download_uri_openvino])
+                model_name = project_obj.download_uri_openvino.split('/')[3][2:]
+                iteration_id = project_obj.download_uri_openvino.split('/')[4].split('.')[0]
+                file_name = ROOT + '/' + iteration_id + '.zip'
+                logger.warning("Pre-download customvision model.zip")
+                if not os.path.isfile(file_name):
+                    subprocess.run(['wget', '-O', file_name, project_obj.download_uri_openvino])
                 
                 break
             return

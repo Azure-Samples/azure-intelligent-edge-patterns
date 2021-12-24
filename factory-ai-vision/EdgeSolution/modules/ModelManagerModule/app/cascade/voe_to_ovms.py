@@ -127,11 +127,19 @@ def process_openvino_model(node, g):
 def process_customvision_model(node, g):
 
     model_name = node.download_uri_openvino.split('/')[3][2:]
+    iteration_id = node.download_uri_openvino.split('/')[4].split('.')[0]
 
     #
     # Download Model
     #
-    subprocess.run(['wget', '-O', TMP_DIR+'/model.zip', node.download_uri_openvino])
+    file_name = ROOT + '/' + iteration_id + '.zip'
+    if os.path.isfile(file_name):
+        # customvision model already downloaded
+        subprocess.run(['cp', file_name, TMP_DIR+'/model.zip'])
+    else:
+        # customvision not yet downloaded
+        subprocess.run(['wget', '-O', TMP_DIR+'/model.zip', node.download_uri_openvino])
+        
     subprocess.run(['unzip', '-o', TMP_DIR+'/model.zip', '-d', TMP_DIR])
     subprocess.run(['mkdir', '-p', MODEL_DIR+'/'+model_name])
     subprocess.run(['mkdir', '-p', MODEL_DIR+'/'+model_name+'/1'])

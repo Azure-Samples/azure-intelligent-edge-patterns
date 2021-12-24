@@ -29,6 +29,7 @@ RUN apt-get update \
 # TODO: Consider move env to the end of dockerfile
 ENV LANG en_US.UTF-8
 ENV LC_ALL en_US.UTF-8
+ENV DEVICE_TYPE vpu
 
 # =========================================================
 # Install Python package
