@@ -342,7 +342,7 @@
         "schemaVersion": "1.0",
         "routes": {
           "metrics": "FROM /messages/modules/inferencemodule/outputs/metrics INTO $upstream",
-          "InferenceToLVA": "FROM /messages/modules/inferencemodule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/lvaEdge/inputs/recordingTrigger\")"
+          "InferenceToLVA": "FROM /messages/modules/inferencemodule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/avaedge/inputs/recordingTrigger\")"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
