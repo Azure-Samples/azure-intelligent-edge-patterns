@@ -1,7 +1,7 @@
 # =========================================================
 # Base
 # =========================================================
-FROM amd64/python:3.8
+FROM amd64/python:3.8-slim-buster
 
 WORKDIR /app
 
@@ -38,6 +38,10 @@ RUN pip install --upgrade pip
 RUN --mount=type=cache,target=/root/.cache/pip \
     pip install -r requirements/cpu.txt --ignore-installed \
     pip install -U pydantic==1.7.2
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libglib2.0-0
 
 # ENV CONDA_ENV_NAME python38
 # RUN conda create --name python38 python=3.8.5 -y &&\

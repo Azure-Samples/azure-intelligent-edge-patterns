@@ -1,5 +1,5 @@
 {
-    "@apiVersion": "1.0",
+    "@apiVersion": "1.1",
     "name": "InferencingWithGrpcExtension",
     "properties": {
         "description": "Factory AI Video Pipeline",
@@ -172,15 +172,20 @@
             {
                 "@type": "#Microsoft.VideoAnalyzer.VideoSink",
                 "name": "videoSink",
-                "videoName": "sampleAssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
+                "videoName": "AssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
                 "videoCreationProperties": {
-                    "title": "sampleAssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
+                    "title": "AssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
                     "segmentLength": "${recordingDuration}"
                 },
                 "localMediaCacheMaximumSizeMiB": "2048",
-                "localMediaCachePath": "/var/lib/azuremediaservices/tmp/",
+                "localMediaCachePath": "/var/lib/videoanalyzer/tmp/",
                 "inputs": [{
-                    "nodeName": "signalGateProcessor"
+                    "nodeName": "signalGateProcessor",
+                    "outputSelectors": [{
+                        "property": "mediaType",
+                        "operator": "is",
+                        "value": "video"
+                    }]
                 }]
             }
         ]

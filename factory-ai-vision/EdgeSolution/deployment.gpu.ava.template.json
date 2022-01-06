@@ -208,7 +208,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/media/video-analyzer:1",
+              "image": "mcr.microsoft.com/media/video-analyzer:1.1.0",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {

@@ -1068,7 +1068,7 @@ def send_message_to_iothub(predictions):
 def send_message_to_lva(cam_id):
     if iot:
         try:
-            target = "/graphInstances/" + str(cam_id)
+            target = "/livePipelines/" + str(cam_id)
             msg = Message("")
             msg.custom_properties["eventTarget"] = target
             iot.send_message_to_output(msg, "InferenceToLVA")

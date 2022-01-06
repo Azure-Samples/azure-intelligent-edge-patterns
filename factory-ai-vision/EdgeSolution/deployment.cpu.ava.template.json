@@ -208,7 +208,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/media/video-analyzer:1",
+              "image": "mcr.microsoft.com/media/video-analyzer:1.1.0",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {
@@ -399,7 +399,7 @@
         "ApplicationDataDirectory": "/var/lib/videoanalyzer",
         "DiagnosticsEventsOutputName": "diagnostics",
         "OperationalEventsOutputName": "operational",
-        "LogLevel": "information",
+        "LogLevel": "Verbose",
         "LogCategories": "Application,Events",
         "AllowUnsecuredEndpoints": true,
         "TelemetryOptOut": false
