@@ -2,6 +2,8 @@
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | --------------- | ------------------------------- |
 | This is an easy-to-use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop. | -Azure Stack<br/> -Azure Percept<br/> -Custom Vision<br/>-Onnxruntime<br/>-OpenVINO Model Server<br/>-OpenVINO <br/>-Azure IoTEdge<br/>-AVA<br/>-RTSP Source <br/>-HTTP/GRPC Extension   | sample solution | -json<br>-python<br>-javascript |
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
 # Vision on Edge (VoE)
 
 Vision on Edge (VoE) is an open-source tool that accelerates and simplifies the journey of building vision-based intelligent edge solutions using Machine Learning (ML). VoE helps you with extracting insights and actions from RTSP IP cameras using a no-code UI that runs and processes streams locally on your edge device.
@@ -24,39 +26,32 @@ VoE combines the power of Azure services such as Custom Vision and Video Analyze
 - Create a more complex AI Skill/Logic by combining your custom ML models with already trained models from our model zoo
 - Deploy your hardware optimized ML models on your IP camera streams to extract insights and create actions locally or in the cloud
 
+## Concepts
 
-# Table of Content
+You can get started learning about VoE's user concepts [here](Tutorial/concepts.md).
 
-- [Concepts & Prerequisites](#concepts-and-prerequisites)
-  * [Hardware](#hardware)
-  * [Services](#services)
-- [Architecture](#architecture)
-- [Get Started](#get-started-vision-on-edge-installer)
-  * [For Azure IoT Edge](#for-azure-iotedge-devices-recommended)
-    + [Option 1: Azure Shell Installer](#option-1-azure-shell-installer-recommended)
-    + [Option 2: Azure ARM Template](#option-2-azure-arm-template)
-- [Other Tutorials](#other-tutorials)
-  * [Video Tutorials](#video-tutorials)
-  * [Upload your own video to be processed](#upload-your-own-video-to-be-processed)
-- [Privacy Notice](#privacy-notice)
+## Prerequisites and Architecture
 
+Learn about VoE's architecture and its technical requirements in [this document](Tutorial/req_arch.md).
 
-# Get Started: Vision on Edge Installer
+# Get Started
 
-## For Azure IoTEdge Devices (Recommended)
+## Deploy
+
+You can deploy VoE to your edge or [simulated](https://docs.microsoft.com/en-us/azure/iot-edge/how-to-install-iot-edge-linux) device either through a shell installer or Azure ARM template. 
+
+**If you don't have camera devices to connect to your VoE portal, you can use your own videos by uploading them to your edge device. Please follow the instruction [here](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/UploadVideo.md).**
 
 ### Option 1: Azure Shell Installer (Recommended)
 
-Please follow the [instructions given here](Tutorial/Shell-installer-Tutorial.md) to install VoE using Azure Shell.
+Please follow the [instructions given here](Tutorial/Shell-installer-Tutorial.md) to install VoE using Azure Cloud Shell.
 
 ### Option 2: Azure ARM Template
 
 [![Deploy to Azure ARM](https://aka.ms/deploytoazurebutton)](https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Flinkernetworks%2Fazure-intelligent-edge-patterns%2Ffeat%2Fcascade-dev%2Ffactory-ai-vision%2FDeploy%2Farm%2Farmdeploy.json)
 
-Please follow [the following document](Tutorial/Tutorial_ARM_TemplateDeployment.md) to learn more about our Azure ARM deployment.
+Please follow [this document](Tutorial/Tutorial_ARM_TemplateDeployment.md) to learn more about our Azure ARM deployment.
 
-
-# Other Tutorials 
 
 ## Video Tutorials
 
@@ -70,9 +65,6 @@ Please follow [the following document](Tutorial/Tutorial_ARM_TemplateDeployment.
 
 - Tutorial 5: Advance capabilities setting [https://youtu.be/Bv7wxfFEdtI]
 
-## Upload your own video to be processed
-
-If you don't have camera devices to connect to your VoE deployment, you can use your own videos by uploading them to your edge device. Please follow the instruction [here](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/UploadVideo.md).
 
 # Privacy Notice
 
