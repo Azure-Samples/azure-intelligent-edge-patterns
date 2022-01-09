@@ -1,46 +1,37 @@
 | description                                                                                                                                                                                                                          | products                                                               | page_type       | description                     |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------- | --------------- | ------------------------------- |
-| This is an easy-to-use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop. | - Azure Stack<br/> -Custom Vision<br/>-Onnxruntime<br/>-OpenVINO Model Server<br/>-OpenVINO <br/>-Azure IoTEdge<br/>-AVA<br/>*RTSP Source <br/>*HTTP/GRPC Extension   | sample solution | -json<br>-python<br>-javascript |
+| This is an easy-to-use UI solution showing how to realize a your own machine learning solution concept in a single day without requiring any Machine Learning expertise, run with hardware accleration on edge with retraining loop. | -Azure Stack<br/> -Azure Percept<br/> -Custom Vision<br/>-Onnxruntime<br/>-OpenVINO Model Server<br/>-OpenVINO <br/>-Azure IoTEdge<br/>-AVA<br/>-RTSP Source <br/>-HTTP/GRPC Extension   | sample solution | -json<br>-python<br>-javascript |
 
-# Vision on Edge Solution
+# Vision on Edge (VoE)
 
-This is a solution showing how to deploy a Custom Vision model to Azure IoT edge device and get Machine learning solution up and running in a single day.
-You can define your location, camera and set up objects to detect example: any manufacturing parts, defected parts, etc. while keeping your video footage private, lowering your badnwidth costs and even running everything offline. This solution is capable of processing multiple cameras using Microsoft AVA.
+Vision on Edge (VoE) is an open-source tool that accelerates and simplifies the journey of building vision-based intelligent edge solutions using Machine Learning (ML). VoE helps you with extracting insights and actions from RTSP IP cameras using a no-code UI that runs and processes streams locally on your edge device.
 
 Check out [this video](https://www.youtube.com/watch?v=17UW6veK7SA) to see brief introduction in action and understand how the value is delivered:
 
 [![video](https://raw.githubusercontent.com/linkernetworks/azure-intelligent-edge-patterns/linker/factory-ai-vision/assets/Ignite42021.jpg)](https://www.youtube.com/watch?v=17UW6veK7SA)
 
-## What's New
+## Overview
 
-### Model Cascading
+Gaining meaningful insights from the physical world can be quite complex and time consuming. Camera is quickly becoming the one universal sensor that can capture the essence of the physical world for many different use cases. To be able to reason about your desired events happening in the physical world using cameras you need to be able to ingest, process and reason about many camera streams at once. Creating a video ingestion process with only 1 camera is not an easy task but creating a scalable, yet extensible video pipeline is even more difficult. In addition, understanding things/objects in the physical world requires algorithms that are not easy to build without specialized knowledge and resources. 
 
-You can now combine models to create more advanced computer vision solutions easily with drag-n-drop cascading. Drag-n-drop cascading allows you to use a combination of Object Detector and Classifier models in a pipeline fashion to achieve insights that were not easily achievable before. Your Models can be from:
-
-* Custom Vision: You can create/train your own CNN models based on images coming from RTSP camera feeds. Created models are in OpenVINO format and are optimized for Intel CPU/VPUs.
-* OpenVINO Model Zoo: Pre-trained, optimized, deep learning models by Intel for use with Intel CPU/VPUs. These generic yet performant models are ready for use without any need for training.
- 
 <p align="center">
 <img src="assets/VoEGH.gif" width="800"/>
 </p>
 
-
-### OpenVINO Model Zoo
-
-OpenVINO Model Zoo is now the first of many official Model Zoos available for use. OpenVINO Model Zoo is a library of pre-trained, optimized, deep learning models by Intel for use with Intel CPU/VPUs. You can use these models without any need for training and they can be used in combination with Custom Vision models to create your desired AI Logic/Solution! The following models are currently available as part of the model zoo:
-
-* [age-gender-recognition-retail-0013](https://github.com/openvinotoolkit/open_model_zoo/blob/master/models/intel/age-gender-recognition-retail-0013/README.md)
-* [emotions-recognition-retail-0003](https://github.com/openvinotoolkit/open_model_zoo/blob/master/models/intel/emotions-recognition-retail-0003/README.md)
-* [face-detection-retail-0005](https://github.com/openvinotoolkit/open_model_zoo/blob/master/models/intel/face-detection-retail-0005/README.md)
+VoE combines the power of Azure services such as Custom Vision and Video Analyzer in one simple and easy to use local UI that helps you:
+- Connect and view your IP cameras
+- Train your own custom ML models from scratch using training data from your IP cameras
+- Create a more complex AI Skill/Logic by combining your custom ML models with already trained models from our model zoo
+- Deploy your hardware optimized ML models on your IP camera streams to extract insights and create actions locally or in the cloud
 
 
 # Table of Content
 
-- [Prerequisites](#prerequisites)
+- [Concepts & Prerequisites](#concepts-and-prerequisites)
   * [Hardware](#hardware)
   * [Services](#services)
 - [Architecture](#architecture)
-- [Get Started: Vision on Edge Installer](#get-started-vision-on-edge-installer)
+- [Get Started](#get-started-vision-on-edge-installer)
   * [For Azure IoT Edge](#for-azure-iotedge-devices-recommended)
     + [Option 1: Azure Shell Installer](#option-1-azure-shell-installer-recommended)
     + [Option 2: Azure ARM Template](#option-2-azure-arm-template)
@@ -49,7 +40,7 @@ OpenVINO Model Zoo is now the first of many official Model Zoos available for us
   * [Upload your own video to be processed](#upload-your-own-video-to-be-processed)
 - [Privacy Notice](#privacy-notice)
 
-# Prerequisites
+## Concepts and Prerequisites
 
 ## Hardware
 
