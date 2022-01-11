@@ -50,11 +50,13 @@ ENV LC_ALL en_US.UTF-8
 # =========================================================
 # Install Python package
 # =========================================================
-RUN pip3 install --upgrade pip
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip3 install --upgrade pip
 COPY requirements/base.txt ./requirements/base.txt
 COPY requirements/gpu.txt ./requirements/gpu.txt
 RUN --mount=type=cache,target=/root/.cache/pip \
-    pip3 install -r requirements/base.txt \
+    pip3 install -r requirements/base.txt 
+RUN --mount=type=cache,target=/root/.cache/pip \
     pip3 install -r requirements/gpu.txt
 
 # =========================================================

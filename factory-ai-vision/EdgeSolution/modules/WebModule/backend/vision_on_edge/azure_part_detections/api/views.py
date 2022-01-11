@@ -144,6 +144,8 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             device = inference_module_obj.device()
             if device == 'vpu' and instance.deployment_type == 'model':
                 device = 'cpu'
+            if device == 'gpu' and instance.deployment_type == 'cascade':
+                device = 'cpu'
         except requests.exceptions.ConnectionError as err:
             raise PdInferenceModuleUnreachable from err
         except ReadTimeout as err:
@@ -175,6 +177,8 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
             inference_num = data["inference_num"]
             device = inference_module_obj.device()
             if device == 'vpu' and instance.deployment_type == 'model':
+                device = 'cpu'
+            if device == 'gpu' and instance.deployment_type == 'cascade':
                 device = 'cpu'
             unidentified_num = data["unidentified_num"]
             average_inference_time = data["average_inference_time"]
