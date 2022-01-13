@@ -347,7 +347,7 @@ if [ "$isCfg" != true ]; then
 	#    fi
     #fi
 	PS3='Choose the number corresponding to the Azure IoT Edge device: '
-	deviceOptions="cpu vpu"
+	deviceOptions="cpu gpu vpu"
 	select cpuGpu in $deviceOptions
 	do
 	  echo "you chose: " $cpuGpu
@@ -358,6 +358,9 @@ if [ "$isCfg" != true ]; then
 	if [ "$cpuGpu" == "cpu" ]; then
 		runtime="runc"
 	fi
+        if [ "$cpuGpu" == "gpu" ]; then
+                runtime="nvidia"
+        fi
 	if [ "$cpuGpu" == "vpu" ]; then
 		runtime="runc"
 	fi

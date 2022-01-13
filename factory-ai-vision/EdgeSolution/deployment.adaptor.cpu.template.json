@@ -48,7 +48,7 @@
                         "status": "running",
                         "restartPolicy": "always",
                         "settings": {
-                            "image": "mcr.microsoft.com/media/video-analyzer:1",
+                            "image": "mcr.microsoft.com/media/video-analyzer:1.1.0",
                             "createOptions": {
                                 "HostConfig": {
                                     "LogConfig": {
@@ -74,13 +74,11 @@
                             "image": "${MODULES.OVMSAdaptorModule}",
                             "createOptions": {
                                 "HostConfig": {
-                                    "Mounts": [
-                                        {
-                                            "Target": "/workspace",
-                                            "Source": "ovmsworkspace",
-                                            "Type": "volume"
-                                        }
-                                    ],
+                                    "Mounts": [{
+                                        "Target": "/workspace",
+                                        "Source": "ovmsworkspace",
+                                        "Type": "volume"
+                                    }],
                                     "LogConfig": {
                                         "Type": "",
                                         "Config": {
@@ -104,19 +102,15 @@
                             "image": "${MODULES.ModelManagerModule}",
                             "createOptions": {
                                 "HostConfig": {
-                                    "Mounts": [
-                                        {
-                                            "Target": "/workspace",
-                                            "Source": "ovmsworkspace",
-                                            "Type": "volume"
-                                        }
-                                    ],
+                                    "Mounts": [{
+                                        "Target": "/workspace",
+                                        "Source": "ovmsworkspace",
+                                        "Type": "volume"
+                                    }],
                                     "PortBindings": {
-                                        "8585/tcp": [
-                                            {
-                                                "HostPort": "8585"
-                                            }
-                                        ]
+                                        "8585/tcp": [{
+                                            "HostPort": "8585"
+                                        }]
                                     },
                                     "LogConfig": {
                                         "Type": "",
@@ -150,24 +144,18 @@
                                     "-c"
                                 ],
                                 "HostConfig": {
-                                    "Mounts": [
-                                        {
-                                            "Target": "/workspace",
-                                            "Source": "ovmsworkspace",
-                                            "Type": "volume"
-                                        }
-                                    ],
+                                    "Mounts": [{
+                                        "Target": "/workspace",
+                                        "Source": "ovmsworkspace",
+                                        "Type": "volume"
+                                    }],
                                     "PortBindings": {
-                                        "9001/tcp": [
-                                            {
-                                                "HostPort": "9001"
-                                            }
-                                        ],
-                                        "8001/tcp": [
-                                            {
-                                                "HostPort": "8001"
-                                            }
-                                        ]
+                                        "9001/tcp": [{
+                                            "HostPort": "9001"
+                                        }],
+                                        "8001/tcp": [{
+                                            "HostPort": "8001"
+                                        }]
                                     },
                                     "LogConfig": {
                                         "Type": "",
