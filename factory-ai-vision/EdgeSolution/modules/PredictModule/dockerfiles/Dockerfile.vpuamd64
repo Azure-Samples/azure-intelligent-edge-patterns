@@ -41,8 +41,10 @@ COPY requirements/cpu.txt ./requirements/cpu.txt
 #     . activate python38
 # RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
 # RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/cpu.txt --ignore-installed"]
-RUN pip3 install --upgrade pip
-RUN pip3 install -r requirements/cpu.txt --ignore-installed
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip3 install --upgrade pip 
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip3 install -r requirements/cpu.txt --ignore-installed
 
 # =========================================================
 # Copy Source Code

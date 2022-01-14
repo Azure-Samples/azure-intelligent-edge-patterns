@@ -28,6 +28,9 @@ RUN pip install -r ./requirements/base.txt
 COPY backend/requirements/production-x86.txt requirements/production-x86.txt
 RUN pip install -r ./requirements/production-x86.txt
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libglib2.0-0
 
 COPY backend/manage.py .
 COPY backend/config.py .

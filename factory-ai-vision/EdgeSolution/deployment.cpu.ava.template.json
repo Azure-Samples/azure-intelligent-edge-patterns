@@ -208,7 +208,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/media/video-analyzer:1",
+              "image": "mcr.microsoft.com/media/video-analyzer:1.1.0",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {
@@ -380,7 +380,7 @@
         "schemaVersion": "1.0",
         "routes": {
           "metrics": "FROM /messages/modules/inferencemodule/outputs/metrics INTO $upstream",
-          "InferenceToLVA": "FROM /messages/modules/inferencemodule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/lvaEdge/inputs/recordingTrigger\")"
+          "InferenceToLVA": "FROM /messages/modules/inferencemodule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/avaedge/inputs/recordingTrigger\")"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
@@ -399,7 +399,7 @@
         "ApplicationDataDirectory": "/var/lib/videoanalyzer",
         "DiagnosticsEventsOutputName": "diagnostics",
         "OperationalEventsOutputName": "operational",
-        "LogLevel": "information",
+        "LogLevel": "Verbose",
         "LogCategories": "Application,Events",
         "AllowUnsecuredEndpoints": true,
         "TelemetryOptOut": false

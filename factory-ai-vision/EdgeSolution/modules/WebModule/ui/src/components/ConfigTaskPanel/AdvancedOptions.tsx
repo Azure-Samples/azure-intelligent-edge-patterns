@@ -11,7 +11,7 @@ import { CloudMsgOption } from './CloudMsgOption';
 import { DisableVideoOption } from './DisableVideoFeedOption';
 import { ProtocolOptions } from './ProtocolOptions';
 import { RetrainImgOption } from './RetrainImgOption';
-// import { SendVideoOptions } from './SendVideoOptions';
+import { SendVideoOptions } from './SendVideoOptions';
 import { TimeInfoOption } from './TimeInfoOption';
 import EdgeMsgOption from './EdgeMsgOption';
 
@@ -24,8 +24,8 @@ type AdvancedOptionsProps = {
 
 export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
   projectData,
-  // selectedCameraOptions,
-  // selectedPartOptions,
+  selectedCameraOptions,
+  selectedPartOptions,
   onChange,
 }) => {
   const selectedTrainProjectIsNotDemo = useSelector((state: State) =>
@@ -61,7 +61,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
       />
       {inferenceSource === InferenceSource.LVA && (
         <>
-          {/* <SendVideoOptions
+          <SendVideoOptions
             SVTCisOpen={projectData.SVTCisOpen}
             SVTCcameras={projectData.SVTCcameras}
             SVTCparts={projectData.SVTCparts}
@@ -71,7 +71,7 @@ export const AdvancedOptions: React.FC<AdvancedOptionsProps> = ({
             onChange={onChange}
             selectedCameraOptions={selectedCameraOptions}
             selectedPartOptions={selectedPartOptions}
-          /> */}
+          />
           <ProtocolOptions inferenceProtocol={projectData.inferenceProtocol} onChange={onChange} />
         </>
       )}

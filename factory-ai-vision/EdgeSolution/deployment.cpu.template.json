@@ -35,21 +35,15 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [
-                      {
-                        "HostPort": "5671"
-                      }
-                    ],
-                    "8883/tcp": [
-                      {
-                        "HostPort": "8883"
-                      }
-                    ],
-                    "443/tcp": [
-                      {
-                        "HostPort": "443"
-                      }
-                    ]
+                    "5671/tcp": [{
+                      "HostPort": "5671"
+                    }],
+                    "8883/tcp": [{
+                      "HostPort": "8883"
+                    }],
+                    "443/tcp": [{
+                      "HostPort": "443"
+                    }]
                   }
                 }
               }
@@ -74,11 +68,9 @@
                     }
                   },
                   "PortBindings": {
-                    "8181/tcp": [
-                      {
-                        "HostPort": "8181"
-                      }
-                    ]
+                    "8181/tcp": [{
+                      "HostPort": "8181"
+                    }]
                   }
                 }
               }
@@ -121,11 +113,9 @@
                     }
                   },
                   "PortBindings": {
-                    "8000/tcp": [
-                      {
-                        "HostPort": "8000"
-                      }
-                    ]
+                    "8000/tcp": [{
+                      "HostPort": "8000"
+                    }]
                   }
                 }
               }
@@ -156,21 +146,15 @@
                     }
                   },
                   "PortBindings": {
-                    "5000/tcp": [
-                      {
-                        "HostPort": "5000"
-                      }
-                    ],
-                    "5558/tcp": [
-                      {
-                        "HostPort": "5558"
-                      }
-                    ],
-                    "44000/tcp": [
-                      {
-                        "HostPort": "44000"
-                      }
-                    ]
+                    "5000/tcp": [{
+                      "HostPort": "5000"
+                    }],
+                    "5558/tcp": [{
+                      "HostPort": "5558"
+                    }],
+                    "44000/tcp": [{
+                      "HostPort": "44000"
+                    }]
                   },
                   "IpcMode": "host",
                   "runtime": "runc"
@@ -203,11 +187,9 @@
                     }
                   },
                   "PortBindings": {
-                    "7777/tcp": [
-                      {
-                        "HostPort": "7777"
-                      }
-                    ]
+                    "7777/tcp": [{
+                      "HostPort": "7777"
+                    }]
                   },
                   "IpcMode": "host",
                   "runtime": "runc"
@@ -245,13 +227,11 @@
               "image": "${MODULES.RtspSimModule}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [
-                    {
-                      "Target": "/live/mediaServer/media/upload",
-                      "Source": "upload_data",
-                      "Type": "volume"
-                    }
-                  ],
+                  "Mounts": [{
+                    "Target": "/live/mediaServer/media/upload",
+                    "Source": "upload_data",
+                    "Type": "volume"
+                  }],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -260,11 +240,9 @@
                     }
                   },
                   "PortBindings": {
-                    "554/tcp": [
-                      {
-                        "HostPort": "554"
-                      }
-                    ]
+                    "554/tcp": [{
+                      "HostPort": "554"
+                    }]
                   }
                 }
               }
@@ -279,13 +257,11 @@
               "image": "${MODULES.UploadModule}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [
-                    {
-                      "Target": "/app/upload",
-                      "Source": "upload_data",
-                      "Type": "volume"
-                    }
-                  ],
+                  "Mounts": [{
+                    "Target": "/app/upload",
+                    "Source": "upload_data",
+                    "Type": "volume"
+                  }],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -294,11 +270,9 @@
                     }
                   },
                   "PortBindings": {
-                    "7000/tcp": [
-                      {
-                        "HostPort": "7000"
-                      }
-                    ]
+                    "7000/tcp": [{
+                      "HostPort": "7000"
+                    }]
                   }
                 }
               }
@@ -324,12 +298,10 @@
                 ],
                 "HostConfig": {
                   "PortBindings": {
-                    "9000/tcp": [
-                      {
-                        "HostIp": "",
-                        "HostPort": "9000"
-                      }
-                    ]
+                    "9000/tcp": [{
+                      "HostIp": "",
+                      "HostPort": "9000"
+                    }]
                   },
                   "LogConfig": {
                     "Type": "",
@@ -366,12 +338,10 @@
                 ],
                 "HostConfig": {
                   "PortBindings": {
-                    "5010/tcp": [
-                      {
-                        "HostIp": "",
-                        "HostPort": "5010"
-                      }
-                    ]
+                    "5010/tcp": [{
+                      "HostIp": "",
+                      "HostPort": "5010"
+                    }]
                   },
                   "LogConfig": {
                     "Type": "",
@@ -400,7 +370,7 @@
         "schemaVersion": "1.0",
         "routes": {
           "metrics": "FROM /messages/modules/inferencemodule/outputs/metrics INTO $upstream",
-          "InferenceToLVA": "FROM /messages/modules/inferencemodule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/lvaEdge/inputs/recordingTrigger\")"
+          "InferenceToLVA": "FROM /messages/modules/inferencemodule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/avaedge/inputs/recordingTrigger\")"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
