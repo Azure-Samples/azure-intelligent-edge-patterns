@@ -55,13 +55,13 @@ echo "Installing iotedgedev"
 bash -c "pip install iotedgedev==2.1.4" || true
 
 echo "Updating az-cli"
-pip install --upgrade azure-cli
-pip install --upgrade azure-cli-telemetry
+bash -c "pip install --upgrade azure-cli" || true
+bash -c "pip install --upgrade azure-cli-telemetry" || true
 
 echo "installing azure iot extension"
 az extension add --name azure-iot
 
-pip3 install --upgrade jsonschema
+bash -c "pip3 install --upgrade jsonschema" || true
 apk add coreutils
 echo "Installation complete"
 
