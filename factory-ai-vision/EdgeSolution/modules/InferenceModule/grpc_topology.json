@@ -75,16 +75,16 @@
                 "default": "30"
             },
             {
-                "name": "instanceId",
-                "type": "String",
-                "description": "instance id",
-                "default": "0"
-            },
-            {
                 "name": "recordingDuration",
                 "type": "String",
                 "description": "recording duration",
                 "default": "PT60S"
+            },
+            {
+                "name": "videoOptputName",
+                "type": "String",
+                "description": "Video output name.",
+                "default": "AVAtestVideo"
             }
         ],
         "sources": [{
@@ -172,13 +172,7 @@
             {
                 "@type": "#Microsoft.VideoAnalyzer.VideoSink",
                 "name": "videoSink",
-                "videoName": "AssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
-                "videoCreationProperties": {
-                    "title": "AssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
-                    "segmentLength": "${recordingDuration}"
-                },
-                "localMediaCacheMaximumSizeMiB": "2048",
-                "localMediaCachePath": "/var/lib/videoanalyzer/tmp/",
+                "videoName": "${videoOptputName}",
                 "inputs": [{
                     "nodeName": "signalGateProcessor",
                     "outputSelectors": [{
@@ -186,7 +180,13 @@
                         "operator": "is",
                         "value": "video"
                     }]
-                }]
+                }],
+                "videoCreationProperties": {
+                    "title": "${videoOptputName}",
+                    "segmentLength": "${recordingDuration}"
+                },
+                "localMediaCachePath": "/var/lib/videoanalyzer/tmp/",
+                "localMediaCacheMaximumSizeMiB": "2048"
             }
         ]
     }

@@ -11,6 +11,8 @@ import urllib.request
 from builtins import input
 from os import path
 
+from datetime import datetime
+
 import requests
 from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import CloudToDeviceMethod, CloudToDeviceMethodResult
@@ -155,12 +157,14 @@ class GraphManager:
         return self.invoke_method(method, payload)
 
     def invoke_graph_grpc_instance_set(self, name, rtspUrl, frameRate, recording_duration, ava_is_send_iothub):
-        recordingDuration = "PT{}S".format(recording_duration)
+        # recordingDuration = "PT{}S".format(recording_duration)
+        recordingDuration = "PT30S"
         if ava_is_send_iothub:
             output_name = 'iothubsinkoutput'
         else:
             output_name = 'nosend'
         find_cred, username, password = self.parse_rtsp_credential(rtspUrl)
+        video_name = f"avaedge-{name}"
         properties = {
             "topologyName": "InferencingWithGrpcExtension",
             "description": "Sample graph description",
@@ -169,7 +173,7 @@ class GraphManager:
                 {"name": "rtspUserName", "value": username},
                 {"name": "rtspPassword", "value": password},
                 {"name": "frameRate", "value": frameRate},
-                {"name": "instanceId", "value": name},
+                {"name": "videoOptputName", "value": video_name},
                 {"name": "hubSinkOutputName", "value": output_name},
                 {"name": "recordingDuration", "value": recordingDuration},
                 {
@@ -192,12 +196,14 @@ class GraphManager:
     def invoke_graph_http_instance_set(self, name, rtspUrl, frameRate, recording_duration, ava_is_send_iothub):
         inferencingUrl = "http://inferencemodule:5000/predict?camera_id=" + \
             str(name)
-        recordingDuration = "PT{}S".format(recording_duration)
+        # recordingDuration = "PT{}S".format(recording_duration)
+        recordingDuration = "PT30S"
         if ava_is_send_iothub:
             output_name = 'iothubsinkoutput'
         else:
             output_name = 'nosend'
         find_cred, username, password = self.parse_rtsp_credential(rtspUrl)
+        video_name = f"avaedge-{name}"
         properties = {
             "topologyName": "InferencingWithHttpExtension",
             "description": "Sample graph description",
@@ -206,7 +212,7 @@ class GraphManager:
                 {"name": "rtspUserName", "value": username},
                 {"name": "rtspPassword", "value": password},
                 {"name": "frameRate", "value": frameRate},
-                {"name": "instanceId", "value": name},
+                {"name": "videoOptputName", "value": video_name},
                 {"name": "hubSinkOutputName", "value": output_name},
                 {"name": "recordingDuration", "value": recordingDuration},
                 {"name": "inferencingUrl", "value": inferencingUrl},

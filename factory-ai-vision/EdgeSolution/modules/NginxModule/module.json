@@ -4,7 +4,7 @@
   "image": {
     "repository": "${CONTAINER_REGISTRY_NAME}/intelligentedge/nginxmodule",
     "tag": {
-      "version": "0.33.4",
+      "version": "0.33.12",
       "platforms": {
         "amd64": "./dockerfiles/Dockerfile.amd64",
         "arm64v8": "./dockerfiles/Dockerfile.arm64v8"

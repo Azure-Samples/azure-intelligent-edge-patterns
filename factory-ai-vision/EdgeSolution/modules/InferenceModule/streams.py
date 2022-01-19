@@ -139,7 +139,7 @@ class Stream:
 
         # lva signal
         self.lva_last_send_time = time.time()
-        self.lva_interval = 10
+        self.lva_interval = 0
         self.lva_mode = LVA_MODE
 
         self.zmq_sender = sender
@@ -892,7 +892,7 @@ class Stream:
             if to_send:
                 send_message_to_lva(self.cam_id)
                 self.lva_last_send_time = time.time()
-                self.lva_interval = 60
+                self.lva_interval = 0
 
     def draw_img(self):
 
