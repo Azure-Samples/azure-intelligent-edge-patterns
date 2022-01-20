@@ -1,8 +1,6 @@
-"""
-Location Views
+"""App API views.
 """
 
-# from rest_framework.response import Response
 from filters.mixins import FiltersMixin
 from rest_framework import filters, viewsets
 

@@ -8,5 +8,5 @@ import os
 
 from config import ENDPOINT, TRAINING_KEY
 
-TRAINING_KEY = os.environ.get('TRAINING_KEY', TRAINING_KEY)
-ENDPOINT = os.environ.get('ENDPOINT', ENDPOINT)
+TRAINING_KEY = os.environ.get("TRAINING_KEY", TRAINING_KEY)
+ENDPOINT = os.environ.get("ENDPOINT", ENDPOINT)

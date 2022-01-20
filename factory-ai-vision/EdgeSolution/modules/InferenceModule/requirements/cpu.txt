@@ -1,0 +1,3 @@
+-r ./base.txt
+# cpu arm not installable package
+opencv-python==4.4.0.44

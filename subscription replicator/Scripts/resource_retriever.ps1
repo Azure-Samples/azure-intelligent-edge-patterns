@@ -90,11 +90,38 @@ $resourceTypes = @(
 if($resourceType -eq "All"){
     $resources = @()
     foreach($rt in $resourceTypes){
-        $resources += Get-AzureRmResource -ResourceType $rt
+        # Check if resource type is Microsoft.Network/networkSecurityGroups. Use specific API version: 2017-10-01
+        # The API discovery (via Get-AzureRmResource) chooses the API version: 2016-09-01 by default
+        # The response with this API version is missing data shown below:
+        <# 
+        Example missing data:
+        "destinationPortRanges": [
+            "80",
+            "443",
+            "6060",
+            "8080"
+          ],
+          "sourceAddressPrefixes": [
+            "10.192.1.0/27",
+            "10.203.0.0/16"
+          ],
+        #>
+        # To fix this, we use the API version 2017-10-01 which is used by Get-AzureRmNetworkSecurityGroup
+        if($rt -eq "Microsoft.Network/networkSecurityGroups"){
+            $resources += Get-AzureRmResource -ResourceType $rt -ApiVersion "2017-10-01"
+        }
+        else{
+            $resources += Get-AzureRmResource -ResourceType $rt 
+        }
     }
 }
 else{
-    $resources = Get-AzureRmResource -ResourceType $resourceType
+    if($rt -eq "Microsoft.Network/networkSecurityGroups"){
+        $resources += Get-AzureRmResource -ResourceType $rt -ApiVersion "2017-10-01"
+    }
+    else{
+        $resources = Get-AzureRmResource -ResourceType $resourceType
+    }
 }
 
 $waitBlock = 
@@ -110,7 +137,16 @@ Add-Content -Path ".\Deployment_Files\DeployResources.ps1" -Value "Write-Output 
 
 foreach($resource in $resources){
     #convert resource to a JSON string
-    $resource = Get-AzureRmResource -ResourceId $resource.ResourceId
+    # Check if resource type is Microsoft.Network/networkSecurityGroups. Use specific API version: 2017-10-01
+    # The API discovery (via Get-AzureRmResource) chooses the API version: 2016-09-01 by default
+    # The response with this API version is missing data. See example above
+    # To fix this, we use the API version 2017-10-01 which is used by Get-AzureRmNetworkSecurityGroup
+    if($resource.ResourceType -eq "Microsoft.Network/networkSecurityGroups"){
+        $resource = Get-AzureRmResource -ResourceId $resource.ResourceId -ApiVersion "2017-10-01"
+    }
+    else{
+        $resource = Get-AzureRmResource -ResourceId $resource.ResourceId
+    }
     $resourceJSONString = $resource | ConvertTo-Json -Depth 7
 
     .\resource_processor.ps1 -resourceJSONString $resourceJSONString `

@@ -50,7 +50,7 @@ This will launch a ui site in localhost:3000
     Cameras: <http://localhost:8000/api/cameras/>
     Parts: <http://localhost:8000/api/parts/>
     Images: <http://localhost:8000/api/images/>
-    
+
     Streams:
     Connect a new stream <http://localhost:8000/api/streams/connect>
     This will return a json with stream_id

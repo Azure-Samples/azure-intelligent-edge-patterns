@@ -1,35 +1,39 @@
 import React, { FC } from 'react';
-import { Switch, Route } from 'react-router-dom';
-import Home from '../pages/Home';
-import Cameras from '../pages/Cameras';
-import CameraDetails from '../pages/CameraDetails';
+import { Switch, Route, Redirect } from 'react-router-dom';
+import { useSelector } from 'react-redux';
+
+import { State } from 'RootStateType';
+
+import { Status } from '../store/project/projectTypes';
+import { Url } from '../enums';
+
+import { Home } from '../pages/Home';
+import { Cameras } from '../pages/Cameras';
+import { CameraDetails } from '../pages/CameraDetails';
 import { PartDetails } from '../pages/PartDetails';
-import Locations from '../pages/Locations';
-import LocationDetails from '../pages/LocationDetails';
-import ManualIdentification from '../pages/ManualIdentification';
 import { Parts } from '../pages/Parts';
-import { PartIdentification } from '../pages/PartIdentification';
-import { Setting } from '../pages/Setting';
-import { PrivateRoute } from './PrivateRoute';
+import { Images } from '../pages/Images';
+import { DeploymentPage } from '../pages/Deployment';
+import { Models } from '../pages/Models';
+import { ModelDetail } from '../pages/ModelDetail';
 
 export const RootRouter: FC = () => {
+  const projectHasConfiged = useSelector((state: State) => state.project.status !== Status.None);
+
   return (
     <Switch>
-      <PrivateRoute path="/manual" component={ManualIdentification} />
-      <PrivateRoute path="/locations/detail" component={LocationDetails} />
-      <PrivateRoute path="/locations" component={Locations} />
-      <PrivateRoute path="/cameras/detail" component={CameraDetails} />
-      <PrivateRoute path="/cameras" component={Cameras} />
-      <PrivateRoute path="/parts/detail" component={PartDetails} />
-      <PrivateRoute path="/parts" component={Parts} />
-      <PrivateRoute path="/pretrainDetection">
-        <PartIdentification isDemo={true} />
-      </PrivateRoute>
-      <PrivateRoute path="/partIdentification">
-        <PartIdentification isDemo={false} />
-      </PrivateRoute>
-      <Route path="/setting" component={Setting} />
-      <PrivateRoute path="/" component={Home} />
+      <Route path={Url.DEPLOYMENT} component={DeploymentPage} />
+      <Route path={Url.MODELS_DETAIL} component={ModelDetail} />
+      <Route path={Url.MODELS} component={Models} />
+      <Route path={Url.CAMERAS_DETAIL} component={CameraDetails} />
+      <Route path={Url.CAMERAS} component={Cameras} />
+      <Route path={Url.PARTS_DETAIL} component={PartDetails} />
+      <Route path={Url.PARTS} component={Parts} />
+      <Route path={Url.IMAGES} component={Images} />
+      <Route path={Url.HOME} component={Home} />
+      <Route path={Url.ROOT}>
+        <Redirect to={projectHasConfiged ? Url.DEPLOYMENT : Url.HOME} />
+      </Route>
     </Switch>
   );
 };

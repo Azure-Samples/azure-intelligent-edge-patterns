@@ -1,0 +1,4 @@
+-r ./base.txt
+# cpu arm not installable package
+opencv-python==4.4.0.44
+onnxruntime==1.5.2

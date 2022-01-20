@@ -1,14 +1,13 @@
 """Location Factories
 """
 
-from typing import Any, Sequence
+from factory import DjangoModelFactory, Faker
 
-from factory import DjangoModelFactory, Faker, post_generation
-
-from vision_on_edge.locations.models import Location
+from ...locations.models import Location
 
 
 class LocationFactory(DjangoModelFactory):
+    """LocationFactory."""
 
     name = Faker("city")
     description = Faker("sentence")

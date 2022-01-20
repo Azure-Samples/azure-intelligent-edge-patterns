@@ -1,36 +1,42 @@
-import { createEntityAdapter, createAsyncThunk, createSlice } from '@reduxjs/toolkit';
+import { createEntityAdapter, createSlice, createSelector } from '@reduxjs/toolkit';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
+import { createWrappedAsync } from './shared/createWrappedAsync';
 
 export type Part = {
   id: number;
   name: string;
   description: string;
+  trainingProject: number;
+};
+
+const normalizePart = (data): Part[] => {
+  return data.map((d) => ({
+    id: d.id,
+    name: d.name,
+    description: d.description,
+    trainingProject: d.project,
+  }));
 };
 
 const entityAdapter = createEntityAdapter<Part>();
 
-export const getParts = createAsyncThunk<any, boolean, { state: State }>(
-  'parts/get',
-  async (isDemo) => {
-    const response = await Axios.get(`/api/parts?is_demo=${Number(isDemo)}`);
-    return response.data;
-  },
-  {
-    condition: (_, { getState }) => getState().parts.ids.length === 0,
-  },
-);
+export const getParts = createWrappedAsync<any, undefined, { state: State }>('parts/get', async () => {
+  const response = await Axios.get('/api/parts/');
+  return normalizePart(response.data);
+});
 
-export const postPart = createAsyncThunk<any, Omit<Part, 'id'>, { state: State }>(
+export const postPart = createWrappedAsync<any, Omit<Part, 'id' | 'trainingProject'>, { state: State }>(
   'parts/post',
-  async (data) => {
-    const response = await Axios.post(`/api/parts/`, data);
-    return response.data;
+  async (data, { getState }) => {
+    const trainingProject = getState().trainingProject.nonDemo[0];
+    const response = await Axios.post(`/api/parts/`, { ...data, project: trainingProject });
+    return { ...response.data, trainingProject: response.data.project };
   },
 );
 
-export const patchPart = createAsyncThunk<
+export const patchPart = createWrappedAsync<
   any,
   { data: { name: string; description: string }; id: number },
   { state: State }
@@ -39,23 +45,15 @@ export const patchPart = createAsyncThunk<
   return { id: response.data.id, changes: response.data };
 });
 
-export const deletePart = createAsyncThunk<any, number, { state: State }>(
-  'parts/delete',
-  async (id, { getState }) => {
-    const projectId = getState().project.data.id;
-    const partName = selectPartById(getState(), id).name;
-    await Axios.get(`/api/projects/${projectId}/delete_tag?part_name=${partName}`);
-    await Axios.delete(`/api/parts/${id}/`);
-    return id;
-  },
-);
+export const deletePart = createWrappedAsync<any, number, { state: State }>('parts/delete', async (id) => {
+  await Axios.delete(`/api/parts/${id}/`);
+  return id;
+});
 
 const slice = createSlice({
   name: 'parts',
   initialState: entityAdapter.getInitialState(),
-  reducers: {
-    clearParts: () => entityAdapter.getInitialState(),
-  },
+  reducers: {},
   extraReducers: (builder) => {
     builder
       .addCase(getParts.fulfilled, entityAdapter.setAll)
@@ -68,10 +66,19 @@ const slice = createSlice({
 const { reducer } = slice;
 export default reducer;
 
-export const { clearParts } = slice.actions;
-
 export const {
   selectAll: selectAllParts,
   selectById: selectPartById,
   selectEntities: selectPartEntities,
 } = entityAdapter.getSelectors<State>((state) => state.parts);
+
+export const partNamesSelectorFactory = (ids) =>
+  createSelector(selectPartEntities, (partEntities) => ids.map((i) => partEntities[i]?.name));
+
+export const trainingProjectPartsSelectorFactory = (trainProject: number) =>
+  createSelector(selectAllParts, (parts) => parts.filter((p) => p.trainingProject === trainProject));
+
+export const partOptionsSelectorFactory = (trainProject: number) =>
+  createSelector(trainingProjectPartsSelectorFactory(trainProject), (parts) =>
+    parts.map((p) => ({ key: p.id, text: p.name })),
+  );

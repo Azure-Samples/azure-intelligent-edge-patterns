@@ -1,11 +1,10 @@
-import React, { FC, useState, useEffect, useCallback, useRef, Dispatch, useMemo } from 'react';
-import { Button, CloseIcon } from '@fluentui/react-northstar';
-import { Stage, Layer, Image, Group, Text as KonvaText, Text } from 'react-konva';
+import React, { FC, useState, useEffect, useCallback, useRef, Dispatch } from 'react';
+import { Stage, Layer, Image, Group, Text as KonvaText, Text, Label, Tag } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 import { useDispatch } from 'react-redux';
 
 import useImage from './util/useImage';
-import getResizeImageFunction from './util/resizeImage';
+import resizeImageFunction, { CanvasFit } from './util/resizeImage';
 import { Box2d } from './Box';
 import { WorkState, LabelingType, LabelingCursorStates } from './type';
 import {
@@ -13,15 +12,14 @@ import {
   removeAnnotation,
   thunkCreateAnnotation,
 } from '../../store/annotationSlice';
+import { removeImgLabels } from '../../store/imageSlice';
 import RemoveBoxButton from './RemoveBoxButton';
-import { PartForm } from '../PartForm';
 import { Annotation, Size2D } from '../../store/type';
 import { Part } from '../../store/partSlice';
-import { thunkChangeImgPart } from '../../store/imageSlice';
 
 const defaultSize: Size2D = {
-  width: 800,
-  height: 600,
+  width: 720,
+  height: 520,
 };
 
 interface SceneProps {
@@ -31,32 +29,31 @@ interface SceneProps {
   workState: WorkState;
   setWorkState: Dispatch<WorkState>;
   onBoxCreated?: () => void;
-  partFormDisabled: boolean;
-  imgPart: Part;
+  parts: Part[];
+  selectedImageId: number;
 }
 const Scene: FC<SceneProps> = ({
   url = '',
-  labelingType,
   annotations,
   workState,
   setWorkState,
   onBoxCreated,
-  partFormDisabled,
-  imgPart,
+  parts,
+  selectedImageId,
 }) => {
   const dispatch = useDispatch();
-  const resizeImage = useCallback(getResizeImageFunction(defaultSize), [defaultSize]);
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
-  const noMoreCreate = useMemo(
-    () => labelingType === LabelingType.SingleAnnotation && annotations.length === 1,
-    [labelingType, annotations],
-  );
+  const noMoreCreate = false;
   const [cursorState, setCursorState] = useState<LabelingCursorStates>(LabelingCursorStates.default);
   const [image, status, size] = useImage(url, 'anonymous');
   const [selectedAnnotationIndex, setSelectedAnnotationIndex] = useState<number>(null);
-  const [showOuterRemoveButton, setShowOuterRemoveButton] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const scale = useRef<number>(1);
+
+  /**
+   * Change the type of cursor. If passing nothing, than it will set to default
+   * @param cursorType The css cursor
+   */
   const changeCursorState = useCallback(
     (cursorType?: LabelingCursorStates): void => {
       if (!cursorType) {
@@ -71,19 +68,35 @@ const Scene: FC<SceneProps> = ({
     },
     [noMoreCreate],
   );
+
   const removeBox = useCallback((): void => {
+    // Avoid find undefined annotation
+    if (annotations[selectedAnnotationIndex] === undefined) return;
+
+    dispatch(removeImgLabels({ selectedImageId, annotationIndex: annotations[selectedAnnotationIndex].id }));
+
     dispatch(removeAnnotation(annotations[selectedAnnotationIndex].id));
     setWorkState(WorkState.None);
-    setShowOuterRemoveButton(false);
     setSelectedAnnotationIndex(null);
-  }, [dispatch, annotations, selectedAnnotationIndex, setWorkState]);
+  }, [dispatch, annotations, selectedAnnotationIndex, setWorkState, selectedImageId]);
+
   const onMouseDown = (e: KonvaEventObject<MouseEvent>): void => {
     // * Single bounding box labeling type condition
     if (noMoreCreate || workState === WorkState.Creating) return;
 
+    // remove selecting labeling
+    if (workState === WorkState.Selecting && e.target.attrs.name === 'cancel') return;
+
+    // On click box circle & dragging circle
+    if (
+      workState === WorkState.Selecting &&
+      ['anchor-0', 'anchor-1', 'anchor-2', 'anchor-3'].includes(e.target.attrs.name)
+    ) {
+      return;
+    }
+
     dispatch(thunkCreateAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }));
-    // FIXME Select the last annotation. Use lenth instead of length -1 because the annotations here is the old one
-    // Should put this state in redux
+    // Select the last annotation. Use lenth instead of length -1 because the annotations here is the old one
     setSelectedAnnotationIndex(annotations.length);
     setWorkState(WorkState.Creating);
   };
@@ -93,16 +106,12 @@ const Scene: FC<SceneProps> = ({
       dispatch(
         updateCreatingAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }),
       );
-      if (annotations.length - 1 === selectedAnnotationIndex) {
-        setWorkState(WorkState.Selecting);
-        if (onBoxCreated) onBoxCreated();
-      } else {
-        setWorkState(WorkState.None);
-      }
+
+      if (onBoxCreated) onBoxCreated();
+      setWorkState(WorkState.None);
     }
   };
 
-  // FIXIME: Probably use useReduce for this case
   const onSelect = (index: number): void => {
     setSelectedAnnotationIndex(index);
     if (index === null) setWorkState(WorkState.None);
@@ -112,39 +121,25 @@ const Scene: FC<SceneProps> = ({
   useEffect(() => {
     // * Single bounding box labeling type condition
     if (noMoreCreate) {
-      changeCursorState();
       setSelectedAnnotationIndex(0);
-    } else {
-      changeCursorState();
     }
+    changeCursorState();
   }, [noMoreCreate, changeCursorState]);
+
   useEffect(() => {
     if (workState === WorkState.None && !noMoreCreate) setSelectedAnnotationIndex(null);
   }, [workState, noMoreCreate]);
+
   useEffect(() => {
-    const [outcomeSize, outcomeScale] = resizeImage(size);
+    const [outcomeSize, outcomeScale] = resizeImageFunction(defaultSize, CanvasFit.Contain, size);
     setImageSize(outcomeSize);
     scale.current = outcomeScale;
-  }, [size, resizeImage]);
+  }, [size]);
 
   const isLoading = status === 'loading' || (imageSize.height === 0 && imageSize.width === 0);
 
   return (
-    <div style={{ margin: '0.2em', position: 'relative' }}>
-      {annotations.length !== 0 &&
-      showOuterRemoveButton &&
-      !isDragging &&
-      workState !== WorkState.Creating ? (
-        <Button
-          iconOnly
-          text
-          styles={{ color: '#F9526B', ':hover': { color: '#E73550' } }}
-          content={<CloseIcon size="large" />}
-          onClick={removeBox}
-        />
-      ) : (
-        <div style={{ height: '2em' }} />
-      )}
+    <div>
       <Stage
         width={imageSize.width}
         height={imageSize.height}
@@ -171,7 +166,6 @@ const Scene: FC<SceneProps> = ({
                   label={annotation.label}
                   scale={scale.current}
                   changeCursorState={changeCursorState}
-                  setShowOuterRemoveButton={setShowOuterRemoveButton}
                   removeBox={removeBox}
                 />
                 <Box2d
@@ -184,14 +178,16 @@ const Scene: FC<SceneProps> = ({
                   dispatch={dispatch}
                   changeCursorState={changeCursorState}
                 />
-                <Text
+                <LabelText
                   x={annotation.label.x1}
-                  y={annotation.label.y1 - 25 / scale.current}
+                  y={
+                    annotation.label.y1 < 20 / scale.current
+                      ? annotation.label.y1
+                      : annotation.label.y1 - 30 / scale.current
+                  }
                   fontSize={20 / scale.current}
-                  fill="red"
-                  text={imgPart?.name}
-                  test="part"
-                  visible={!partFormDisabled}
+                  text={annotation.part && parts.find((part) => part.id === annotation.part).name}
+                  padding={5 / scale.current}
                 />
               </Group>
             ))}
@@ -206,23 +202,26 @@ const Scene: FC<SceneProps> = ({
           )}
         </Layer>
       </Stage>
-      {!partFormDisabled &&
-        selectedAnnotationIndex !== null &&
-        workState !== WorkState.Creating &&
-        annotations[selectedAnnotationIndex] && (
-          <PartForm
-            top={annotations[0]?.label.y1 * scale.current - 10}
-            left={annotations[0]?.label.x2 * scale.current + 10}
-            open={true}
-            onDismiss={(): void => onSelect(null)}
-            selectedPart={imgPart}
-            setSelectedPart={(part): void => {
-              dispatch(thunkChangeImgPart(part));
-            }}
-          />
-        )}
     </div>
   );
 };
 
 export default Scene;
+
+type LabelTextProps = {
+  x: number;
+  y: number;
+  fontSize: number;
+  padding: number;
+  text: string;
+};
+
+export const LabelText: React.FC<LabelTextProps> = ({ x, y, fontSize, text, padding }) => {
+  if (!text) return null;
+  return (
+    <Label x={x} y={y}>
+      <Tag fill="white" />
+      <Text fontSize={fontSize} text={text} padding={padding} />
+    </Label>
+  );
+};

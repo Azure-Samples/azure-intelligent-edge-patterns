@@ -1,0 +1,98 @@
+# syntax = docker/dockerfile:experimental
+# =========================================================
+# Base
+# =========================================================
+#ARG BASE_IMAGE=nvcr.io/nvidia/l4t-base:r32.4.3
+ARG BASE_IMAGE=intelligentedge/onnxruntime-opencv:4.4.0.44-cpuarm64v8
+FROM ${BASE_IMAGE} as base
+
+WORKDIR /app
+ENV LANG=en_US.UTF-8
+ENV LANGUAGE=en_US.UTF-8
+ARG SYSTEM_CORES=4
+
+# =========================================================
+# Install system packages
+# =========================================================
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    cmake \
+    git \
+    wget \
+    unzip \
+    yasm \
+    pkg-config \    
+    libtbb2 \
+    libtbb-dev \
+    libpq-dev \
+    libprotobuf-dev \
+    protobuf-compiler \
+    libgeos-dev \
+    ca-certificates \
+    bzip2 \
+    unzip \
+    curl \
+    libcurl4-openssl-dev \
+    libssl-dev && \
+    rm -rf /var/lib/apt/lists/*
+
+# protobuf-compiler:   https://github.com/onnx/onnx#build-onnx-on-arm-64
+# libprotobuf-dev:     https://github.com/onnx/onnx#build-onnx-on-arm-64
+# libgeos-dev:         Shapely
+
+# =========================================================
+# Install Python package
+# =========================================================
+WORKDIR /app
+#RUN echo "/usr/bin/make --jobs=${SYSTEM_CORES} \$@" > /usr/local/bin/make && \
+#    chmod 755 /usr/local/bin/make
+#
+#RUN --mount=type=cache,target=/root/.cache/pip \
+#    pip uninstall -y onnx && \
+#    pip install onnx
+
+COPY requirements/base.txt ./requirements/base.txt
+
+#RUN --mount=type=cache,target=/root/.cache/pip \
+#    pip install --upgrade pip && \
+#    pip install wheel cython protobuf
+# Workaround scikit image requires numpy while dependency is not resolved
+#
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements/base.txt
+
+# =========================================================
+# Shapely Work around
+# =========================================================
+#RUN cp /usr/lib/aarch64-linux-gnu/libgeos* /opt/conda/envs/python38/lib/
+
+# =========================================================
+# Copy Source Code
+# =========================================================
+WORKDIR /app
+
+COPY coco_classes.txt ./
+COPY default_model default_model/
+COPY default_model_6parts default_model_6parts/
+COPY sample_video sample_video/
+COPY scenario_models scenario_models/
+RUN chmod 777 sample_video/video.mp4
+RUN chmod 777 default_model
+
+COPY api/__init__.py ./api/__init__.py
+COPY api/models.py ./api/models.py
+COPY config.py ./
+COPY exception_handler.py ./
+COPY logging_conf/logging_config.py ./logging_conf/logging_config.py
+COPY model_wrapper.py ./
+COPY object_detection.py ./
+COPY object_detection2.py ./
+COPY onnxruntime_predict.py ./
+COPY server.py ./
+COPY utility.py ./
+
+EXPOSE 7777
+
+#CMD source activate activate python38 && python3 server.py
+CMD python3 server.py

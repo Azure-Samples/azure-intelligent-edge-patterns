@@ -1,6 +1,4 @@
-"""Utilities
-
-App Insight Utilities.
+"""App utilities.
 """
 
 import logging
@@ -15,8 +13,6 @@ def get_app_insight_logger() -> logging.Logger:
 
     Return a logger with AzureLogHandler added.
 
-    Args:
-
     Returns:
         logging.Logger:
     """
@@ -24,5 +20,6 @@ def get_app_insight_logger() -> logging.Logger:
     app_insight_logger = logging.getLogger("Backend-Training-App-Insight")
     app_insight_logger.handlers = []
     app_insight_logger.addHandler(
-        AzureLogHandler(connection_string=APP_INSIGHT_CONN_STR))
+        AzureLogHandler(connection_string=APP_INSIGHT_CONN_STR)
+    )
     return app_insight_logger

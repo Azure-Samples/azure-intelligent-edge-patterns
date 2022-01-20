@@ -1,70 +1,104 @@
-/* eslint-disable @typescript-eslint/camelcase */
-import React, { useEffect, FC } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { Grid } from '@fluentui/react-northstar';
+import React, { useMemo, useCallback } from 'react';
+import {
+  CommandBar,
+  ICommandBarItemProps,
+  getTheme,
+  Stack,
+  Breadcrumb,
+  ProgressIndicator,
+  mergeStyleSets,
+  DefaultButton,
+} from '@fluentui/react';
+import { useBoolean } from '@uifabric/react-hooks';
+import { useSelector, useDispatch } from 'react-redux';
 
-import { getCameras, postCamera, selectAllCameras } from '../store/cameraSlice';
-import ImageLink from '../components/ImageLink';
-import { AddModuleDialog } from '../components/AddModuleDialog/AddModuleDialog';
+import { State } from 'RootStateType';
 
-const Cameras: FC = (): JSX.Element => {
+import { Url } from '../enums';
+import { thunkCancelCameraSetting } from '../store/cameraSetting/cameraSettingActions';
+
+import AddCameraPanel, { PanelMode } from '../components/AddCameraPanel';
+import { CameraDetailList } from '../components/CameraDetailList';
+import { Instruction } from '../components/Instruction';
+
+const theme = getTheme();
+
+const classes = mergeStyleSets({
+  container: {
+    position: 'relative',
+  },
+  progressWrapper: {
+    position: 'absolute',
+    top: '15px',
+    left: '200px',
+    '> div': {
+      marginTop: '5px',
+    },
+  },
+  progress: {
+    width: '500px',
+  },
+});
+
+export const Cameras: React.FC = () => {
+  const [isPanelOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
+
+  const showInstruction = useSelector(
+    (state: State) => state.camera.nonDemo.length > 0 && state.labelImages.ids.length === 0,
+  );
+  const isCameraCreating = useSelector((state: State) => state.cameraSetting.isCreating);
+
   const dispatch = useDispatch();
-  const cameras = useSelector(selectAllCameras);
 
-  useEffect(() => {
-    dispatch(getCameras(false));
+  const commandBarItems: ICommandBarItemProps[] = useMemo(
+    () => [
+      {
+        key: 'addBtn',
+        text: 'Add',
+        iconProps: {
+          iconName: 'Add',
+        },
+        onClick: openPanel,
+      },
+    ],
+    [openPanel],
+  );
+
+  const onCancelButtonClick = useCallback(() => {
+    dispatch(thunkCancelCameraSetting());
   }, [dispatch]);
 
   return (
-    <div
-      style={{
-        display: 'flex',
-        flexFlow: 'column',
-        justifyContent: 'space-between',
-        padding: '3em',
-        height: '100%',
-      }}
-    >
-      <Grid columns="8" styles={{ height: '75%' }}>
-        {cameras.map((camera, i) => (
-          <ImageLink
-            key={i}
-            to={`/cameras/detail?cameraId=${camera.id}`}
-            defaultSrc="/icons/Play.png"
-            bgImgSrc="/icons/defaultCamera.png"
-            width="6.25em"
-            height="6.25em"
-            bgImgStyle={{
-              backgroundSize: '60%',
-              backgroundPosition: 'center',
-              backgroundRepeat: 'no-repeat',
-            }}
-            label={camera.name}
-          />
-        ))}
-      </Grid>
-      <AddModuleDialog
-        header="Add Camera"
-        fields={[
-          {
-            placeholder: 'Name',
-            key: 'name',
-            type: 'input',
-            required: true,
-          },
-          {
-            placeholder: 'RTSP URL',
-            key: 'rtsp',
-            type: 'input',
-            required: true,
-          },
-        ]}
-        onConfirm={({ name, rtsp }): void => {
-          dispatch(postCamera({ name, rtsp }));
-        }}
+    <Stack styles={{ root: { height: '100%' } }}>
+      <CommandBar
+        items={commandBarItems}
+        styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
       />
-    </div>
+      <Stack styles={{ root: { padding: '15px' } }} grow>
+        {showInstruction && (
+          <Instruction
+            title="Successfully added a camera!"
+            subtitle="Now that you have added a camera, you can use that camera to capture images and tag objects for your model."
+            button={{ text: 'Go to Images', to: Url.IMAGES }}
+          />
+        )}
+        <Stack className={classes.container}>
+          <Breadcrumb items={[{ key: 'cameras', text: 'Cameras' }]} />
+          {isCameraCreating && (
+            <Stack
+              className={classes.progressWrapper}
+              horizontal
+              horizontalAlign="center"
+              tokens={{ childrenGap: '20px' }}
+            >
+              <ProgressIndicator className={classes.progress} />
+              <DefaultButton text="Cancel" onClick={onCancelButtonClick} />
+            </Stack>
+          )}
+        </Stack>
+        <CameraDetailList onAddBtnClick={openPanel} />
+      </Stack>
+      <AddCameraPanel isOpen={isPanelOpen} onDissmiss={dismissPanel} mode={PanelMode.Create} />
+    </Stack>
   );
 };
-
-export default Cameras;

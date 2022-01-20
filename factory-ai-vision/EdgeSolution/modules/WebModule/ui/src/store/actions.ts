@@ -1,10 +1,14 @@
-import { createAsyncThunk } from '@reduxjs/toolkit';
+import { createAction, Update } from '@reduxjs/toolkit';
 import Axios from 'axios';
 
 import { State } from 'RootStateType';
-import { Shape } from './shared/BaseShape';
+import { isAOIShape, isCountingLine, isDangerZone } from './shared/VideoAnnoUtil';
+import { Image } from './type';
+import { createWrappedAsync } from './shared/createWrappedAsync';
 
-export const updateRelabelImages = createAsyncThunk<any, undefined, { state: State }>(
+import { plusOrderVideoAnnos } from '../utils/plusVideoAnnos';
+
+export const updateRelabelImages = createWrappedAsync<any, undefined, { state: State }>(
   'updateRelabel',
   async (_, { getState }) => {
     const data: { partId: number; imageId: number }[] = Object.values(getState().labelImages.entities)
@@ -15,56 +19,112 @@ export const updateRelabelImages = createAsyncThunk<any, undefined, { state: Sta
   },
 );
 
-export const deleteImage = createAsyncThunk('images/delete', async (id: number) => {
+export const deleteImage = createWrappedAsync('images/delete', async (id: number) => {
   await Axios.delete(`/api/images/${id}`);
   return id;
 });
 
-export const toggleShowAOI = createAsyncThunk<any, { cameraId: number; showAOI: boolean }, { state: State }>(
+type toggleCameraLabelPayload = { cameraId: number; checked: boolean };
+
+const getAOIs = (state: State, cameraId) => {
+  const videoAnnoEntities = state.videoAnnos.entities;
+  return Object.values(videoAnnoEntities)
+    .filter((e) => e.camera === cameraId && isAOIShape(e))
+    .map((e) => ({
+      id: e.id,
+      type: e.type,
+      label: e.vertices,
+    }));
+};
+
+const getCountingLines = (state: State, cameraId) => {
+  const videoAnnoEntities = state.videoAnnos.entities;
+  return Object.values(videoAnnoEntities)
+    .filter((e) => e.camera === cameraId && isCountingLine(e))
+    .map((e) => ({
+      id: e.id,
+      type: e.type,
+      label: e.vertices,
+    }));
+};
+
+const getDangerZones = (state: State, cameraId) => {
+  const videoAnnoEntities = state.videoAnnos.entities;
+  return Object.values(videoAnnoEntities)
+    .filter((e) => e.camera === cameraId && isDangerZone(e))
+    .map((e) => ({
+      id: e.id,
+      type: e.type,
+      label: e.vertices,
+    }));
+};
+
+export const toggleShowAOI = createWrappedAsync<any, toggleCameraLabelPayload, { state: State }>(
   'cameras/toggleShowAOI',
-  async ({ cameraId, showAOI }, { getState }) => {
-    const AOIEntities = getState().AOIs.entities;
-    const AOIs = Object.values(AOIEntities)
-      .filter((e) => e.camera === cameraId)
-      .map((e) => {
-        if (e.type === Shape.BBox)
-          return {
-            id: e.id,
-            type: e.type,
-            label: e.vertices,
-          };
-        if (e.type === Shape.Polygon)
-          return {
-            id: e.id,
-            type: e.type,
-            label: e.vertices,
-          };
-      });
-    await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI: showAOI, AOIs }) });
+  async ({ cameraId, checked }, { getState }) => {
+    const AOIs = getAOIs(getState(), cameraId);
+    await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI: checked, AOIs }) });
   },
 );
 
-export const updateCameraArea = createAsyncThunk<any, number, { state: State }>(
-  'cameras/updateArea',
-  async (cameraId, { getState }) => {
-    const { useAOI } = getState().camera.entities[cameraId];
-    const AOIEntities = getState().AOIs.entities;
-    const AOIs = Object.values(AOIEntities)
-      .filter((e) => e.camera === cameraId)
-      .map((e) => {
-        if (e.type === Shape.BBox)
-          return {
-            id: e.id,
-            type: e.type,
-            label: e.vertices,
-          };
-        if (e.type === Shape.Polygon)
-          return {
-            id: e.id,
-            type: e.type,
-            label: e.vertices,
-          };
-      });
-    await Axios.patch(`/api/cameras/${cameraId}/`, { area: JSON.stringify({ useAOI, AOIs }) });
+export const toggleShowCountingLines = createWrappedAsync<any, toggleCameraLabelPayload, { state: State }>(
+  'cameras/toggleShowCountingLines',
+  async ({ cameraId, checked }, { getState }) => {
+    const countingLines = getCountingLines(getState(), cameraId);
+    await Axios.patch(`/api/cameras/${cameraId}/`, {
+      lines: JSON.stringify({ useCountingLine: checked, countingLines }),
+    });
   },
 );
+
+export const toggleShowDangerZones = createWrappedAsync<any, toggleCameraLabelPayload, { state: State }>(
+  'cameras/toggleShowDangerZones',
+  async ({ cameraId, checked }, { getState }) => {
+    const dangerZones = getDangerZones(getState(), cameraId);
+    await Axios.patch(`/api/cameras/${cameraId}/`, {
+      danger_zones: JSON.stringify({ useDangerZone: checked, dangerZones }),
+    });
+  },
+);
+
+export const updateCameraArea = createWrappedAsync<any, number, { state: State }>(
+  'cameras/updateArea',
+  async (cameraId, { getState }) => {
+    const { useAOI, useCountingLine, useDangerZone } = getState().camera.entities[cameraId];
+    const AOIs = getAOIs(getState(), cameraId);
+    const countingLines = getCountingLines(getState(), cameraId);
+    const dangerZones = getDangerZones(getState(), cameraId);
+
+    const enhanceOrderCountingLines = plusOrderVideoAnnos(countingLines);
+    const enhanceOrderDangerZones = plusOrderVideoAnnos(dangerZones);
+
+    await Axios.patch(`/api/cameras/${cameraId}/`, {
+      area: JSON.stringify({ useAOI, AOIs }),
+      lines: JSON.stringify({ useCountingLine, countingLines: enhanceOrderCountingLines }),
+      danger_zones: JSON.stringify({ useDangerZone, dangerZones: enhanceOrderDangerZones }),
+    });
+  },
+);
+
+export const changeImage = createAction<{ offset: 1 | -1; changePart: Update<Image> }>(
+  'labelingPage/goNextImage',
+);
+
+const getChangeImageAction = (rootState, offset: 1 | -1) => {
+  const { entities } = rootState.labelImages;
+  const { imageIds, selectedImageId } = rootState.labelingPage;
+  const newImgId = imageIds[imageIds.indexOf(selectedImageId) + offset];
+
+  const partOfCurrentImg = entities[selectedImageId].part;
+  const partOfNewImg = entities[newImgId].part;
+
+  // If no part defined in the next image, set it same as the current one.
+  const changes = partOfNewImg === null ? { part: partOfCurrentImg } : {};
+  return changeImage({ offset, changePart: { id: newImgId, changes } });
+};
+
+export const thunkGoNextImage = () => (dispatch, getState: () => State) =>
+  dispatch(getChangeImageAction(getState(), 1));
+
+export const thunkGoPrevImage = () => (dispatch, getState: () => State) =>
+  dispatch(getChangeImageAction(getState(), -1));

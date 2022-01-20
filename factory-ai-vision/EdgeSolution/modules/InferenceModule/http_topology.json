@@ -1,0 +1,197 @@
+{
+    "@apiVersion": "1.0",
+    "name": "InferencingWithHttpExtension",
+    "properties": {
+        "description": "Factory AI Video Pipeline",
+        "parameters": [
+            {
+                "name": "rtspUrl",
+                "type": "String",
+                "description": "Rtsp source Url address"
+            },
+            {
+                "name": "rtspUserName",
+                "type": "String",
+                "description": "Rtsp source user name.",
+                "default": "dummyUsername"
+            },
+            {
+                "name": "rtspPassword",
+                "type": "String",
+                "description": "Rtsp source password.",
+                "default": "dummyPassword"
+            },
+            {
+                "name": "inferencingUrl",
+                "type": "String",
+                "description": "inferencing Url",
+                "default": "http://44957d6b28e2.ngrok.io/predict"
+            },
+            {
+                "name": "inferencingUserName",
+                "type": "String",
+                "description": "inferencing endpoint user name.",
+                "default": "dummyUserName"
+            },
+            {
+                "name": "inferencingPassword",
+                "type": "String",
+                "description": "inferencing endpoint password.",
+                "default": "dummyPassword"
+            },
+            {
+                "name": "hubSinkOutputName",
+                "type": "String",
+                "description": "Hub sink output name",
+                "default": "iothubsinkoutput"
+            },
+            {
+                "name": "imageScaleMode",
+                "type": "String",
+                "description": "image scaling mode",
+                "default": "pad"
+            },
+            {
+                "name": "frameWidth",
+                "type": "String",
+                "description": "Width of the video frame to be received from LVA.",
+                "default": "960"
+            },
+            {
+                "name": "frameHeight",
+                "type": "String",
+                "description": "Height of the video frame to be received from LVA.",
+                "default": "540"
+            },
+            {
+                "name": "hubSourceInput",
+                "type": "String",
+                "description": "input name for hub source",
+                "default": "recordingTrigger"
+            },
+            {
+                "name": "frameRate",
+                "type": "String",
+                "description": "input maximumFPs",
+                "default": "30"
+            },
+            {
+                "name": "instanceId",
+                "type": "String",
+                "description": "instance id",
+                "default": "0"
+            },
+            {
+                "name": "recordingDuration",
+                "type": "String",
+                "description": "recording duration",
+                "default": "PT60S"
+            }
+        ],
+        "sources": [
+            {
+                "@type": "#Microsoft.VideoAnalyzer.RtspSource",
+                "name": "rtspSource",
+                "endpoint": {
+                    "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
+                    "url": "${rtspUrl}",
+                    "credentials": {
+                        "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
+                        "username": "${rtspUserName}",
+                        "password": "${rtspPassword}"
+                    }
+                }
+            },
+            {
+                "@type": "#Microsoft.VideoAnalyzer.IoTHubMessageSource",
+                "name": "iotMessageSource",
+                "hubInputName": "${hubSourceInput}"
+            }
+        ],
+        "processors": [
+            {
+                "@type": "#Microsoft.VideoAnalyzer.SignalGateProcessor",
+                "name": "signalGateProcessor",
+                "inputs": [
+                    {
+                        "nodeName": "iotMessageSource"
+                    },
+                    {
+                        "nodeName": "rtspSource"
+                    }
+                ],
+                "activationEvaluationWindow": "PT1S",
+                "activationSignalOffset": "-PT5S",
+                "minimumActivationTime": "PT30S",
+                "maximumActivationTime": "PT30S"
+            },
+            {
+                "@type": "#Microsoft.VideoAnalyzer.HttpExtension",
+                "name": "httpExtension",
+                "endpoint": {
+                    "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
+                    "url": "${inferencingUrl}",
+                    "credentials": {
+                        "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
+                        "username": "${inferencingUserName}",
+                        "password": "${inferencingPassword}"
+                    }
+                },
+                "image": {
+                    "scale": {
+                        "mode": "${imageScaleMode}",
+                        "width": "${frameWidth}",
+                        "height": "${frameHeight}"
+                    },
+                    "format": {
+                        "@type": "#Microsoft.VideoAnalyzer.ImageFormatBmp"
+                    }
+                },
+                "samplingOptions": {
+                    "skipSamplesWithoutAnnotation": "false",
+                    "maximumSamplesPerSecond": "${frameRate}"
+                },
+                "inputs": [
+                    {
+                        "nodeName": "rtspSource",
+                        "outputSelectors": [
+                            {
+                                "property": "mediaType",
+                                "operator": "is",
+                                "value": "video"
+                            }
+                        ]
+                    }
+                ]
+            }
+        ],
+        "sinks": [
+            {
+                "@type": "#Microsoft.VideoAnalyzer.IoTHubMessageSink",
+                "name": "hubSink",
+                "hubOutputName": "${hubSinkOutputName}",
+                "inputs": [
+                    {
+                        "nodeName": "httpExtension"
+                    }
+                ]
+            },
+            {
+                "@type": "#Microsoft.VideoAnalyzer.VideoSink",
+                "name": "videoSink",
+                "videoName": "sampleAssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
+                "videoCreationProperties": {
+                    "title": "sampleAssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
+                    "segmentLength": "${recordingDuration}"
+                },
+                "localMediaCacheMaximumSizeMiB": "2048",
+                "localMediaCachePath": "/var/lib/azuremediaservices/tmp/",
+                "inputs": [
+                    {
+                        "nodeName": "signalGateProcessor"
+                    }
+                ]
+            }
+        ]
+    }
+}

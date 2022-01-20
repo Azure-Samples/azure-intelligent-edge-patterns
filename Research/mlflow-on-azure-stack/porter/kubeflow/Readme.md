@@ -19,34 +19,32 @@ Make sure you have Porter installed. You can find the installation instructions 
 
 
 ## Step 2: Build Porter CNAB
+
 First you will need to navigate to porter directory in the repository. For example 
 
-```sh
-cd ./research/mlflow-on-azure-stack/porter/kubeflow
-```
-Change the file permissions
+    $ cd Research/mlflow-on-azure-stack/porter/kubeflow
 
-```sh
-chmod 777 kubeflow.sh
-```
+Change the file permissions if needed:
+
+    $ chmod 777 kubeflow.sh
+
 Next, you will build the porter CNAB
 
-```sh
-porter build
-```
+    $ porter build
 
 ## Step 3: Generate Credentials 
+
 This step is needed to connect to your Kubernetes cluster
 
-```sh
-porter credentials generate 
-```
-Enter path to your kubeconfig file when prompted
+    $ porter credentials generate 
+
+You will have options to generate the credentials. We recommend you export the kubeconfig from your cluster,
+it is usually `~/.kube/config` or `/etc/kubernetes/admin.conf` on the Master node of your cluster. And then
+enter path to your kubeconfig file when prompted.
 
 Validate that your credential is present by running the below command. You should see something like the below output.
-```sh
-porter credentials list
-```
+
+    $ porter credentials list
 
 ![List Porter Credentials](/Research/mlflow-on-azure-stack/docs/img/porter-credentials-validate.png)
 
@@ -55,38 +53,36 @@ porter credentials list
 Run one of the below commands to interact with the CNAB
 
 To Install :
-```sh
-porter install --cred KubeflowInstaller
-```
-To Upgrade :
-```sh
-porter upgrade --cred KubeflowInstaller
-```
-To Uninstall :
-```sh
-porter uninstall --cred KubeflowInstaller
-```
+
+    $ porter install --cred KubeflowInstaller
+
+And later, if you need, you can upgrade:
+
+    $ porter upgrade --cred KubeflowInstaller
+
+When you do not want it anymore, you can uninstall the package:
+
+    $ porter uninstall --cred KubeflowInstaller
+
 ### Step 5: Check for pods and services
+
 After the installation each of the services gets installed into its own namespace, try below commands to look for pods and services:
 
-```sh
-kubectl get pods -n kubeflow
-kubectl get svc -n kubeflow
-```
+    $ kubectl get pods -n kubeflow
+    $ kubectl get svc -n kubeflow
+
 ### Step 6: Opening Kubeflow dashboard
 To access the dashboard using external connection, replace "type: NodePort" with "type: LoadBalancer" using the patch command:
 
-```sh
-$ kubectl patch svc/istio-ingressgateway -p '{"spec":{"type": "LoadBalancer"}}' -n istio-system
-service/istio-ingressgateway patched
-```
+    $ kubectl patch svc/istio-ingressgateway -p '{"spec":{"type": "LoadBalancer"}}' -n istio-system
+    service/istio-ingressgateway patched
+
 Then the EXTERNAL-IP will become available from:
 
-```sh
-$ kubectl get -w -n istio-system svc/istio-ingressgateway
-NAME                   TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                          AGE
-istio-ingressgateway   LoadBalancer   10.0.123.210   12.34.56.78   15020:30397/TCP,80:31380/TCP,..  7m27s
-```
+    $ kubectl get -w -n istio-system svc/istio-ingressgateway
+    NAME                   TYPE           CLUSTER-IP     EXTERNAL-IP   PORT(S)                          AGE
+    istio-ingressgateway   LoadBalancer   10.0.123.210   12.34.56.78   15020:30397/TCP,80:31380/TCP,..  7m27s
+
 ![Kubeflow dashboard](/Research/mlflow-on-azure-stack/docs/img/kubeflow_dashboard1.png) 
 
 Use external-ip to open it in your browser, and make sure your firewall rules allow HTTP port 80.

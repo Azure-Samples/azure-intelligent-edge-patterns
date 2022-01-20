@@ -1,12 +1,10 @@
-"""
-App Config
+"""App.
 """
 
 from django.apps import AppConfig
 
 
 class FeedbackConfig(AppConfig):
-    """App Config
-    """
+    """App Config."""
 
-    name = 'vision_on_edge.feedback'
+    name = "vision_on_edge.feedback"

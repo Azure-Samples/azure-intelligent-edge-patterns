@@ -1,8 +1,8 @@
-import json
+"""App API views.
+"""
+
 import logging
 
-from django.http import HttpResponse, JsonResponse, StreamingHttpResponse
-from django.shortcuts import render
 from rest_framework import viewsets
 from rest_framework.response import Response
 
@@ -21,7 +21,7 @@ class FeedbackViewSet(viewsets.ModelViewSet):
         serialized_data = self.serializer_class(data=request.data)
         # logger.warning('serialized data type:%s'%type(serialized_data))
         if serialized_data.is_valid():
-            logger.info('is_valid')
+            logger.info("is_valid")
             serialized_data.save()
 
             return Response(data=serialized_data.data, status=201)

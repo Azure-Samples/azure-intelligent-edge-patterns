@@ -1,33 +1,43 @@
-import React, { useEffect, useCallback, useLayoutEffect, memo, MouseEvent, FC, useRef } from 'react';
-import Konva from 'konva';
-import { Text } from '@fluentui/react-northstar';
+import React, { useLayoutEffect, memo, MouseEvent, FC, useRef, useMemo } from 'react';
+import { useSelector } from 'react-redux';
+import { Image, Layer, Stage } from 'react-konva';
 
 import useImage from './LabelingPage/util/useImage';
-import getResizeImageFunction from './LabelingPage/util/resizeImage';
-import { Annotation, Size2D, LabelImage } from '../store/type';
+import resizeImageFunction, { CanvasFit } from './LabelingPage/util/resizeImage';
+import { Size2D } from '../store/type';
+import { imgAnnoSelectorFactory } from '../store/annotationSlice';
+import { LabelingDisplayImageCard } from './LabelingDisplayImageCard';
+import { Box2d } from './LabelingPage/Box';
+import { WorkState } from './LabelingPage/type';
 
 interface LabelDisplayImageProps {
-  labelImage: LabelImage;
-  labelText?: string;
+  imgId: number;
+  imgUrl: string;
+  imgTimeStamp: string;
+  cameraName: string;
+  partName: string;
+  manualChecked: boolean;
   pointerCursor?: boolean;
   onClick?: (event: MouseEvent<HTMLDivElement>) => void;
+
+  parts: string[];
 }
 const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
-  labelImage,
-  labelText = '',
+  imgId,
+  imgUrl,
+  imgTimeStamp,
+  cameraName,
+  partName,
+  manualChecked,
   pointerCursor = false,
   onClick,
+  parts,
 }) => {
-  const stage = useRef<Konva.Stage>(null);
-  const layer = useRef<Konva.FastLayer>(null);
-  const img = useRef<Konva.Image>(null);
-
   const imgSize = useRef<Size2D>({ width: 400, height: 300 });
   const imgScale = useRef<number>(1);
-  const shapes = useRef<BoxShape[]>([]);
-  const [image, , size] = useImage(labelImage.image, 'anonymous');
-  const resizeImage = useCallback(getResizeImageFunction(imgSize.current), [imgSize.current]);
-  const annotations = labelImage.labels;
+  const [image, , size] = useImage(imgUrl, 'anonymous');
+  const imgAnnoSelector = useMemo(() => imgAnnoSelectorFactory(imgId), [imgId]);
+  const annotations = useSelector(imgAnnoSelector);
 
   useLayoutEffect(() => {
     const container: HTMLDivElement = document.querySelector('#container');
@@ -35,104 +45,49 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
     const height = container.offsetHeight;
     imgSize.current = { width, height };
   }, []);
-  useEffect(() => {
-    if (size.width > 0) {
-      if (layer.current === null) {
-        const [outcomeSize, outcomeScale] = resizeImage(size);
-        imgScale.current = outcomeScale;
 
-        stage.current = new Konva.Stage({
-          height: outcomeSize.height,
-          width: outcomeSize.width,
-          scale: { x: outcomeScale, y: outcomeScale },
-          container: `display-${labelImage.id}`,
-        });
-
-        layer.current = new Konva.FastLayer();
-
-        img.current = new Konva.Image({ image });
-
-        layer.current.add(img.current);
-        stage.current.add(layer.current);
-      }
-      const newShapes = annotations.map((e) => annotationToShape(e, imgScale.current));
-
-      for (let i = 0; i < shapes.current.length; i++) {
-        shapes.current[i].edge.destroy();
-        shapes.current[i].points.forEach((e) => e.destroy());
-      }
-
-      shapes.current = newShapes;
-      for (let i = 0; i < newShapes.length; i++) {
-        const { points, edge } = newShapes[i];
-        layer.current.add(edge);
-
-        for (let j = 0; j < points.length; j++) {
-          layer.current.add(points[j]);
-        }
-      }
-
-      layer.current.draw();
-    }
-  }, [size, image, resizeImage, labelImage.id, annotations]);
+  const [outcomeSize, outcomeScale] = resizeImageFunction(imgSize.current, CanvasFit.Cover, size);
 
   return (
-    <div
-      onClick={onClick}
-      id="container"
-      style={{
-        cursor: pointerCursor ? 'pointer' : 'default',
-        display: 'flex',
-        flexFlow: 'column',
-        height: '100%',
-        width: '100%',
-        justifyContent: 'center',
-        alignItems: 'center',
-      }}
+    <LabelingDisplayImageCard
+      manualChecked={manualChecked}
+      cameraName={cameraName}
+      imgTimeStamp={imgTimeStamp}
+      partName={partName}
+      parts={parts}
     >
-      <div id={`display-${labelImage.id}`} />
-      <Text align="center">{labelText}</Text>
-    </div>
+      <div
+        onClick={onClick}
+        id="container"
+        style={{
+          cursor: pointerCursor ? 'pointer' : 'default',
+          height: '200px',
+          width: '300px',
+        }}
+      >
+        <Stage
+          height={outcomeSize.height}
+          width={outcomeSize.width}
+          scale={{ x: outcomeScale, y: outcomeScale }}
+        >
+          <Layer>
+            <Image image={image} />
+            {annotations.map((e, i) => (
+              <Box2d
+                key={e.id}
+                scale={imgScale.current}
+                workState={WorkState.None}
+                annotationIndex={i}
+                annotation={e}
+                draggable={false}
+                color="red"
+              />
+            ))}
+          </Layer>
+        </Stage>
+      </div>
+    </LabelingDisplayImageCard>
   );
-};
-
-type BoxShape = {
-  id: string;
-  edge: Konva.Line;
-  points: Konva.Circle[];
-};
-const annotationToShape = (annotation: Annotation, imgScale: number): BoxShape => {
-  const { id, label } = annotation;
-  const edge = new Konva.Line({
-    points: [
-      label.x1,
-      label.y1,
-      label.x2,
-      label.y1,
-      label.x2,
-      label.y2,
-      label.x1,
-      label.y2,
-      label.x1,
-      label.y1,
-    ],
-    stroke: 'red',
-    strokeWidth: 1 / imgScale,
-    closed: true,
-  });
-
-  const points = [];
-
-  points.push(new Konva.Circle({ x: label.x1, y: label.y1, radius: 3 / imgScale, fill: 'red' }));
-  points.push(new Konva.Circle({ x: label.x1, y: label.y2, radius: 3 / imgScale, fill: 'red' }));
-  points.push(new Konva.Circle({ x: label.x2, y: label.y2, radius: 3 / imgScale, fill: 'red' }));
-  points.push(new Konva.Circle({ x: label.x2, y: label.y1, radius: 3 / imgScale, fill: 'red' }));
-
-  return {
-    id,
-    edge,
-    points,
-  };
 };
 
 export default memo(LabelDisplayImage);

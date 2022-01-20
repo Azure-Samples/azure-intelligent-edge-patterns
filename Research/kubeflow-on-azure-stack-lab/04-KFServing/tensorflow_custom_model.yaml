@@ -1,0 +1,22 @@
+#
+# This is how it works:
+#
+# $ kubectl apply -f tensorflow_custom_model.yaml  -n kfserving-test
+# inferenceservice.serving.kubeflow.org/custom-model configured
+#
+# $ kubectl get inferenceservice -n kfserving-test
+# NAME             URL                                                                   READY   DEFAULT TRAFFIC   CANARY TRAFFIC   AGE
+# custom-model   http://custom-model.kfserving-test.example.com/v1/models/custom-model   True    100                                2m23s
+#
+
+apiVersion: "serving.kubeflow.org/v1alpha2"
+kind: "InferenceService"
+metadata:
+  name: "custom-model"
+spec:
+  default:
+    predictor:
+      tensorflow:
+        # for example,
+        # storageUri: "gs://rollingstone/models/1/custom-model"
+        storageUri: "gs://<your bucket>/models/1/custom-model"

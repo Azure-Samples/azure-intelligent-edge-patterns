@@ -1,4 +1,4 @@
-"""App Signals
+"""App signals.
 """
 
 import logging
@@ -6,39 +6,32 @@ import logging
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
-from vision_on_edge.azure_training_status.models import TrainingStatus
-from vision_on_edge.notifications.models import Notification
+from ..azure_projects.models import Project
+from .models import TrainingStatus
 
 logger = logging.getLogger(__name__)
 
 
-@receiver(signal=post_save,
-          sender=TrainingStatus,
-          dispatch_uid="training_status_send_notification")
-def training_status_send_notification_handler(**kwargs):
-    """training_status_send_notification_handler.
+@receiver(
+    signal=post_save,
+    sender=Project,
+    dispatch_uid="training_status_project_created_listener",
+)
+def training_status_project_created_listener(**kwargs):
+    """Project create change."""
 
-    Args:
-        kwargs:
-    """
-    if 'sender' not in kwargs or kwargs['sender'] != TrainingStatus:
-        logger.info(
-            "'sender' not in kwargs or kwargs['sender'] != TrainingStatus")
-        logger.info("nothing to do")
-        return
-    if 'instance' not in kwargs:
-        logger.info("'instance' not in kwargs:'")
-        logger.info("Nothing to do")
+    instance = kwargs["instance"]
+    created = kwargs["created"]
+    if not created:
+        logger.info("Project not created. Pass...")
         return
 
-    instance = kwargs['instance']
-    if 'need_to_send_notification' in dir(
-            instance) and instance.need_to_send_notification:
-        logger.info("Azure TrainingStatus changed.")
-        logger.info("instance.need_to_send_notification %s",
-                    instance.need_to_send_notification)
-        Notification.objects.create(notification_type="project",
-                                    sender="system",
-                                    title=instance.status.capitalize(),
-                                    details=instance.log.capitalize())
-    logger.info("Signal end")
+    logger.info("Azure Project created. Create TrainingStatus object.")
+    TrainingStatus.objects.update_or_create(
+        project_id=instance.id,
+        defaults={
+            "status": "ok",
+            "log": "Status : Has not configured",
+            "performance": "{}",
+        },
+    )

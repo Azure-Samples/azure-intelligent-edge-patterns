@@ -13,8 +13,8 @@ class FeedbackModelTestCases(APITransactionTestCase):
     """
 
     def setUp(self):
-        Feedback.objects.create(satisfaction='GD')
-        Feedback.objects.create(satisfaction='EX')
+        Feedback.objects.create(satisfaction="GD")
+        Feedback.objects.create(satisfaction="EX")
         self.exist_num = 2
 
     def test_setup_is_valid(self):

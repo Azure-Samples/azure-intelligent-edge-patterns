@@ -1,5 +1,5 @@
-# -*- coding: utf-8 -*-
-"""Models for Azure CustomVision images"""
+"""App models.
+"""
 
 import json
 import logging
@@ -12,9 +12,10 @@ from django.db.models.signals import pre_save
 from PIL import Image as PILImage
 from rest_framework import status
 
-from vision_on_edge.azure_training.models import Project
-
 from ..azure_parts.models import Part
+from ..azure_projects.models import Project
+from ..cameras.models import Camera
+from .exceptions import ImageGetRemoteImageRequestsError
 
 logger = logging.getLogger(__name__)
 
@@ -22,18 +23,19 @@ logger = logging.getLogger(__name__)
 
 
 class Image(models.Model):
-    """Image.
+    """Image model."""
 
-    models.Model
-    """
-
+    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
+    part = models.ForeignKey(Part, on_delete=models.SET_NULL, null=True)
+    part_ids = models.CharField(max_length=1000, null=True)
+    camera = models.ForeignKey(Camera, on_delete=models.SET_NULL, null=True)
     image = models.ImageField(upload_to="images/")
-    part = models.ForeignKey(Part, on_delete=models.CASCADE, null=True)
     labels = models.CharField(max_length=1000, null=True)
     is_relabel = models.BooleanField(default=False)
     confidence = models.FloatField(default=0.0)
     uploaded = models.BooleanField(default=False)
-    project = models.ForeignKey(Project, on_delete=models.CASCADE, null=True)
+    manual_checked = models.BooleanField(default=False)
+
     customvision_id = models.CharField(max_length=1000, null=True, blank=True)
     remote_url = models.CharField(max_length=1000, null=True)
     timestamp = models.DateTimeField(auto_now=True)
@@ -43,28 +45,21 @@ class Image(models.Model):
 
         Download image using remote url
         """
-
         try:
-            if self.remote_url:
-                resp = requests.get(self.remote_url)
-                if resp.status_code != status.HTTP_200_OK:
-                    raise requests.exceptions.RequestException
-                bytes_io = BytesIO()
-                bytes_io.write(resp.content)
-                file_name = f"{self.part.name}-{self.remote_url.split('/')[-1]}"
-                logger.info("Saving as name %s", file_name)
+            resp = requests.get(self.remote_url)
+        except Exception:
+            raise ImageGetRemoteImageRequestsError(detail=("url: " + self.remote_url))
+        if resp.status_code != status.HTTP_200_OK:
+            raise ImageGetRemoteImageRequestsError(detail=("url: " + self.remote_url))
+        bytes_io = BytesIO()
+        bytes_io.write(resp.content)
+        file_name = f"{self.part.name}-{self.remote_url.split('/')[-1]}"
+        self.image.save(file_name, files.File(bytes_io))
+        bytes_io.close()
+        self.save()
+        logger.info("Saving as name %s", file_name)
 
-                self.image.save(file_name, files.File(bytes_io))
-                bytes_io.close()
-                self.save()
-        except requests.exceptions.RequestException as request_err:
-            # Probably wrong url
-            raise request_err
-        except Exception as unexpected_error:
-            logger.exception("unexpected error")
-            raise unexpected_error
-
-    def set_labels(self, left: float, top: float, width: float, height: float):
+    def set_labels(self, left: float, top: float, width: float, height: float, tag_id: str):
         """set_labels.
 
         Args:
@@ -73,83 +68,75 @@ class Image(models.Model):
             width (float): width
             height (float): height
         """
-        try:
-            if left > 1 or top > 1 or width > 1 or height > 1:
-                raise ValueError(
-                    f"{left}, {top}, {width}, {height} must be less than 1")
-            if left < 0 or top < 0 or width < 0 or height < 0:
-                # raise ValueError(
-                # f"{left}, {top}, {width}, {height} must be greater than 0")
-                logger.error("%s, %s, %s, %s must be greater than 0", left,
-                             top, width, height)
-                return
-            if left + width > 1:
-                logger.error("left + width: %s + %s must be less than 1", left,
-                             width)
-                return
-            if top + height > 1:
-                logger.error("top + height: %s + %s must be less than 1", top,
-                             height)
-                return
+        logger.info("Setting Image labels")
+        if left > 1 or top > 1 or width > 1 or height > 1:
+            logger.error("%s, %s, %s, %s must be less than 1", left, top, width, height)
+            return
+        if left < 0 or top < 0 or width < 0 or height < 0:
+            logger.error(
+                "%s, %s, %s, %s must be greater than 0", left, top, width, height
+            )
+            return
+        if left + width > 1:
+            logger.error("left + width: %s + %s must be less than 1", left, width)
+            return
+        if top + height > 1:
+            logger.error("top + height: %s + %s must be less than 1", top, height)
+            return
 
-            with PILImage.open(self.image) as img:
-                logger.info("Successfully open img %s", self.image)
-                size_width, size_height = img.size
-                label_x1 = int(size_width * left)
-                label_y1 = int(size_height * top)
-                label_x2 = int(size_width * (left + width))
-                label_y2 = int(size_height * (top + height))
-                self.labels = json.dumps([{
-                    "x1": label_x1,
-                    "y1": label_y1,
-                    "x2": label_x2,
-                    "y2": label_y2
-                }])
-                self.save()
-                logger.info("Successfully save labels to %s", self.labels)
-        except ValueError as value_err:
-            raise value_err
-        except Exception as uncaught_err:
-            logger.exception("Set label raise unexpected error")
-            raise uncaught_err
+        with PILImage.open(self.image) as img:
+            size_width, size_height = img.size
+            logger.info("Setting labels. Image size %s", self.image)
+            label_x1 = int(size_width * left)
+            label_y1 = int(size_height * top)
+            label_x2 = int(size_width * (left + width))
+            label_y2 = int(size_height * (top + height))
+            # to be modified to multi-labels
+            if self.labels:
+                if len(self.labels) > 0:
+                    labels = json.loads(self.labels)
+            else:
+                labels = []
 
-    def add_labels(self, left: float, top: float, width: float, height: float):
-        """add_labels.
+            if self.part_ids:
+                if len(self.part_ids) > 0:
+                    part_ids = json.loads(self.part_ids)
+            else:
+                part_ids = []
 
-        Args:
-            left (float): left
-            top (float): top
-            width (float): width
-            height (float): height
-        """
-        try:
-            if left > 1 or top > 1 or width > 1 or height > 1:
-                raise ValueError("%s, %s, %s, %s must be less than 1" %
-                                 (left, top, width, height))
-            if left < 0 or top < 0 or width < 0 or height < 0:
-                raise ValueError("%s, %s, %s, %s must be greater than 0" %
-                                 (left, top, width, height))
-            if left + width > 1:
-                raise ValueError("left + width: %s + %s must be less than 1" %
-                                 (left, width))
-            if top + height > 1:
-                raise ValueError("top + height: %s + %s  must be less than 1" %
-                                 (top, height))
-        except ValueError as value_err:
-            raise value_err
+            labels.append({"x1": label_x1, "y1": label_y1,
+                           "x2": label_x2, "y2": label_y2, "part": tag_id})
+            if str(tag_id) not in part_ids:
+                part_ids.append(str(tag_id))
+                self.part_ids = json.dumps(part_ids)
+            self.labels = json.dumps(labels)
+            self.save()
+            logger.info("Set image labels success %s", self.labels)
+            logger.info("Set image part_ids success %s", self.part_ids)
 
     @staticmethod
-    def pre_save(instance, **kwargs):
+    def pre_save(**kwargs):
         """pre_save.
 
         Args:
             instance:
             kwargs:
         """
+        instance = kwargs["instance"]
+        if instance.part_ids is not None:
+            if len(instance.part_ids) > 0:
+                part_ids = json.loads(instance.part_ids)
+        else:
+            part_ids = []
+        if instance.labels is not None:
+            labels = json.loads(instance.labels)
+            for label in labels:
+                if str(label['part']) not in part_ids:
+                    part_ids.append(str(label['part']))
+        instance.part_ids = json.dumps(part_ids)
 
-        if 'instance' not in kwargs:
-            return
-        instance = kwargs['instance']
+        if instance.project is None and instance.part is not None:
+            instance.project = instance.part.project
         if not instance.customvision_id:
             return
 

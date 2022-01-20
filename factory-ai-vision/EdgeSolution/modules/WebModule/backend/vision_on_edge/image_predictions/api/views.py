@@ -1,6 +1,6 @@
+"""App API views.
 """
-Image Prediction ViewSet
-"""
+
 from __future__ import absolute_import, unicode_literals
 
 import logging
@@ -14,9 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class ImagePredictionViewSet(viewsets.ModelViewSet):
-    """
-    Image Prediction ModelViewSet
-    """
+    """ImagePredictionViewSet."""
 
     queryset = ImagePrediction.objects.all()
     serializer_class = ImagePredictionSerializer

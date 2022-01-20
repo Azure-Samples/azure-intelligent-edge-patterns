@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/camelcase */
 import Axios from 'axios';
-import * as R from 'ramda';
+import { isEmpty } from 'ramda';
+
 import { State } from 'RootStateType';
 import {
   ProjectThunk,
@@ -11,10 +13,6 @@ import {
   POST_PROJECT_SUCCESS,
   POST_PROJECT_FALIED,
   PostProjectFaliedAction,
-  DeleteProjectSuccessAction,
-  DELETE_PROJECT_SUCCESS,
-  DeleteProjectFaliedAction,
-  DELETE_PROJECT_FALIED,
   ProjectData,
   PostProjectRequestAction,
   POST_PROJECT_REQUEST,
@@ -22,273 +20,185 @@ import {
   GET_PROJECT_REQUEST,
   UpdateProjectDataAction,
   UPDATE_PROJECT_DATA,
-  GetTrainingLogRequesAction,
-  GET_TRAINING_LOG_REQUEST,
-  GetTrainingLogSuccessAction,
-  GET_TRAINING_LOG_SUCCESS,
-  GetTrainingLogFailedAction,
-  GET_TRAINING_LOG_FAILED,
-  Status,
-  GetTrainingMetricsRequestAction,
-  GET_TRAINING_METRICS_REQUEST,
-  GetTrainingMetricsSuccessAction,
-  GET_TRAINING_METRICS_SUCCESS,
-  GetTrainingMetricsFailedAction,
-  GET_TRAINING_METRICS_FAILED,
-  Consequence,
-  GetInferenceMetricsRequestAction,
-  GET_INFERENCE_METRICS_REQUEST,
-  GET_INFERENCE_METRICS_SUCCESS,
-  GetInferenceMetricsSuccessAction,
-  GetInferenceMetricsFailedAction,
-  GET_INFERENCE_METRICS_FAILED,
-  StartInferenceAction,
-  START_INFERENCE,
-  STOP_INFERENCE,
-  StopInferenceAction,
-  UPDATE_ORIGIN_PROJECT_DATA,
-  UpdateOriginProjectDataAction,
-  ChangeStatusAction,
-  UpdateProbThresholdRequestAction,
-  UpdateProbThresholdSuccessAction,
-  UpdateProbThresholdFailedAction,
-  TrainingStatus,
+  InferenceProtocol,
+  InferenceSource,
+  TrainSuccessAction,
+  TRAIN_SUCCESS,
+  TrainFailedAction,
+  TRAIN_FAILED,
 } from './projectTypes';
-import { selectAllImages } from '../imageSlice';
+import { createWrappedAsync, getErrorLog } from '../shared/createWrappedAsync';
 
-const getProjectRequest = (isDemo: boolean): GetProjectRequestAction => ({
+import { extractRecommendFps, getDeploymentProbThreshold } from '../../utils/projectUtils';
+import { getCameraSettingSuccess } from '../cameraSetting/cameraSettingActions';
+
+const getProjectRequest = (): GetProjectRequestAction => ({
   type: GET_PROJECT_REQUEST,
-  isDemo,
 });
-const getProjectSuccess = (
-  project: ProjectData,
-  hasConfigured: boolean,
-  isDemo: boolean,
-): GetProjectSuccessAction => ({
+export const getProjectSuccess = (project: ProjectData, hasConfigured: boolean): GetProjectSuccessAction => ({
   type: GET_PROJECT_SUCCESS,
   payload: { project, hasConfigured },
-  isDemo,
 });
-const getProjectFailed = (error: Error, isDemo: boolean): GetProjectFailedAction => ({
+const getProjectFailed = (error: Error): GetProjectFailedAction => ({
   type: GET_PROJECT_FAILED,
   error,
-  isDemo,
 });
 
-const getTrainingLogRequest = (isDemo: boolean): GetTrainingLogRequesAction => ({
-  type: GET_TRAINING_LOG_REQUEST,
-  isDemo,
-});
-const getTrainingLogSuccess = (
-  trainingLog: string,
-  newStatus: Status,
-  isDemo: boolean,
-  progress: number,
-): GetTrainingLogSuccessAction => ({
-  type: GET_TRAINING_LOG_SUCCESS,
-  payload: {
-    trainingLog,
-    newStatus,
-    progress,
-  },
-  isDemo,
-});
-const getTrainingStatusFailed = (error: Error, isDemo: boolean): GetTrainingLogFailedAction => ({
-  type: GET_TRAINING_LOG_FAILED,
-  error,
-  isDemo,
-});
-
-const postProjectRequest = (isDemo: boolean): PostProjectRequestAction => ({
+const postProjectRequest = (): PostProjectRequestAction => ({
   type: POST_PROJECT_REQUEST,
-  isDemo,
 });
-const postProjectSuccess = (data: any, isDemo: boolean): PostProjectSuccessAction => ({
+const postProjectSuccess = (data: ProjectData): PostProjectSuccessAction => ({
   type: POST_PROJECT_SUCCESS,
-  data: {
-    id: data?.id ?? null,
-    camera: data?.camera ?? null,
-    location: data?.location ?? null,
-    parts: data?.parts ?? [],
-    modelUrl: data?.download_uri ?? '',
-    needRetraining: data?.needRetraining ?? true,
-    accuracyRangeMin: data?.accuracyRangeMin ?? 60,
-    accuracyRangeMax: data?.accuracyRangeMax ?? 80,
-    maxImages: data?.maxImages ?? 20,
-    sendMessageToCloud: data?.metrics_is_send_iothub,
-    framesPerMin: data?.metrics_frame_per_minutes,
-    accuracyThreshold: data?.metrics_accuracy_threshold,
-    cvProjectId: data?.customvision_project_id,
-    probThreshold: data?.prob_threshold?.toString() ?? '10',
-  },
-  isDemo,
+  data,
 });
-const postProjectFail = (error: Error, isDemo: boolean): PostProjectFaliedAction => ({
+const postProjectFail = (error: Error): PostProjectFaliedAction => ({
   type: POST_PROJECT_FALIED,
   error,
-  isDemo,
 });
 
-const deleteProjectSuccess = (isDemo: boolean): DeleteProjectSuccessAction => ({
-  type: DELETE_PROJECT_SUCCESS,
-  isDemo,
-});
-const deleteProjectFailed = (isDemo: boolean): DeleteProjectFaliedAction => ({
-  type: DELETE_PROJECT_FALIED,
-  isDemo,
+export const trainSuccess = (): TrainSuccessAction => ({
+  type: TRAIN_SUCCESS,
 });
 
-const getTrainingMetricsRequest = (isDemo: boolean): GetTrainingMetricsRequestAction => ({
-  type: GET_TRAINING_METRICS_REQUEST,
-  isDemo,
-});
-const getTrainingMetricsSuccess = (
-  curConsequence: Consequence,
-  prevConsequence: Consequence,
-  isDemo: boolean,
-): GetTrainingMetricsSuccessAction => ({
-  type: GET_TRAINING_METRICS_SUCCESS,
-  payload: { prevConsequence, curConsequence },
-  isDemo,
-});
-const getTrainingMetricsFailed = (error: Error, isDemo: boolean): GetTrainingMetricsFailedAction => ({
-  type: GET_TRAINING_METRICS_FAILED,
-  error,
-  isDemo,
+export const trainFailed = (): TrainFailedAction => ({
+  type: TRAIN_FAILED,
 });
 
-const getInferenceMetricsRequest = (isDemo: boolean): GetInferenceMetricsRequestAction => ({
-  type: GET_INFERENCE_METRICS_REQUEST,
-  isDemo,
-});
-const getInferenceMetricsSuccess = (
-  successRate: number,
-  successfulInferences: number,
-  unIdetifiedItems: number,
-  isGpu: boolean,
-  averageTime: number,
-  partCount: Record<string, number>,
-  isDemo: boolean,
-): GetInferenceMetricsSuccessAction => ({
-  type: GET_INFERENCE_METRICS_SUCCESS,
-  payload: { successRate, successfulInferences, unIdetifiedItems, isGpu, averageTime, partCount },
-  isDemo,
-});
-const getInferenceMetricsFailed = (error: Error, isDemo: boolean): GetInferenceMetricsFailedAction => ({
-  type: GET_INFERENCE_METRICS_FAILED,
-  error,
-  isDemo,
-});
-
-export const startInference = (isDemo: boolean): StartInferenceAction => ({
-  type: START_INFERENCE,
-  isDemo,
-});
-
-export const stopInference = (isDemo: boolean): StopInferenceAction => ({
-  type: STOP_INFERENCE,
-  isDemo,
-});
-
-export const updateProjectData = (
-  partialProjectData: Partial<ProjectData>,
-  isDemo: boolean,
-): UpdateProjectDataAction => ({
+export const updateProjectData = (partialProjectData: Partial<ProjectData>): UpdateProjectDataAction => ({
   type: UPDATE_PROJECT_DATA,
   payload: partialProjectData,
-  isDemo,
 });
 
-export const updateOriginProjectData = (isDemo: boolean): UpdateOriginProjectDataAction => ({
-  type: UPDATE_ORIGIN_PROJECT_DATA,
-  isDemo,
+const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps: number): ProjectData => ({
+  id: data?.id ?? null,
+  cameras: data?.cameras ?? [],
+  parts: data?.parts ?? [],
+  trainingProject: data?.project ?? null,
+  name: data?.name ?? '',
+  // Retraining
+  needRetraining: data?.needRetraining ?? true,
+  accuracyRangeMin: data?.accuracyRangeMin ?? 60,
+  accuracyRangeMax: data?.accuracyRangeMax ?? 80,
+  maxImages: data?.maxImages ?? 20,
+  // Cloud message
+  sendMessageToCloud: data?.metrics_is_send_iothub,
+  framesPerMin: data?.metrics_frame_per_minutes,
+  probThreshold: data?.prob_threshold ?? 60,
+  inferenceMode: data?.inference_mode ?? '',
+  // Send video to cloud
+  SVTCisOpen: data?.send_video_to_cloud.some((e) => e.send_video_to_cloud),
+  SVTCcameras: data?.send_video_to_cloud.some((e) => e.send_video_to_cloud)
+    ? data?.send_video_to_cloud.map((e) => e.camera)
+    : [],
+  SVTCparts: data?.send_video_to_cloud[0]?.parts || [], // All the camera will detect same parts
+  SVTCconfirmationThreshold: data?.send_video_to_cloud[0]?.send_video_to_cloud_threshold || 0,
+  SVTCRecordingDuration: data?.send_video_to_cloud[0]?.recording_duration ?? 1,
+  SVTCEnableTracking: data?.send_video_to_cloud[0]?.enable_tracking ?? false,
+  // Camera fps
+  setFpsManually: data?.fps !== recomendedFps,
+  recomendedFps,
+  fps: Number(data?.fps).toFixed(1).toString() ?? '10.0',
+  totalRecomendedFps,
+  // Disable live video
+  disableVideoFeed: data?.disable_video_feed ?? false,
+  // Other
+  deployTimeStamp: data?.deploy_timestamp ?? '',
+  inferenceProtocol: data?.inference_protocol ?? InferenceProtocol.GRPC,
+  inferenceSource: data?.inference_source ?? InferenceSource.LVA,
+  /* --- Mode Counting people need  --- */
+  countingStartTime: data?.counting_start_time === '' ? new Date().toString() : data?.counting_start_time,
+  countingEndTime: data?.counting_end_time === '' ? new Date().toString() : data?.counting_end_time,
+  maxPeople: data?.max_people,
+
+  oldCameras: [],
 });
 
-export const changeStatus = (status: Status, isDemo: boolean): ChangeStatusAction => ({
-  type: 'CHANGE_STATUS',
-  status,
-  isDemo,
-});
+const getProjectData = (state: State): ProjectData => state.project.data;
 
-const updateProbThresholdRequest = (isDemo: boolean): UpdateProbThresholdRequestAction => ({
-  type: 'UPDATE_PROB_THRESHOLD_REQUEST',
-  isDemo,
-});
+export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> => {
+  dispatch(getProjectRequest());
 
-const updateProbThresholdSuccess = (isDemo: boolean): UpdateProbThresholdSuccessAction => ({
-  type: 'UPDATE_PROB_THRESHOLD_SUCCESS',
-  isDemo,
-});
+  const getPartDetection = Axios.get('/api/part_detections/');
+  const getInferenceModule = Axios.get('/api/inference_modules/');
 
-const updateProbThresholdFailed = (error: Error, isDemo: boolean): UpdateProbThresholdFailedAction => ({
-  type: 'UPDATE_PROB_THRESHOLD_FAILED',
-  error,
-  isDemo,
-});
+  return Promise.all([getPartDetection, getInferenceModule])
+    .then(
+      ([
+        {
+          data: [partDetection], // Because we will always got one partDetection currently, pick the first one
+        },
+        { data: inferenceModule },
+      ]) => {
+        const relatedInferenceModule = inferenceModule.find((e) => e.id === partDetection.inference_module);
+        const totalRecomendedFps = relatedInferenceModule?.recommended_fps;
 
-const getProjectDataByDemo = (isDemo: boolean, state: State): ProjectData => {
-  if (isDemo) return state.demoProject.data;
-  return state.project.data;
-};
+        const baseCameras = partDetection.cameras?.length || 1;
+        const recommendedFps = extractRecommendFps(totalRecomendedFps, baseCameras);
 
-export const thunkGetProject = (isDemo: boolean): ProjectThunk => (dispatch): Promise<void> => {
-  dispatch(getProjectRequest(isDemo));
+        const uploadStatus = inferenceModule[0].upload_status === 'True' ? false : true;
 
-  const url = isDemo === undefined ? '/api/projects/' : `/api/projects/?is_demo=${Number(isDemo)}`;
+        dispatch(
+          getProjectSuccess(
+            normalizeServerToClient(partDetection, recommendedFps, totalRecomendedFps),
+            partDetection?.has_configured,
+          ),
+        );
 
-  return Axios.get(url)
-    .then(({ data }) => {
-      const project: ProjectData = {
-        id: data[0]?.id ?? null,
-        camera: data[0]?.camera ?? null,
-        location: data[0]?.location ?? null,
-        parts: data[0]?.parts ?? [],
-        modelUrl: data[0]?.download_uri ?? '',
-        needRetraining: data[0]?.needRetraining ?? true,
-        accuracyRangeMin: data[0]?.accuracyRangeMin ?? 60,
-        accuracyRangeMax: data[0]?.accuracyRangeMax ?? 80,
-        maxImages: data[0]?.maxImages ?? 20,
-        sendMessageToCloud: data[0]?.metrics_is_send_iothub,
-        framesPerMin: data[0]?.metrics_frame_per_minutes,
-        accuracyThreshold: data[0]?.metrics_accuracy_threshold,
-        cvProjectId: data[0]?.customvision_project_id,
-        probThreshold: data[0]?.prob_threshold?.toString() ?? '10',
-      };
-      dispatch(getProjectSuccess(project, data[0]?.has_configured, isDemo));
-      return void 0;
-    })
+        // For camera create setting
+        dispatch(getCameraSettingSuccess(uploadStatus));
+
+        return partDetection?.has_configured;
+      },
+    )
     .catch((err) => {
-      dispatch(getProjectFailed(err, isDemo));
+      dispatch(getProjectFailed(err));
+      alert(getErrorLog(err));
     });
 };
 
-export const thunkPostProject = (
-  projectId,
-  selectedLocations,
-  selectedParts,
-  selectedCamera,
-  isDemo,
-): ProjectThunk => (dispatch, getState): Promise<number> => {
-  const isProjectEmpty = projectId === null;
-  const url = isProjectEmpty ? `/api/projects/` : `/api/projects/${projectId}/`;
+export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectThunk => (
+  dispatch,
+  getState,
+): Promise<number> => {
+  const projectId = getState().project.data.id;
+  const isProjectEmpty = projectId === null || projectId === undefined;
+  const url = isProjectEmpty ? `/api/part_detections/` : `/api/part_detections/${projectId}/`;
+  const isDemo = getState().trainingProject.isDemo.includes(projectData.trainingProject);
 
-  dispatch(postProjectRequest(isDemo));
-
-  const projectData = getProjectDataByDemo(isDemo, getState());
+  dispatch(postProjectRequest());
 
   return Axios(url, {
     data: {
-      location: selectedLocations.id,
-      parts: selectedParts.map((e) => e.id),
-      camera: selectedCamera.id,
-      download_uri: projectData.modelUrl,
-      needRetraining: projectData.needRetraining,
+      parts: projectData.parts,
+      cameras: projectData.cameras,
+      project: projectData.trainingProject,
+      needRetraining: isDemo ? false : projectData.needRetraining,
       accuracyRangeMin: projectData.accuracyRangeMin,
       accuracyRangeMax: projectData.accuracyRangeMax,
       maxImages: projectData.maxImages,
       metrics_is_send_iothub: projectData.sendMessageToCloud,
       metrics_frame_per_minutes: projectData.framesPerMin,
-      metrics_accuracy_threshold: projectData.accuracyThreshold,
+      prob_threshold: getDeploymentProbThreshold(projectData.inferenceMode, projectData.probThreshold),
+      name: projectData.name,
+      send_video_to_cloud: projectData.cameras.map((e) => ({
+        camera: e,
+        parts: projectData.SVTCparts,
+        send_video_to_cloud: projectData.SVTCcameras.includes(e),
+        send_video_to_cloud_threshold: projectData.SVTCconfirmationThreshold,
+        recording_duration: projectData.SVTCRecordingDuration,
+        enable_tracking: projectData.SVTCEnableTracking,
+      })),
+      inference_mode: projectData.inferenceMode,
+      fps: projectData.setFpsManually ? parseFloat(projectData.fps) : projectData.recomendedFps,
+      inference_protocol: projectData.inferenceProtocol,
+      disable_video_feed: projectData.disableVideoFeed,
+      counting_start_time: isEmpty(projectData.countingStartTime)
+        ? ''
+        : new Date(projectData.countingStartTime).toUTCString(),
+      counting_end_time: isEmpty(projectData.countingEndTime)
+        ? ''
+        : new Date(projectData.countingEndTime).toUTCString(),
+      max_people: projectData.maxPeople,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {
@@ -296,172 +206,43 @@ export const thunkPostProject = (
     },
   })
     .then(({ data }) => {
-      dispatch(postProjectSuccess(data, isDemo));
-      getTrain(data.id, isDemo);
+      dispatch(
+        postProjectSuccess(
+          normalizeServerToClient(data, projectData.recomendedFps, projectData.totalRecomendedFps),
+        ),
+      );
       return data.id;
     })
     .catch((err) => {
-      dispatch(postProjectFail(err, isDemo));
+      dispatch(postProjectFail(err));
+      alert(getErrorLog(err));
     }) as Promise<number>;
 };
-const getTrain = (projectId, isTestModel: boolean): void => {
-  const url = isTestModel ? `/api/projects/${projectId}/train?demo=True` : `/api/projects/${projectId}/train`;
-  Axios.get(url).catch((err) => console.error(err));
-};
 
-export const thunkDeleteProject = (isDemo): ProjectThunk => (dispatch, getState): Promise<any> => {
-  const projectId = getProjectDataByDemo(isDemo, getState()).id;
-  return Axios.get(`/api/projects/${projectId}/reset_camera`)
-    .then(() => {
-      return dispatch(deleteProjectSuccess(isDemo));
-    })
-    .catch((err) => {
-      alert(err);
-      dispatch(deleteProjectFailed(isDemo));
-    });
-};
+export const getConfigure = createWrappedAsync<any, number>('project/configure', async (projectId) => {
+  await Axios.get(`/api/part_detections/${projectId}/configure`);
+});
 
-export const thunkGetTrainingLog = (projectId: number, isDemo: boolean) => (dispatch): Promise<any> => {
-  dispatch(getTrainingLogRequest(isDemo));
+export const updateProbThreshold = createWrappedAsync<any, undefined, { state: State }>(
+  'project/updateProbThreshold',
+  async (_, { getState }) => {
+    const { id: projectId, probThreshold } = getProjectData(getState());
 
-  return Axios.get(`/api/projects/${projectId}/export`)
-    .then(({ data }) => {
-      if (data.status === 'failed') throw new Error(data.log);
-      else if (data.status === 'ok' || data.status === 'demo ok')
-        dispatch(getTrainingLogSuccess('', Status.FinishTraining, isDemo, 0));
-      else
-        dispatch(getTrainingLogSuccess(data.log, Status.WaitTraining, isDemo, TrainingStatus[data.status]));
-      return void 0;
-    })
-    .catch((err) => dispatch(getTrainingStatusFailed(err, isDemo)));
-};
+    const response = await Axios.get(
+      `/api/part_detections/${projectId}/update_prob_threshold?prob_threshold=${probThreshold}`,
+    );
+    return response.data;
+  },
+);
 
-export const thunkGetTrainingMetrics = (projectId: number, isDemo: boolean) => (dispacth): Promise<any> => {
-  dispacth(getTrainingMetricsRequest(isDemo));
+export const updateMaxPeople = createWrappedAsync<any, undefined, { state: State }>(
+  'project/updateMaxPeople',
+  async (_, { getState }) => {
+    const { id: projectId, maxPeople } = getProjectData(getState());
 
-  return Axios.get(`/api/projects/${projectId}/train_performance`)
-    .then(({ data }) => {
-      const curConsequence: Consequence = data.new
-        ? {
-            precision: data.new.precision,
-            recall: data.new.recall,
-            mAP: data.new.map,
-          }
-        : null;
-
-      const prevConsequence: Consequence = data.previous
-        ? {
-            precision: data.previous.precision,
-            recall: data.previous.recall,
-            mAP: data.previous.map,
-          }
-        : null;
-
-      return dispacth(getTrainingMetricsSuccess(curConsequence, prevConsequence, isDemo));
-    })
-    .catch((err) => dispacth(getTrainingMetricsFailed(err, isDemo)));
-};
-
-export const thunkGetInferenceMetrics = (projectId: number, isDemo: boolean) => (dispatch): Promise<any> => {
-  dispatch(getInferenceMetricsRequest(isDemo));
-
-  return Axios.get(`/api/projects/${projectId}/export`)
-    .then(({ data }) => {
-      return dispatch(
-        getInferenceMetricsSuccess(
-          data.success_rate,
-          data.inference_num,
-          data.unidentified_num,
-          data.gpu,
-          data.average_time,
-          data.count,
-          isDemo,
-        ),
-      );
-    })
-    .catch((err) => dispatch(getInferenceMetricsFailed(err, isDemo)));
-};
-
-export const thunkUpdateProbThreshold = (isDemo: boolean): ProjectThunk => (
-  dispatch,
-  getState,
-): Promise<any> => {
-  dispatch(updateProbThresholdRequest(isDemo));
-  const { id: projectId, probThreshold } = getProjectDataByDemo(isDemo, getState());
-
-  return Axios.get(`/api/projects/${projectId}/update_prob_threshold?prob_threshold=${probThreshold}`)
-    .then(() => dispatch(updateProbThresholdSuccess(isDemo)))
-    .catch((e) => {
-      if (e.response) {
-        throw new Error(e.response.data.log);
-      } else if (e.request) {
-        throw new Error(e.request);
-      } else {
-        throw e;
-      }
-    })
-    .catch((e) => {
-      dispatch(updateProbThresholdFailed(e, isDemo));
-    });
-};
-
-export const thunkUpdateAccuracyRange = (isDemo: boolean): ProjectThunk => (
-  dispatch,
-  getState,
-): Promise<any> => {
-  dispatch(postProjectRequest(isDemo));
-  const { id: projectId, accuracyRangeMin, accuracyRangeMax } = getProjectDataByDemo(isDemo, getState());
-
-  return Axios.patch(`/api/projects/${projectId}/`, {
-    accuracyRangeMin,
-    accuracyRangeMax,
-  })
-    .then(({ data }) => {
-      dispatch(postProjectSuccess(data, isDemo));
-      return void 0;
-    })
-    .catch((e) => {
-      if (e.response) {
-        throw new Error(e.response.data.log);
-      } else if (e.request) {
-        throw new Error(e.request);
-      } else {
-        throw e;
-      }
-    })
-    .catch((e) => {
-      dispatch(postProjectFail(e, isDemo));
-    });
-};
-
-export const thunkCheckAndSetAccuracyRange = (newSelectedParts: any[], isDemo: boolean): ProjectThunk => (
-  dispatch,
-  getState,
-): void => {
-  const images = selectAllImages(getState()).filter((e) => !e.isRelabel);
-
-  const partsWithImageLength = images.reduce((acc, cur) => {
-    const id = cur.part;
-    const relatedPartIdx = acc.findIndex((e) => e.id === id);
-    if (relatedPartIdx >= 0) acc[relatedPartIdx].length = acc[relatedPartIdx].length + 1 || 1;
-    return acc;
-  }, R.clone(newSelectedParts));
-
-  const minimumLengthPart = partsWithImageLength.reduce(
-    (acc, cur) => {
-      if (cur.length < acc.length) return { name: cur.name, length: cur.length };
-      return acc;
-    },
-    { name: '', length: Infinity },
-  );
-  if (minimumLengthPart.length === Infinity) return;
-  if (minimumLengthPart.length < 30) {
-    dispatch(updateProjectData({ accuracyRangeMax: 40, accuracyRangeMin: 10 }, isDemo));
-  } else if (minimumLengthPart.length >= 30 && minimumLengthPart.length < 80) {
-    dispatch(updateProjectData({ accuracyRangeMax: 60, accuracyRangeMin: 30 }, isDemo));
-  } else if (minimumLengthPart.length >= 80 && minimumLengthPart.length < 130) {
-    dispatch(updateProjectData({ accuracyRangeMax: 80, accuracyRangeMin: 50 }, isDemo));
-  } else if (minimumLengthPart.length >= 130) {
-    dispatch(updateProjectData({ accuracyRangeMax: 90, accuracyRangeMin: 60 }, isDemo));
-  }
-};
+    const response = await Axios.get(
+      `/api/part_detections/${projectId}/update_max_people?max_people=${maxPeople}`,
+    );
+    return response.data;
+  },
+);

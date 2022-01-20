@@ -1,58 +1,77 @@
-import React, { FC } from 'react';
-import { Text, Flex } from '@fluentui/react-northstar';
+/* eslint react/display-name: "off" */
 
-import ImageLink from '../components/ImageLink';
+import React, { useState, useEffect } from 'react';
+import { useLocation, useHistory, Switch, Route, Redirect } from 'react-router-dom';
+import { Stack, Pivot, PivotItem, Spinner } from '@fluentui/react';
+import { useDispatch, useSelector } from 'react-redux';
+import * as R from 'ramda';
 
-const Home: FC = () => {
+import { State } from 'RootStateType';
+import { getCameras } from '../store/cameraSlice';
+import { getImages } from '../store/imageSlice';
+import { thunkGetProject } from '../store/project/projectActions';
+import { getParts } from '../store/partSlice';
+
+import { Status } from '../store/project/projectTypes';
+import { Url } from '../enums';
+
+import { Customize } from '../components/Home/Customize';
+import { GetStarted } from '../components/Home/GetStarted';
+
+const BaseHome: React.FC = () => {
+  const dispatch = useDispatch();
+  const projectHasConfiged = useSelector((state: State) => state.project.status !== Status.None);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      setLoading(true);
+      await dispatch(getCameras(false));
+      await dispatch(getImages({ freezeRelabelImgs: false }));
+      await dispatch(thunkGetProject());
+      await dispatch(getParts());
+      setLoading(false);
+    })();
+  }, [dispatch]);
+
+  if (loading) return <Spinner label="Loading" />;
+
   return (
-    <Flex column gap="gap.medium">
-      <Text size="larger" weight="semibold">
-        Hello User!
-      </Text>
-      <Text color="white" styles={{ backgroundColor: '#373644', padding: '0.125em 0.125em 0.125em 0.625em' }}>
-        GET STARTED:
-      </Text>
-      <Flex gap="gap.large">
-        <ImageLink
-          imgSrc="/icons/location-filled.png"
-          to="/locations"
-          label="Register a new Location"
-          width="6.25em"
-        />
-        <ImageLink
-          imgSrc="/icons/camera-filled.png"
-          to="/cameras"
-          label="Register a new Camera"
-          width="6.25em"
-          imgPadding="0.625em 0.1875em 0.625em 0.1875em"
-        />
-        <ImageLink imgSrc="/icons/part-filled.png" to="/parts" label="Register a new Part" width="6.25em" />
-      </Flex>
-      <Text color="white" styles={{ backgroundColor: '#373644', padding: '0.125em 0.125em 0.125em 0.625em' }}>
-        SELECT FROM THE FOLLOWING TASKS:
-      </Text>
-      <Flex gap="gap.large">
-        <ImageLink
-          imgSrc="/icons/doubleCube.png"
-          to="/partIdentification"
-          label="Identify Parts"
-          width="6.25em"
-        />
-        <ImageLink
-          imgSrc="/icons/manual-filled.png"
-          to="/manual"
-          label="Identify items manually"
-          width="6.25em"
-        />
-        <ImageLink
-          imgSrc="/icons/pretrained-model-filled.png"
-          to="/pretrainDetection/"
-          label="Demo Model"
-          width="6.25em"
-        />
-      </Flex>
-    </Flex>
+    <Switch>
+      <Route path={Url.HOME_CUSTOMIZE}>
+        <Customize />
+      </Route>
+      <Route path={Url.HOME_GET_STARTED}>
+        <GetStarted hasTask={projectHasConfiged} />
+      </Route>
+      <Route path={Url.HOME}>
+        <Redirect to={Url.HOME_GET_STARTED} />
+      </Route>
+    </Switch>
   );
 };
 
-export default Home;
+export const Home = R.compose(
+  (BaseComponent: React.ComponentType<{}>): React.FC => () => {
+    const location = useLocation();
+    const history = useHistory();
+
+    const onPivotChange = (item: PivotItem) => {
+      history.push(`${Url.HOME}/${item.props.itemKey}`);
+    };
+
+    return (
+      <>
+        <Stack styles={{ root: { height: '100%' } }}>
+          <Pivot selectedKey={location.pathname.split('/')[2]} onLinkClick={onPivotChange}>
+            <PivotItem itemKey="getStarted" headerText="Get started" />
+            <PivotItem itemKey="customize" headerText="Scenario library" />
+          </Pivot>
+          <Stack grow>
+            <BaseComponent />
+          </Stack>
+        </Stack>
+      </>
+    );
+  },
+)(BaseHome);

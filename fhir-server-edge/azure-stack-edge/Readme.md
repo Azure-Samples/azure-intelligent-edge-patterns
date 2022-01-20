@@ -36,9 +36,11 @@ For authentication to be enabled, the following will need to be setup in you Azu
     |Environment Variable|Description|
     |--------------------|-----------|
     |FHIR_VERSION | Version of FHIR Server to Run (ex. R4, R5, STU3)|
+    |FHIR_CONTAINER_RELEASE | Release tag of FHIR server container (ex. 1.0.788)|
     |FHIRServer__Security__Authentication__Audience| Audience from your service princpal registration in Azure Active Directory|
     |FHIRServer__Security__Authentication__Authority| Authority from your client app in Azure Active Directory|
     |SAPASSWORD| Password to use for SQL Server service account
+    |SqlServer__SchemaOptions__AutomaticUpdatesEnabled| Set to true by default|
     |ApplicationInsights__InstrumentationKey| Instrumentation key for Azure Application Insights to send audit logs|
     |ASPNETCORE_Kestrel__Certificates__Default__Path| Fully qualified path to your certificate|
     |ASPNETCORE_Kestrel__Certificates__Default__Password| Password required to use your certificate|
@@ -46,10 +48,13 @@ For authentication to be enabled, the following will need to be setup in you Azu
 
 
 - For HTTPS connectivity, you will need to provide a certificate
-    - You will need to [add a share](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-deploy-add-shares) to the following path: `/https`    
-        - Note: be sure to configure your share as Edge local share
-    - Connect to the share and copy your certificate to the share location
-
+    - You will need to [add shares](https://docs.microsoft.com/en-us/azure/databox-online/azure-stack-edge-deploy-add-shares) to the following paths: `/https` and `/sqlvolume`
+        - Note: be sure to configure your share `https` as Edge local share
+        ![Create https share](./images/https-share.png)
+        - Note: be sure to configure your share `sqlvolume` as Edge share, backed by an Storage Account blob container
+        ![Create sqlvolume share](./images/sqlvolume-share.png)
+    - Connect to the `https` share and copy your certificate to the share location `\\ASE-hostname\https`
+    - Make sure both shares are shown as **mounted** in Azure portal, so these shares will available as Persistent Volumes in k8s.
 
 ## Step 2: Deploy to Edge Device
 

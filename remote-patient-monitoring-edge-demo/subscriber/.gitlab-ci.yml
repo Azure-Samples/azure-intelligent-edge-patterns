@@ -1,0 +1,16 @@
+# This build job is provided as an example 
+
+# The build job in this file uses "Docker-in-docker" which requirers some specific configuration of the Gitlab Runner.   
+# See this link for more detail: https://docs.gitlab.com/ee/ci/docker/using_docker_build.html#use-the-docker-executor-with-the-docker-image-docker-in-docker
+
+before_script:
+  - echo ${docker_registry_password} | docker login --username ${docker_registry_username} --password-stdin  ${DOCKER_REGISTRY}
+
+build:
+  image: docker:19.03.12
+  services:
+      - name: docker:19.03.12-dind
+  script:
+    - TAG="${DOCKER_REGISTRY}/${CI_PROJECT_NAME}:latest"
+    - docker build -t $TAG .
+    - docker push $TAG

@@ -1,8 +1,19 @@
 import { Size2D } from '../../../store/type';
 
-const getResizeImageFunction = (defaultSize: Size2D) => (size: Size2D): [Size2D, number] => {
+// Simulate css object-fit properties
+export enum CanvasFit {
+  Contain,
+  Cover,
+}
+
+const resizeImageFunction = (defaultSize: Size2D, fit: CanvasFit, size: Size2D): [Size2D, number] => {
+  const conditionCheck = (width, height) => {
+    if (fit === CanvasFit.Contain) return width > height;
+    return width < height;
+  };
+
   if (size.width !== 0) {
-    if (size.width > size.height) {
+    if (conditionCheck(size.width, size.height)) {
       const scaleX = defaultSize.width / size.width;
 
       return [{ width: defaultSize.width, height: size.height * scaleX }, scaleX];
@@ -14,4 +25,4 @@ const getResizeImageFunction = (defaultSize: Size2D) => (size: Size2D): [Size2D,
   return [defaultSize, 1];
 };
 
-export default getResizeImageFunction;
+export default resizeImageFunction;

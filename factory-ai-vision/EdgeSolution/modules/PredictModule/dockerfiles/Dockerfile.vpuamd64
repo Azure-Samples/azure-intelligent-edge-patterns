@@ -1,0 +1,101 @@
+FROM mcr.microsoft.com/azureml/onnxruntime:latest-openvino-myriad
+# FROM waitingkuo/onnxruntime-vpu
+
+# Get rid of UDEV by rebuilding libusb without UDEV support in the Docker* image 
+
+ARG BUILD_DEPENDENCIES="autoconf \
+    automake \
+    build-essential \
+    libtool \
+    unzip \
+    udev"
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends ${BUILD_DEPENDENCIES} && \
+    rm -rf /var/lib/apt/lists/*
+#RUN usermod -aG users openvino
+WORKDIR /opt
+RUN curl -L https://github.com/libusb/libusb/archive/v1.0.22.zip --output v1.0.22.zip && \
+    unzip v1.0.22.zip
+WORKDIR /opt/libusb-1.0.22
+RUN ./bootstrap.sh && \
+    ./configure --disable-udev --enable-shared && \
+    make -j4
+WORKDIR /opt/libusb-1.0.22/libusb
+RUN /bin/mkdir -p '/usr/local/lib' && \
+    /bin/bash ../libtool --mode=install /usr/bin/install -c libusb-1.0.la '/usr/local/lib' && \
+    /bin/mkdir -p '/usr/local/include/libusb-1.0' && \
+    /usr/bin/install -c -m 644 libusb.h '/usr/local/include/libusb-1.0' && \
+    /bin/mkdir -p '/usr/local/lib/pkgconfig'
+WORKDIR /opt/libusb-1.0.22/
+RUN cd /opt/intel && ln -s openvino_2021 openvino
+RUN /usr/bin/install -c -m 644 libusb-1.0.pc '/usr/local/lib/pkgconfig' && \
+    cp /opt/intel/openvino/deployment_tools/inference_engine/external/97-myriad-usbboot.rules /etc/udev/rules.d/ && \
+    ldconfig
+
+
+
+WORKDIR /app
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libffi-dev \
+    libgl1-mesa-glx \
+    libgtk2.0-dev \
+    libssl-dev \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+# libgl1-mesa-glx: opencv2 libGL.so error workaround
+
+RUN apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y locales \
+    && sed -i -e 's/# en_US.UTF-8 UTF-8/en_US.UTF-8 UTF-8/' /etc/locale.gen \
+    && dpkg-reconfigure --frontend=noninteractive locales \
+    && update-locale LANG=en_US.UTF-8 \
+    && rm -rf /var/lib/apt/lists/*
+
+# TODO: Consider move env to the end of dockerfile
+ENV LANG en_US.UTF-8
+ENV LC_ALL en_US.UTF-8
+
+COPY requirements/base.txt ./requirements/base.txt
+#ENV CONDA_ENV_NAME python38
+#RUN conda create --name python38 python=3.8.5 -y &&\
+#    . activate python38
+#RUN [ "/bin/bash", "-c", "source activate python38 && pip install --upgrade pip"]
+#RUN [ "/bin/bash", "-c", "source activate python38 && pip install -r requirements/base.txt --ignore-installed"]
+#RUN [ "/bin/bash", "-c", "source activate python38 && pip install opencv-python onnxruntime" ]
+RUN pip install --upgrade pip
+RUN pip install -r requirements/base.txt --ignore-installed
+RUN pip install opencv-python
+
+# =========================================================
+# Copy Source Code
+# =========================================================
+COPY coco_classes.txt ./
+COPY default_model default_model/
+COPY default_model_6parts default_model_6parts/
+COPY sample_video sample_video/
+COPY scenario_models scenario_models/
+RUN chmod 777 sample_video/video.mp4
+RUN chmod 777 default_model
+
+COPY api/__init__.py ./api/__init__.py
+COPY api/models.py ./api/models.py
+COPY config.py ./
+COPY exception_handler.py ./
+COPY logging_conf/logging_config.py ./logging_conf/logging_config.py
+COPY model_wrapper.py ./
+COPY object_detection.py ./
+COPY object_detection2.py ./
+COPY onnxruntime_predict.py ./
+COPY server.py ./
+COPY utility.py ./
+
+
+EXPOSE 7777
+
+#COPY onnxruntime_openvino-1.5.2-cp38-cp38-linux_x86_64.whl ./
+#RUN [ "/bin/bash", "-c", "source activate python38 && pip install onnxruntime_openvino-1.5.2-cp38-cp38-linux_x86_64.whl"]
+
+#CMD [ "/bin/bash", "-c", "source activate python38 && python3 server.py -p 44000"]
+CMD ["python", "server.py"]

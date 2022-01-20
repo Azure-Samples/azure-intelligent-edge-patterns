@@ -1,23 +1,20 @@
-"""Azure Part Factories
+"""App model factories.
 """
 
-from typing import Any, Sequence
 
-from factory import DjangoModelFactory, Faker, post_generation
+from factory import DjangoModelFactory, Faker, SubFactory
 
-from vision_on_edge.azure_parts.models import Part
+from ...azure_projects.tests.factories import ProjectFactory
+from ..models import Part
 
 
 class PartFactory(DjangoModelFactory):
-    """PartFactory.
-    """
+    """PartFactory."""
 
+    project = SubFactory(ProjectFactory)
     name = Faker("name")
     description = Faker("sentence")
 
     class Meta:
-        """Meta.
-        """
-
         model = Part
         django_get_or_create = ["name"]

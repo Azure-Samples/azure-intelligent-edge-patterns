@@ -1,4 +1,4 @@
-"""Test Azure App Insight utilites
+"""App utility tests.
 """
 
 import logging
@@ -6,12 +6,12 @@ import logging
 import pytest
 from opencensus.ext.azure.log_exporter import AzureLogHandler
 
-from vision_on_edge.azure_app_insight.utils import get_app_insight_logger
+from ..utils import get_app_insight_logger
 
 
+@pytest.mark.fast
 def test_get_app_insight_logger():
-    """test_get_app_insight_logger.
-    """
+    """test_get_app_insight_logger."""
     az_logger = get_app_insight_logger()
 
     assert isinstance(az_logger, logging.Logger)

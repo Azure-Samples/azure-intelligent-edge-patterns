@@ -1,0 +1,28 @@
+#
+# originally from https://github.com/kubeflow/kfserving/tree/master/docs/samples
+# see the repository for model changes.
+#
+
+#
+# This is how it works:
+#
+# $ kubectl apply -f pytorch_cifar10.yaml  -n kfserving-test
+# inferenceservice.serving.kubeflow.org/pytorch-cifar10 configured
+#
+# $ kubectl get inferenceservice -n kfserving-test
+# NAME             URL                                                                           READY   DEFAULT TRAFFIC   CANARY TRAFFIC   AGE
+# pytorch-cifar10   http://flowers-sample.kfserving-test.example.com/v1/models/pytorch-cifar10   True    100                                2m23s
+#
+
+apiVersion: "serving.kubeflow.org/v1alpha2"
+kind: "InferenceService"
+metadata:
+  name: "pytorch-cifar10"
+spec:
+  default:
+    parallelism: 1
+    predictor:
+      pytorch:
+        storageUri: "gs://kfserving-samples/models/pytorch/cifar10/"
+        modelClassName: "Net"
+

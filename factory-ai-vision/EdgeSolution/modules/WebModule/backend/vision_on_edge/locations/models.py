@@ -1,6 +1,6 @@
+"""App models.
 """
-Location models
-"""
+
 from django.db import models
 
 

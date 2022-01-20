@@ -1,52 +1,89 @@
 # Vision On Edge - Web Module
 
-## How to run
+[![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 
-### Migrate
+[![Imports: isort](https://img.shields.io/badge/%20imports-isort-%231674b1?style=flat&labelColor=00000)](https://pycqa.github.io/isort/)
 
-```bash
-python manage.py makemigration
-python manage.py migrate
-```
+## Quick Start
 
-### Configure
+1. Install requirements
 
-```bash
-vim config.py
-vim configs/app_insight.py
-```
+   ```bash
+   pip install -r requirements/production-x86.txt
+   # Arm: pip install -r requirements/production-arm.txt
+   ```
 
-### Run server
+2. Run Server
 
-```bash
-python manage.py runserver
-```
+   ```bash
+   # start django
+   python manage.py makemigration
+   python manage.py migrate
+   python manage.py runserver
+   ```
 
-Go to [Web UI](http://localhost:8000)
+3. Django REST Framework UI
 
-## Pylint
+   [http://localhost:8000/api/](http://localhost:8000/api/)
 
-```bash
-pylint
-```
+4. Swagger Documents
 
-## How to test
+   [http://localhost:8000/api/swagger](http://localhost:8000/api/swagger)
 
-Go to project directory (same level with manage.py)
+## Production Setup
 
-```bash
-export ENDPOINT=${your_endpoint}
-export TRAINING_KEY=${your_key}
-pytest
-```
+1. Run Django
 
-## Test coverage
+   ```bash
+   pip install -r requirements/production-x86.txt
+   # Arm: pip install -r requirements/production-arm.txt
 
-To run the tests, check your test coverage, and generate an HTML coverage report::
+   # If not set, django will use sqlite
+   export DJANGO_ENV="PRODUCTION"
 
-```bash
-$ coverage run -m pytest
-$ coverage html
-$ open htmlcov/index.html
-```
+   # database info
+   export DBNAME="${YOUR_DB_NAME}"
+   export DBNAME="${YOUR_DB_NAME}"
+   export DBHOST="${YOUR_DB_HOST}"
+   export DBUSER="${YOUR_DB_USER}"
+   export DBPASS="${YOUR_DB_PASSWORD}"
 
+   # start django
+   python manage.py makemigration
+   python manage.py migrate
+   python manage.py runserver
+   ```
+
+## Developers
+
+1. Installation
+
+   ```bash
+   make install-dev
+   ```
+
+2. Run tests
+
+   ```bash
+   make test
+   ```
+
+3. Run coverage (local)
+
+   To run the tests, check your test coverage, and generate an HTML coverage report:
+
+   ```bash
+   # Generate html
+   make coverage-html
+   # Open with browser
+   open htmlcov/index.html
+   ```
+
+4. Run coverage (publish in pipelines)
+
+   To run the tests, and publish coverage using junit xml:
+
+   ```bash
+   # Generate junit_family: xunit2 xml
+   make coverage-xml
+   ```

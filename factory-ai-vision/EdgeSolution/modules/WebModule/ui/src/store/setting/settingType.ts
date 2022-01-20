@@ -2,6 +2,8 @@ import { ThunkAction } from 'redux-thunk';
 import { Action } from 'redux';
 import type { State } from 'RootStateType';
 
+export type CVProject = { id: string; name: string };
+
 type SettingData = {
   id: number;
   key: string;
@@ -13,8 +15,9 @@ export type Setting = {
   error: Error;
   current: SettingData;
   origin: SettingData;
+  // If the given endpoint and key is valid
   isTrainerValid: boolean;
-  cvProjects?: Record<string, string>;
+  cvProjects: CVProject[];
   appInsightHasInit: boolean;
   isCollectData: boolean;
   appInsightKey?: string;
@@ -53,16 +56,16 @@ export type GetSettingFailedAction = {
 };
 
 export type GetAllCvProjectsRequestAction = {
-  type: 'GET_ALL_CV_PROJECTS_REQUEST';
+  type: 'settings/listAllProjects/pending';
 };
 
 export type GetAllCvProjectsSuccessAction = {
-  type: 'GET_ALL_CV_PROJECTS_SUCCESS';
-  pyload: Record<string, string>;
+  type: 'settings/listAllProjects/fulfilled';
+  pyload: CVProject[];
 };
 
 export type GetAllCvProjectsErrorAction = {
-  type: 'GET_ALL_CV_PROJECTS_ERROR';
+  type: 'settings/listAllProjects/rejected';
   error: Error;
 };
 

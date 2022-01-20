@@ -1,0 +1,3 @@
+# TODO: replace arm64 rtsp-sim base image
+FROM intelligentedge/rtspsim-live555:0.0.1-arm64v8
+COPY ./videos/* /live/mediaServer/media/

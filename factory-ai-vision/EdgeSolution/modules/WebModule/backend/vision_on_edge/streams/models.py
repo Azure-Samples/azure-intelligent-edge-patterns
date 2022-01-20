@@ -1,120 +1,63 @@
-"""Stream models
+"""App models.
 """
 
 import logging
-import sys
 import threading
 import time
 
 import cv2
-import requests
-from azure.iot.device import IoTHubModuleClient
 
-from ..azure_iot.utils import inference_module_url
+from configs.general_configs import PRINT_THREAD
+
+from ..cameras.utils import normalize_rtsp, verify_rtsp
+from .exceptions import StreamOpenRTSPError
 
 logger = logging.getLogger(__name__)
 
-KEEP_ALIVE_THRESHOLD = 10
+# Stream
+KEEP_ALIVE_THRESHOLD = 10  # Seconds
+
+# Stream Manager
+STREAM_GC_TIME_THRESHOLD = 5  # Seconds
 
 
-class Stream():
+class Stream:
     """Stream Class"""
 
-    def __init__(self, rtsp, part_id=None, inference=False):
-        if rtsp == "0":
-            self.rtsp = 0
-        elif rtsp == "1":
-            self.rtsp = 1
-        else:
-            self.rtsp = rtsp
+    def __init__(self, rtsp, camera_id, part_id=None):
+        self.rtsp = normalize_rtsp(rtsp=rtsp)
+        self.camera_id = camera_id
         self.part_id = part_id
 
         self.last_active = time.time()
         self.status = "init"
-        self.last_img = None
         self.cur_img_index = 0
-        self.last_get_img_index = 0
+        self.last_get_img_index = 1
         self.id = id(self)
 
-        self.mutex = threading.Lock()
-        self.predictions = []
-        self.inference = inference
-        self.iot = None
-        self.keep_alive = time.time()
-        self.cap = None
-        try:
-            self.iot = IoTHubModuleClient.create_from_edge_environment()
-        except KeyError as key_error:
-            logger.error(key_error)
-        except OSError as os_error:
-            logger.error(os_error)
-        except Exception:
-            logger.exception("Unexpected error")
-
-        logger.info("inference %s", self.inference)
-        logger.info("iot %s", self.iot)
-
-        def _listener(self):
-            if not self.inference:
-                return
-            while True:
-                if self.last_active + 10 < time.time():
-                    logger.info("stream finished")
-                    break
-                sys.stdout.flush()
-                res = requests.get("http://" + inference_module_url() +
-                                   "/prediction")
-
-                self.mutex.acquire()
-                self.predictions = res.json()
-                self.mutex.release()
-                time.sleep(0.02)
-                # print('received p', self.predictions)
-
-                # inference = self.iot.receive_message_on_input('inference',
-                #                                               timeout=1)
-                # if not inference:
-                #    self.mutex.acquire()
-                #    self.bboxes = []
-                #    self.mutex.release()
-                # else:
-                #    data = json.loads(inference.data)
-                #    print('receive inference', data)
-                #    self.mutex.acquire()
-                #    self.bboxes = [{
-                #        'label': data['Label'],
-                #        'confidence': data['Confidence'] + '%',
-                #        'p1': (data['Position'][0], data['Position'][1]),
-                #        'p2': (data['Position'][2], data['Position'][3])
-                #    }]
-                #    self.mutex.release()
-
-        # if self.iot:
-        threading.Thread(target=_listener, args=(self,)).start()
+        # test rtsp
+        if not verify_rtsp(self.rtsp):
+            raise StreamOpenRTSPError
+        self.cap = cv2.VideoCapture(self.rtsp)
+        self.last_img = self.cap.read()[1]
 
     def update_keep_alive(self):
-        """update_keep_alive.
-        """
-        self.keep_alive = time.time()
+        """update_keep_alive."""
+        self.last_active = time.time()
 
     def gen(self):
-        """generator for stream.
-        """
+        """generator for stream."""
         self.status = "running"
-        if self.rtsp == '0':
-            self.rtsp = 0
-        elif isinstance(self.rtsp,
-                        str) and self.rtsp.lower().find("rtsp") == 0:
-            self.rtsp = "rtsp" + self.rtsp[4:]
-        logger.info("start streaming with %s", self.rtsp)
-        self.cap = cv2.VideoCapture(self.rtsp)
+
+        logger.info("Start streaming with %s.", self.rtsp)
         while self.status == "running" and (
-                self.keep_alive + KEEP_ALIVE_THRESHOLD > time.time()):
+            self.last_active + KEEP_ALIVE_THRESHOLD > time.time()
+        ):
             if not self.cap.isOpened():
-                raise ValueError("Cannot connect to rtsp")
-            t, img = self.cap.read()
+                raise StreamOpenRTSPError
+            has_img, img = self.cap.read()
             # Need to add the video flag FIXME
-            if t == False:
+            if not has_img:
                 self.cap = cv2.VideoCapture(self.rtsp)
                 time.sleep(1)
                 continue
@@ -123,50 +66,18 @@ class Stream():
             self.last_active = time.time()
             self.last_img = img.copy()
             self.cur_img_index = (self.cur_img_index + 1) % 10000
-            self.mutex.acquire()
-            predictions = list(
-                prediction.copy() for prediction in self.predictions)
-            self.mutex.release()
-
-            # print('bboxes', bboxes)
-            # cv2.rectangle(img, bbox['p1'], bbox['p2'], (0, 0, 255), 3)
-            # cv2.putText(img, bbox['label'] + ' ' + bbox['confidence'],
-            # (bbox['p1'][0], bbox['p1'][1]-15),
-            # cv2.FONT_HERSHEY_COMPLEX,
-            # 0.6,
-            # (0, 0, 255),
-            # 1)
-            height, width = img.shape[0], img.shape[1]
-            font = cv2.FONT_HERSHEY_SIMPLEX
-            font_scale = 1
-            thickness = 3
-            for prediction in predictions:
-                if prediction["probability"] > 0.25:
-                    x1 = int(prediction["boundingBox"]["left"] * width)
-                    y1 = int(prediction["boundingBox"]["top"] * height)
-                    x2 = x1 + int(prediction["boundingBox"]["width"] * width)
-                    y2 = y1 + int(prediction["boundingBox"]["height"] * height)
-                    img = cv2.rectangle(img, (x1, y1), (x2, y2), (0, 0, 255),
-                                        2)
-                    img = cv2.putText(
-                        img,
-                        prediction["tagName"],
-                        (x1 + 10, y1 + 30),
-                        font,
-                        font_scale,
-                        (0, 0, 255),
-                        thickness,
-                    )
-            yield (b"--frame\r\n"
-                   b"Content-Type: image/jpeg\r\n\r\n" +
-                   cv2.imencode(".jpg", img)[1].tobytes() + b"\r\n")
-        logger.info('%s releasing self...', self)
+            yield (
+                b"--frame\r\n"
+                b"Content-Type: image/jpeg\r\n\r\n"
+                + cv2.imencode(".jpg", img)[1].tobytes()
+                + b"\r\n"
+            )
         self.cap.release()
+        logger.info("%s cap released.", self)
 
     def get_frame(self):
-        """get_frame.
-        """
-        logger.info("get frame %s", self)
+        """get_frame."""
+        logger.info("%s get frame.", self)
         # b, img = self.cap.read()
         time_begin = time.time()
         while True:
@@ -188,9 +99,74 @@ class Stream():
         close the stream.
         """
         self.status = "stopped"
-        logger.info("release %s", self)
+        logger.info("%s stopped.", self)
+
+    def __str__(self):
+        return f"<Stream id:{self.id} rtsp:{self.rtsp}>"
 
     def __repr__(self):
-        """__repr__.
+        return f"<Stream id:{self.id} rtsp:{self.rtsp}>"
+
+
+class StreamManager:
+    """StreamManager"""
+
+    def __init__(self):
+        self.streams = []
+        self.mutex = threading.Lock()
+        self.gc()
+
+    def add(self, stream: Stream):
+        """add stream"""
+        self.mutex.acquire()
+        self.streams.append(stream)
+        self.mutex.release()
+
+    def get_stream_by_id(self, stream_id):
+        """get_stream_by_id"""
+
+        self.mutex.acquire()
+
+        for i in range(len(self.streams)):
+            stream = self.streams[i]
+            if stream.id == stream_id:
+
+                self.mutex.release()
+                return stream
+
+        self.mutex.release()
+        return None
+
+    def gc(self):
+        """Garbage collector
+
+        IMPORTANT, autoreloader will not reload threading,
+        please restart the server if you modify the thread
         """
-        return f"<{self.id}: {self.rtsp}>"
+
+        def _gc(self):
+            while True:
+                self.mutex.acquire()
+                if PRINT_THREAD:
+                    logger.info("streams: %s", self.streams)
+                to_delete = []
+                for stream in self.streams:
+                    if stream.last_active + STREAM_GC_TIME_THRESHOLD < time.time():
+
+                        # stop the inactive stream
+                        # (the ones users didnt click disconnect)
+                        logger.info("stream %s inactive", stream)
+                        logger.info("Time now %s", time.time())
+                        logger.info("Stream alive through %s", stream.last_active)
+                        stream.close()
+
+                        # collect the stream, to delete later
+                        to_delete.append(stream)
+
+                for stream in to_delete:
+                    self.streams.remove(stream)
+
+                self.mutex.release()
+                time.sleep(3)
+
+        threading.Thread(target=_gc, args=(self,), daemon=True).start()

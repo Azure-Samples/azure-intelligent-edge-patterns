@@ -12,7 +12,11 @@ import {
   GetAllCvProjectsSuccessAction,
   GetAllCvProjectsErrorAction,
   OnSettingStatusCheckAction,
+  CVProject,
 } from './settingType';
+import { getTrainingProject } from '../trainingProjectSlice';
+import { getAppInsights } from '../../TelemetryService';
+import { createWrappedAsync } from '../shared/createWrappedAsync';
 
 export const updateKey = (key: string): UpdateKeyAction => ({ type: 'UPDATE_KEY', payload: key });
 
@@ -47,16 +51,16 @@ export const settingFailed = (error: Error): GetSettingFailedAction => ({
 });
 
 const getAllCvProjectsRequest = (): GetAllCvProjectsRequestAction => ({
-  type: 'GET_ALL_CV_PROJECTS_REQUEST',
+  type: 'settings/listAllProjects/pending',
 });
 
-const getAllCvProjectsSuccess = (cvProjects: Record<string, string>): GetAllCvProjectsSuccessAction => ({
-  type: 'GET_ALL_CV_PROJECTS_SUCCESS',
+const getAllCvProjectsSuccess = (cvProjects: CVProject[]): GetAllCvProjectsSuccessAction => ({
+  type: 'settings/listAllProjects/fulfilled',
   pyload: cvProjects,
 });
 
-const getAllCvProjectError = (error: Error): GetAllCvProjectsErrorAction => ({
-  type: 'GET_ALL_CV_PROJECTS_ERROR',
+export const getAllCvProjectError = (error: Error): GetAllCvProjectsErrorAction => ({
+  type: 'settings/listAllProjects/rejected',
   error,
 });
 
@@ -83,6 +87,7 @@ export const thunkGetSetting = () => (dispatch): Promise<any> => {
             isTrainerValid: data[0].is_trainer_valid,
             appInsightHasInit: data[0].app_insight_has_init,
             isCollectData: data[0].is_collect_data,
+            cvProjects: [],
           }),
         );
       }
@@ -129,10 +134,12 @@ export const thunkGetSettingAndAppInsightKey = (): SettingThunk => (dispatch): P
               appInsightHasInit: settingsData[0].app_insight_has_init,
               isCollectData: settingsData[0].is_collect_data,
               appInsightKey: appInsightKeyData.key,
+              cvProjects: [],
             }),
           );
+        } else {
+          throw new Error('No API Key');
         }
-        throw new Error('No API Key');
       }),
     )
     .catch((e) => console.error(e));
@@ -183,8 +190,11 @@ export const thunkPostSetting = (): SettingThunk => (dispatch, getStore): Promis
           isTrainerValid: data.is_trainer_valid,
           appInsightHasInit: data.app_insight_has_init,
           isCollectData: data.is_collect_data,
+          cvProjects: [],
         }),
       );
+      dispatch(thunkGetAllCvProjects());
+      dispatch(getTrainingProject(false));
       return void 0;
     })
     .catch((err) => {
@@ -198,12 +208,12 @@ export const thunkGetAllCvProjects = (): SettingThunk => (dispatch, getState) =>
   const settingId = getState().setting.current.id;
   return Axios.get(`/api/settings/${settingId}/list_projects`)
     .then(({ data }) => {
-      dispatch(getAllCvProjectsSuccess(data));
+      dispatch(getAllCvProjectsSuccess(data?.projects || []));
       return void 0;
     })
     .catch((e) => {
       if (e.response) {
-        throw new Error(e.response.data.log);
+        throw new Error(e.response.data.error.message);
       } else if (e.request) {
         throw new Error(e.request);
       } else {
@@ -222,3 +232,16 @@ export const checkSettingStatus = (): SettingThunk => async (dispatch): Promise<
   const appInsightHasInit = appInsightHasInitStr ? JSON.parse(appInsightHasInitStr) : false;
   dispatch(onSettingStatusCheck(isTrainerValid, appInsightHasInit));
 };
+
+export const patchIsCollectData = createWrappedAsync<
+  any,
+  { id: number; isCollectData: boolean; hasInit: boolean }
+>('settings/updateIsCollectData', async ({ id, isCollectData, hasInit }) => {
+  await Axios.patch(`/api/settings/${id}`, {
+    is_collect_data: isCollectData,
+    ...(hasInit && { app_insight_has_init: hasInit }),
+  });
+  const appInsight = getAppInsights();
+  if (!appInsight) throw Error('App Insight hasnot been initialize');
+  appInsight.config.disableTelemetry = !isCollectData;
+});

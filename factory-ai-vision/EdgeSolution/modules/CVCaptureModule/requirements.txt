@@ -1,0 +1,7 @@
+azure-iot-device==2.0.1
+azure-iot-hub==2.2.2rc0
+fastapi
+uvicorn
+opencv-python
+pyzmq
+requests

@@ -1,35 +1,96 @@
 import { createSelector } from '@reduxjs/toolkit';
 import { selectAllImages } from './imageSlice';
-import { selectPartEntities } from './partSlice';
+import { selectPartEntities, selectAllParts } from './partSlice';
+import { Item as ImageListItem } from '../components/ImageList';
+import { selectNonDemoProject } from './trainingProjectSlice';
+import { selectCameraEntities } from './cameraSlice';
 import { selectAllAnno } from './annotationSlice';
-import { LabelImage } from './type';
+import { Image, Annotation } from './type';
 
-const selectImagesByRelabel = (isRelabel) =>
-  createSelector(selectAllImages, (images) =>
-    images.filter((img) => img.isRelabel === isRelabel && img.part !== null),
-  );
+const getImgListItem = (
+  img: Image,
+  partEntities,
+  cameraEntities,
+  annotations: Annotation[],
+): ImageListItem => {
+  const part = partEntities[img.part];
+  const camera = cameraEntities[img.camera];
 
-const selectImagesByPart = (partId) =>
-  createSelector(selectImagesByRelabel(false), (images) => images.filter((img) => img.part === partId));
+  const parts = img.labels
+    .map((id) => annotations.find((anno) => anno.id === id).part)
+    .filter((part) => part)
+    .map((partId) => partEntities[partId])
+    .map((part) => ({ id: part.id, name: part.name }));
 
-const mapImageToLabelImage = (images, partEntities, allAnno): LabelImage[] =>
-  images.map((img) => ({
+  return {
     id: img.id,
     image: img.image,
-    labels: allAnno.filter((e) => e.image === img.id),
+    timestamp: img.timestamp,
+    manualChecked: img.manualChecked,
     part: {
-      id: img.part,
-      name: partEntities[img.part]?.name,
+      id: part?.id || null,
+      name: part?.name || '',
     },
-    is_relabel: img.isRelabel,
-    confidence: img.confidence,
-    hasRelabeled: img.hasRelabeled,
-  }));
+    camera: {
+      id: camera?.id || null,
+      name: camera?.name || '',
+    },
+    parts,
+  };
+};
 
-export const makeLabelImageSelector = (partId) =>
-  createSelector([selectImagesByPart(partId), selectPartEntities, selectAllAnno], mapImageToLabelImage);
+/**
+ * Get the part-image selector by passing the part ID
+ * @param partId
+ */
+export const partImageItemSelectorFactory = (partId) =>
+  createSelector(
+    [partsImagesSelectorFactory, selectPartEntities, selectCameraEntities, selectAllAnno],
+    (partAllImages, partEntities, cameraEntities, annotations) => {
+      return partAllImages
+        .filter((img) => !img.isRelabel && img.parts.includes(partId))
+        .map((img) => getImgListItem(img, partEntities, cameraEntities, annotations));
+    },
+  );
 
-export const selectRelabelImages = createSelector(
-  [selectImagesByRelabel(true), selectPartEntities, selectAllAnno],
-  mapImageToLabelImage,
+/**
+ * Create a memoize image item selector by passing untagged
+ * @param unTagged If the selector need to select untagged image
+ */
+export const imageItemSelectorFactory = (unTagged: boolean) =>
+  createSelector(
+    [selectAllImages, selectPartEntities, selectCameraEntities, selectAllAnno],
+    (images, partEntities, cameraEntities, annotations) => {
+      return images
+        .filter((img) => {
+          if (unTagged) return !img.manualChecked && !img.isRelabel;
+          return img.manualChecked;
+        })
+        .map((img) => getImgListItem(img, partEntities, cameraEntities, annotations));
+    },
+  );
+
+export const relabelImageSelector = createSelector(
+  [selectAllImages, selectPartEntities, selectCameraEntities, selectAllAnno],
+  (images, partEntities, cameraEntities, annotations) => {
+    return images
+      .filter((img) => img.isRelabel && !img.manualChecked)
+      .map((img) => getImgListItem(img, partEntities, cameraEntities, annotations));
+  },
+);
+
+export const selectNonDemoPart = createSelector(
+  [selectAllParts, selectNonDemoProject],
+  (parts, [nonDemoProject]) => parts.filter((p) => p.trainingProject === nonDemoProject.id),
+);
+
+export const partsImagesSelectorFactory = createSelector(
+  [selectAllImages, selectAllAnno],
+  (images, annotations) =>
+    images.map((img) => ({
+      ...img,
+      parts: img.labels
+        .map((label) => annotations.find((anno) => anno.id === label).part)
+        .filter((part) => part),
+    })),
 );

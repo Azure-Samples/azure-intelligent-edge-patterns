@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: tensorboard
+  name: tensorboard
+spec:
+  progressDeadlineSeconds: 2147483647
+  replicas: 1
+  revisionHistoryLimit: 2147483647
+  selector:
+    matchLabels:
+      app: tensorboard
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: tensorboard
+    spec:
+      containers:
+      - args:
+        - --logdir
+        - /tmp/tensorflow/logs
+        command:
+        - /usr/local/bin/tensorboard
+        image: tensorflow/tensorflow:1.10.0
+        imagePullPolicy: Always
+        name: tensorboard
+        ports:
+        - containerPort: 6006
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /tmp/tensorflow
+          name: samba-share-volume2
+          subPath: tf-mnist-w-tb
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: samba-share-volume2
+        persistentVolumeClaim:
+          claimName: samba-share-claim
+status: {}

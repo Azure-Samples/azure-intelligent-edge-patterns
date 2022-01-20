@@ -1,0 +1,12 @@
+#
+# From KFServing docs, see https://github.com/kubeflow/kfserving/tree/master/docs/samples
+#
+apiVersion: "serving.kubeflow.org/v1alpha2"
+kind: "InferenceService"
+metadata:
+  name: "sklearn-iris"
+spec:
+  default:
+    predictor:
+      sklearn:
+        storageUri: "gs://kfserving-samples/models/sklearn/iris"

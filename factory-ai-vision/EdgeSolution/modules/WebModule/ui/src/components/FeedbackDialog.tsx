@@ -1,75 +1,73 @@
-import React, { useState } from 'react';
-import { Text, Flex, CloseIcon } from '@fluentui/react-northstar';
+import {
+  DefaultButton,
+  Dialog,
+  DialogFooter,
+  PrimaryButton,
+  ProgressIndicator,
+  Rating,
+  RatingSize,
+  Stack,
+  Text,
+} from '@fluentui/react';
 import Axios from 'axios';
+import React, { useState } from 'react';
+import { getErrorLog } from '../store/shared/createWrappedAsync';
 
-import { Dialog } from './Dialog';
-import { LoadingDialog, Status } from './LoadingDialog/LoadingDialog';
-import { handleAxiosError } from '../util/handleAxiosError';
-import { Rating } from './Rating';
+type FeedbackDialogProps = {
+  hidden: boolean;
+  onDismiss: () => void;
+};
 
 const SATISFACTION = ['VB', 'PR', 'FR', 'GD', 'EX'];
 
-const FeedbackDialog: React.FC<{ trigger: JSX.Element }> = ({ trigger }) => {
-  const [dialogOpen, setDialogOpen] = useState(false);
-  const [rate, setRate] = useState(0);
-  const [status, setStatus] = useState<Status>(Status.None);
-  const [error, setError] = useState<Error>(null);
+export const FeedbackDialog: React.FC<FeedbackDialogProps> = ({ hidden, onDismiss }) => {
+  const [rating, setrating] = useState(5);
+  const [loading, setLoading] = useState(false);
 
-  const onUpdate = async (): Promise<void> => {
-    setStatus(Status.Loading);
+  const onRateChange = (_, newRating) => setrating(newRating);
+
+  const onUpdate = async () => {
+    setLoading(true);
     try {
-      await Axios.post('/api/feedback', { satisfaction: SATISFACTION[rate - 1] });
-      setStatus(Status.Success);
+      await Axios.post('/api/feedback', { satisfaction: SATISFACTION[rating - 1] });
+      onDismiss();
     } catch (e) {
-      setStatus(Status.Failed);
-      setError(handleAxiosError(e));
+      alert(getErrorLog(e));
     }
-    setDialogOpen(false);
+    setLoading(false);
   };
 
   return (
-    <>
-      <Dialog
-        open={dialogOpen}
-        onOpen={(): void => setDialogOpen(true)}
-        styles={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          width: '30%',
-        }}
-        header="Your Feedback is greatly Appreciated!"
-        content={
-          <Flex column hAlign="center">
-            <Text size="large" styles={{ padding: '20px' }}>
-              Rate your experience
-            </Text>
-            <Rating max={5} value={rate} onChange={setRate} />
-          </Flex>
-        }
-        confirmButton={{ content: 'OK', primary: true, disabled: rate <= 0, onClick: onUpdate }}
-        cancelButton={{
-          primary: true,
-          content: 'Give detail feedback',
-          onClick: (): void => {
-            window.open('https://github.com/Azure-Samples/azure-intelligent-edge-patterns/issues');
+    <Dialog
+      hidden={hidden}
+      onDismiss={onDismiss}
+      minWidth={600}
+      dialogContentProps={{
+        title: 'Your feedback is greatly appreciated!',
+        showCloseButton: true,
+        onDismiss,
+        styles: {
+          header: {
+            textAlign: 'center',
           },
-        }}
-        trigger={trigger}
-        headerAction={{
-          icon: <CloseIcon />,
-          title: 'Close',
-          onClick: (): void => setDialogOpen(false),
-          styles: { position: 'absolute', right: '10px', top: '10px' },
-        }}
-      />
-      <LoadingDialog
-        status={status}
-        errorMessage={error?.message}
-        onConfirm={(): void => setStatus(Status.None)}
-      />
-    </>
+        },
+      }}
+    >
+      <ProgressIndicator progressHidden={!loading} />
+      <Stack horizontalAlign="center">
+        <Text variant="large">Rate your experience</Text>
+        <Rating max={5} size={RatingSize.Large} rating={rating} onChange={onRateChange} />
+      </Stack>
+      <DialogFooter styles={{ actions: { display: 'flex', justifyContent: 'center' } }}>
+        <PrimaryButton text="OK" disabled={loading} onClick={onUpdate} />
+        <DefaultButton
+          text="Give detail feedback"
+          onClick={(): void => {
+            window.open('https://github.com/Azure-Samples/azure-intelligent-edge-patterns/issues/new');
+          }}
+          disabled={loading}
+        />
+      </DialogFooter>
+    </Dialog>
   );
 };
-
-export default FeedbackDialog;

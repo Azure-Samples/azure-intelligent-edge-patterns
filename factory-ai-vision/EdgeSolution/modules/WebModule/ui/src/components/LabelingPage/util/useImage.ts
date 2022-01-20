@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import uniqid from 'uniqid';
+import { nanoid } from '@reduxjs/toolkit';
 
 type ImageState = {
   image: HTMLImageElement;
@@ -28,7 +28,7 @@ const useImage = (
 ): [HTMLImageElement, string, { width: number; height: number }] => {
   const [imageState, setImageState] = useState<ImageState>(defaultState);
   const { image, status, size } = imageState;
-  const uniqidRef = useRef(uniqid());
+  const uniqidRef = useRef(nanoid());
 
   const prevUrl = usePrevious<string>(url);
   const prevImageWidth = usePrevious(image?.width);
@@ -61,13 +61,18 @@ const useImage = (
 
     // Use this hack to force web not caching image
     // See https://stackoverflow.com/questions/126772/how-to-force-a-web-browser-not-to-cache-images
-    img.src = nocache ? `${url}?${uniqidRef.current}` : url;
+    img.src = nocache ? `${url}&hash_id=${uniqidRef.current}` : url;
 
     return (): void => {
       img.removeEventListener('load', onload);
       img.removeEventListener('error', onerror);
+      // Cancel loading
+      img.src = '';
+      img.remove();
+      // refresh the uniqid so the image won't be cached by browser
+      uniqidRef.current = nanoid();
     };
-  }, [url, crossOrigin, prevUrl]);
+  }, [url, crossOrigin, prevUrl, nocache]);
 
   useEffect(() => {
     let request;

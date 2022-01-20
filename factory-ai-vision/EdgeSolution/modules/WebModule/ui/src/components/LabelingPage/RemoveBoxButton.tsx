@@ -1,4 +1,4 @@
-import React, { FC, memo, Dispatch, useState, useEffect } from 'react';
+import React, { FC, memo, useState, useEffect } from 'react';
 import { Group, Line, Rect } from 'react-konva';
 
 import { LabelingCursorStates } from './type';
@@ -6,11 +6,11 @@ import { Size2D, BoxLabel } from '../../store/type';
 
 interface RemoveBoxButtonProps {
   visible: boolean;
+  // To make the button inside the image boundary
   imageSize: Size2D;
   label: BoxLabel;
   changeCursorState: (cursorType?: LabelingCursorStates) => void;
   scale: number;
-  setShowOuterRemoveButton: Dispatch<boolean>;
   removeBox: () => void;
 }
 const RemoveBoxButton: FC<RemoveBoxButtonProps> = ({
@@ -19,7 +19,6 @@ const RemoveBoxButton: FC<RemoveBoxButtonProps> = ({
   label,
   changeCursorState,
   scale,
-  setShowOuterRemoveButton,
   removeBox,
 }) => {
   const [color, setColor] = useState<string>('#F9526B');
@@ -53,8 +52,6 @@ const RemoveBoxButton: FC<RemoveBoxButtonProps> = ({
       y = -60;
     }
   }
-  if (y === -60) setShowOuterRemoveButton(true);
-  else setShowOuterRemoveButton(false);
 
   useEffect(() => {
     setStrokeWidth(1.5 / scale);
@@ -85,11 +82,13 @@ const RemoveBoxButton: FC<RemoveBoxButtonProps> = ({
         points={[-5 / scale, -5 / scale, 5 / scale, 5 / scale]}
         stroke={color}
         strokeWidth={strokeWidth}
+        name={'cancel'}
       />
       <Line
         points={[5 / scale, -5 / scale, -5 / scale, 5 / scale]}
         stroke={color}
         strokeWidth={strokeWidth}
+        name={'cancel'}
       />
     </Group>
   );

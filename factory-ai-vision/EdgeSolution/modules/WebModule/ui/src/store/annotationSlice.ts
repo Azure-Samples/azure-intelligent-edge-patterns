@@ -23,13 +23,13 @@ export const BoxObj = {
       image: imageId,
       label: { x1: 0, y1: 0, x2: 0, y2: 0 },
       annotationState: AnnotationState.Empty,
+      part: null,
     };
   },
   createWithPoint(p: Position2D, imageId: number, id: string) {
     return BoxObj.add(p, BoxObj.init(imageId, id));
   },
   add({ x, y }, obj) {
-    // make the original object immutable, for future history usage
     const newObj = { ...obj };
 
     if (obj.annotationState === AnnotationState.Empty) {
@@ -47,15 +47,13 @@ export const BoxObj = {
     return BoxObj.setVerticesToValidValue(newObj);
   },
   setVerticesToInt(obj: Annotation): Annotation {
-    const newObj = { ...obj };
-    const { x1, y1, x2, y2 } = newObj.label;
-    newObj.label = {
-      x1: Math.round(x1),
-      y1: Math.round(y1),
-      x2: Math.round(x2),
-      y2: Math.round(y2),
+    const roundLabel = {
+      x1: Math.round,
+      y1: Math.round,
+      x2: Math.round,
+      y2: Math.round,
     };
-    return newObj;
+    return R.evolve({ label: roundLabel }, obj);
   },
   setVerticesPointsOrder(obj: Annotation): Annotation {
     const newObj = { ...obj };
@@ -72,7 +70,7 @@ export const BoxObj = {
     return newObj;
   },
   setVerticesToValidValue(object: Annotation): Annotation {
-    return BoxObj.setVerticesPointsOrder(BoxObj.setVerticesToInt(object));
+    return R.compose(BoxObj.setVerticesPointsOrder, BoxObj.setVerticesToInt)(object);
   },
 };
 
@@ -80,20 +78,27 @@ const entityAdapter = createEntityAdapter<Annotation>();
 
 const slice = createSlice({
   name: 'label',
-  initialState: entityAdapter.getInitialState(),
+  initialState: {
+    ...entityAdapter.getInitialState(),
+    originEntities: entityAdapter.getInitialState().entities,
+  },
   reducers: {
     createAnnotation: {
-      prepare: (point: Position2D, imageId: number) => ({
+      prepare: (point: Position2D, imageId: number, part: number) => ({
         payload: {
           id: nanoid(),
           point,
           imageId,
+          part,
         },
       }),
-      reducer: (state, action: PayloadAction<{ point: Position2D; imageId: number; id: string }>) => {
-        const { point, imageId, id } = action.payload;
+      reducer: (
+        state,
+        action: PayloadAction<{ point: Position2D; imageId: number; id: string; part: number }>,
+      ) => {
+        const { point, imageId, id, part } = action.payload;
         const newAnno = BoxObj.createWithPoint(point, imageId, id);
-        entityAdapter.upsertOne(state, newAnno);
+        entityAdapter.upsertOne(state, { ...newAnno, part });
       },
     },
     updateCreatingAnnotation: (state, action: PayloadAction<Position2D>) => {
@@ -102,6 +107,7 @@ const slice = createSlice({
 
       if (creatingAnnotation.annotationState === AnnotationState.Finish) {
         if (
+          // | 0 is same as Math.floor
           (creatingAnnotation.label.x1 | 0) === (creatingAnnotation.label.x2 | 0) &&
           (creatingAnnotation.label.y1 | 0) === (creatingAnnotation.label.y2 | 0)
         ) {
@@ -114,7 +120,7 @@ const slice = createSlice({
     updateAnnotation: (state, action) => {
       entityAdapter.updateOne(state, action.payload);
     },
-    removeAnnotation: entityAdapter.removeOne,
+    removeAnnotation: (state, action) => entityAdapter.removeOne(state, action.payload),
   },
   extraReducers: (builder) =>
     builder.addCase(getImages.fulfilled, (state, action) => {
@@ -154,7 +160,9 @@ export const thunkCreateAnnotation = (
   point: Position2D,
 ): ThunkAction<void, State, unknown, Action<string>> => (dispatch, getState) => {
   const id = getState().labelingPage.selectedImageId;
-  dispatch(createAnnotation(point, id));
+  const part = getState().labelingPage.selectedPartId;
+
+  dispatch(createAnnotation(point, id, part));
 };
 
 export const { selectAll: selectAllAnno, selectEntities: selectAnnoEntities } = entityAdapter.getSelectors(
@@ -166,3 +174,5 @@ export const labelPageAnnoSelector = createSelector(
   [selectedImageIdSelector, selectAllAnno],
   (selectedImageId, allAnnos) => allAnnos.filter((anno) => anno.image === selectedImageId),
 );
+export const imgAnnoSelectorFactory = (imgId: number) =>
+  createSelector(selectAllAnno, (anno) => anno.filter((e) => e.image === imgId));

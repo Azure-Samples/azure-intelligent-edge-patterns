@@ -1,0 +1,332 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "deviceArchitecture": {
+      "defaultValue": "X86",
+      "allowedValues": [ "X86", "ARM64" ],
+      "type": "string",
+      "metadata": {
+        "description": "Specify the architecture of the Edge Device. Currently supported values are 'X86' and 'ARM64'."
+      }
+    },
+    "moduleRuntime": {
+      "defaultValue": "cpu",
+      "allowedValues": [
+        "cpu",
+        "gpu (NVIDIA cuda11)",
+        "vpu (Movidius)",
+        "Jetson (Jetpack 4.4)"
+      ],
+      "type": "string",
+      "metadata": {
+        "description": "Select value for runtime for Detector module on Edge Device. Set it to 'CPU' to use CPU to run detector module. If the Edge Device has Nvidia GPU, set it to 'NVIDIA' to use GPU to run detector module or to use movidius set it to 'MOVIDIUS'."
+      }
+    },
+    "videoCaptureModule": {
+      "defaultValue": "ava",
+      "allowedValues": [ "ava", "opencv" ],
+      "type": "string",
+      "metadata": {
+        "description": "Select video capture module to deal with the media source. Live Video Analytics (LVA) is a service from Microsoft that enables developers to capture, record, analyze live video and publish the results (video and/or video analytics) to Azure services (in the cloud and/or the edge). Opencv is an open-source library that includes several hundreds of computer vision algorithms."
+      }
+    },
+    "iotHubName": {
+      "defaultValue": "",
+      "type": "string",
+      "metadata": {
+        "description": "Enter the name of existing Iot Hub."
+      }
+    },
+    "edgeDeviceName": {
+      "defaultValue": "",
+      "type": "string",
+      "metadata": {
+        "description": "Enter the name of existing Iot Hub Edge Device."
+      }
+    },
+    "customVisionName": {
+      "type": "string",
+      "metadata": {
+        "description": "Enter the name of existing CustomVision service."
+      }
+    },
+    "edgeToken": {
+      "type": "string",
+      "metadata": {
+        "description": "Enter the token of existing AVA Edge Module."
+      }
+    }
+
+  },
+  "variables": {
+    "resourceGroupName": "[resourceGroup().name]",
+    "deploymentName": "[concat('factoryai-deployment',substring(uniqueString(subscription().id,variables('resourceGroupName')),1,4))]",
+    "managedIdentityName": "[concat('Managed_Identity',substring(uniqueString(subscription().id,variables('resourceGroupName')),1,4))]",
+    "managedIdentityResourceGroup": "[variables('resourceGroupName')]",
+    "containerRegistryName": "docker.io",
+    "containerRegistryUserName": "",
+    "containerRegistryPassword": ""
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-06-01",
+      "name": "CreatingManagedIdentity",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {},
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.ManagedIdentity/userAssignedIdentities",
+              "name": "[variables('managedIdentityName')]",
+              "apiVersion": "2018-11-30",
+              "location": "[resourceGroup().location]"
+            }
+          ]
+        }
+      },
+      "resourceGroup": "[variables('resourceGroupName')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-06-01",
+      "name": "CreatingRoleAssignments",
+      "dependsOn": [ "CreatingManagedIdentity" ],
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "parameters": {
+          "managedIdentityName": {
+            "value": "[variables('managedIdentityName')]"
+          }
+        },
+        "template": {
+          "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "managedIdentityName": {
+              "type": "String"
+            }
+          },
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.Authorization/roleAssignments",
+              "apiVersion": "2018-09-01-preview",
+              "name": "[guid(concat(resourceGroup().id, 'contributor'))]",
+              "properties": {
+                "roleDefinitionId": "[concat(resourceGroup().id, '/providers/Microsoft.Authorization/roleDefinitions/', 'b24988ac-6180-42a0-ab88-20f7382dd24c')]",
+                "principalId": "[reference(resourceId('Microsoft.ManagedIdentity/userAssignedIdentities', parameters('managedIdentityName')), '2018-11-30').principalId]",
+                "scope": "[resourceGroup().id]",
+                "principalType": "ServicePrincipal"
+              }
+            }
+          ]
+        }
+      },
+      "resourceGroup": "[variables('resourceGroupName')]"
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "apiVersion": "2020-06-01",
+      "name": "ResourcesDeployment",
+      "dependsOn": [ "CreatingRoleAssignments", "CreatingManagedIdentity" ],
+      "properties": {
+        "mode": "Incremental",
+        "expressionEvaluationOptions": {
+          "scope": "inner"
+        },
+        "parameters": {
+          "resourceGroupName": {
+            "value": "[variables('resourceGroupName')]"
+          },
+          "videoCaptureModule": {
+            "value": "[parameters('videoCaptureModule')]"
+          },
+          "edgeToken": {
+            "value": "[parameters('edgeToken')]"
+          },
+          "iotHubName": {
+            "value": "[parameters('iotHubName')]"
+          },
+          "resourceGroupLocation": {
+            "value": "[resourceGroup().location]"
+          },
+          "deviceArchitecture": {
+            "value": "[parameters('deviceArchitecture')]"
+          },
+          "moduleRuntime": {
+            "value": "[parameters('moduleRuntime')]"
+          },
+          "containerRegistryName": {
+            "value": "[variables('containerRegistryName')]"
+          },
+          "containerRegistryUserName": {
+            "value": "[variables('containerRegistryUserName')]"
+          },
+          "containerRegistryPassword": {
+            "value": "[variables('containerRegistryPassword')]"
+          },
+          "managedIdentityResourceGroup": {
+            "value": "[variables('managedIdentityResourceGroup')]"
+          },
+          "managedIdentityName": {
+            "value": "[variables('managedIdentityName')]"
+          },
+          "edgeDeviceName": {
+            "value": "[parameters('edgeDeviceName')]"
+          },
+          "deploymentName": {
+            "value": "[variables('deploymentName')]"
+          },
+          "customVisionName": {
+            "value": "[parameters('customVisionName')]"
+          }
+        },
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "parameters": {
+            "resourceGroupName": {
+              "type": "String"
+            },
+            "edgeToken": {
+              "type": "String"
+            },
+            "videoCaptureModule": {
+              "type": "String"
+            },
+            "iotHubName": {
+              "type": "string"
+            },
+            "resourceGroupLocation": {
+              "type": "String"
+            },
+            "deviceArchitecture": {
+              "type": "String"
+            },
+            "moduleRuntime": {
+              "type": "String"
+            },
+            "containerRegistryName": {
+              "type": "string"
+            },
+            "containerRegistryUserName": {
+              "type": "string"
+            },
+            "containerRegistryPassword": {
+              "type": "string"
+            },
+            "managedIdentityResourceGroup": {
+              "type": "String"
+            },
+            "managedIdentityName": {
+              "type": "String"
+            },
+            "edgeDeviceName": {
+              "type": "String"
+            },
+            "deploymentName": {
+              "type": "String"
+            },
+            "utcValue": {
+              "type": "string",
+              "defaultValue": "[utcNow()]"
+            },
+            "customVisionName": {
+              "type": "string"
+            }
+          },
+          "variables": {},
+          "resources": [
+            {
+              "type": "Microsoft.Resources/deploymentScripts",
+              "apiVersion": "2019-10-01-preview",
+              "name": "[concat('ModuleDeployment',parameters('utcValue'))]",
+              "location": "[parameters('resourceGroupLocation')]",
+              "kind": "AzureCLI",
+              "identity": {
+                "type": "UserAssigned",
+                "userAssignedIdentities": {
+                  "[concat(subscription().id,'/resourceGroups/', parameters('managedIdentityResourceGroup'),'/providers/Microsoft.ManagedIdentity/userAssignedIdentities/',parameters('managedIdentityName'))]": {}
+                }
+              },
+              "properties": {
+                "forceUpdateTag": "1",
+                "azCliVersion": "2.9.1",
+                "primaryScriptUri": "https://raw.githubusercontent.com/Azure-Samples/azure-intelligent-edge-patterns/master/factory-ai-vision/Deploy/arm/scripts/deploy-iot-edge.sh",
+                "supportingScriptUris": [],
+                "environmentVariables": [
+                  {
+                    "name": "CONTAINER_REGISTRY_NAME",
+                    "value": "[parameters('containerRegistryName')]"
+                  },
+                  {
+                    "name": "CONTAINER_REGISTRY_USERNAME",
+                    "value": "[parameters('containerRegistryUserName')]"
+                  },
+                  {
+                    "name": "CONTAINER_REGISTRY_PASSWORD",
+                    "value": "[parameters('containerRegistryPassword')]"
+                  },
+                  {
+                    "name": "INFERENCE_MODULE_RUNTIME",
+                    "value": "[parameters('moduleRuntime')]"
+                  },
+                  {
+                    "name": "EDGE_DEVICE_ARCHITECTURE",
+                    "value": "[parameters('deviceArchitecture')]"
+                  },
+                  {
+                    "name": "IOTHUB_NAME",
+                    "value": "[parameters('iotHubName')]"
+                  },
+                  {
+                    "name": "RESOURCE_GROUP",
+                    "value": "[parameters('resourceGroupName')]"
+                  },
+                  {
+                    "name": "DEVICE_NAME",
+                    "value": "[parameters('edgeDeviceName')]"
+                  },
+                  {
+                    "name": "DEPLOYMENT_NAME",
+                    "value": "[concat(parameters('deploymentName'),parameters('utcValue'))]"
+                  },
+                  {
+                    "name": "IDENTITY_NAME",
+                    "value": "[parameters('managedIdentityName')]"
+                  },
+                  {
+                    "name": "CUSTOMVISION_NAME",
+                    "value": "[parameters('customVisionName')]"
+                  },
+                  {
+                    "name": "AVA_EDGE_TOKEN",
+                    "value": "[parameters('edgeToken')]"
+                  },
+                  {
+                    "name": "VIDEO_CAPTURE_MODULE",
+                    "value": "[parameters('videoCaptureModule')]"
+                  }
+                ],
+                "retentionInterval": "P1D",
+                "timeout": "PT15M",
+                "containerSettings": {},
+                "cleanupPreference": "OnSuccess"
+              }
+            }
+          ]
+        }
+      },
+      "resourceGroup": "[variables('resourceGroupName')]"
+    }
+  ]
+}

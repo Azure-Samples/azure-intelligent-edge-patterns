@@ -1,5 +1,4 @@
-"""
-Admin
+"""App admin.
 """
 
 from django.contrib import admin

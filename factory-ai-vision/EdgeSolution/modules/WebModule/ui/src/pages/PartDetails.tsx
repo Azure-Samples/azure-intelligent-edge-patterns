@@ -1,184 +1,227 @@
-import React, { useState, useEffect } from 'react';
-import { Flex, Input, Button, Menu, Grid, Alert, Provider } from '@fluentui/react-northstar';
-import { Link, useLocation, Switch, Route, useHistory, Redirect } from 'react-router-dom';
+import React, { useEffect, useRef, useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
+import {
+  Breadcrumb,
+  Stack,
+  CommandBar,
+  ICommandBarItemProps,
+  getTheme,
+  IBreadcrumbItem,
+  Text,
+  IStackTokens,
+  ITextStyles,
+  Spinner,
+} from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
+import { useBoolean } from '@uifabric/react-hooks';
 
 import { State } from 'RootStateType';
-import { CapturePhotos } from '../components/CapturePhoto';
-import { UploadPhotos } from '../components/UploadPhotos';
 import { useQuery } from '../hooks/useQuery';
-import { WarningDialog } from '../components/WarningDialog';
-import { errorTheme } from '../themes/errorTheme';
-import { LoadingDialog, Status } from '../components/LoadingDialog/LoadingDialog';
-import { useProject } from '../hooks/useProject';
-import { getParts, patchPart, deletePart, selectPartById, Part } from '../store/partSlice';
-import { getImages } from '../store/imageSlice';
+import { selectPartById, getParts, deletePart } from '../store/partSlice';
+import { thunkGetProject } from '../store/project/projectActions';
+import { EmptyAddIcon } from '../components/EmptyAddIcon';
+import { postImages, getImages } from '../store/imageSlice';
+import { partImageItemSelectorFactory } from '../store/selectors';
 
-export const PartDetails = (): JSX.Element => {
+import { Url } from '../enums';
+
+import LabelingPage from '../components/LabelingPage/LabelingPage';
+import { AddEditPartPanel, PanelMode } from '../components/AddPartPanel';
+import { ImageList } from '../components/ImageList';
+import { CaptureDialog } from '../components/CaptureDialog';
+
+const theme = getTheme();
+const titleStyles: ITextStyles = { root: { fontWeight: 600, fontSize: '16px' } };
+const infoBlockTokens: IStackTokens = { childrenGap: 10 };
+
+export const PartDetails: React.FC = () => {
   const partId = parseInt(useQuery().get('partId'), 10);
-
-  const part = useSelector<State, Part>(
-    (state) => selectPartById(state, partId) || { id: null, name: '', description: '' },
-  );
+  const part = useSelector((state: State) => selectPartById(state, partId));
   const dispatch = useDispatch();
-  // Because we need project ID for delete part
-  useProject(false);
-
-  const [name, setName] = useState(part?.name);
-  const [description, setDescription] = useState(part?.description);
-
-  // Describe if parts and images is getting
-  const [loading, setLoading] = useState(true);
-  // Describe if parts is patching or deleting
-  const [status, setStatus] = useState<Status>(Status.None);
-  const [error, setError] = useState('');
-
   const history = useHistory();
 
-  useEffect(() => {
-    const loadData = async (): Promise<void> => {
-      try {
-        await Promise.all([dispatch(getParts(false)), dispatch(getImages())]);
-      } catch (e) {
-        setError(e);
-      }
-      setLoading(false);
-    };
+  const [editPanelOpen, { setTrue: openPanel, setFalse: closePanel }] = useBoolean(false);
 
-    loadData();
-  }, [dispatch]);
+  // Create a memoized selector so the selector factory won't return different selectors every render
+  const labeledImagesSelector = useMemo(() => partImageItemSelectorFactory(partId), [partId]);
+  const labeledImages = useSelector(labeledImagesSelector);
 
-  useEffect(() => {
-    setName(part.name);
-    setDescription(part.description);
-  }, [part.name, part.description]);
-
-  const onSave = async (): Promise<void> => {
-    setStatus(Status.Loading);
-    try {
-      await dispatch(patchPart({ data: { name, description }, id: partId }));
-      setStatus(Status.Success);
-    } catch (e) {
-      setError(e);
-    }
-  };
-
-  const onDelete = async (): Promise<void> => {
-    setStatus(Status.Loading);
-
-    try {
-      await dispatch(deletePart(partId));
-    } catch (e) {
-      setError(e);
-    }
-  };
-
-  if (loading) return <h1>Loading...</h1>;
-
-  if (!part.id) return <Redirect to="/parts" />;
-
-  const saveBtnDisabled = !name || (name === part.name && description === part.description);
-
-  return (
-    <Grid columns={'68% 30%'} rows={'80px auto 30px'} styles={{ gridColumnGap: '20px', height: '100%' }}>
-      {partId ? <Tab partId={partId} /> : null}
-      <PartInfoForm name={name} setName={setName} description={description} setDescription={setDescription} />
-      <Flex
-        column
-        gap="gap.small"
-        styles={{ gridColumn: '1 / span 2', gridRow: '2 / span 1', height: '100%' }}
-      >
-        <CaptureImagePanel partId={partId} partName={name} />
-      </Flex>
-      <Flex styles={{ gridColumn: '2 / span 1' }} hAlign="center" vAlign="center" gap="gap.small">
-        <Button content="Save" primary onClick={onSave} disabled={saveBtnDisabled} />
-        <Provider theme={errorTheme}>
-          <WarningDialog
-            contentText={
-              <p>
-                Sure you want to delete the part <b>{name}</b>?
-              </p>
-            }
-            trigger={<Button content="Delete" primary />}
-            onConfirm={onDelete}
-          />
-        </Provider>
-        <LoadingDialog
-          status={status}
-          onConfirm={(): void => {
-            if (status === Status.Success) history.push(`/parts/`, 'AFTER_DELETE');
-          }}
-        />
-        {!!error && <Alert danger content={error} dismissible />}
-      </Flex>
-    </Grid>
-  );
-};
-
-const PartInfoForm = ({ name, setName, description, setDescription }): JSX.Element => {
-  return (
-    <div
-      style={{
-        display: 'flex',
-        flexFlow: 'column',
-        justifyContent: 'space-between',
-      }}
-    >
-      <Input
-        placeholder="Enter Part Name..."
-        fluid
-        value={name}
-        onChange={(_, newProps): void => {
-          setName(newProps.value);
-        }}
-      />
-      <Input
-        placeholder="Enter Description..."
-        fluid
-        value={description}
-        onChange={(_, newProps): void => {
-          setDescription(newProps.value);
-        }}
-      />
-    </div>
-  );
-};
-
-const CaptureImagePanel = ({ partId, partName }): JSX.Element => {
-  return (
-    <Switch>
-      <Route path={`/parts/detail/capturePhotos`}>
-        <CapturePhotos partId={parseInt(partId, 10)} partName={partName} />
-      </Route>
-      <Route path={`/parts/detail/uploadPhotos`}>
-        <UploadPhotos partId={parseInt(partId, 10)} />
-      </Route>
-    </Switch>
-  );
-};
-
-const Tab = ({ partId }): JSX.Element => {
-  const items = [
+  const commandBarItems: ICommandBarItemProps[] = [
     {
-      key: 'uploadPhotos',
-      as: Link,
-      to: `/parts/detail/uploadPhotos?partId=${partId}`,
-      content: 'Upload Photos',
+      key: 'edit',
+      text: 'Edit',
+      iconProps: {
+        iconName: 'Edit',
+      },
+      onClick: openPanel,
     },
     {
-      key: 'capturePhotos',
-      as: Link,
-      to: `/parts/detail/capturePhotos?partId=${partId}`,
-      content: 'Capture Photo',
+      key: 'delete',
+      text: 'Delete',
+      iconProps: {
+        iconName: 'Delete',
+      },
+      onClick: () => {
+        // Because onClick cannot accept the return type Promise<void>, use the IIFE to workaround
+        (async () => {
+          // eslint-disable-next-line no-restricted-globals
+          if (!confirm('Sure you want to delete?')) return;
+
+          await dispatch(deletePart(partId));
+          history.push(Url.PARTS);
+        })();
+      },
     },
   ];
 
-  const { pathname } = useLocation();
-  const activeIndex = items.findIndex((ele) => ele.to.split('?')[0] === pathname);
+  useEffect(() => {
+    dispatch(getParts());
+    dispatch(thunkGetProject());
+  }, [dispatch]);
+
+  if (part === undefined) return <Spinner label="Loading" />;
+
+  const breadCrumbItems: IBreadcrumbItem[] = [
+    {
+      key: 'parts',
+      text: 'Objects',
+      href: '/parts',
+      onClick: (ev, item) => {
+        // Default behaviour will reload the entire page.
+        // Prevent this behaviour and use react-router-dom instead
+        ev.preventDefault();
+        history.push(item.href);
+      },
+    },
+    { key: part.name, text: part.name },
+  ];
+
+  const numImages = labeledImages.length;
 
   return (
-    <div>
-      <Menu items={items} activeIndex={activeIndex} pointing primary />
-    </div>
+    <>
+      <Stack styles={{ root: { height: '100%' } }}>
+        <CommandBar
+          items={commandBarItems}
+          styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
+        />
+        <Stack tokens={{ childrenGap: 30 }} styles={{ root: { padding: '15px' } }} grow>
+          <Breadcrumb items={breadCrumbItems} />
+          <Stack tokens={{ childrenGap: 20 }} horizontal grow>
+            <PartInfo description={part.description} numImages={numImages} />
+          </Stack>
+        </Stack>
+        <Images labeledImages={labeledImages}></Images>
+        <AddEditPartPanel
+          isOpen={editPanelOpen}
+          onDissmiss={closePanel}
+          mode={PanelMode.Update}
+          initialValue={{
+            name: { value: part.name, errMsg: '' },
+            description: { value: part.description, errMsg: '' },
+          }}
+          partId={partId}
+        />
+      </Stack>
+    </>
+  );
+};
+
+const PartInfo: React.FC<{ description: string; numImages: number }> = ({ description, numImages }) => (
+  <Stack tokens={{ childrenGap: 30 }} styles={{ root: { width: '100%', marginLeft: '0.8em' } }}>
+    <Stack tokens={infoBlockTokens}>
+      <Text styles={titleStyles}>Description</Text>
+      <Text block nowrap>
+        {description}
+      </Text>
+    </Stack>
+    <Stack tokens={infoBlockTokens}>
+      <Text styles={titleStyles}>Images</Text>
+      <Text>
+        <b>{numImages} images</b> have been trained for this object
+      </Text>
+    </Stack>
+  </Stack>
+);
+
+export const Images: React.FC<{ labeledImages }> = ({ labeledImages }) => {
+  const [isCaptureDialgOpen, { setTrue: openCaptureDialog, setFalse: closeCaptureDialog }] = useBoolean(
+    false,
+  );
+  const fileInputRef = useRef(null);
+  const dispatch = useDispatch();
+  const partId = parseInt(useQuery().get('partId'), 10);
+
+  const onUpload = () => {
+    fileInputRef.current.click();
+  };
+
+  function handleUpload(e: React.ChangeEvent<HTMLInputElement>): void {
+    for (let i = 0; i < e.target.files.length; i++) {
+      const formData = new FormData();
+      formData.append('image', e.target.files[i]);
+      dispatch(postImages(formData));
+    }
+  }
+
+  const commandBarItems: ICommandBarItemProps[] = useMemo(
+    () => [
+      {
+        key: 'uploadImages',
+        text: 'Upload images',
+        iconProps: {
+          iconName: 'Upload',
+        },
+        onClick: onUpload,
+      },
+      {
+        key: 'captureFromCamera',
+        text: 'Capture from camera',
+        iconProps: {
+          iconName: 'Camera',
+        },
+        onClick: openCaptureDialog,
+      },
+    ],
+    [openCaptureDialog],
+  );
+
+  useEffect(() => {
+    dispatch(getImages({ freezeRelabelImgs: false }));
+    // Image list items need part info
+    dispatch(getParts());
+  }, [dispatch]);
+
+  return (
+    <>
+      <Stack styles={{ root: { height: '100%' } }}>
+        <CommandBar
+          items={commandBarItems}
+          styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
+        />
+        <div style={{ padding: '15px' }}>
+          {labeledImages.length ? (
+            <ImageList images={labeledImages} />
+          ) : (
+            <EmptyAddIcon
+              title="Add images"
+              subTitle="Capture images from your video streams and tag parts"
+              primary={{ text: 'Capture from camera', onClick: openCaptureDialog }}
+              secondary={{ text: 'Upload images', onClick: onUpload }}
+            />
+          )}
+        </div>
+      </Stack>
+      <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} partId={partId} />
+      <LabelingPage onSaveAndGoCaptured={openCaptureDialog} />
+      <input
+        ref={fileInputRef}
+        type="file"
+        onChange={handleUpload}
+        accept="image/*"
+        multiple
+        style={{ display: 'none' }}
+      />
+    </>
   );
 };

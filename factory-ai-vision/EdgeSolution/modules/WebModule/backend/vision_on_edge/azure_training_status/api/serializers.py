@@ -1,5 +1,4 @@
-"""
-Azure Training Status Serializers
+"""App API serializers.
 """
 
 import logging
@@ -12,12 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class TrainingStatusSerializer(serializers.ModelSerializer):
-    """TrainingStatusSerializer.
-    """
+    """TrainingStatusSerializer."""
 
     class Meta:
-        """Meta.
-        """
-
         model = TrainingStatus
-        fields = '__all__'
+        fields = "__all__"

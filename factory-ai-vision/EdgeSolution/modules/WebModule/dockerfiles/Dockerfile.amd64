@@ -3,22 +3,27 @@
 # =========================================================
 FROM node:12 as builder
 
-WORKDIR /
-COPY ui_v2 app
 WORKDIR /app
-RUN rm -rf node_modules/
-RUN rm -rf build/
+COPY ui/package.json .
+COPY ui/yarn.lock .
 RUN yarn install --production
+COPY ui/tsconfig.json .
+COPY ui/src/ ./src
+COPY ui/public/ ./public
 RUN yarn build
+
+ARG GIT_LOG
+RUN echo ${GIT_LOG} > ./build/static/git_sha1.txt
 
 # =========================================================
 # === Build Backend Base                                ===
 # =========================================================
 FROM amd64/python:3.8 as backend-base
-
-RUN apt-get update
-# libgl for opencv
-RUN apt-get install -y libgl1-mesa-glx
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libgl1-mesa-glx \
+    && rm -rf /var/lib/apt/lists/*
+# libgl1-mesa-glx: opencv2 libGL.so error workaround
 
 
 # =========================================================
@@ -28,17 +33,25 @@ FROM backend-base as backend-production
 
 WORKDIR /app
 
-COPY backend_v2/requirements requirements
+RUN python -m pip install --upgrade pip
+
+COPY backend/requirements/core.txt requirements/core.txt
+RUN pip install -r ./requirements/core.txt
+
+COPY backend/requirements/base.txt requirements/base.txt
+RUN pip install -r ./requirements/base.txt
+
+COPY backend/requirements/production-x86.txt requirements/production-x86.txt
 RUN pip install -r ./requirements/production-x86.txt
 
-COPY backend_v2/manage.py .
-COPY backend_v2/config.py .
-COPY backend_v2/vision_on_edge vision_on_edge
-COPY backend_v2/configs configs
+
+COPY backend/manage.py .
+COPY backend/config.py .
+COPY backend/vision_on_edge vision_on_edge
+COPY backend/configs configs
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
-RUN rm -rf ui_production
 COPY --from=builder /app/build vision_on_edge/ui_production
 EXPOSE 8000
 

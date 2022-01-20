@@ -1,71 +1,39 @@
-import React, { useEffect } from 'react';
-import { Flex, Image, Text } from '@fluentui/react-northstar';
-import { Link } from 'react-router-dom';
-import { useDispatch, useSelector } from 'react-redux';
+import React, { useMemo } from 'react';
+import { CommandBar, ICommandBarItemProps, getTheme, Stack, Breadcrumb } from '@fluentui/react';
+import { useBoolean } from '@uifabric/react-hooks';
+import { PartDetailList } from '../components/Part/PartDetailList';
+import { AddEditPartPanel, PanelMode } from '../components/AddPartPanel';
 
-import { State } from 'RootStateType';
-import { AddModuleDialog } from '../components/AddModuleDialog';
-import { getImages, selectAllImages } from '../store/imageSlice';
-import { Part, getParts, postPart, selectAllParts } from '../store/partSlice';
-
-const partsWithImgSelector = (state: State): (Part & { image: string })[] => {
-  const parts = selectAllParts(state);
-  const images = selectAllImages(state);
-  return parts.map((p) => {
-    const relatedImage = images.find((i) => i.part === p.id);
-    return { ...p, image: relatedImage?.image || '' };
-  });
-};
+const theme = getTheme();
 
 export const Parts: React.FC = () => {
-  const partsWithImg = useSelector<State, (Part & { image: string })[]>(partsWithImgSelector);
-  const dispatch = useDispatch();
+  const [isPanelOpen, { setTrue: openPanel, setFalse: dismissPanel }] = useBoolean(false);
 
-  useEffect(() => {
-    dispatch(getParts(false));
-    dispatch(getImages());
-  }, [dispatch]);
-
-  return (
-    <div style={{ position: 'relative', height: '100%' }}>
-      <Flex gap="gap.large" wrap>
-        {partsWithImg.map((ele) => (
-          <Item key={ele.id} src={ele.image} id={ele.id} name={ele.name} />
-        ))}
-      </Flex>
-      <div style={{ position: 'absolute', right: '100px', bottom: '100px' }}>
-        <AddModuleDialog
-          header="Add Part"
-          fields={[
-            {
-              placeholder: 'Part Name',
-              key: 'name',
-              type: 'input',
-              required: true,
-            },
-            {
-              placeholder: 'Description',
-              key: 'description',
-              type: 'textArea',
-              required: false,
-            },
-          ]}
-          onConfirm={({ name, description }): void => {
-            dispatch(postPart({ name, description }));
-          }}
-        />
-      </div>
-    </div>
+  const commandBarItems: ICommandBarItemProps[] = useMemo(
+    () => [
+      {
+        key: 'addBtn',
+        text: 'Add',
+        iconProps: {
+          iconName: 'Add',
+        },
+        onClick: openPanel,
+      },
+    ],
+    [openPanel],
   );
-};
 
-const Item = ({ src, id, name }): JSX.Element => {
   return (
-    <Flex column hAlign="center" gap="gap.large" as={Link} to={`/parts/detail/capturePhotos?partId=${id}`}>
-      <div style={{ width: '250px', height: '250px' }}>
-        <Image src={src} styles={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-      </div>
-      <Text size="larger">{name}</Text>
-    </Flex>
+    <Stack styles={{ root: { height: '100%' } }}>
+      <CommandBar
+        items={commandBarItems}
+        styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
+      />
+      <Stack styles={{ root: { padding: '15px' } }} grow>
+        <Breadcrumb items={[{ key: 'parts', text: 'Objects' }]} />
+        <PartDetailList onAddBtnClick={openPanel} />
+      </Stack>
+      <AddEditPartPanel isOpen={isPanelOpen} onDissmiss={dismissPanel} mode={PanelMode.Create} />
+    </Stack>
   );
 };

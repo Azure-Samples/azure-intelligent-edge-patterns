@@ -1,5 +1,4 @@
-"""
-Azure Training Serializers
+"""App API serializers.
 """
 
 import logging
@@ -12,8 +11,8 @@ logger = logging.getLogger(__name__)
 
 
 class ImageSerializer(serializers.ModelSerializer):
-    """ImageSerializer"""
+    """ImageSerializer."""
 
     class Meta:
         model = Image
-        fields = '__all__'
+        fields = "__all__"

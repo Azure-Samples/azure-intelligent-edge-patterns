@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """App views.
 """
 
@@ -26,18 +25,15 @@ class PartViewSet(FiltersMixin, viewsets.ModelViewSet):
     queryset = Part.objects.all()
     serializer_class = PartSerializer
     filter_backends = (filters.OrderingFilter,)
-    filter_mappings = {
-        "is_demo": "project__is_demo",
-        "project_id": "project_id",
-    }
+    filter_mappings = {"is_demo": "project__is_demo", "project_id": "project_id"}
 
     def destroy(self, request, **kwargs):
         """destroy.
 
         only delete image on customvision when api_call
         """
-        if Part.objects.filter(pk=kwargs['pk']).exists():
-            part_obj = Part.objects.get(pk=kwargs['pk'])
+        if Part.objects.filter(pk=kwargs["pk"]).exists():
+            part_obj = Part.objects.filter(pk=kwargs["pk"]).get()
             part_obj.delete_on_customvision = True
             part_obj.delete()
 

@@ -4,7 +4,7 @@ This guide demonstrates how to install a remote MLflow Tracking Server & Kubeflo
 
 **Reference Material:**
 - [Manual Installation Instructions for Mlflow](./docs/manual_installation.md)
-- [Manual Installation Instructions for Kubeflow](/Research/kubeflow-on-azure-stack/Readme.md)
+- [Manual Installation Instructions for Kubeflow](/Research/kubeflow-on-azure-stack-lab/Readme.md)
 
 **Prerequisite:**
 - Will need the k8 cluster ".kubeconfig" file on your local machine to execute commands on the k8 cluster 
@@ -21,5 +21,5 @@ Make sure you have Porter installed. You can find the installation instructions 
 ## Step 2 : Install CNAB Packages
 We have CNAB packages for Kubeflow & MLFlow, use any of the below link to install 
 
- - [Link to Kubeflow](https://github.com/NealAnalyticsLLC/azure-intelligent-edge-patterns/blob/mlflow-on-azure-stack/Research/mlflow-on-azure-stack/porter/kubeflow/Readme.md)
- - [Link to MLFlow](https://github.com/NealAnalyticsLLC/azure-intelligent-edge-patterns/blob/mlflow-on-azure-stack/Research/mlflow-on-azure-stack/porter/mlflow/Readme.md)
+ - [Link to Kubeflow](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/tree/master/Research/mlflow-on-azure-stack/porter/kubeflow/Readme.md)
+ - [Link to MLFlow](https://github.com/Azure-Samples/azure-intelligent-edge-patterns/tree/master/Research/mlflow-on-azure-stack/porter/mlflow/Readme.md)

@@ -1,0 +1,75 @@
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "intelcustomvision": {
+                "username": "$CONTAINER_REGISTRY_USERNAME",
+                "password": "$CONTAINER_REGISTRY_PASSWORD",
+                "address": "$CONTAINER_REGISTRY_NAME"
+              }
+            }
+          }
+        },
+        "systemModules": {},
+        "modules": {
+          "nginxmodule": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.NginxModule.amd64}"
+            }
+          },
+          "webmodule": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.WebModule.amd64}"
+            }
+          },
+          "inferencemodule": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.InferenceModule.amd64}"
+            }
+          },
+          "PredictModuleCPU": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.PredictModule.cpuamd64}"
+            }
+          },
+          "PredictModuleGPU": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.PredictModule.gpuamd64}"
+            }
+          },
+          "PredictModuleVPU": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.PredictModule.vpuamd64}"
+            }
+          },
+          "rtspsim": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.RtspSimModule.amd64}"
+            }
+          },
+          "uploadmodule": {
+            "type": "docker",
+            "settings": {
+              "image": "${MODULES.UploadModule.amd64}"
+            }
+          }
+        }
+      }
+    }
+  }
+}

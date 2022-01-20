@@ -1,44 +1,59 @@
+# syntax = docker/dockerfile:experimental
 # =========================================================
 # === Build Static UI                                   ===
 # =========================================================
 FROM node:12 as builder
 
-WORKDIR /
-COPY ui_v2 app
 WORKDIR /app
-RUN rm -rf node_modules/
-RUN rm -rf build/
+COPY ui/package.json .
+COPY ui/yarn.lock .
 RUN yarn install --production
+COPY ui/tsconfig.json .
+COPY ui/src/ ./src
+COPY ui/public/ ./public
 RUN yarn build
+
+ARG GIT_LOG
+RUN echo ${GIT_LOG} > ./build/static/git_sha1.txt
 
 # =========================================================
 # === Build Backend                                     ===
 # =========================================================
-FROM arm64v8/python:3.8-slim-buster as backend-base
+FROM intelligentedge/python3-opencv:py3.8.6-cv4.4.0.44-arm64v8
 
-RUN apt-get update
-RUN apt install -y build-essential libffi-dev libssl-dev python3-dev python3-opencv
-RUN ln -s /usr/lib/python3/dist-packages/cv2.cpython-37m-aarch64-linux-gnu.so /usr/local/lib/python3.8/site-packages/cv2.so
-RUN pip install numpy
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    build-essential \
+    libffi-dev \
+    && rm -rf /var/lib/apt/lists/*
 
 # =========================================================
 # === Build Backend Production                          ===
 # =========================================================
-FROM backend-base as backend-production
 
 WORKDIR /app
 
-COPY backend_v2/requirements-arm.txt .
-RUN pip install -r ./requirements/production-arm.txt
+RUN python -m pip install --upgrade pip
 
-COPY backend_v2/manage.py .
-COPY backend_v2/config.py .
-COPY backend_v2/vision_on_edge vision_on_edge
-COPY backend_v2/configs configs
+COPY backend/requirements/core.txt requirements/core.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r ./requirements/core.txt
+
+COPY backend/requirements/base.txt requirements/base.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r ./requirements/base.txt
+
+COPY backend/requirements/production-arm.txt requirements/production-arm.txt
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r ./requirements/production-arm.txt
+
+COPY backend/manage.py .
+COPY backend/config.py .
+COPY backend/vision_on_edge vision_on_edge
+COPY backend/configs configs
 RUN python manage.py makemigrations
 RUN python manage.py migrate
 
-RUN rm -rf ui_production
 COPY --from=builder /app/build vision_on_edge/ui_production
 EXPOSE 8000
 

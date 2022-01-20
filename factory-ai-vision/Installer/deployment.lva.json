@@ -1,0 +1,177 @@
+{
+  "$schema-template": "2.0.0",
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {}
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "createOptions": "{}"
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}]}}}"
+            }
+          }
+        },
+        "modules": {
+          "nginxmodule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "intelligentedge/nginxmodule:0.27.1-<platform>",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8181/tcp\":[{\"HostPort\":\"8181\"}]}}}"
+            }
+          },
+          "webmodule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "TRAINING_KEY": {
+                "value": "<Training API Key>"
+              },
+              "ENDPOINT": {
+                "value": "<Training Endpoint>"
+              },
+              "DBNAME": {
+                "value": "vision_on_edge"
+              },
+              "DBHOST": {
+                "value": "172.18.0.1"
+              },
+              "DBUSER": {
+                "value": "vision_on_edge"
+              },
+              "DBPASS": {
+                "value": "vision_on_edge"
+              }
+            },
+            "settings": {
+              "image": "intelligentedge/webmodule:0.27.1-<platform>",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"8000/tcp\":[{\"HostPort\":\"8000\"}]}}}"
+            }
+          },
+          "inferencemodule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "LVA_MODE": {
+                "value": "grpc"
+              }
+            },
+            "settings": {
+              "image": "intelligentedge/inferencemodule:0.27.1-<platform>",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5000/tcp\":[{\"HostPort\":\"5000\"}],\"44000/tcp\":[{\"HostPort\":\"44000\"}],\"5558/tcp\":[{\"HostPort\":\"5558\"}]},\"IpcMode\":\"host\",\"runtime\":\"<Docker Runtime>\"}}"
+            }
+          },
+          "predictmodule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "env": {
+              "IOTHUB_CONNECTION_STRING": {
+                "value": "$IOTHUB_CONNECTION_STRING"
+              },
+              "LVA_MODE": {
+                "value": "grpc"
+              }
+            },
+            "settings": {
+              "image": "intelligentedge/predictmodule:0.27.1-<cpu or gpu><platform>",
+              "createOptions": "{\"HostConfig\":{\"Binds\":[\"/dev/bus/usb:/dev/bus/usb\"],\"DeviceCgroupRules\":[\"c 189:* rmw\"],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"7777/tcp\":[{\"HostPort\":\"7777\"}]},\"IpcMode\":\"host\",\"runtime\":\"<Docker Runtime>\"}}"
+            }
+          },
+          "lvaEdge": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/media/live-video-analytics:2",
+              "createOptions": "{\"HostConfig\":{\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"Binds\":[],\"IpcMode\":\"host\"}}"
+            }
+          },
+          "rtspsim": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "intelligentedge/rtspsimmodule:0.27.1-<platform>",
+              "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Target\":\"/live/mediaServer/media/upload\",\"Source\":\"upload_data\",\"Type\":\"volume\"}],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"554/tcp\":[{\"HostPort\":\"554\"}]}}}"
+            }
+          },
+          "uploadmodule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "intelligentedge/uploadmodule:0.27.1-<platform>",
+              "createOptions": "{\"HostConfig\":{\"Mounts\":[{\"Target\":\"/app/upload\",\"Source\":\"upload_data\",\"Type\":\"volume\"}],\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}},\"PortBindings\":{\"7000/tcp\":[{\"HostPort\":\"7000\"}]}}}"
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {
+          "metrics": "FROM /messages/modules/inferencemodule/outputs/metrics INTO $upstream",
+          "InferenceToLVA": "FROM /messages/modules/inferencemodule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/lvaEdge/inputs/recordingTrigger\")"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "webmodule": {
+      "properties.desired": {}
+    },
+    "lvaEdge": {
+      "properties.desired": {
+        "applicationDataDirectory": "/var/media",
+        "azureMediaServicesArmId": "/subscriptions/$SUBSCRIPTION_ID/resourcegroups/$RESOURCE_GROUP/providers/microsoft.media/mediaservices/$SERVICE_NAME",
+        "aadTenantId": "$TENANT_ID",
+        "aadServicePrincipalAppId": "$SERVICE_PRINCIPAL_APP_ID",
+        "aadServicePrincipalSecret": "$SERVICE_PRINCIPAL_SECRET",
+        "aadEndpoint": "https://login.microsoftonline.com",
+        "aadResourceId": "https://management.core.windows.net/",
+        "armEndpoint": "https://management.azure.com/",
+        "diagnosticsEventsOutputName": "AmsDiagnostics",
+        "operationalEventsOutputName": "AmsOperational",
+        "logLevel": "Information",
+        "logCategories": "Application,Events",
+        "allowUnsecuredEndpoints": true,
+        "telemetryOptOut": false
+      }
+    }
+  }
+}

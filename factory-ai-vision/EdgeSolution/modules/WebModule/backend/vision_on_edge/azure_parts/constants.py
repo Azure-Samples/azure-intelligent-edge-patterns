@@ -1,0 +1,4 @@
+"""App constants.
+"""
+
+CUSTOMVISION_LEAST_IMAGE_TO_TRAIN = 15

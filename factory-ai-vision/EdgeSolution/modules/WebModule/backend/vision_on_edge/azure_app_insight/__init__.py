@@ -1,1 +1,2 @@
-"""Azure Application insight app."""
+"""Azure Application insight app.
+"""

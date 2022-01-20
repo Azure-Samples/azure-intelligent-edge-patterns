@@ -1,1 +1,2 @@
-"""Project configurations."""
+"""Project configurations.
+"""

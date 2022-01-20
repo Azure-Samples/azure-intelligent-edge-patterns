@@ -2,7 +2,7 @@
     "@apiVersion": "1.0",
     "name": "InferencingWithGrpcExtension",
     "properties": {
-        "description": "Record on motion to AMS Asset and record events from external models through gRPC Extension",
+        "description": "Factory AI Video Pipeline",
         "parameters": [
             {
                 "name": "rtspUrl",
@@ -20,12 +20,6 @@
                 "type": "String",
                 "description": "Rtsp source password.",
                 "default": "dummyPassword"
-            },
-            {
-                "name": "motionSensitivity",
-                "type": "String",
-                "description": "Motion detection sensitivity",
-                "default": "medium"
             },
             {
                 "name": "grpcExtensionAddress",
@@ -52,18 +46,6 @@
                 "default": "iothubsinkoutput"
             },
             {
-                "name": "imageEncoding",
-                "type": "String",
-                "description": "image encoding for frames",
-                "default": "jpeg"
-            },
-            {
-                "name": "imageQuality",
-                "type": "String",
-                "description": "image encoding quality for frames (valid for JPG encoding)",
-                "default": "90"
-            },
-            {
                 "name": "imageScaleMode",
                 "type": "String",
                 "description": "image scaling mode",
@@ -80,49 +62,84 @@
                 "type": "String",
                 "description": "Height of the video frame to be received from LVA.",
                 "default": "540"
+            },
+            {
+                "name": "hubSourceInput",
+                "type": "String",
+                "description": "input name for hub source",
+                "default": "recordingTrigger"
+            },
+            {
+                "name": "frameRate",
+                "type": "String",
+                "description": "input maximumFPs",
+                "default": "30"
+            },
+            {
+                "name": "instanceId",
+                "type": "String",
+                "description": "instance id",
+                "default": "0"
+            },
+            {
+                "name": "recordingDuration",
+                "type": "String",
+                "description": "recording duration",
+                "default": "PT60S"
             }
         ],
         "sources": [
             {
-                "@type": "#Microsoft.Media.MediaGraphRtspSource",
+                "@type": "#Microsoft.VideoAnalyzer.RtspSource",
                 "name": "rtspSource",
                 "endpoint": {
-                    "@type": "#Microsoft.Media.MediaGraphUnsecuredEndpoint",
+                    "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
                     "url": "${rtspUrl}",
                     "credentials": {
-                        "@type": "#Microsoft.Media.MediaGraphUsernamePasswordCredentials",
+                        "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
                         "username": "${rtspUserName}",
                         "password": "${rtspPassword}"
                     }
                 }
+            },
+            {
+                "@type": "#Microsoft.VideoAnalyzer.IoTHubMessageSource",
+                "name": "iotMessageSource",
+                "hubInputName": "${hubSourceInput}"
             }
         ],
         "processors": [
             {
-                "@type": "#Microsoft.Media.MediaGraphMotionDetectionProcessor",
-                "name": "motionDetection",
-                "sensitivity": "${motionSensitivity}",
+                "@type": "#Microsoft.VideoAnalyzer.SignalGateProcessor",
+                "name": "signalGateProcessor",
                 "inputs": [
+                    {
+                        "nodeName": "iotMessageSource"
+                    },
                     {
                         "nodeName": "rtspSource"
                     }
-                ]
+                ],
+                "activationEvaluationWindow": "PT1S",
+                "activationSignalOffset": "-PT5S",
+                "minimumActivationTime": "PT30S",
+                "maximumActivationTime": "PT30S"
             },
             {
-                "@type": "#Microsoft.Media.MediaGraphGrpcExtension",
+                "@type": "#Microsoft.VideoAnalyzer.GrpcExtension",
                 "name": "grpcExtension",
                 "endpoint": {
-                    "@type": "#Microsoft.Media.MediaGraphUnsecuredEndpoint",
+                    "@type": "#Microsoft.VideoAnalyzer.UnsecuredEndpoint",
                     "url": "${grpcExtensionAddress}",
                     "credentials": {
-                        "@type": "#Microsoft.Media.MediaGraphUsernamePasswordCredentials",
+                        "@type": "#Microsoft.VideoAnalyzer.UsernamePasswordCredentials",
                         "username": "${grpcExtensionUserName}",
                         "password": "${grpcExtensionPassword}"
                     }
                 },
                 "dataTransfer": {
                     "mode": "sharedMemory",
-                    "SharedMemorySizeMiB": "5"
+                    "SharedMemorySizeMiB": "50"
                 },
                 "image": {
                     "scale": {
@@ -131,26 +148,51 @@
                         "height": "${frameHeight}"
                     },
                     "format": {
-                        "@type": "#Microsoft.Media.MediaGraphImageFormatEncoded",
-                        "encoding": "${imageEncoding}",
-                        "quality": "${imageQuality}"
+                        "@type": "#Microsoft.VideoAnalyzer.ImageFormatBmp"
                     }
+                },
+                "samplingOptions": {
+                    "skipSamplesWithoutAnnotation": "false",
+                    "maximumSamplesPerSecond": "${frameRate}"
                 },
                 "inputs": [
                     {
-                        "nodeName": "motionDetection"
+                        "nodeName": "rtspSource",
+                        "outputSelectors": [
+                            {
+                                "property": "mediaType",
+                                "operator": "is",
+                                "value": "video"
+                            }
+                        ]
                     }
                 ]
             }
         ],
         "sinks": [
             {
-                "@type": "#Microsoft.Media.MediaGraphIoTHubMessageSink",
+                "@type": "#Microsoft.VideoAnalyzer.IoTHubMessageSink",
                 "name": "hubSink",
                 "hubOutputName": "${hubSinkOutputName}",
                 "inputs": [
                     {
                         "nodeName": "grpcExtension"
+                    }
+                ]
+            },
+            {
+                "@type": "#Microsoft.VideoAnalyzer.VideoSink",
+                "name": "videoSink",
+                "videoName": "sampleAssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
+                "videoCreationProperties": {
+                    "title": "sampleAssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
+                    "segmentLength": "${recordingDuration}"
+                },
+                "localMediaCacheMaximumSizeMiB": "2048",
+                "localMediaCachePath": "/var/lib/azuremediaservices/tmp/",
+                "inputs": [
+                    {
+                        "nodeName": "signalGateProcessor"
                     }
                 ]
             }

@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.deployment.name }}-deployment
+  labels:
+    app: {{ .Values.deployment.name }}-deployment
+    group: {{ .Values.deployment.group }}
+spec:
+  replicas: {{ .Values.deployment.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.deployment.name }}-deployment
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.deployment.name }}-deployment
+        group: {{ .Values.deployment.group }}
+    spec:
+      imagePullSecrets:
+        - name: {{ .Values.deployment.imagePullSecrets}}
+      containers:
+        - name: {{ .Values.deployment.name }}
+          image: "{{ .Values.global.docker_registry }}{{ .Values.deployment.container.image_name }}:{{ .Values.deployment.container.tag }}"
+          imagePullPolicy: {{ .Values.deployment.pullPolicy }}
+          ports:
+          {{- range $key, $value := .Values.deployment.container.ports }}
+             - protocol: TCP
+               containerPort: {{ $value }}
+          {{- end }} 
+          env:
+            - name: FHIR_URL
+              value: "http://{{ .Values.global.fhir_service_name }}.{{ .Release.Namespace }}.svc.cluster.local:8080"
+             

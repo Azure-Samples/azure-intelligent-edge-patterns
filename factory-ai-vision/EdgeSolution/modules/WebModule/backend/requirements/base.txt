@@ -1,11 +1,11 @@
+-r ./core.txt
+asgiref==3.2.10
 django==3.0.8
 djangorestframework==3.11.0
-drf-yasg==1.17.1
+drf-yasg2
 drf-url-filters==0.5.1
-numpy
 pillow
-pyzmq
-azure-cognitiveservices-vision-customvision==1.0.0
+azure-cognitiveservices-vision-customvision==3.0.0
 requests
 django-cors-headers
 azure-iot-device~=2.0.0
@@ -16,3 +16,5 @@ opencensus-ext-azure==1.0.2
 opencensus-ext-django==0.7.2
 opencensus-ext-stackdriver==0.7.2
 channels==2.4.0
+django-extra-fields==3.0.0
+django-extensions==3.0.9
