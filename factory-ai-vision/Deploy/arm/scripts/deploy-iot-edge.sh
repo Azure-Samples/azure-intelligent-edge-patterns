@@ -51,6 +51,8 @@ echo "$(info) Apt-packages installed"
 # echo "$(info) Installing Azure IoT extension."
 # az extension add --name azure-iot
 # pip -q install --upgrade jsonschema
+echo "Updating pip"
+pip install --upgrade pip
 echo "Installing iotedgedev"
 bash -c "pip install iotedgedev==2.1.4" || true
 
