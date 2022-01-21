@@ -18,9 +18,19 @@ type DemoStateType = {
   isDemo: boolean;
 };
 
-type DemoEntityState<T> = EntityState<T> & { isDemo: EntityId[]; nonDemo: EntityId[] };
+export interface ProjectInfo {
+  tags: string[];
+  type: 'ObjectDetection' | 'Classification';
+  classification_type: '' | 'Multiclass' | 'Multilabel';
+}
+
+type DemoEntityState<T> = EntityState<T> & {
+  isDemo: EntityId[];
+  nonDemo: EntityId[];
+  selectedProjectInfo: ProjectInfo;
+};
 export function getInitialDemoState<T>(initialState: EntityState<T>): DemoEntityState<T> {
-  return { ...initialState, isDemo: [], nonDemo: [] };
+  return { ...initialState, isDemo: [], nonDemo: [], selectedProjectInfo: null };
 }
 
 type DemoSliceKey = keyof Pick<State, 'camera' | 'trainingProject'>;

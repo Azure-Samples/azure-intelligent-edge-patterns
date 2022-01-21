@@ -35,21 +35,15 @@
               "createOptions": {
                 "HostConfig": {
                   "PortBindings": {
-                    "5671/tcp": [
-                      {
-                        "HostPort": "5671"
-                      }
-                    ],
-                    "8883/tcp": [
-                      {
-                        "HostPort": "8883"
-                      }
-                    ],
-                    "443/tcp": [
-                      {
-                        "HostPort": "443"
-                      }
-                    ]
+                    "5671/tcp": [{
+                      "HostPort": "5671"
+                    }],
+                    "8883/tcp": [{
+                      "HostPort": "8883"
+                    }],
+                    "443/tcp": [{
+                      "HostPort": "443"
+                    }]
                   }
                 }
               }
@@ -74,11 +68,9 @@
                     }
                   },
                   "PortBindings": {
-                    "8181/tcp": [
-                      {
-                        "HostPort": "8181"
-                      }
-                    ]
+                    "8181/tcp": [{
+                      "HostPort": "8181"
+                    }]
                   }
                 }
               }
@@ -113,6 +105,11 @@
               "image": "${MODULES.WebModule}",
               "createOptions": {
                 "HostConfig": {
+                  "Mounts": [{
+                    "Target": "/workspace",
+                    "Source": "ovmsworkspace",
+                    "Type": "volume"
+                  }],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -121,11 +118,9 @@
                     }
                   },
                   "PortBindings": {
-                    "8000/tcp": [
-                      {
-                        "HostPort": "8000"
-                      }
-                    ]
+                    "8000/tcp": [{
+                      "HostPort": "8000"
+                    }]
                   }
                 }
               }
@@ -156,21 +151,15 @@
                     }
                   },
                   "PortBindings": {
-                    "5000/tcp": [
-                      {
-                        "HostPort": "5000"
-                      }
-                    ],
-                    "5558/tcp": [
-                      {
-                        "HostPort": "5558"
-                      }
-                    ],
-                    "44000/tcp": [
-                      {
-                        "HostPort": "44000"
-                      }
-                    ]
+                    "5000/tcp": [{
+                      "HostPort": "5000"
+                    }],
+                    "5558/tcp": [{
+                      "HostPort": "5558"
+                    }],
+                    "44000/tcp": [{
+                      "HostPort": "44000"
+                    }]
                   },
                   "IpcMode": "host",
                   "runtime": "runc"
@@ -203,11 +192,9 @@
                     }
                   },
                   "PortBindings": {
-                    "7777/tcp": [
-                      {
-                        "HostPort": "7777"
-                      }
-                    ]
+                    "7777/tcp": [{
+                      "HostPort": "7777"
+                    }]
                   },
                   "IpcMode": "host",
                   "runtime": "runc"
@@ -221,7 +208,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/media/video-analyzer:1",
+              "image": "mcr.microsoft.com/media/video-analyzer:1.1.0",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {
@@ -231,8 +218,21 @@
                       "max-file": "10"
                     }
                   },
-                  "IpcMode": "host"
+                  "Binds": [
+                    "/home/localedgeuser/samples/input:/var/media",
+                    "/var/lib/videoanalyzer/:/var/lib/videoanalyzer"
+                  ],
+                  "IpcMode": "host",
+                  "ShmSize": 1536870912
                 }
+              }
+            },
+            "env": {
+              "LOCAL_USER_ID": {
+                "value": "1010"
+              },
+              "LOCAL_GROUP_ID": {
+                "value": "1010"
               }
             }
           },
@@ -245,13 +245,11 @@
               "image": "${MODULES.RtspSimModule}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [
-                    {
-                      "Target": "/live/mediaServer/media/upload",
-                      "Source": "upload_data",
-                      "Type": "volume"
-                    }
-                  ],
+                  "Mounts": [{
+                    "Target": "/live/mediaServer/media/upload",
+                    "Source": "upload_data",
+                    "Type": "volume"
+                  }],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -260,11 +258,9 @@
                     }
                   },
                   "PortBindings": {
-                    "554/tcp": [
-                      {
-                        "HostPort": "554"
-                      }
-                    ]
+                    "554/tcp": [{
+                      "HostPort": "554"
+                    }]
                   }
                 }
               }
@@ -279,13 +275,11 @@
               "image": "${MODULES.UploadModule}",
               "createOptions": {
                 "HostConfig": {
-                  "Mounts": [
-                    {
-                      "Target": "/app/upload",
-                      "Source": "upload_data",
-                      "Type": "volume"
-                    }
-                  ],
+                  "Mounts": [{
+                    "Target": "/app/upload",
+                    "Source": "upload_data",
+                    "Type": "volume"
+                  }],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -294,25 +288,79 @@
                     }
                   },
                   "PortBindings": {
-                    "7000/tcp": [
-                      {
-                        "HostPort": "7000"
-                      }
-                    ]
+                    "7000/tcp": [{
+                      "HostPort": "7000"
+                    }]
                   }
                 }
               }
             }
           },
-          "yolov4module": {
-            "version": "1.0",
+          "modelmanager": {
+            "version": "1.1",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
+            "startupOrder": 0,
             "settings": {
-              "image": "registry.hub.docker.com/ronpai/yolov4-tflite-tiny",
+              "image": "${MODULES.ModelManagerModule}",
               "createOptions": {
                 "HostConfig": {
+                  "Mounts": [{
+                    "Target": "/workspace",
+                    "Source": "ovmsworkspace",
+                    "Type": "volume"
+                  }],
+                  "PortBindings": {
+                    "8585/tcp": [{
+                      "HostPort": "8585"
+                    }]
+                  },
+                  "LogConfig": {
+                    "Type": "",
+                    "Config": {
+                      "max-size": "10m",
+                      "max-file": "10"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "ovmsserver": {
+            "version": "1.1",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "startupOrder": 1,
+            "settings": {
+              "image": "openvino/model_server:2021.4.1-gpu",
+              "createOptions": {
+                "ExposedPorts": {
+                  "9001/tcp": {},
+                  "8001/tcp": {}
+                },
+                "Cmd": [
+                  "/ovms/bin/ovms --config_path /workspace/config.json --port 9001 --rest_port 8001 --log_level DEBUG"
+                ],
+                "Entrypoint": [
+                  "sh",
+                  "-c"
+                ],
+                "HostConfig": {
+                  "Mounts": [{
+                    "Target": "/workspace",
+                    "Source": "ovmsworkspace",
+                    "Type": "volume"
+                  }],
+                  "PortBindings": {
+                    "9001/tcp": [{
+                      "HostPort": "9001"
+                    }],
+                    "8001/tcp": [{
+                      "HostPort": "8001"
+                    }]
+                  },
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -332,7 +380,7 @@
         "schemaVersion": "1.0",
         "routes": {
           "metrics": "FROM /messages/modules/inferencemodule/outputs/metrics INTO $upstream",
-          "InferenceToLVA": "FROM /messages/modules/inferencemodule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/lvaEdge/inputs/recordingTrigger\")"
+          "InferenceToLVA": "FROM /messages/modules/inferencemodule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/avaedge/inputs/recordingTrigger\")"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200
@@ -351,7 +399,7 @@
         "ApplicationDataDirectory": "/var/lib/videoanalyzer",
         "DiagnosticsEventsOutputName": "diagnostics",
         "OperationalEventsOutputName": "operational",
-        "LogLevel": "information",
+        "LogLevel": "Verbose",
         "LogCategories": "Application,Events",
         "AllowUnsecuredEndpoints": true,
         "TelemetryOptOut": false

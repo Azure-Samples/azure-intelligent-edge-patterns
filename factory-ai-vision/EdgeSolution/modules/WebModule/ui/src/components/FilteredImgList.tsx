@@ -6,8 +6,14 @@ function filterImgs(imgs: Item[], filterCameras: string[], filterParts: string[]
   let filteredImgs = imgs;
   if (filterCameras.length)
     filteredImgs = filteredImgs.filter((img) => filterCameras.includes(img.camera.id?.toString()));
-  if (filterParts.length)
-    filteredImgs = filteredImgs.filter((img) => filterParts.includes(img.part.id?.toString()));
+  if (filterParts.length) {
+    filteredImgs = filteredImgs.filter((img) => {
+      const imgParts = img.parts.map((img) => img.id);
+
+      return imgParts.some((partId) => filterParts.indexOf(partId.toString()) >= 0);
+    });
+  }
+
   return filteredImgs;
 }
 

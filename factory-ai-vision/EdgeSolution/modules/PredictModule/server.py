@@ -72,11 +72,11 @@ def prediction(cam_id: str):
 
 
 @app.post("/predict")
-async def predict(request: Request):
+async def predict(edge: str, request: Request):
     """predict."""
     img_raw = await request.body()
     nparr = np.frombuffer(img_raw, np.uint8)
-    if len(nparr) % 960 == 0:
+    if edge == '960':
         img = nparr.reshape(-1, 960, 3)
     else:
         img = nparr.reshape(540, -1, 3)

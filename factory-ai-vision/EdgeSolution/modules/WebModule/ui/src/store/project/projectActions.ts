@@ -111,6 +111,11 @@ const normalizeServerToClient = (data, recomendedFps: number, totalRecomendedFps
   maxPeople: data?.max_people,
 
   oldCameras: [],
+  cascade: data.cascade,
+  deployment_type: data.deployment_type,
+
+  // Send video to cloud ava version
+  ava_is_send_iothub: data.ava_is_send_iothub,
 });
 
 const getProjectData = (state: State): ProjectData => state.project.data;
@@ -135,7 +140,7 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
         const baseCameras = partDetection.cameras?.length || 1;
         const recommendedFps = extractRecommendFps(totalRecomendedFps, baseCameras);
 
-        const uploadStatus = inferenceModule[0].upload_status === 'True' ? false : true;
+        const uploadStatus = inferenceModule[0].upload_status !== 'True';
 
         dispatch(
           getProjectSuccess(
@@ -156,6 +161,11 @@ export const thunkGetProject = (): ProjectThunk => (dispatch): Promise<boolean> 
     });
 };
 
+const getCascade = (cascadeId: string | number) => {
+  if (typeof cascadeId === 'string') return parseInt(cascadeId.replace('cascade_', ''), 10);
+  return cascadeId;
+};
+
 export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectThunk => (
   dispatch,
   getState,
@@ -171,7 +181,7 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
     data: {
       parts: projectData.parts,
       cameras: projectData.cameras,
-      project: projectData.trainingProject,
+      project: projectData.deployment_type === 'model' ? projectData.trainingProject : null,
       needRetraining: isDemo ? false : projectData.needRetraining,
       accuracyRangeMin: projectData.accuracyRangeMin,
       accuracyRangeMax: projectData.accuracyRangeMax,
@@ -199,6 +209,9 @@ export const thunkPostProject = (projectData: Omit<ProjectData, 'id'>): ProjectT
         ? ''
         : new Date(projectData.countingEndTime).toUTCString(),
       max_people: projectData.maxPeople,
+      deployment_type: projectData.deployment_type,
+      cascade: projectData.deployment_type === 'cascade' ? getCascade(projectData.cascade) : null,
+      ava_is_send_iothub: projectData.ava_is_send_iothub,
     },
     method: isProjectEmpty ? 'POST' : 'PUT',
     headers: {

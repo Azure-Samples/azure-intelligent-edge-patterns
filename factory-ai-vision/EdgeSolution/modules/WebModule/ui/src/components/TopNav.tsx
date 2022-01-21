@@ -15,10 +15,8 @@ import { useSelector } from 'react-redux';
 
 import { State } from 'RootStateType';
 import { selectUnreadNotification } from '../store/notificationSlice';
+import { Url } from '../constant';
 
-import { Url } from '../enums';
-
-import { FeedbackDialog } from './FeedbackDialog';
 import { NotificationPanel } from './NotificationPanel';
 
 const theme = getTheme();
@@ -68,7 +66,6 @@ type TopNavProps = {
 
 export const TopNav: React.FC<TopNavProps> = ({ onSettingClick }) => {
   const history = useHistory();
-  const [feedbackHidden, { setFalse: openFeedback, setTrue: closeFeedback }] = useBoolean(true);
   const [notificationOpen, { setFalse: closeNotification, setTrue: openNotification }] = useBoolean(false);
   const notificationCount = useSelector((state: State) => selectUnreadNotification(state).length);
 
@@ -78,7 +75,10 @@ export const TopNav: React.FC<TopNavProps> = ({ onSettingClick }) => {
       iconOnly: true,
       onRenderIcon: () => <FeedbackIcon className={classes.icon} />,
       buttonStyles: commandBarBtnStyles,
-      onClick: openFeedback,
+      onClick: () => {
+        const win = window.open('https://go.microsoft.com/fwlink/?linkid=2173532', '_blank');
+        win.focus();
+      },
     },
     {
       key: 'notification',
@@ -122,7 +122,7 @@ export const TopNav: React.FC<TopNavProps> = ({ onSettingClick }) => {
   return (
     <>
       <CommandBar styles={commandBarStyles} items={commandBarItems} farItems={commandBarFarItems} />
-      <FeedbackDialog hidden={feedbackHidden} onDismiss={closeFeedback} />
+      {/* <FeedbackDialog hidden={feedbackHidden} onDismiss={closeFeedback} /> */}
       <NotificationPanel isOpen={notificationOpen} onDismiss={closeNotification} />
     </>
   );

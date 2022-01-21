@@ -81,6 +81,7 @@ const LabelDisplayImage: FC<LabelDisplayImageProps> = ({
                 annotation={e}
                 draggable={false}
                 color="red"
+                selected={false}
               />
             ))}
           </Layer>

@@ -12,6 +12,8 @@ import {
   getTheme,
   Pivot,
   PivotItem,
+  IDropdownOption,
+  DropdownMenuItemType,
 } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 import Axios from 'axios';
@@ -19,13 +21,14 @@ import { isBefore, isSameDay, isAfter } from 'date-fns';
 
 import { getCameras, cameraOptionsSelectorFactoryInConfig } from '../../store/cameraSlice';
 import { partOptionsSelectorFactory, getParts } from '../../store/partSlice';
-import { ProjectData } from '../../store/project/projectTypes';
+import { ProjectData, DeploymentType } from '../../store/project/projectTypes';
 import { getTrainingProject, trainingProjectOptionsSelectorFactory } from '../../store/trainingProjectSlice';
 import { getAppInsights } from '../../TelemetryService';
 import { getConfigure, thunkPostProject } from '../../store/project/projectActions';
 import { getScenario } from '../../store/scenarioSlice';
 import { OnChangeType } from './type';
-import { Url } from '../../enums';
+import { Url } from '../../constant';
+import { getCascades, selectAllCascades } from '../../store/cascadeSlice';
 
 import { extractRecommendFps } from '../../utils/projectUtils';
 
@@ -70,7 +73,7 @@ const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChange
   }, [initialProjectData]);
 
   const onChange: OnChangeType = useCallback(
-    (key, value) => {
+    (key, value, optional) => {
       const cloneProject = R.clone(projectData);
       cloneProject[key] = value;
 
@@ -83,6 +86,11 @@ const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChange
           return prev;
         }, []);
         cloneProject.oldCameras = newCameras;
+        cloneProject.deployment_type = optional.type as DeploymentType;
+
+        if ((optional.type as DeploymentType) === 'cascade') {
+          cloneProject.cascade = optional.value;
+        }
 
         // Because demo parts and demo camera can only be used in demo training project(6 scenarios)
         // We should reset them every time the training project is changed
@@ -158,6 +166,11 @@ type ConfigTaskPanelProps = {
   isEdit?: boolean;
 };
 
+const getEditSelectedProjectKey = (projectData: ProjectData) => {
+  if (!projectData.trainingProject) return `cascade_${projectData.cascade}`;
+  return projectData.trainingProject;
+};
+
 export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   isOpen,
   onDismiss,
@@ -190,15 +203,31 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     isEdit ? initialProjectData.trainingProject : trainingProjectOfSelectedScenario,
   );
   const trainingProjectOptions = useSelector(trainingProjectOptionsSelector);
+
+  const cascadeList = useSelector(selectAllCascades);
+
   const dispatch = useDispatch();
   const history = useHistory();
   const [deploying, setdeploying] = useState(false);
+
+  const modelOptions: IDropdownOption[] = [
+    { key: 'model', text: 'Model', itemType: DropdownMenuItemType.Header },
+    ...trainingProjectOptions,
+    { key: 'divider_1', text: '-', itemType: DropdownMenuItemType.Divider },
+    { key: 'cascade', text: 'Cascade', itemType: DropdownMenuItemType.Header },
+    ...cascadeList.map((cascade, id) => ({
+      key: `cascade_${cascade.id}`,
+      text: cascade.name,
+      title: 'cascade',
+    })),
+  ];
 
   useEffect(() => {
     dispatch(getParts());
     dispatch(getCameras(true));
     dispatch(getTrainingProject(true));
     dispatch(getScenario());
+    dispatch(getCascades());
   }, [dispatch]);
 
   const onDeployClicked = async () => {
@@ -248,11 +277,14 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
             />
             <Dropdown
               label="Model"
-              options={trainingProjectOptions}
+              options={modelOptions}
               required
-              selectedKey={projectData.trainingProject}
+              selectedKey={isEdit ? getEditSelectedProjectKey(projectData) : projectData.trainingProject}
               onChange={(_, options) => {
-                onChange('trainingProject', options.key as number);
+                onChange('trainingProject', options.key as number, {
+                  type: options.title,
+                  value: options.key as string,
+                });
               }}
             />
             <Dropdown
@@ -286,6 +318,8 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
                   );
                 }
               }}
+              styles={{ root: { '.is-disabled': { border: '1px solid #605e5c' } } }}
+              disabled={projectData.deployment_type === 'cascade'}
             />
           </Stack>
         </PivotItem>

@@ -3,8 +3,10 @@
 
 import datetime
 import logging
+import os
 import threading
 import time
+import subprocess
 
 from azure.cognitiveservices.vision.customvision.training.models import (
     CustomVisionErrorException,
@@ -28,6 +30,7 @@ from .exceptions import (
 
 logger = logging.getLogger(__name__)
 
+ROOT = '/workspace'
 
 class Project(models.Model):
     """Project Model."""
@@ -39,6 +42,9 @@ class Project(models.Model):
     name = models.CharField(max_length=200, null=True, blank=True, default="")
     download_uri = models.CharField(max_length=1000, null=True, blank=True, default="")
     download_uri_fp16 = models.CharField(
+        max_length=1000, null=True, blank=True, default=""
+    )
+    download_uri_openvino = models.CharField(
         max_length=1000, null=True, blank=True, default=""
     )
     is_prediction_module = models.BooleanField(default=False)
@@ -55,6 +61,21 @@ class Project(models.Model):
     maxImages = models.IntegerField(default=20)
     needRetraining = models.BooleanField(default=True)
     relabel_expired_time = models.DateTimeField(default=timezone.now)
+
+    project_type = models.CharField(max_length=1000, null=True, blank=True, default="")
+    category = models.CharField(max_length=1000, null=True, blank=True, default="")
+
+    is_cascade = models.BooleanField(default=False)
+    type = models.CharField(max_length=1000, null=True, blank=True, default="")
+    inputs = models.CharField(max_length=2000, null=True, blank=True, default="")
+    outputs = models.CharField(max_length=2000, null=True, blank=True, default="")
+    combined = models.CharField(max_length=50, null=True, blank=True, default="")
+    params = models.CharField(max_length=2000, null=True, blank=True, default="")
+    demultiply_count = models.IntegerField(blank=True, null=True)
+    openvino_library_name = models.CharField(max_length=1000, null=True, blank=True, default="")
+    openvino_model_name = models.CharField(max_length=1000, null=True, blank=True, default="")
+    classification_type = models.CharField(max_length=1000, null=True, blank=True, default="")
+    is_trained = models.BooleanField(default=False)
 
     def __repr__(self):
         return self.name.__repr__()
@@ -154,9 +175,19 @@ class Project(models.Model):
             instance.name,
         )
         try:
+            # set project name
             project = instance.get_project_obj()
             instance.name = project.name
             logger.info("Project Found. Set instance.name to %s", instance.name)
+
+            # check is_trained
+            trainer = instance.get_trainer_obj()    
+            iterations = trainer.get_iterations(instance.customvision_id)
+            if len(iterations) > 0:
+                instance.is_trained = True
+            else:
+                instance.is_trained = False        
+
         except Exception:
             instance.customvision_id = ""
         logger.info(
@@ -190,17 +221,25 @@ class Project(models.Model):
             logger.exception("dequeue_iteration error")
             raise
 
-    def create_project(self):
+    def create_project(self, project_type: str = None, classification_type: str = None):
         """create_project.
 
         Create a project on CustomVision.
         """
-        logger.info("Creating obj detection project")
+        logger.info("Creating {} project".format(project_type))
 
         try:
             if not self.name:
                 self.name = "VisionOnEdge-" + datetime.datetime.utcnow().isoformat()
-            project = self.setting.create_project(project_name=self.name)
+            if project_type == 'ObjectDetection':
+                obj_detection_domain = next(domain for domain in self.setting.get_trainer_obj().get_domains() if domain.type == project_type and domain.name == "General (compact)")
+                project = self.setting.create_project(project_name=self.name, domain_id=obj_detection_domain.id)
+            elif project_type == 'Classification':
+                obj_detection_domain = next(domain for domain in self.setting.get_trainer_obj().get_domains() if domain.type == project_type)
+                project = self.setting.create_project(project_name=self.name, domain_id=obj_detection_domain.id, classification_type=classification_type)   
+            else:
+                project = self.setting.create_project(project_name=self.name)
+
             self.customvision_id = project.id
             self.name = project.name
             update_fields = ["customvision_id", "name"]
@@ -375,9 +414,9 @@ class Task(models.Model):
                 time.sleep(1)
                 iterations = trainer.get_iterations(customvision_id)
                 if len(iterations) == 0:
-                    logger.error("failed: not yet trained")
+                    logger.error("Failed: not yet trained")
                     self.status = "running"
-                    self.log = "failed: not yet trained"
+                    self.log = "Failed: not yet trained"
                     self.save()
                     return
 
@@ -389,7 +428,14 @@ class Task(models.Model):
                     continue
                 try:
                     project_obj.export_iteration(iteration.id)
+                except Exception:
+                    logger.exception("Export already in queue")
+                try:
                     project_obj.export_iteration(iteration.id, flavor="ONNXFloat16")
+                except Exception:
+                    logger.exception("Export already in queue")
+                try:
+                    project_obj.export_iteration(iteration.id, platform="OPENVINO")
                 except Exception:
                     logger.exception("Export already in queue")
                 exports = project_obj.get_exports(iteration.id)
@@ -412,18 +458,40 @@ class Task(models.Model):
                     "Successfully export model. download_uri: %s",
                     exports[1].download_uri,
                 )
+                logger.info(
+                    "Successfully export model. download_uri: %s",
+                    exports[2].download_uri,
+                )
                 self.status = "ok"
                 self.log = "Status : work done"
                 self.save()
                 # Get the latest object
                 project_obj = Project.objects.get(pk=project_obj.id)
-                if not exports[0].flavor:
-                    project_obj.download_uri = exports[0].download_uri
-                    project_obj.download_uri_fp16 = exports[1].download_uri
-                else:
-                    project_obj.download_uri = exports[1].download_uri
-                    project_obj.download_uri_fp16 = exports[0].download_uri
+                for export in exports:
+                    if export.flavor:
+                        project_obj.download_uri_fp16 = export.download_uri
+                    else:
+                        if "onnx" in export.platform.lower():
+                            project_obj.download_uri = export.download_uri
+                        else:
+                            project_obj.download_uri_openvino = export.download_uri
+
+                # if not exports[0].flavor:
+                #     project_obj.download_uri = exports[0].download_uri
+                #     project_obj.download_uri_fp16 = exports[1].download_uri
+                # else:
+                #     project_obj.download_uri = exports[1].download_uri
+                #     project_obj.download_uri_fp16 = exports[0].download_uri
                 project_obj.save()
+
+                # pre-download openvino model.zip
+                model_name = project_obj.download_uri_openvino.split('/')[3][2:]
+                iteration_id = project_obj.download_uri_openvino.split('/')[4].split('.')[0]
+                file_name = ROOT + '/' + iteration_id + '.zip'
+                logger.warning("Pre-download customvision model.zip")
+                if not os.path.isfile(file_name):
+                    subprocess.run(['wget', '-O', file_name, project_obj.download_uri_openvino])
+                
                 break
             return
 

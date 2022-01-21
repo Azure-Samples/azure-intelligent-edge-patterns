@@ -42,6 +42,8 @@ from model_object import ModelObject
 from stream_manager import StreamManager
 from utility import is_edge
 
+from cascade.voe_to_ovms import load_voe_config_from_json, voe_config_to_ovms_config
+
 # sys.path.insert(0, '../lib')
 # Set logging parameters
 
@@ -120,13 +122,41 @@ async def predict(camera_id: str, request: Request):
     return "", 204
 
 
+@app.post("/predict_opencv")
+async def predict_opencv(camera_id: str, edge: str, request: Request):
+    """predict."""
+    img_raw = await request.body()
+    if IS_OPENCV == "true":
+        nparr = np.frombuffer(img_raw, np.uint8)
+        if edge == '960':
+            logger.warning('960')
+            img = nparr.reshape(-1, 960, 3)
+        else:
+            logger.warning('540')
+            img = nparr.reshape(540, -1, 3)
+
+    else:
+        img = cv2.imdecode(np.frombuffer(img_raw, dtype=np.uint8), -1)
+    # img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+    # cv2.imwrite('grpc_inf.jpg', img)
+    results = http_inference_engine.predict(camera_id, img)
+    if int(time.time()) % 5 == 0:
+        logger.warning(results)
+    if len(results) > 0:
+        # TypeError: Object of type float32 is not JSON serializable
+        # move to streams.py
+        # results = np.array(results).tolist()
+        return json.dumps({"inferences": results}), 200
+    return "", 204
+
+
 @app.get("/metrics")
 def metrics(cam_id: str):
     """metrics."""
-    inference_num = 0
-    unidentified_num = 0
-    total = 0
-    success_rate = 0
+    inference_num = {}
+    unidentified_num = {}
+    total = {}
+    success_rate = {}
     average_inference_time = 0
     last_prediction_count = {}
     is_gpu = onnx.is_gpu
@@ -142,10 +172,16 @@ def metrics(cam_id: str):
         average_inference_time = stream.average_inference_time
         last_prediction_count = stream.last_prediction_count
         scenario_metrics = stream.get_scenario_metrics()
-        if total == 0:
-            success_rate = 0
-        else:
-            success_rate = inference_num * 100 / total
+        for tag in total.keys():
+            if total[tag] == 0:
+                success_rate[tag] = 0
+            else:
+                if tag in inference_num.keys():
+                    success_rate[tag] = inference_num[tag] * 100 / total[tag]
+                else:
+                    logger.warning("tag not found in inference_num...")
+        logger.warning("success rate")
+        logger.warning(success_rate)
     return {
         "success_rate": success_rate,
         "inference_num": inference_num,
@@ -206,6 +242,13 @@ def update_endpoint(request_body: UpdateEndpointBody):
         endpoint = 'http://' + endpoint
     logger.warning('SET ENDPOINT: {}'.format(endpoint))
     onnx.endpoint = endpoint
+
+    if request_body.pipeline:
+        onnx.pipeline = request_body.pipeline
+        voe_config = load_voe_config_from_json(onnx.pipeline)
+        _, metadatas = voe_config_to_ovms_config(voe_config)
+        onnx.metadatas = metadatas
+        print(metadatas)
     return 'ok', 200
 
 
@@ -276,6 +319,7 @@ def update_cams(request_body: CamerasModel):
     """
     logger.info(request_body)
     frame_rate = request_body.fps
+    ava_is_send = request_body.ava_is_send
     stream_manager.update_streams([cam.id for cam in request_body.cameras])
     n = stream_manager.get_streams_num_danger()
     # frame_rate = onnx.update_frame_rate_by_number_of_streams(n)
@@ -320,6 +364,7 @@ def update_cams(request_body: CamerasModel):
             frame_rate,
             recording_duration,
             lva_mode,
+            ava_is_send,
             cam_id,
             cam_name,
             has_aoi,
@@ -328,6 +373,7 @@ def update_cams(request_body: CamerasModel):
             line_info,
             zone_info,
         )
+        stream.cascade_name = request_body.cascade_name
         stream.send_video_to_cloud = cam.send_video_to_cloud
         stream.send_video_to_cloud_parts = [
             part.name for part in cam.send_video_to_cloud_parts
@@ -639,7 +685,7 @@ def benchmark():
     for s in stream_manager.get_streams():
         s.set_is_benchmark(True)
         s.update_cam("video", SAMPLE_VIDEO, 30,
-                     s.cam_id, False, None, "PC", [], [])
+                     s.cam_id, False, False, None, "PC", [], [])
 
     # vpu's first image take long time
     img = cv2.imread("img.png")

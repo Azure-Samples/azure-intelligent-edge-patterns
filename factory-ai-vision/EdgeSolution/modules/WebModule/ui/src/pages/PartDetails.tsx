@@ -23,7 +23,7 @@ import { EmptyAddIcon } from '../components/EmptyAddIcon';
 import { postImages, getImages } from '../store/imageSlice';
 import { partImageItemSelectorFactory } from '../store/selectors';
 
-import { Url } from '../enums';
+import { Url } from '../constant';
 
 import LabelingPage from '../components/LabelingPage/LabelingPage';
 import { AddEditPartPanel, PanelMode } from '../components/AddPartPanel';
@@ -212,8 +212,8 @@ export const Images: React.FC<{ labeledImages }> = ({ labeledImages }) => {
           )}
         </div>
       </Stack>
-      <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} partId={partId} />
-      <LabelingPage onSaveAndGoCaptured={openCaptureDialog} />
+      {/* <CaptureDialog isOpen={isCaptureDialgOpen} onDismiss={closeCaptureDialog} partId={partId} />
+      <LabelingPage onSaveAndGoCaptured={openCaptureDialog} projectId="13" /> */}
       <input
         ref={fileInputRef}
         type="file"

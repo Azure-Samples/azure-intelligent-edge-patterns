@@ -54,12 +54,16 @@ export const initialProjectData: ProjectData = {
   inferenceProtocol: InferenceProtocol.GRPC,
   inferenceSource: InferenceSource.LVA,
   disableVideoFeed: false,
-  countingStartTime: '',
-  countingEndTime: '',
+  countingStartTime: new Date().toISOString(),
+  countingEndTime: new Date(new Date().setDate(new Date().getDate() + 1)).toISOString(),
   maxPeople: 1,
 
   // For select model, old camera still existing.
   oldCameras: [],
+
+  deployment_type: 'model',
+  cascade: '',
+  ava_is_send_iothub: false,
 };
 
 const initialState: Project = {

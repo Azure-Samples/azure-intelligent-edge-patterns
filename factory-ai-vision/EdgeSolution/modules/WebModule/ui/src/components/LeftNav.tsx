@@ -2,7 +2,7 @@ import { INavLinkGroup, Nav, INavLink } from '@fluentui/react';
 import React, { useMemo } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
 
-import { Url } from '../enums';
+import { Url } from '../constant';
 
 const navLinks: INavLink[] = [
   {
@@ -32,21 +32,30 @@ const navLinks: INavLink[] = [
       },
     },
   },
-  {
-    name: 'Objects',
-    url: Url.PARTS,
-    iconProps: {
-      imageProps: {
-        src: '/icons/objects.svg',
-      },
-    },
-  },
+  // {
+  //   name: 'Objects',
+  //   url: Url.PARTS,
+  //   iconProps: {
+  //     imageProps: {
+  //       src: '/icons/objects.svg',
+  //     },
+  //   },
+  // },
   {
     name: 'Models',
     url: Url.MODELS,
     iconProps: {
       imageProps: {
         src: '/icons/models.svg',
+      },
+    },
+  },
+  {
+    name: 'Cascades',
+    url: Url.CASCADES,
+    iconProps: {
+      imageProps: {
+        src: '/icons/cascades.svg',
       },
     },
   },

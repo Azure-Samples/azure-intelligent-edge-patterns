@@ -33,8 +33,10 @@ export enum InferenceProtocol {
 
 export enum InferenceSource {
   LVA = 'lva',
-  CaptureModule = 'capture_module',
+  OpenCv = 'opencv',
 }
+
+export type DeploymentType = 'model' | 'cascade';
 
 export type ProjectData = {
   id: number;
@@ -53,6 +55,8 @@ export type ProjectData = {
   sendMessageToCloud: boolean;
   framesPerMin: number;
   probThreshold: number;
+
+  ava_is_send_iothub: boolean;
   // Send video to cloud
   SVTCisOpen: boolean;
   SVTCcameras: number[];
@@ -81,6 +85,9 @@ export type ProjectData = {
   // For want to select other model, old camera still in option component.
   // Forced add.
   oldCameras?: number[];
+
+  deployment_type: DeploymentType;
+  cascade: string;
 };
 
 // Describing the different ACTION NAMES available

@@ -28,7 +28,7 @@ if [ -d "factoryai_configs/factoryai_cfgs" ]; then
 fi
 
 if [ "$isCfg" = true ]; then
-  PS3='Choose the number corresponding to the Azure Stack Edge device: '
+  PS3='Choose the number corresponding to the Azure IoT Edge device: '
   configs=`ls factoryai_configs/factoryai_cfgs`
   select opt in $configs
   do
@@ -186,7 +186,7 @@ if [ "$isCfg" != true ]; then
 
     # ############################## Get Streaming Type #####################################
     while true; do
-      read -p "Do you want to use Azure Video Analytics? (y or n): " -n 1 -r; echo
+      read -p "Do you want to use Azure Video Analyzer? (y or n): " -n 1 -r; echo
       case $REPLY in
           [Yy]* ) streaming="ava"; break;;
           [Nn]* ) streaming="opencv"; break;;
@@ -218,7 +218,7 @@ if [ "$isCfg" != true ]; then
 
     if [ $tLen -le 0 ]; then
       echo IoTHub not found
-      echo Sorry, this demo requires that you have an existing IoTHub and registered Azure Stack Edge Device
+      echo Sorry, this demo requires that you have an existing IoTHub and registered Azure Iot Edge Device
       read -p "Press <Enter> key to exit..."; echo
       exit 1
     fi
@@ -268,7 +268,7 @@ if [ "$isCfg" != true ]; then
 
     if [ $tLen -le 0 ]; then
       echo No edge device found
-      echo Sorry, this demo requires that you have an existing IoTHub and registered Azure Stack Edge Device
+      echo Sorry, this demo requires that you have an existing IoTHub and registered Azure IoT Edge Device
       read -p "Press any key to exit..."; echo
       exit 1
     fi
@@ -284,7 +284,7 @@ if [ "$isCfg" != true ]; then
       done
       edgeDeviceId=${outputarrdevs[0]%$CR}
     else
-      PS3='Choose the number corresponding to the Azure Stack Edge device: '
+      PS3='Choose the number corresponding to the Azure Iot Edge device: '
       select opt in "${outputarrdevs[@]}"
       do
         echo "you chose: " $opt
@@ -294,57 +294,76 @@ if [ "$isCfg" != true ]; then
     fi
 
     ################################ Check for Platform ###########################################
-    echo 1 amd64
-    echo 2 arm64v8
-    read -p "Choose the platform you're going to deploy: "
-    if [ "$REPLY" == "1" ]; then
+    #echo 1 amd64
+    #echo 2 arm64v8
+    #read -p "Choose the platform you're going to deploy: "
+    #if [ "$REPLY" == "1" ]; then
+	#platform="amd64"
+    #elif [ "$REPLY" == "2" ]; then
+	#platform="arm64v8"
+    #else
+	#echo "Unknown Platform"
+	#exit
+    #fi
+
 	platform="amd64"
-    elif [ "$REPLY" == "2" ]; then
-	platform="arm64v8"
-    else
-	echo "Unknown Platform"
-	exit
-    fi
-
-
+	echo Platform: amd64
 
     ################################ Check for Device ###########################################
-    if [ "$platform" == "amd64" ]; then
-	    PS3='Choose the number corresponding to the Azure Stack Edge device: '
-	    deviceOptions="cpu gpu vpu"
-	    select cpuGpu in $deviceOptions
-	    do
-	      echo "you chose: " $cpuGpu
-	      if [ "$cpuGpu" != "" ]; then
-		  break
-	      fi
-	    done
-	    if [ "$cpuGpu" == "cpu" ]; then
+    #if [ "$platform" == "amd64" ]; then
+	#    PS3='Choose the number corresponding to the Azure Stack Edge device: '
+	#    deviceOptions="cpu gpu vpu"
+	#    select cpuGpu in $deviceOptions
+	#    do
+	#      echo "you chose: " $cpuGpu
+	#      if [ "$cpuGpu" != "" ]; then
+	#	  break
+	#      fi
+	#    done
+	#    if [ "$cpuGpu" == "cpu" ]; then
+	#	runtime="runc"
+	#    fi
+	#    if [ "$cpuGpu" == "gpu" ]; then
+	#	runtime="nvidia"
+	#    fi
+	#    if [ "$cpuGpu" == "vpu" ]; then
+	#	runtime="runc"
+	#    fi
+    #elif [ "$platform" == "arm64v8" ]; then
+	#    PS3='Choose the number corresponding to the Azure Stack Edge device: '
+	#    deviceOptions="cpu jetson"
+	#    select cpuGpu in $deviceOptions
+	#    do
+	#      echo "you chose: " $cpuGpu
+	#      if [ "$cpuGpu" != "" ]; then
+	#	  break
+	#      fi
+	#    done
+	#    if [ "$cpuGpu" == "cpu" ]; then
+	#	runtime="runc"
+	#    fi
+	#    if [ "$cpuGpu" == "jetson" ]; then
+	#	runtime="nvidia"
+	#    fi
+    #fi
+	PS3='Choose the number corresponding to the Azure IoT Edge device: '
+	deviceOptions="cpu gpu vpu"
+	select cpuGpu in $deviceOptions
+	do
+	  echo "you chose: " $cpuGpu
+	  if [ "$cpuGpu" != "" ]; then
+		 break
+	  fi
+	done
+	if [ "$cpuGpu" == "cpu" ]; then
 		runtime="runc"
-	    fi
-	    if [ "$cpuGpu" == "gpu" ]; then
-		runtime="nvidia"
-	    fi
-	    if [ "$cpuGpu" == "vpu" ]; then
+	fi
+        if [ "$cpuGpu" == "gpu" ]; then
+                runtime="nvidia"
+        fi
+	if [ "$cpuGpu" == "vpu" ]; then
 		runtime="runc"
-	    fi
-    elif [ "$platform" == "arm64v8" ]; then
-	    PS3='Choose the number corresponding to the Azure Stack Edge device: '
-	    deviceOptions="cpu jetson"
-	    select cpuGpu in $deviceOptions
-	    do
-	      echo "you chose: " $cpuGpu
-	      if [ "$cpuGpu" != "" ]; then
-		  break
-	      fi
-	    done
-	    if [ "$cpuGpu" == "cpu" ]; then
-		runtime="runc"
-	    fi
-	    if [ "$cpuGpu" == "jetson" ]; then
-		runtime="nvidia"
-	    fi
-    fi
+	fi
 
 fi #if [ $isCfg != true ]; then
 
@@ -357,6 +376,16 @@ else
 fi
 
 
+if [ "$cpuGpu" == "vpu" ]; then
+    createOptions='"createOptions": "{\"ExposedPorts\":{\"9001/tcp\":{},\"8001/tcp\":{}},\"Cmd\":[\"/ovms/bin/ovms --config_path /workspace/config.json --port 9001 --rest_port 8001 --log_level DEBUG\"],\"Devices\":[{\"PathOnHost\":\"/dev/ion\",\"PathInContainer\":\"/dev/ion\"}],\"Entrypoint\":[\"sh\",\"-c\"],\"HostConfig\":{\"Mounts\":[{\"Target\":\"/workspace\",\"Source\":\"ovmsworkspace\",\"Type\":\"volume\"},{\"Target\":\"/var/tmp\",\"Source\":\"hddldaemon\",\"Type\":\"volume\"}],\"PortBindings\":{\"9001/tcp\":[{\"HostPort\":\"9001\"}],\"8001/tcp\":[{\"HostPort\":\"8001\"}]},\"LogConfig\":{\"Type\":\"\",\"Config\":",'
+    createOptions01='"createOptions01": "{\"max-size\":\"10m\",\"max-file\":\"10\"}}}}"'
+else
+    createOptions='"createOptions": "{\"ExposedPorts\":{\"9001/tcp\":{},\"8001/tcp\":{}},\"Cmd\":[\"/ovms/bin/ovms --config_path /workspace/config.json --port 9001 --rest_port 8001 --log_level DEBUG\"],\"Entrypoint\":[\"sh\",\"-c\"],\"HostConfig\":{\"Mounts\":[{\"Target\":\"/workspace\",\"Source\":\"ovmsworkspace\",\"Type\":\"volume\"}],\"PortBindings\":{\"9001/tcp\":[{\"HostPort\":\"9001\"}],\"8001/tcp\":[{\"HostPort\":\"8001\"}]},\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}}}}"'
+    createOptions01=''
+fi  
+ 
+
+
 ################################ Write Config ############################################
 
 # Will overwrite file if it already exists
@@ -366,8 +395,11 @@ do
     prtline=${line//'<Training Endpoint>'/$cvTrainingEndpoint}
     prtline=${prtline//'<Training API Key>'/$cvTrainingApiKey}
     prtline=${prtline//'<cpu or gpu>'/$cpuGpu}
+    #prtline=${prtline//'<cpu or gpu>'/cpu}
     prtline=${prtline//'<Docker Runtime>'/$runtime}
     prtline=${prtline//'<platform>'/$platform}
+    prtline=${prtline//'<create option>'/$createOptions}
+    prtline=${prtline//'<create option 01>'/$createOptions01}
     prtline=${prtline//'$IOTHUB_CONNECTION_STRING'/$iotHubConnectionString}
     prtline=${prtline//'$AVA_PROVISIONING_TOKEN'/$avaProvisioningToken}
     echo $prtline
@@ -392,8 +424,8 @@ fi
 
 # ############################## Deploy Edge Modules #####################################
 
-echo Deploying containers to Azure Stack Edge
-echo This will take more than 10 min at normal connection speeds.  Status can be checked on the Azure Stack Edge device
+echo Deploying containers to Azure IoT Edge Device
+echo This will take more than 10 min at normal connection speeds.  Status can be checked on the Azure IoT Edge device
 
 #echo az iot edge set-modules --device-id $edgeDeviceId --hub-name $iotHubName --content $edgeDeployJson
 output=$(az iot edge set-modules --device-id $edgeDeviceId --hub-name $iotHubName --content $edgeDeployJson)

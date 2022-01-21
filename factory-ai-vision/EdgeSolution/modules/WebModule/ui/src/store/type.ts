@@ -55,4 +55,6 @@ export type Image = {
   uploaded: boolean;
   manualChecked: boolean;
   labels: string[];
+  project: number;
+  part_ids: string[];
 };

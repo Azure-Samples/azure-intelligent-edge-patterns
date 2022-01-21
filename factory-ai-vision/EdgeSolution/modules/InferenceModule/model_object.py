@@ -33,6 +33,8 @@ class ModelObject():
         self.lva_mode = LVA_MODE
         self.endpoint = 'http://predictmodule:7777/predict'
         self.headers = None
+        self.pipeline = None
+        self.metadatas = None
 
         self.image_shape = [IMG_HEIGHT, IMG_WIDTH]
 
@@ -66,7 +68,7 @@ class ModelObject():
                 response = requests.get(
                     "http://" + predict_module_url() + "/get_device")
                 device = response.json()["device"]
-                if device == 'CPU-OPENVINO_MYRIAD':
+                if device == 'CPU-OPENVINO_CPU_FP32':
                     device = 'vpu'
                 break
             except:
@@ -75,6 +77,7 @@ class ModelObject():
         # device = onnxruntime.get_device()
         # if device == 'CPU-OPENVINO_MYRIAD':
         #     device = 'vpu'
+        # device = 'cpu'
         return device.lower()
 
     def set_is_scenario(self, is_scenario):

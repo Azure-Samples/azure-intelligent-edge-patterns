@@ -5,7 +5,7 @@ import {
   ThunkAction,
   Action,
   PayloadAction,
-  current,
+  // current,
 } from '@reduxjs/toolkit';
 import * as R from 'ramda';
 import Axios from 'axios';
@@ -32,6 +32,7 @@ type ImageFromServer = {
   timestamp: string;
   camera: number;
   manual_checked: boolean;
+  part_ids: string;
 };
 
 type ImageFromServerWithSerializedLabels = Omit<ImageFromServer, 'labels'> & { labels: Annotation[] };
@@ -39,6 +40,13 @@ type ImageFromServerWithSerializedLabels = Omit<ImageFromServer, 'labels'> & { l
 type RemoveImageLabel = {
   selectedImageId: number;
   annotationIndex: string;
+};
+
+export type CaptureImagePayload = {
+  streamId: string;
+  imageIds: number[];
+  shouldOpenLabelingPage: boolean;
+  projectId: number;
 };
 
 // Normalization
@@ -55,6 +63,8 @@ const normalizeImageShape = (response: ImageFromServerWithSerializedLabels) => {
     camera: response.camera,
     uploaded: response.uploaded,
     manualChecked: response.manual_checked,
+    project: response.project,
+    part_ids: JSON.parse(response.part_ids),
   };
 };
 
@@ -101,11 +111,11 @@ const normalizeImages = R.compose(normalizeImagesAndLabelByNormalizr, serializeL
 // Async Thunk Actions
 export const getImages = createWrappedAsync<
   ReturnType<typeof normalizeImages>['entities'],
-  { freezeRelabelImgs: boolean },
+  { freezeRelabelImgs: boolean; selectedProject?: number },
   // TODO Use the type State will cause annotationSlice/addOriginEntitiesReducer encounter own annotation referencing
   // issue. Should define the type State manually instead of getting it from return type.
   { state: any }
->('images/get', async ({ freezeRelabelImgs }, { getState }) => {
+>('images/get', async ({ freezeRelabelImgs, selectedProject }, { getState }) => {
   if (freezeRelabelImgs) {
     /**
      * Call keep_alive can freeze the relabel images
@@ -114,7 +124,13 @@ export const getImages = createWrappedAsync<
     const nonDemoProjectId = getState().trainingProject.nonDemo[0];
     await Axios.post(`/api/projects/${nonDemoProjectId}/relabel_keep_alive/`);
   }
-  const response = await Axios.get(`/api/images/`);
+
+  let url = '/api/images';
+  if (selectedProject) {
+    url = url + `?project=${selectedProject}`;
+  }
+
+  const response = await Axios.get(url);
   return normalizeImages(response.data).entities;
 });
 
@@ -123,24 +139,24 @@ export const postImages = createWrappedAsync('image/post', async (newImage: Form
   return normalizeImages([response.data]).entities;
 });
 
-export const captureImage = createWrappedAsync<
-  any,
-  { streamId: string; imageIds: number[]; shouldOpenLabelingPage: boolean }
->('image/capture', async ({ streamId, imageIds, shouldOpenLabelingPage }, { dispatch }) => {
-  const response = await Axios.get(`/api/streams/${streamId}/capture`);
-  const capturedImage = response.data.image;
+export const captureImage = createWrappedAsync<any, CaptureImagePayload>(
+  'image/capture',
+  async ({ streamId, imageIds, shouldOpenLabelingPage, projectId }, { dispatch }) => {
+    const response = await Axios.get(`/api/streams/${streamId}/capture?project=${projectId}`);
+    const capturedImage = response.data.image;
 
-  if (shouldOpenLabelingPage)
-    dispatch(
-      openLabelingPage({
-        imageIds: [...imageIds, capturedImage.id],
-        selectedImageId: capturedImage.id,
-        openFrom: OpenFrom.AfterCapture,
-      }),
-    );
+    if (shouldOpenLabelingPage)
+      dispatch(
+        openLabelingPage({
+          imageIds: [...imageIds, capturedImage.id],
+          selectedImageId: capturedImage.id,
+          openFrom: OpenFrom.AfterCapture,
+        }),
+      );
 
-  return normalizeImages([response.data.image]).entities;
-});
+    return normalizeImages([response.data.image]).entities;
+  },
+);
 
 export const saveLabelImageAnnotation = createWrappedAsync<any, undefined, { state: State }>(
   'image/saveAnno',
@@ -159,6 +175,22 @@ export const saveLabelImageAnnotation = createWrappedAsync<any, undefined, { sta
       part: imgPart,
     });
     return { imageId, manualChecked, labels: labels.map((label) => label.id) };
+  },
+);
+
+export const saveClassificationImageTag = createWrappedAsync<any, undefined, { state: State }>(
+  'image/saveClassification',
+  async (_, { getState }) => {
+    const { selectedImageId } = getState().labelingPage;
+    const annoEntities = getState().annotations.entities;
+    const labels = Object.values(annoEntities).filter((e: Annotation) => e.image === selectedImageId);
+
+    await Axios.patch(`/api/images/${selectedImageId}/`, {
+      labels: JSON.stringify(labels.map((e: Annotation) => ({ ...e.label, part: e.part }))),
+      manual_checked: true,
+    });
+
+    return { id: selectedImageId, manualChecked: true, labels: labels.map((label) => label.id) };
   },
 );
 
@@ -186,6 +218,12 @@ const slice = createSlice({
       .addCase(saveLabelImageAnnotation.fulfilled, (state, action) => {
         imageAdapter.updateOne(state, {
           id: action.payload.imageId,
+          changes: { manualChecked: action.payload.manualChecked, labels: action.payload.labels },
+        });
+      })
+      .addCase(saveClassificationImageTag.fulfilled, (state, action) => {
+        imageAdapter.updateOne(state, {
+          id: action.payload.id,
           changes: { manualChecked: action.payload.manualChecked, labels: action.payload.labels },
         });
       })

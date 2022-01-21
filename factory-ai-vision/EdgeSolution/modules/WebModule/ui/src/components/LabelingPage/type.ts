@@ -6,6 +6,7 @@ export enum LabelingCursorStates {
   crosshair = 'crosshair',
   neswResize = 'nesw-resize',
   nwseResize = 'nwse-resize',
+  notAllowed = 'not-allowed',
 }
 
 export interface Box2dComponentProps {
@@ -20,7 +21,7 @@ export interface Box2dComponentProps {
   changeCursorState?: (cursorType?: LabelingCursorStates) => void;
   color?: string;
   draggable?: boolean;
-  // instanceID: number;
+  onLeaveBoxCursorChange?: () => void;
 }
 
 export enum WorkState {

@@ -84,6 +84,8 @@ COPY stream_manager.py ./
 COPY streams.py ./
 COPY tracker.py ./
 COPY utility.py ./
+COPY ovms_utils.py ./
+COPY yolo_utils.py ./
 
 # =========================================================
 # Run

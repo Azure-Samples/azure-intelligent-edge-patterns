@@ -14,6 +14,7 @@ from ..azure_pd_deploy_status.utils import upcreate_deploy_status
 from ..azure_training_status.models import TrainingStatus
 from .api.serializers import UpdateCamBodySerializer
 from .models import PartDetection, PDScenario
+from ..azure_iot.utils import model_manager_module_url
 
 logger = logging.getLogger(__name__)
 
@@ -24,49 +25,66 @@ def if_trained_then_deploy_worker(part_detection_id):
     Args:
         part_detection_id:
     """
-
-    # =====================================================
-    # 1. Wait for project to be trained                 ===
-    # =====================================================
-    logger.info("Wait for project to be trained")
+    # if no download_uri -> first training -> wait for training (1. ~ 2.)
+    # others -> deploy the latest trained model (from 3.)
     part_detection_obj = PartDetection.objects.get(pk=part_detection_id)
     project_obj = part_detection_obj.project
-    last_log = None
-    while True:
-        time.sleep(1)
-        training_status_obj = TrainingStatus.objects.get(project=project_obj)
-        logger.info("Listening on Training Status: %s", training_status_obj)
-        if training_status_obj.status in ["ok", "failed"]:
-            break
-        if training_status_obj.log != last_log:
-            upcreate_deploy_status(
-                part_detection_id=part_detection_id,
-                status=training_status_obj.status,
-                log=training_status_obj.log,
-            )
-            last_log = training_status_obj.log
 
-    # =====================================================
-    # 2. Project training failed                        ===
-    # =====================================================
-    if training_status_obj.status == "failed":
-        logger.info("Project train/export failed.")
-        upcreate_deploy_status(
-            part_detection_id=part_detection_id,
-            status=training_status_obj.status,
-            log=training_status_obj.log,
-        )
-        return
+    # # =====================================================
+    # # 1. Wait for project to be trained                 ===
+    # # =====================================================
+    # if project_obj.download_uri:
+    #     logger.warning('Deploy the latest trained model')
+    # else:
+    #     logger.info("Wait for project to be trained")
+    #     last_log = None
+    #     while True:
+    #         time.sleep(1)
+    #         training_status_obj = TrainingStatus.objects.get(project=project_obj)
+    #         logger.info("Listening on Training Status: %s", training_status_obj)
+    #         if training_status_obj.status in ["ok", "Failed"]:
+    #             break
+    #         if training_status_obj.log != last_log:
+    #             upcreate_deploy_status(
+    #                 part_detection_id=part_detection_id,
+    #                 status=training_status_obj.status,
+    #                 log=training_status_obj.log,
+    #             )
+    #             last_log = training_status_obj.log
+
+    # # =====================================================
+    # # 2. Project training failed                        ===
+    # # =====================================================
+    #     if training_status_obj.status == "Failed":
+    #         logger.info("Project train/export failed.")
+    #         upcreate_deploy_status(
+    #             part_detection_id=part_detection_id,
+    #             status=training_status_obj.status,
+    #             log=training_status_obj.log,
+    #         )
+    #         return
 
     # =====================================================
     # 2. Project training success                       ===
     # =====================================================
-    logger.info("Project train/export success.")
-    logger.info("Deploying...")
+        # logger.info("Project train/export success.")
+        # logger.info("Deploying...")
+
+    # =====================================================
+    # 3.0 Update cascade config                         ===
+    # =====================================================
+    if part_detection_obj.deployment_type == "cascade":
+        url = "http://" + str(model_manager_module_url()) + "/set_voe_config"
+        data = {"name": part_detection_obj.cascade.name, "config": part_detection_obj.cascade.flow}
+        res = requests.post(url, json=data)
+        logger.warning(res.text)
 
     # =====================================================
     # 3. Deploy Model and params                        ===
     # =====================================================
+
+    logger.info("Project train/export success.")
+    logger.info("Deploying...")
     try:
         deploy_worker(part_detection_id=part_detection_obj.id)
         logger.info("Part Detection successfully deployed to inference_module!")
@@ -77,8 +95,8 @@ def if_trained_then_deploy_worker(part_detection_id):
     # 4. Deployed! Saving                               ===
     # =====================================================
     part_detection_obj.deployed = True
-    part_detection_obj.deploy_timestamp = timezone.now()
     part_detection_obj.has_configured = True
+    part_detection_obj.deploy_timestamp = timezone.now()
     part_detection_obj.save()
 
     logger.info("PartDetection is deployed before: %s", part_detection_obj.deployed)
@@ -95,14 +113,15 @@ def deploy_worker(part_detection_id):
     """
     REQUEST_TIMEOUT = 60
     instance: PartDetection = PartDetection.objects.get(pk=part_detection_id)
-    if not instance.has_configured:
-        logger.error("This PartDetection is not configured")
-        logger.error("Not sending any request to inference")
-        return
+    # if not instance.has_configured:
+    #     logger.error("This PartDetection is not configured")
+    #     logger.error("Not sending any request to inference")
+    #     return
     confidence_min = getattr(instance, "accuracyRangeMin", 30)
     confidence_max = getattr(instance, "accuracyRangeMax", 80)
     max_images = getattr(instance, "maxImages", 10)
     metrics_is_send_iothub = getattr(instance, "metrics_is_send_iothub", False)
+    ava_is_send_iothub = getattr(instance, "ava_is_send_iothub", False)
     metrics_accuracy_threshold = getattr(instance, "metrics_accuracy_threshold", 50)
     metrics_frame_per_minutes = getattr(instance, "metrics_frame_per_minutes", 6)
     need_retraining = getattr(instance, "needRetraining", False)
@@ -126,14 +145,25 @@ def deploy_worker(part_detection_id):
     # =====================================================
     # 2.1 Update endpoint                               ===
     # =====================================================
-    requests.post(
-        "http://" + str(instance.inference_module.url) + "/update_endpoint",
-        json={
-            "endpoint": instance.project.get_prediction_uri(),
-            "headers": instance.project.prediction_header,
-        },
-        timeout=REQUEST_TIMEOUT,
-    )
+    if instance.deployment_type == 'cascade':
+        requests.post(
+            "http://" + str(instance.inference_module.url) + "/update_endpoint",
+            json={
+                "endpoint": "ovmsserver:9001",
+                "headers": "",
+                "pipeline": instance.cascade.flow,
+            },
+            timeout=REQUEST_TIMEOUT,
+        ) 
+    else:
+        requests.post(
+            "http://" + str(instance.inference_module.url) + "/update_endpoint",
+            json={
+                "endpoint": instance.project.get_prediction_uri(),
+                "headers": instance.project.prediction_header,
+            },
+            timeout=REQUEST_TIMEOUT,
+        )
 
     # =====================================================
     # 2.2 Update model                                  ===
@@ -200,8 +230,14 @@ def deploy_worker(part_detection_id):
     # =====================================================
     logger.info("Update Cam!!!")
     cameras = instance.cameras.all()
+    if instance.deployment_type == "cascade":
+        cascade_name = instance.cascade.name
+    else:
+        cascade_name = "no cascade"
     res_data = {
         "fps": instance.fps,
+        "cascade_name": cascade_name,
+        "ava_is_send": ava_is_send_iothub,
         "lva_mode": instance.inference_protocol,
         "cameras": [],
     }
@@ -275,7 +311,7 @@ def if_trained_then_deploy_catcher(part_detection_id):
     except Exception:
         upcreate_deploy_status(
             part_detection_id=part_detection_id,
-            status="failed",
+            status="Failed",
             log=traceback.format_exc(),
             need_to_send_notification=True,
         )

@@ -31,6 +31,7 @@ interface SceneProps {
   onBoxCreated?: () => void;
   parts: Part[];
   selectedImageId: number;
+  selectedPartId: number;
 }
 const Scene: FC<SceneProps> = ({
   url = '',
@@ -40,6 +41,7 @@ const Scene: FC<SceneProps> = ({
   onBoxCreated,
   parts,
   selectedImageId,
+  selectedPartId,
 }) => {
   const dispatch = useDispatch();
   const [imageSize, setImageSize] = useState<Size2D>(defaultSize);
@@ -56,18 +58,32 @@ const Scene: FC<SceneProps> = ({
    */
   const changeCursorState = useCallback(
     (cursorType?: LabelingCursorStates): void => {
-      if (!cursorType) {
-        if (noMoreCreate) {
-          setCursorState(LabelingCursorStates.default);
-        } else {
-          setCursorState(LabelingCursorStates.crosshair);
-        }
-      } else {
+      if (cursorType) {
         setCursorState(cursorType);
+        return;
       }
+
+      if (selectedPartId === 0) {
+        setCursorState(LabelingCursorStates.notAllowed);
+        return;
+      }
+
+      if (noMoreCreate) {
+        setCursorState(LabelingCursorStates.default);
+        return;
+      }
+      setCursorState(LabelingCursorStates.crosshair);
     },
-    [noMoreCreate],
+    [noMoreCreate, selectedPartId],
   );
+
+  const onLeaveBoxCursorChange = useCallback(() => {
+    if (selectedPartId === 0) {
+      setCursorState(LabelingCursorStates.notAllowed);
+      return;
+    }
+    setCursorState(LabelingCursorStates.crosshair);
+  }, [selectedPartId]);
 
   const removeBox = useCallback((): void => {
     // Avoid find undefined annotation
@@ -78,12 +94,15 @@ const Scene: FC<SceneProps> = ({
     dispatch(removeAnnotation(annotations[selectedAnnotationIndex].id));
     setWorkState(WorkState.None);
     setSelectedAnnotationIndex(null);
-  }, [dispatch, annotations, selectedAnnotationIndex, setWorkState, selectedImageId]);
+
+    if (selectedPartId === 0) {
+      setCursorState(LabelingCursorStates.notAllowed);
+      return;
+    }
+    setCursorState(LabelingCursorStates.crosshair);
+  }, [dispatch, annotations, selectedAnnotationIndex, setWorkState, selectedImageId, selectedPartId]);
 
   const onMouseDown = (e: KonvaEventObject<MouseEvent>): void => {
-    // * Single bounding box labeling type condition
-    if (noMoreCreate || workState === WorkState.Creating) return;
-
     // remove selecting labeling
     if (workState === WorkState.Selecting && e.target.attrs.name === 'cancel') return;
 
@@ -91,9 +110,17 @@ const Scene: FC<SceneProps> = ({
     if (
       workState === WorkState.Selecting &&
       ['anchor-0', 'anchor-1', 'anchor-2', 'anchor-3'].includes(e.target.attrs.name)
-    ) {
+    )
+      return;
+
+    // Close selecting state when not select part
+    if (WorkState.Selecting === workState && selectedPartId === 0) {
+      setWorkState(WorkState.None);
       return;
     }
+
+    // Don't work on not select part
+    if (WorkState.None === workState && selectedPartId === 0) return;
 
     dispatch(thunkCreateAnnotation({ x: e.evt.offsetX / scale.current, y: e.evt.offsetY / scale.current }));
     // Select the last annotation. Use lenth instead of length -1 because the annotations here is the old one
@@ -158,39 +185,42 @@ const Scene: FC<SceneProps> = ({
         >
           <Image image={image} />
           {!isLoading &&
-            annotations.map((annotation, i) => (
-              <Group key={i}>
-                <RemoveBoxButton
-                  imageSize={imageSize}
-                  visible={!isDragging && workState !== WorkState.Creating && i === selectedAnnotationIndex}
-                  label={annotation.label}
-                  scale={scale.current}
-                  changeCursorState={changeCursorState}
-                  removeBox={removeBox}
-                />
-                <Box2d
-                  workState={workState}
-                  onSelect={onSelect}
-                  annotation={annotation}
-                  scale={scale.current}
-                  annotationIndex={i}
-                  selected={i === selectedAnnotationIndex}
-                  dispatch={dispatch}
-                  changeCursorState={changeCursorState}
-                />
-                <LabelText
-                  x={annotation.label.x1}
-                  y={
-                    annotation.label.y1 < 20 / scale.current
-                      ? annotation.label.y1
-                      : annotation.label.y1 - 30 / scale.current
-                  }
-                  fontSize={20 / scale.current}
-                  text={annotation.part && parts.find((part) => part.id === annotation.part).name}
-                  padding={5 / scale.current}
-                />
-              </Group>
-            ))}
+            annotations.map((annotation, i) => {
+              return (
+                <Group key={i}>
+                  <RemoveBoxButton
+                    imageSize={imageSize}
+                    visible={!isDragging && workState !== WorkState.Creating && i === selectedAnnotationIndex}
+                    label={annotation.label}
+                    scale={scale.current}
+                    changeCursorState={changeCursorState}
+                    removeBox={removeBox}
+                  />
+                  <Box2d
+                    workState={workState}
+                    onSelect={onSelect}
+                    annotation={annotation}
+                    scale={scale.current}
+                    annotationIndex={i}
+                    selected={i === selectedAnnotationIndex}
+                    dispatch={dispatch}
+                    changeCursorState={changeCursorState}
+                    onLeaveBoxCursorChange={onLeaveBoxCursorChange}
+                  />
+                  <LabelText
+                    x={annotation.label.x1}
+                    y={
+                      annotation.label.y1 < 20 / scale.current
+                        ? annotation.label.y1
+                        : annotation.label.y1 - 30 / scale.current
+                    }
+                    fontSize={20 / scale.current}
+                    text={annotation.part && parts.find((part) => part.id === annotation.part).name}
+                    padding={5 / scale.current}
+                  />
+                </Group>
+              );
+            })}
           {isLoading && (
             <KonvaText
               x={imageSize.width / 2 - 50}

@@ -116,6 +116,13 @@
               "image": "${MODULES.WebModule}",
               "createOptions": {
                 "HostConfig": {
+                  "Mounts": [
+                    {
+                      "Target": "/workspace",
+                      "Source": "ovmsworkspace",
+                      "Type": "volume"
+                    }
+                  ],
                   "LogConfig": {
                     "Type": "",
                     "Config": {
@@ -321,30 +328,27 @@
               }
             }
           },
-          "ovms-server": {
-            "version": "1.0",
+          "modelmanager": {
+            "version": "1.1",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
+            "startupOrder": 0,
             "settings": {
-              "image": "docker.io/kakalin/ovms-server",
+              "image": "${MODULES.ModelManagerModule}",
               "createOptions": {
-                "ExposedPorts": {
-                  "9000/tcp": {}
-                },
-                "Cmd": [
-                  "/ovms/bin/ovms --model_path /models/yolov3 --model_name yolov3 --port 9000"
-                ],
-                "Entrypoint": [
-                  "sh",
-                  "-c"
-                ],
                 "HostConfig": {
+                  "Mounts": [
+                    {
+                      "Target": "/workspace",
+                      "Source": "ovmsworkspace",
+                      "Type": "volume"
+                    }
+                  ],
                   "PortBindings": {
-                    "9000/tcp": [
+                    "8585/tcp": [
                       {
-                        "HostIp": "",
-                        "HostPort": "9000"
+                        "HostPort": "8585"
                       }
                     ]
                   },
@@ -355,38 +359,44 @@
                       "max-file": "10"
                     }
                   }
-                },
-                "Labels": {
-                  "com.docker.compose.project": "yolov3-ovms-iotedge",
-                  "com.docker.compose.service": "ovms-server",
-                  "com.docker.compose.oneoff": "False",
-                  "com.docker.compose.container-number": "1",
-                  "com.docker.compose.version": "1.24.0",
-                  "com.docker.compose.config-hash": "7f09e8165c07b4b5d43b0d9ac09a06a4062a31da2ae1e43997ee8e0f4a90fcfd"
                 }
               }
             }
           },
-          "ovms-app": {
-            "version": "1.0",
+          "ovmsserver": {
+            "version": "1.1",
             "type": "docker",
             "status": "running",
             "restartPolicy": "always",
+            "startupOrder": 1,
             "settings": {
-              "image": "docker.io/kakalin/ovms-app",
+              "image": "openvino/model_server",
               "createOptions": {
                 "ExposedPorts": {
-                  "5010/tcp": {}
+                  "9001/tcp": {},
+                  "8001/tcp": {}
                 },
-                "Env": [
-                  "PYTHONUNBUFFERED=1"
+                "Cmd": [
+                  "/ovms/bin/ovms --config_path /workspace/config.json --port 9001 --rest_port 8001 --log_level DEBUG"
                 ],
+                "Entrypoint": ["sh", "-c"],
                 "HostConfig": {
+                  "Mounts": [
+                    {
+                      "Target": "/workspace",
+                      "Source": "ovmsworkspace",
+                      "Type": "volume"
+                    }
+                  ],
                   "PortBindings": {
-                    "5010/tcp": [
+                    "9001/tcp": [
                       {
-                        "HostIp": "",
-                        "HostPort": "5010"
+                        "HostPort": "9001"
+                      }
+                    ],
+                    "8001/tcp": [
+                      {
+                        "HostPort": "8001"
                       }
                     ]
                   },
@@ -397,14 +407,6 @@
                       "max-file": "10"
                     }
                   }
-                },
-                "Labels": {
-                  "com.docker.compose.project": "yolov3-ovms-iotedge",
-                  "com.docker.compose.service": "ovms-app",
-                  "com.docker.compose.oneoff": "False",
-                  "com.docker.compose.container-number": "1",
-                  "com.docker.compose.version": "1.24.0",
-                  "com.docker.compose.config-hash": "dcdef0702a8e26d7c244eb1fc29534413b8822c98e1db982a604609a5b2e8c1a"
                 }
               }
             }

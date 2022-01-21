@@ -8,11 +8,11 @@ from django.db.models.signals import pre_save
 from rest_framework.exceptions import APIException
 
 from ..azure_projects.models import Project
-from .constants import CUSTOMVISION_LEAST_IMAGE_TO_TRAIN
+from .constants import OBJECTDETECTION_LEAST_IMAGE_TO_TRAIN, CASSIFICATION_LEAST_IMAGE_TO_TRAIN
 from .exceptions import PartNotEnoughImagesToTrain
 
 logger = logging.getLogger(__name__)
-
+CUSTOMVISION_LEAST_IMAGE_TO_TRAIN = 15
 
 class Part(models.Model):
     """Part Model"""
@@ -37,6 +37,11 @@ class Part(models.Model):
             bool: if part has enough images and is trainable.
         """
         try:
+            if self.project.type == 'ObjectDetection':
+                CUSTOMVISION_LEAST_IMAGE_TO_TRAIN = OBJECTDETECTION_LEAST_IMAGE_TO_TRAIN
+            else:
+                CUSTOMVISION_LEAST_IMAGE_TO_TRAIN = CASSIFICATION_LEAST_IMAGE_TO_TRAIN
+
             if self.project.is_demo:
                 return True
             local_count = self.get_tagged_images_count_local()

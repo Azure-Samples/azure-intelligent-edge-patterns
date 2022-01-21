@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "vision_on_edge.streams",
     "vision_on_edge.azure_settings",
     "vision_on_edge.azure_projects",
+    "vision_on_edge.azure_cascades",
     "vision_on_edge.azure_training_status",
     "vision_on_edge.notifications",
     "vision_on_edge.azure_parts",

