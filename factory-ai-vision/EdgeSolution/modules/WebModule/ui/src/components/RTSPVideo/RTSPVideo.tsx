@@ -75,7 +75,7 @@ export const RTSPVideoComponent: React.FC<RTSPVideoProps> = ({
           >
             • LIVE
           </div>
-          <img src={src} style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+          <img src={src} style={{ width: '100%', height: '100%', objectFit: 'contain' }} alt="" />
         </>
       ) : null}
     </div>
