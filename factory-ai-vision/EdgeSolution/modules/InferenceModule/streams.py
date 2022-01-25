@@ -892,7 +892,7 @@ class Stream:
             if to_send:
                 send_message_to_lva(self.cam_id)
                 self.lva_last_send_time = time.time()
-                self.lva_interval = 0
+                self.lva_interval = 80
 
     def draw_img(self):
 

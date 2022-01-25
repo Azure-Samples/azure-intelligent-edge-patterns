@@ -114,6 +114,86 @@ age_gender_recognition_config = {
     }
 }
 
+vehicle_attributes_recognition_config = {
+    "model_config_list": [
+        {
+            "config": {
+                "name": "vehicle_attributes_recognition",
+                "base_path": "/workspace/vehicle-attributes-recognition-barrier-0039/",
+                "shape": "(1,3,64,64)",
+                "layout": "NHWC",
+                "target_device": "HDDL"
+            }
+        },
+    ],
+    "cascade_config_list": {
+        "openvino_model_name": "vehicle-attributes-recognition-barrier-0039",
+        "inputs": [{
+            "name": "data",
+            "metadata": {
+                "type": "image",
+                "shape": [1, 3, 64, 64],
+                "layout": ["N", "H", "W", "C"],
+            }
+        }],
+        "outputs": [
+            {
+                "name": "color",
+                "metadata": {
+                    "type": "classification",
+                    "shape": [1, 7, 1, 1],
+                    "layout": [1, "P", 1, 1],
+                    "labels": ["white", "gray", "yellow", "red", "green", "blue", "black"],
+                }
+            },
+            {
+                "name": "type",
+                "metadata": {
+                    "type": "classification",
+                    "shape": [1, 4, 1, 1],
+                    "layout": [1, "P", 1, 1],
+                    "labels": ["car", "bus", "truck", "van"],
+                }
+            }
+        ]
+    }
+}
+
+
+
+pedestrian_and_vehicle_detector_config = {
+    "model_config_list": [{
+        "config": {
+            "name": "pedestrian_and_vehicle_detector",
+            "base_path": "/workspace/pedestrian-and-vehicle-detector-adas-0001/",
+            "shape": "(1,3,400,600)",
+            "layout": "NHWC",
+            "target_device": "HDDL"
+        }
+    }],
+    "cascade_config_list": {
+        "openvino_model_name": "pedestrian-and-vehicle-detector-adas-0001",
+        "inputs": [{
+            "name": "data",
+            "metadata": {
+                "type": "image",    
+                "shape": [1, 3, 416, 416],
+                "layout": ["N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
+        }],
+        "outputs": [{
+            "name": "detection_out",
+            "metadata": {
+                "type": "bounding_box",
+                "shape": [1, 1, 200, 7],
+                "layout": [1, 1, "B", "F"],
+                "labels": ["person"],
+            }
+        }]
+    }
+}
+
 person_detection_config = {
     "model_config_list": [{
         "config": {
@@ -141,7 +221,7 @@ person_detection_config = {
                 "type": "bounding_box",
                 "shape": [1, 1, 200, 7],
                 "layout": [1, 1, "B", "F"],
-                "labels": ["person"],
+                "labels": ["vehicle", "pedestrian"],
             }
         }]
     }
