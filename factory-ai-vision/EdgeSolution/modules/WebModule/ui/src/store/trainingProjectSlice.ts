@@ -38,11 +38,15 @@ export type Handler = {
 };
 
 const convertOpenVinoName = (project: TrainingProject) => {
-  if (project.category === 'openvino' && project.name === 'face_detection') return 'Face Detection';
-  if (project.category === 'openvino' && project.name === 'emotion_recognition') return 'Emotion Recognition';
+  if (project.category !== 'openvino') return project.name;
+
   if (project.category === 'openvino' && project.name === 'age_gender_recognition')
     return 'Age / Gender Recognition';
-  return project.name;
+
+  return project.name
+    .split('_')
+    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
+    .join(' ');
 };
 
 export type TrainingProject = {

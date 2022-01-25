@@ -16,7 +16,7 @@ import { TrainingProject } from '../../store/trainingProjectSlice';
 import { convertProjectType } from '../utils';
 
 import Tag from './Tag';
-import AddOpenVinoPanel from './Panel/AddOpenVino';
+import AddOpenVinoPanel from './Panel/AddOpenVinoPanel';
 
 const CARD_PART_LIMIT = 5;
 
@@ -62,6 +62,8 @@ const getFilterProjects = (projects: IntelProject[], input: string) => {
   return projects.filter((project) => project.name.match(input));
 };
 
+const getExceededName = (name: string) => (name.length > 24 ? `${name.slice(0, 24)}...` : name);
+
 const IntelProjectDashboard = (props: Props) => {
   const { intelProjectList, onCloseIntel, openVinoProjectList } = props;
 
@@ -75,7 +77,7 @@ const IntelProjectDashboard = (props: Props) => {
   const onCreateIntelModel = useCallback(
     async (cascade: IntelProject) => {
       await dispatch(
-        createIntelProject({ model_name: cascade.create_name, project_type: cascade.model_type }),
+        createIntelProject({ create_name: cascade.create_name, project_type: cascade.model_type }),
       );
 
       onCloseIntel();
@@ -135,7 +137,7 @@ const IntelProjectDashboard = (props: Props) => {
                   <img style={{ height: '60px', width: '60px' }} src="/icons/modelCard.png" alt="icon" />
                   <Stack horizontal horizontalAlign="space-between" styles={{ root: classes.titleContainer }}>
                     <Stack styles={{ root: classes.titleWrapper }}>
-                      <Label>{card.name}</Label>
+                      <Label>{getExceededName(card.name)}</Label>
                       <Text styles={{ root: classes.titleType }}>{convertProjectType(card.model_type)}</Text>
                     </Stack>
                     <Stack horizontalAlign="center" verticalAlign="center">
@@ -208,14 +210,7 @@ const IntelProjectDashboard = (props: Props) => {
       <AddOpenVinoPanel
         isOpen={isOpen}
         onDissmiss={() => setIsOpen(false)}
-        intel={{
-          id: selectedId,
-          name: intelProjectList[selectedId].name,
-          describe: intelProjectList[selectedId].describe,
-          imageUrl: intelProjectList[selectedId].imageUrl,
-          inputDescribe: intelProjectList[selectedId].inputDescribe,
-          metric: intelProjectList[selectedId].metric,
-        }}
+        intel={intelProjectList[selectedId]}
         onClickAddModel={() => onCreateIntelModel(intelProjectList[selectedId])}
         isAddIntel={isDisableAddButton(intelProjectList[selectedId], openVinoProjectList)}
       />
