@@ -305,10 +305,10 @@ class ProjectViewSet(FiltersMixin, viewsets.ModelViewSet):
 
         queryset = self.get_queryset()
 
-        model_name = request.data['model_name']
+        model_name = request.data['create_name']
         project_type = request.data['project_type']
         models = [
-            "face_detection", "age_gender_recognition", "emotion_recognition"
+            "face_detection", "age_gender_recognition", "emotion_recognition", "vehicle_attributes_recognition", "pedestrian_and_vehicle_detector", "person_detection"
         ]
 
         if model_name in models:

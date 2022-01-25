@@ -114,6 +114,40 @@ age_gender_recognition_config = {
     }
 }
 
+person_detection_config = {
+    "model_config_list": [{
+        "config": {
+            "name": "person_detection",
+            "base_path": "/workspace/person-detection-retail-0013/",
+            "shape": "(1,3,400,600)",
+            "layout": "NHWC",
+            "target_device": "HDDL"
+        }
+    }],
+    "cascade_config_list": {
+        "openvino_model_name": "person-detection-retail-0013",
+        "inputs": [{
+            "name": "data",
+            "metadata": {
+                "type": "image",    
+                "shape": [1, 3, 416, 416],
+                "layout": ["N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
+        }],
+        "outputs": [{
+            "name": "detection_out",
+            "metadata": {
+                "type": "bounding_box",
+                "shape": [1, 1, 200, 7],
+                "layout": [1, 1, "B", "F"],
+                "labels": ["person"],
+            }
+        }]
+    }
+}
+
+
 
 def create_config(model_name):
     config_file = "/workspace/config.json"
@@ -128,6 +162,9 @@ def create_config(model_name):
     elif model_name == "emotion_recognition":
         model_config_list = emotion_recognition_config['model_config_list']
         cascade_config_list = emotion_recognition_config['cascade_config_list']
+    elif model_name == "person_detection":
+        model_config_list = person_detection_config['model_config_list']
+        cascade_config_list = person_detection_config['cascade_config_list']
     else:
         return config
     
@@ -164,12 +201,13 @@ def get_model_info():
                 parser.read(model_type_file)
                 model_type = parser['model']['type']
                 model_id = parser['model']['id']
-                description_title = parser['description']['title']
-                description_content = parser['description']['content']
-                description_image_url = parser['description']['imageURL']
-                inputs_content = parser['inputs']['content']
-                inputs_layout = parser['inputs']['layout']
-                outputs_content = parser['outputs']['content']
+                create_name = parser['model']['create_name']   # create name
+                # description_title = parser['description']['title']
+                # description_content = parser['description']['content']
+                # description_image_url = parser['description']['imageURL']
+                # inputs_content = parser['inputs']['content']
+                # inputs_layout = parser['inputs']['layout']
+                # outputs_content = parser['outputs']['content']
 
                 class_file = glob.glob('{}/classes.*'.format(cur_path))
                 if class_file:
@@ -181,13 +219,14 @@ def get_model_info():
                     'model_name': model_name,
                     'model_type': model_type,
                     'model_id': model_id,
-                    'classes': classes,
-                    'description_title': description_title,
-                    'description_content': description_content,
-                    'description_image_url': description_image_url,
-                    'inputs_content': inputs_content,
-                    'inputs_layout': inputs_layout,
-                    'outputs_content': outputs_content
+                    'create_name': create_name
+                    # 'classes': classes,
+                    # 'description_title': description_title,
+                    # 'description_content': description_content,
+                    # 'description_image_url': description_image_url,
+                    # 'inputs_content': inputs_content,
+                    # 'inputs_layout': inputs_layout,
+                    # 'outputs_content': outputs_content
                 }
             else:
                 continue
