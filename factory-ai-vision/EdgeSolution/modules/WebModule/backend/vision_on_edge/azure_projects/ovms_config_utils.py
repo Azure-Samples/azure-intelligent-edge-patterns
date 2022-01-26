@@ -129,7 +129,7 @@ vehicle_attributes_recognition_config = {
     "cascade_config_list": {
         "openvino_model_name": "vehicle-attributes-recognition-barrier-0039",
         "inputs": [{
-            "name": "data",
+            "name": "input",
             "metadata": {
                 "type": "image",
                 "shape": [1, 3, 64, 64],
@@ -188,7 +188,7 @@ pedestrian_and_vehicle_detector_config = {
                 "type": "bounding_box",
                 "shape": [1, 1, 200, 7],
                 "layout": [1, 1, "B", "F"],
-                "labels": ["person"],
+                "labels": ["vehicle", "pedestrian"],
             }
         }]
     }
@@ -221,7 +221,7 @@ person_detection_config = {
                 "type": "bounding_box",
                 "shape": [1, 1, 200, 7],
                 "layout": [1, 1, "B", "F"],
-                "labels": ["vehicle", "pedestrian"],
+                "labels": ["person"],
             }
         }]
     }
@@ -242,6 +242,12 @@ def create_config(model_name):
     elif model_name == "emotion_recognition":
         model_config_list = emotion_recognition_config['model_config_list']
         cascade_config_list = emotion_recognition_config['cascade_config_list']
+    elif model_name == "vehicle_attributes_recognition":
+        model_config_list = vehicle_attributes_recognition_config['model_config_list']
+        cascade_config_list = vehicle_attributes_recognition_config['cascade_config_list']
+    elif model_name == "pedestrian_and_vehicle_detector":
+        model_config_list = pedestrian_and_vehicle_detector_config['model_config_list']
+        cascade_config_list = pedestrian_and_vehicle_detector_config['cascade_config_list']
     elif model_name == "person_detection":
         model_config_list = person_detection_config['model_config_list']
         cascade_config_list = person_detection_config['cascade_config_list']
