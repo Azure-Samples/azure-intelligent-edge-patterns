@@ -44,7 +44,7 @@ export const Instruction: React.FC<InstructionProps> = ({
       )}
       horizontal
     >
-      <img src={smallIcon ? '/icons/instruction_icon_sm.svg' : '/icons/instruction_icon.svg'} />
+      <img src={smallIcon ? '/icons/instruction_icon_sm.svg' : '/icons/instruction_icon.svg'} alt="" />
       <Stack tokens={{ padding: 10 }}>
         <Text style={{ fontWeight: 600 }}>{title}</Text>
         <Text>{subtitle}</Text>
