@@ -1,7 +1,7 @@
 -r ./core.txt
 asgiref==3.2.10
 django==3.0.8
-djangorestframework==3.11.0
+djangorestframework==3.11.2
 drf-yasg2
 drf-url-filters==0.5.1
 pillow
