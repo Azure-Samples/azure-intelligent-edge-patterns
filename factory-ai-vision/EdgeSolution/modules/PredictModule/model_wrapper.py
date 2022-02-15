@@ -26,6 +26,7 @@ GPU_MAX_FRAME_RATE = 30
 CPU_MAX_FRAME_RATE = 10
 
 LVA_MODE = os.environ.get("LVA_MODE", "grpc")
+DEVICE_TYPE = os.environ.get("DEVICE_TYPE", "")
 
 logger = logging.getLogger(__name__)
 
@@ -68,10 +69,13 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         return self.get_device() == 'vpu'
 
     def get_device(self):
-        device = onnxruntime.get_device()
-        if device == 'CPU-OPENVINO_MYRIAD':
-            device = 'vpu'
-        return device.lower()
+        if DEVICE_TYPE != "":
+            return DEVICE_TYPE
+        else:
+            device = onnxruntime.get_device()
+            if device == 'CPU-OPENVINO_CPU_FP32':
+                device = 'vpu'
+            return device.lower()
 
     def set_is_scenario(self, is_scenario):
         self.is_scenario = is_scenario
@@ -191,11 +195,11 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
         is_scenario_model = "scenario_models" in model_dir
 
         if is_scenario_model:
-            model_dir += '/onnx'
-            # if self.is_vpu:
-            #     model_dir += '/onnxfloat16'
-            # else:
-            #     model_dir += '/onnx'
+            # model_dir += '/onnx'
+            if self.is_vpu:
+                model_dir += '/onnxfloat16'
+            else:
+                model_dir += '/onnx'
 
         model = self.load_model(model_dir, is_default_model, is_scenario_model)
 

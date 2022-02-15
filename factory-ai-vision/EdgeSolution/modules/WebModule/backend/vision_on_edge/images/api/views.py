@@ -20,6 +20,14 @@ class ImageViewSet(FiltersMixin, viewsets.ModelViewSet):
     filter_backends = (filters.OrderingFilter,)
     filter_mappings = {"is_demo": "is_demo", "project_id": "project_id"}
 
+    def get_queryset(self):
+        project = self.request.query_params.get('project')
+        if project:
+            queryset = Image.objects.filter(project=project)
+        else:
+            queryset = Image.objects.all()
+        return queryset
+
     def destroy(self, request, **kwargs):
         """destroy.
 

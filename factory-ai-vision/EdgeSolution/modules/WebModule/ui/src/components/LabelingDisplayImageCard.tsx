@@ -43,7 +43,9 @@ export const LabelingDisplayImageCard: React.FC<LabelingDilplayImageCardProps> =
         {/* <Stack.Item>{partName && <PartTag status={partTagStatus} text={partName} />}</Stack.Item> */}
         <Stack horizontal tokens={{ childrenGap: '5px' }}>
           {parts.length > 0 &&
-            parts.map((part) => <Stack.Item>{<PartTag status={partTagStatus} text={part} />}</Stack.Item>)}
+            parts.map((part, i) => (
+              <Stack.Item key={i}>{<PartTag status={partTagStatus} text={part} />}</Stack.Item>
+            ))}
         </Stack>
       </Card.Section>
     </Card>

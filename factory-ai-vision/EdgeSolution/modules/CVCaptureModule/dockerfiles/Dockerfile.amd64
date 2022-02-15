@@ -1,15 +1,24 @@
-FROM python:3.8
+FROM amd64/python:3.8-slim-buster
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    libgl1-mesa-glx \
-    && rm -rf /var/lib/apt/lists/*
-# libgl1-mesa-glx: opencv2 libGL.so error workaround
 
 WORKDIR /app
 
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libffi-dev \
+    libgl1-mesa-glx \
+    libgtk2.0-dev \
+    libssl-dev \
+    unzip \
+    && rm -rf /var/lib/apt/lists/*
+# libgl1-mesa-glx: opencv2 libGL.so error workaround
+
+
 COPY requirements.txt .
 RUN pip install -r requirements.txt
+
+RUN apt-get install -y --no-install-recommends libglib2.0-0
+
 
 COPY main.py .
 COPY streams.py .

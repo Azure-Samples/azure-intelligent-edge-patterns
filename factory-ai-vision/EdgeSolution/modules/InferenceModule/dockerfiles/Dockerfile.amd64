@@ -1,7 +1,7 @@
 # =========================================================
 # Base
 # =========================================================
-FROM amd64/python:3.8
+FROM amd64/python:3.8-slim-buster
 
 WORKDIR /app
 
@@ -34,8 +34,12 @@ ENV LC_ALL en_US.UTF-8
 # =========================================================
 COPY requirements/base.txt ./requirements/base.txt
 COPY requirements/cpu.txt ./requirements/cpu.txt
-RUN pip install --upgrade pip 
-RUN pip install -r requirements/cpu.txt --ignore-installed
+RUN pip install --upgrade pip
+RUN --mount=type=cache,target=/root/.cache/pip \
+    pip install -r requirements/cpu.txt --ignore-installed \
+    pip install -U pydantic==1.7.2
+
+RUN apt-get install -y --no-install-recommends libglib2.0-0
 
 # ENV CONDA_ENV_NAME python38
 # RUN conda create --name python38 python=3.8.5 -y &&\
@@ -47,14 +51,14 @@ RUN pip install -r requirements/cpu.txt --ignore-installed
 # Copy Source Code
 # =========================================================
 COPY coco_classes.txt ./
-COPY default_model default_model/
-COPY default_model_6parts default_model_6parts/
+# COPY default_model default_model/
+# COPY default_model_6parts default_model_6parts/
 COPY grpc_topology.json ./
 COPY http_topology.json ./
-COPY sample_video sample_video/
-COPY scenario_models scenario_models/
-RUN chmod 777 sample_video/video.mp4
-RUN chmod 777 default_model
+# COPY sample_video sample_video/
+# COPY scenario_models scenario_models/
+# RUN chmod 777 sample_video/video.mp4
+# RUN chmod 777 default_model
 
 COPY api/__init__.py ./api/__init__.py
 COPY api/models.py ./api/models.py
@@ -84,6 +88,13 @@ COPY stream_manager.py ./
 COPY streams.py ./
 COPY tracker.py ./
 COPY utility.py ./
+COPY ovms_utils.py ./
+COPY yolo_utils.py ./
+COPY cascade/*.py ./cascade/
+
+
+# remove pip cache
+# RUN pip cache purge
 
 # =========================================================
 # Run

@@ -13,7 +13,6 @@ import {
 import * as R from 'ramda';
 import { useDispatch } from 'react-redux';
 
-// import { thunkPostCustomProject } from '../../store/project/projectActions';
 import { createCustomProject, updateCustomProject } from '../../store/trainingProjectSlice';
 
 const toBase64 = (file) =>
@@ -111,7 +110,7 @@ const AddModelPanel: React.FC<AddModelPanelProps> = ({
 
     setLoading(true);
     if (mode === PanelMode.Create) {
-      await dispatch(createCustomProject(formData));
+      // await dispatch(createCustomProject(formData));
     } else {
       await dispatch(updateCustomProject(formData));
     }
@@ -119,16 +118,7 @@ const AddModelPanel: React.FC<AddModelPanelProps> = ({
     setLoading(false);
     onDissmiss();
     setFormData(initialValue);
-  }, [
-    dispatch,
-    formData.name,
-    formData.endPoint,
-    formData.header,
-    formData.labels,
-    mode,
-    onDissmiss,
-    validate,
-  ]);
+  }, [dispatch, formData, mode, onDissmiss, validate, initialValue]);
 
   const onRenderFooterContent = useCallback(
     () => (

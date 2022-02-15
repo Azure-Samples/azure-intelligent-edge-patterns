@@ -128,11 +128,21 @@ class Image(models.Model):
                 part_ids = json.loads(instance.part_ids)
         else:
             part_ids = []
+
+        updated_labels = []
         if instance.labels is not None:
             labels = json.loads(instance.labels)
             for label in labels:
-                if str(label['part']) not in part_ids:
-                    part_ids.append(str(label['part']))
+                if int(label['x2']) > int(label['x1']) and int(label['y2']) > int(label['y1']):
+                    updated_labels.append(label)
+                    if str(label['part']) not in part_ids:
+                        part_ids.append(str(label['part']))
+                else:
+                    logger.warning("Label format not accepted")
+                    logger.warning("Label format not accepted")
+                    logger.warning("Label format not accepted")
+
+        instance.labels = json.dumps(updated_labels)
         instance.part_ids = json.dumps(part_ids)
 
         if instance.project is None and instance.part is not None:

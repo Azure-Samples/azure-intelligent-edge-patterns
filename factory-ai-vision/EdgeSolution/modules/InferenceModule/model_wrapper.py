@@ -71,7 +71,7 @@ class ONNXRuntimeModelDeploy(ObjectDetection):
 
     def get_device(self):
         device = onnxruntime.get_device()
-        if device == 'CPU-OPENVINO_MYRIAD':
+        if device == 'CPU-OPENVINO_CPU_FP32':
             device = 'vpu'
         return device.lower()
 

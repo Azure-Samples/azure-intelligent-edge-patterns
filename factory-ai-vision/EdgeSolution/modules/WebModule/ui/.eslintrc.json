@@ -75,6 +75,8 @@
     "no-use-before-define": "off",
     "@typescript-eslint/no-use-before-define": "off",
     "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/camelcase": "warn",
+    "@typescript-eslint/ban-ts-ignore": true,
     "no-bitwise": ["error", { "int32Hint": true }],
     "promise/catch-or-return": ["error", { "allowFinally": true }],
     "no-param-reassign": [

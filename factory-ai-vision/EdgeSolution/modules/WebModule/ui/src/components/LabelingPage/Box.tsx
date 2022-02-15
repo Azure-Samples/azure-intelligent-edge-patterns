@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, FC, useCallback } from 'react';
-import { Line, Group, Circle } from 'react-konva';
+import { Line, Group, Circle, Rect } from 'react-konva';
 import { KonvaEventObject } from 'konva/types/Node';
 
 import { Box2dComponentProps, WorkState, LabelingCursorStates } from './type';
@@ -19,6 +19,7 @@ export const Box2d: FC<Box2dComponentProps> = ({
   changeCursorState = dummyFunction,
   color = 'white',
   draggable = true,
+  onLeaveBoxCursorChange,
 }) => {
   const [vertices, setVertices] = useState<BoxLabel>(annotation.label);
   const anchorRadius: number = 5 / scale;
@@ -112,6 +113,15 @@ export const Box2d: FC<Box2dComponentProps> = ({
         }
       }}
     >
+      <Rect
+        x={vertices.x1}
+        y={vertices.y1}
+        width={vertices.x2 - vertices.x1}
+        height={vertices.y2 - vertices.y1}
+        visible={selected}
+        fill="white"
+        opacity={0.3}
+      />
       <Line
         points={[
           vertices.x1,
@@ -129,7 +139,11 @@ export const Box2d: FC<Box2dComponentProps> = ({
         strokeWidth={strokeWidth}
         closed={true}
         onMouseEnter={(): void => changeCursorState(LabelingCursorStates.pointer)}
-        onMouseLeave={(): void => changeCursorState(LabelingCursorStates.default)}
+        onMouseLeave={(): void =>
+          onLeaveBoxCursorChange
+            ? onLeaveBoxCursorChange()
+            : changeCursorState(LabelingCursorStates.crosshair)
+        }
       />
       <Circle
         key={'anchor-0'}

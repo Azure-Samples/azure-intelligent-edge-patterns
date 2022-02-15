@@ -1,0 +1,55 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- develop
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+- task: Bash@3
+  inputs:
+    filePath: './factory-ai-vision/EdgeSolution/azure-pipelines-build.sh'
+  env:
+    BUILD_BUILD_NUMBER: $(Build.BuildNumber)
+    BUILD_SOURCE_BRANCHNAME: $(Build.SourceBranchName)
+  displayName: 'Generating IoT Edge module tag from Azure Pipelines'
+
+- task: AzureIoTEdge@2
+  inputs:
+    action: 'Build module images'
+    templateFilePath: './factory-ai-vision/EdgeSolution/deployment.cpu.template.json'
+    defaultPlatform: 'amd64'
+  displayName: 'Azure IoT Edge - Build module images'
+
+- task: AzureIoTEdge@2
+  inputs:
+    action: 'Push module images'
+    containerregistrytype: 'Azure Container Registry'
+    azureSubscriptionEndpoint: 'Microsoft Azure Sponsorship(091725d9-aeba-4638-8faf-d0e81a03a93d)'
+    azureContainerRegistry: '{"loginServer":"factoryairegistry.azurecr.io", "id" : "/subscriptions/091725d9-aeba-4638-8faf-d0e81a03a93d/resourceGroups/customvision/providers/Microsoft.ContainerRegistry/registries/factoryairegistry"}'
+    templateFilePath: './factory-ai-vision/EdgeSolution/deployment.cpu.template.json'
+    defaultPlatform: 'amd64'
+    fillRegistryCredential: 'true'
+  displayName: 'Azure IoT Edge - Push module images'
+  condition: ne(variables['Build.Reason'], 'PullRequest')
+
+- task: CopyFiles@2
+  inputs:
+    SourceFolder: 'factory-ai-vision/EdgeSolution'
+    Contents: |
+      deployment.*.template.json
+      **/module.json
+    TargetFolder: '$(Build.ArtifactStagingDirectory)'
+  condition: ne(variables['Build.Reason'], 'PullRequest')
+
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
+  displayName: 'Publish Artifact Drop.'
+  condition: ne(variables['Build.Reason'], 'PullRequest')

@@ -170,7 +170,7 @@
             "status": "running",
             "restartPolicy": "always",
             "settings": {
-              "image": "mcr.microsoft.com/media/video-analyzer:1",
+              "image": "mcr.microsoft.com/media/video-analyzer:1.1.0",
               "createOptions": {
                 "HostConfig": {
                   "LogConfig": {
@@ -180,9 +180,21 @@
                       "max-file": "10"
                     }
                   },
-                  "Binds": [],
-                  "IpcMode": "host"
+                  "Binds": [
+                    "/home/localedgeuser/samples/input:/var/media",
+                    "/var/lib/videoanalyzer/:/var/lib/videoanalyzer"
+                  ],
+                  "IpcMode": "host",
+                  "ShmSize": 1536870912
                 }
+              }
+            },
+            "env": {
+              "LOCAL_USER_ID": {
+                "value": "1010"
+              },
+              "LOCAL_GROUP_ID": {
+                "value": "1010"
               }
             }
           },
@@ -254,7 +266,7 @@
         "schemaVersion": "1.0",
         "routes": {
           "metrics": "FROM /messages/modules/inferencemodule/outputs/metrics INTO $upstream",
-          "InferenceToLVA": "FROM /messages/modules/inferencemodule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/lvaEdge/inputs/recordingTrigger\")"
+          "InferenceToLVA": "FROM /messages/modules/inferencemodule/outputs/InferenceToLVA INTO BrokeredEndpoint(\"/modules/avaedge/inputs/recordingTrigger\")"
         },
         "storeAndForwardConfiguration": {
           "timeToLiveSecs": 7200

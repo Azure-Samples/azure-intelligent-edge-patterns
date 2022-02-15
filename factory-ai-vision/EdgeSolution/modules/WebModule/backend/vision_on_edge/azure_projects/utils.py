@@ -12,12 +12,14 @@ from configs.general_configs import PRINT_THREAD
 
 from ..azure_app_insight.utils import get_app_insight_logger
 from ..azure_parts.models import Part
-from ..azure_parts.utils import batch_upload_parts_to_customvision
+from ..azure_parts.utils import batch_upload_parts_to_customvision, upload_part_to_customvision_helper
 from ..azure_settings.exceptions import SettingCustomVisionAccessFailed
+from ..azure_settings.models import Setting
 from ..azure_training_status import progress
 from ..azure_training_status.utils import upcreate_training_status
 from ..images.models import Image
 from ..images.utils import upload_images_to_customvision_helper
+from ..notifications.models import Notification
 from .exceptions import ProjectAlreadyTraining, ProjectRemovedError
 from .models import Project, Task
 
@@ -67,8 +69,118 @@ def update_app_insight_counter(
         logger.exception("update_app_insight_counter occur unexcepted error")
         raise
 
+def create_cv_project_helper(name: str, tags = None, project_type: str = None, classification_type: str = None):
+    setting_obj = Setting.objects.first()
+    inputs_ = [
+        {
+            "name": "data",
+            "metadata": {
+                "type": "image",    
+                "shape": [1, 3, 416, 416],
+                "layout": ["N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
+        }
+    ]
+    
+    inputs = json.dumps(inputs_)
+    project_obj = Project.objects.create(name=name, setting=setting_obj, is_demo=False, project_type=project_type, category="customvision", classification_type=classification_type, is_cascade=True, type="customvision_model", inputs=inputs)
 
-def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial: bool):
+    logger.info("Creating Parts:")
+    for tag in tags:
+        logger.info("Creating Part: %s",tag)
+        part_obj, created = Part.objects.update_or_create(
+            project_id=project_obj.id,
+            name=tag,
+            description="",
+        )
+
+        # Make sure part is created
+        if not created:
+            logger.exception("%s not created", tag)
+            continue
+        logger.info("Create Part: %s Success!", tag)
+
+    logger.info("Creating CV project:")
+    project_obj.create_project(project_type=project_type, classification_type=classification_type)
+
+    logger.info("Uploading tags to CV project:")
+    part_ids = [part.id for part in Part.objects.filter(project=project_obj)]
+    has_new_parts = batch_upload_parts_to_customvision(
+        project_id=project_obj.id, part_ids=part_ids, tags_dict={}
+    )
+
+    # update node outputs
+    trainer = project_obj.setting.get_trainer_obj()
+    customvision_project_id = project_obj.customvision_id
+    tags = trainer.get_tags(customvision_project_id)
+    labels = []
+    for tag in tags:
+        labels.append(tag.name)
+    outputs_ = [
+        {
+            "name": "detection_out",
+            "metadata": {
+                "type": "bounding_box",
+                "shape": [1, 1, 200, 7],
+                "layout": [1, 1, "B", "F"],
+                "labels": labels,
+            }
+        }
+    ]
+    project_obj.outputs = json.dumps(outputs_)
+    project_obj.save()
+
+    return(project_obj)
+
+def update_tags_helper(project_id, tags=None):
+    project_obj = Project.objects.get(pk=project_id)
+    parts = Part.objects.filter(project=project_obj)
+    part_names = [part.name for part in parts]
+    part_ids = [part.id for part in parts]
+
+    to_add = []
+    to_delete = []
+    for tag in tags:
+        if tag not in part_names:
+            to_add.append(tag)
+    
+    for part in parts:
+        if part.name not in tags:
+            to_delete.append(part.id)
+
+    logger.info("Creating Parts:")
+    for tag in to_add:
+        logger.info("Creating Part: %s",tag)
+        part_obj, created = Part.objects.update_or_create(
+            project_id=project_obj.id,
+            name=tag,
+            description="",
+        )
+
+        # Make sure part is created
+        if not created:
+            logger.exception("%s not created", tag)
+            continue
+        logger.info("Create Part: %s Success!", tag)
+
+    logger.info("Uploading tags to CV project:")
+    part_ids = [part.id for part in Part.objects.filter(project=project_obj)]
+    has_new_parts = batch_upload_parts_to_customvision(
+        project_id=project_obj.id, part_ids=part_ids, tags_dict={}
+    )
+
+    # delete part
+    for part_id in to_delete:
+        part_obj = Part.objects.filter(pk=part_id).first()
+        part_obj.delete_on_customvision = True
+        part_obj.delete()
+
+
+    
+
+
+def pull_cv_project_helper(customvision_project_id: str, is_partial: bool):
     """pull_cv_project_helper.
 
     Args:
@@ -78,13 +190,34 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     """
 
     logger.info("pull_cv_project_helper")
-    logger.info("project_id %s", project_id)
     logger.info("customvision_project_id: %s", customvision_project_id)
     logger.info("is_partial %s", is_partial)
 
     # Get project objects
-    project_obj = Project.objects.get(pk=project_id)
-
+    #TODO need to resolve hard-coded pk=20
+    # project_obj_template = Project.objects.get(pk=12)
+    setting_obj = Setting.objects.first()
+    inputs_ = [
+        {
+            "name": "data",
+            "metadata": {
+                "type": "image",    
+                "shape": [1, 3, 416, 416],
+                "layout": ["N", "H", "W", "C"],
+                "color_format": "BGR",
+            }
+        }
+    ]
+    
+    inputs = json.dumps(inputs_)
+    project_obj = Project.objects.create(
+        setting=setting_obj, 
+        is_demo=False, 
+        category="customvision", 
+        is_cascade=True, 
+        type="customvision_model",
+        inputs=inputs,
+    )
     # Check Training_Key, Endpoint
     if not project_obj.setting.is_trainer_valid:
         raise SettingCustomVisionAccessFailed
@@ -99,8 +232,11 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
 
     # Invalid CustomVision Project ID handled by exception
     project_obj.name = trainer.get_project(project_id=customvision_project_id).name
+    project_obj.setting.domain_id = trainer.get_project(customvision_project_id).settings.domain_id
+    project_obj.project_type = trainer.get_domain(trainer.get_project(customvision_project_id).settings.domain_id).type
+    if project_obj.project_type == "Classification":
+        project_obj.classification_type = trainer.get_project(customvision_project_id).settings.classification_type
     project_obj.customvision_id = customvision_project_id
-    project_obj.save()
 
     # Delete parts and images
     logger.info("Deleting all parts and images...")
@@ -109,11 +245,32 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
     # Download parts and images
     logger.info("Pulling Parts...")
     counter = 0
+
+    # update node outputs
     tags = trainer.get_tags(customvision_project_id)
+    labels = []
+    for tag in tags:
+        labels.append(tag.name)
+    outputs_ = [
+        {
+            "name": "detection_out",
+            "metadata": {
+                "type": "bounding_box",
+                "shape": [1, 1, 200, 7],
+                "layout": [1, 1, "B", "F"],
+                "labels": labels,
+            }
+        }
+    ]
+    project_obj.outputs = json.dumps(outputs_)
+    project_obj.save()
+
+
+
     for tag in tags:
         logger.info("Creating Part %s: %s %s", counter, tag.name, tag.description)
         part_obj, created = Part.objects.update_or_create(
-            project_id=project_id,
+            project_id=project_obj.id,
             name=tag.name,
             description=tag.description if tag.description else "",
             customvision_id=tag.id,
@@ -144,7 +301,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
                 part=part_obj,
                 remote_url=img.original_image_uri,
                 customvision_id=img.id,
-                project_id=project_id,
+                project_id=project_obj.id,
                 uploaded=True,
                 manual_checked=True,
             )
@@ -218,7 +375,7 @@ def pull_cv_project_helper(project_id, customvision_project_id: str, is_partial:
                 img_counter += 1
             for region in img.regions:
                 part_objs = Part.objects.filter(
-                    name=region.tag_name, project_id=project_id
+                    name=region.tag_name, project_id=project_obj.id
                 )
                 if not part_objs.exists():
                     continue
@@ -275,7 +432,7 @@ def train_project_worker(project_id):
     # =====================================================
     if not project_obj.setting or not project_obj.setting.is_trainer_valid:
         upcreate_training_status(
-            project_id=project_obj.id, status="failed", log="Custom Vision Access Error"
+            project_id=project_obj.id, status="Failed", log="Custom Vision Access Error"
         )
         return
 
@@ -365,7 +522,7 @@ def train_project_worker(project_id):
         upcreate_training_status(
             project_id=project_obj.id,
             need_to_send_notification=True,
-            **progress.PROGRESS_0_OK,
+            **progress.PROGRESS_10_NO_CHANGE,
         )
         return
     upcreate_training_status(
@@ -410,7 +567,7 @@ def train_project_worker(project_id):
             logger.info("Something went wrong...")
             upcreate_training_status(
                 project_id=project_obj.id,
-                status="failed",
+                status="Failed",
                 log="Get iteration from Custom Vision occurs error.",
                 need_to_send_notification=True,
             )
@@ -458,6 +615,10 @@ def train_project_worker(project_id):
         except Exception:
             logger.exception("Export already in queue")
         try:
+            project_obj.export_iteration(iteration.id, platform="OPENVINO")
+        except Exception:
+            logger.exception("Export already in queue")
+        try:
             exports = project_obj.get_exports(iteration.id)
         except Exception:
             logger.exception("get_exports exception")
@@ -478,12 +639,22 @@ def train_project_worker(project_id):
     logger.info("Training about to completed.")
 
     exports = trainer.get_exports(customvision_id, iteration.id)
-    if not exports[0].flavor:
-        project_obj.download_uri = exports[0].download_uri
-        project_obj.download_uri_fp16 = exports[1].download_uri
-    else:
-        project_obj.download_uri = exports[1].download_uri
-        project_obj.download_uri_fp16 = exports[0].download_uri
+
+    for export in exports:
+        if export.flavor:
+            project_obj.download_uri_fp16 = export.download_uri
+        else:
+            if "onnx" in export.platform.lower():
+                project_obj.download_uri = export.download_uri
+            else:
+                project_obj.download_uri_openvino = export.download_uri
+
+    # if not exports[0].flavor:
+    #     project_obj.download_uri = exports[0].download_uri
+    #     project_obj.download_uri_fp16 = exports[1].download_uri
+    # else:
+    #     project_obj.download_uri = exports[1].download_uri
+    #     project_obj.download_uri_fp16 = exports[0].download_uri
 
     train_performance_list = []
 
@@ -496,7 +667,7 @@ def train_project_worker(project_id):
         project_id=project_obj.id,
         performance=json.dumps(train_performance_list),
         need_to_send_notification=True,
-        **progress.PROGRESS_0_OK,
+        **progress.PROGRESS_9_SUCCESS,
     )
     logger.info("Training Performance: %s", train_performance_list)
 
@@ -525,7 +696,7 @@ def train_project_catcher(project_id):
     except Exception:
         upcreate_training_status(
             project_id=project_id,
-            status="failed",
+            status="Failed",
             log=traceback.format_exc(),
             need_to_send_notification=True,
         )

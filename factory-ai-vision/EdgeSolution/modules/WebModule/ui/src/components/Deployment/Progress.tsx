@@ -6,17 +6,20 @@ import { ProgressIndicator, Stack, Text } from '@fluentui/react';
 import { useInterval } from '../../hooks/useInterval';
 import { trainFailed, trainSuccess } from '../../store/project/projectActions';
 import { getErrorLog } from '../../store/shared/createWrappedAsync';
+import { TrainStatus } from '../../constant';
 
-const TrainingStatus = {
-  'finding project': 10,
-  'uploading project': 20,
-  'uploading parts': 30,
-  'uploading images': 40,
-  'preparing training task': 50,
-  'preparing custom vision environment': 60,
-  training: 70,
-  exporting: 80,
-  deploying: 90,
+type DeployTrainStatus = Exclude<TrainStatus, 'Success' | 'Failed' | 'No change' | 'ok'>;
+
+const TrainingStatus: Record<DeployTrainStatus, number> = {
+  'Finding project': 10,
+  'Uploading project': 20,
+  'Uploading parts': 30,
+  'Uploading images': 40,
+  'Preparing training task': 50,
+  'Preparing custom vision environment': 60,
+  Training: 70,
+  Exporting: 80,
+  Deploying: 90,
 };
 
 export const Progress: React.FC<{ projectId: number; cameraId: number }> = ({ projectId, cameraId }) => {

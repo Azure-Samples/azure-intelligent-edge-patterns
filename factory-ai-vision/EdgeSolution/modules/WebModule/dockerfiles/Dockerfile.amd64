@@ -18,7 +18,7 @@ RUN echo ${GIT_LOG} > ./build/static/git_sha1.txt
 # =========================================================
 # === Build Backend Base                                ===
 # =========================================================
-FROM amd64/python:3.8 as backend-base
+FROM amd64/python:3.8-slim-buster as backend-base
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
     libgl1-mesa-glx \
@@ -43,6 +43,10 @@ RUN pip install -r ./requirements/base.txt
 
 COPY backend/requirements/production-x86.txt requirements/production-x86.txt
 RUN pip install -r ./requirements/production-x86.txt
+
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    libglib2.0-0
 
 
 COPY backend/manage.py .

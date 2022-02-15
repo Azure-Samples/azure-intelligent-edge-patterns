@@ -34,8 +34,10 @@ if you don’t have one, you can create one here: https://azure.microsoft.com/en
 <br/><br/>
 
 
-![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot1.3.png) 
-<br/><br/>
+
+![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/raw/linker/factory-ai-vision/assets/Tutorial_ArmTemplate_Deployment_Screenshot1.3.png) 
+<br/>
+
 
 
 ## Step4: Choose the resources under the account; you will see information of “Key” and “Endpoint”
@@ -94,28 +96,20 @@ Example: East US
 <br/><br/>
 
 ### 1.2.2: Device Architecture: 
-Definition:   Specify the Architecture of the Edge Device. Currently supported values are “X86” and “ARM64”. 
-Example: X86 or ARM64
+Definition:   Specify the Architecture of the Edge Device. 
 
-![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot8.png) 
+![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/device%20architecure_20210904.png?raw=true) 
+
 <br/><br/>
 
 ### 1.2.3: Module Runtime: 
 Definition:   Select value for Runtime for detector module on Edge Device.  
-•	Set it to “CPU” to use if CPU to run detector module. 
-•	If the Edge device has Nvidia GPU  
-o	set it to NVIDIA to use GPU to run detector module  
-o	or to use movidius set it to “MOVIDIUS“
 
-Example:  
-o	If You selected X86 in Device Architecture in 1.2.2 then you will see below option 
-   •	cpu 
-   • gpu (NVIDIA cude 11) 
-   •	vpu(Movidius) 
-o	If You selected ARM64 in Device Architecture in 1.2.2 then you will see below option 
-   • Jetson(Jetpack 4.4)
+•	Set it to “CPU” to use if CPU to run detector module, 
+<br> or to use vpu set it to “MOVIDIUS“. Please click [here](https://docs.openvino.ai/latest/openvino_docs_install_guides_installing_openvino_linux_ivad_vpu.html#doxid-openvino-docs-install-guides-installing-openvino-linux-ivad-vpu) and [here](https://docs.openvino.ai/2021.4/openvino_docs_install_guides_installing_openvino_docker_linux.html#build_docker_image_for_intel_vision_accelerator_design_with_intel_movidius_vpus) for more information.
 
-![Diagram - Custom vision Market place path](../assets/Tutorial_ArmTemplate_Deployment_Screenshot9.png) 
+![Diagram - Custom vision Market place path](https://github.com/linkernetworks/azure-intelligent-edge-patterns/blob/feat/cascade-dev/factory-ai-vision/assets/module%20runtime_20210904.png?raw=true) 
+
 <br/><br/>
 
 

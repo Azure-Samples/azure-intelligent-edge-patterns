@@ -15,7 +15,8 @@ logger = logging.getLogger(__name__)
 
 class PartSerializer(serializers.ModelSerializer):
     """PartSerializer."""
-
+    local_image_count = serializers.IntegerField(read_only=True, source="get_tagged_images_count_local")
+    remote_image_count = serializers.IntegerField(read_only=True, source="get_tagged_images_count_remote")
     class Meta:
         model = Part
         fields = "__all__"

@@ -11,6 +11,8 @@ import urllib.request
 from builtins import input
 from os import path
 
+from datetime import datetime
+
 import requests
 from azure.iot.hub import IoTHubRegistryManager
 from azure.iot.hub.models import CloudToDeviceMethod, CloudToDeviceMethodResult
@@ -21,7 +23,7 @@ from utility import is_edge
 DEVICE_ID = os.environ.get("IOTEDGE_DEVICEID", "local")
 MODULE_ID = "avaedge"
 
-default_payload = {"@apiVersion": "1.0"}
+default_payload = {"@apiVersion": "1.1"}
 logger = logging.getLogger(__name__)
 
 # Known issue from LVA
@@ -70,7 +72,7 @@ class GraphManager:
     def invoke_graph_topology_get(self, name):
         method = "pipelineTopologyGet"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "1.1",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -78,7 +80,7 @@ class GraphManager:
     def invoke_graph_topology_set(self, name, properties):
         method = "pipelineTopologySet"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "1.1",
             "name": name,
             "properties": properties,
         }
@@ -87,14 +89,14 @@ class GraphManager:
     def invoke_graph_topology_list(self):
         method = "pipelineTopologyList"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "1.1",
         }
         return self.invoke_method(method, payload)
 
     def invoke_graph_topology_delete(self, name):
         method = "pipelineTopologyDelete"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "1.1",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -102,7 +104,7 @@ class GraphManager:
     def invoke_graph_instance_get(self, name):
         method = "livePipelineGet"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "1.1",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -110,7 +112,7 @@ class GraphManager:
     def invoke_graph_instance_set(self, name, properties):
         method = "livePipelineSet"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "1.1",
             "name": name,
             "properties": properties,
         }
@@ -119,7 +121,7 @@ class GraphManager:
     def invoke_graph_instance_delete(self, name):
         method = "livePipelineDelete"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "1.1",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -127,14 +129,14 @@ class GraphManager:
     def invoke_graph_instance_list(self):
         method = "livePipelineList"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "1.1",
         }
         return self.invoke_method(method, payload)
 
     def invoke_graph_instance_activate(self, name):
         method = "livePipelineActivate"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "1.1",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -142,7 +144,7 @@ class GraphManager:
     def invoke_graph_instance_deactivate(self, name):
         method = "livePipelineDeactivate"
         payload = {
-            "@apiVersion": "1.0",
+            "@apiVersion": "1.1",
             "name": name,
         }
         return self.invoke_method(method, payload)
@@ -154,9 +156,15 @@ class GraphManager:
             payload = json.load(f)
         return self.invoke_method(method, payload)
 
-    def invoke_graph_grpc_instance_set(self, name, rtspUrl, frameRate, recording_duration):
-        recordingDuration = "PT{}S".format(recording_duration)
+    def invoke_graph_grpc_instance_set(self, name, rtspUrl, frameRate, recording_duration, ava_is_send_iothub):
+        # recordingDuration = "PT{}S".format(recording_duration)
+        recordingDuration = "PT30S"
+        if ava_is_send_iothub:
+            output_name = 'iothubsinkoutput'
+        else:
+            output_name = 'nosend'
         find_cred, username, password = self.parse_rtsp_credential(rtspUrl)
+        video_name = f"avaedge-{name}"
         properties = {
             "topologyName": "InferencingWithGrpcExtension",
             "description": "Sample graph description",
@@ -165,7 +173,8 @@ class GraphManager:
                 {"name": "rtspUserName", "value": username},
                 {"name": "rtspPassword", "value": password},
                 {"name": "frameRate", "value": frameRate},
-                {"name": "instanceId", "value": name},
+                {"name": "videoOptputName", "value": video_name},
+                {"name": "hubSinkOutputName", "value": output_name},
                 {"name": "recordingDuration", "value": recordingDuration},
                 {
                     "name": "grpcExtensionAddress",
@@ -184,11 +193,17 @@ class GraphManager:
             payload = json.load(f)
         return self.invoke_method(method, payload)
 
-    def invoke_graph_http_instance_set(self, name, rtspUrl, frameRate, recording_duration):
+    def invoke_graph_http_instance_set(self, name, rtspUrl, frameRate, recording_duration, ava_is_send_iothub):
         inferencingUrl = "http://inferencemodule:5000/predict?camera_id=" + \
             str(name)
-        recordingDuration = "PT{}S".format(recording_duration)
+        # recordingDuration = "PT{}S".format(recording_duration)
+        recordingDuration = "PT30S"
+        if ava_is_send_iothub:
+            output_name = 'iothubsinkoutput'
+        else:
+            output_name = 'nosend'
         find_cred, username, password = self.parse_rtsp_credential(rtspUrl)
+        video_name = f"avaedge-{name}"
         properties = {
             "topologyName": "InferencingWithHttpExtension",
             "description": "Sample graph description",
@@ -197,7 +212,8 @@ class GraphManager:
                 {"name": "rtspUserName", "value": username},
                 {"name": "rtspPassword", "value": password},
                 {"name": "frameRate", "value": frameRate},
-                {"name": "instanceId", "value": name},
+                {"name": "videoOptputName", "value": video_name},
+                {"name": "hubSinkOutputName", "value": output_name},
                 {"name": "recordingDuration", "value": recordingDuration},
                 {"name": "inferencingUrl", "value": inferencingUrl},
                 {"name": "frameHeight", "value": "540"},
@@ -214,11 +230,11 @@ class GraphManager:
         else:
             return "LVA mode error"
 
-    def invoke_instance_set(self, mode, name, rtspUrl, frameRate, recording_duration):
+    def invoke_instance_set(self, mode, name, rtspUrl, frameRate, recording_duration, ava_is_send_iothub):
         if mode == "grpc":
-            return self.invoke_graph_grpc_instance_set(name, rtspUrl, frameRate, recording_duration)
+            return self.invoke_graph_grpc_instance_set(name, rtspUrl, frameRate, recording_duration, ava_is_send_iothub)
         elif mode == "http":
-            return self.invoke_graph_http_instance_set(name, rtspUrl, frameRate, recording_duration)
+            return self.invoke_graph_http_instance_set(name, rtspUrl, frameRate, recording_duration, ava_is_send_iothub)
         else:
             return "LVA mode error"
 

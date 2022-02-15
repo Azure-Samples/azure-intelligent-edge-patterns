@@ -52,14 +52,14 @@ export const TimeInfoOption = ({ countingStartTime, countingEndTime, onChange }:
     if (isSameDay(localStartTime, new Date()) && idx < new Date().getHours()) {
       return {
         key: idx,
-        text: (idx < 10 ? `0${idx}` : idx) + ':00',
+        text: `${idx < 10 ? `0${idx}` : idx}:00`,
         disabled: true,
       };
     }
 
     return {
       key: idx,
-      text: (idx < 10 ? `0${idx}` : idx) + ':00',
+      text: `${idx < 10 ? `0${idx}` : idx}:00`,
     };
   });
 
@@ -67,14 +67,14 @@ export const TimeInfoOption = ({ countingStartTime, countingEndTime, onChange }:
     if (isSameDay(localEndTime, new Date()) && idx < new Date().getHours()) {
       return {
         key: idx,
-        text: (idx < 10 ? `0${idx}` : idx) + ':00',
+        text: `${idx < 10 ? `0${idx}` : idx}:00`,
         disabled: true,
       };
     }
 
     return {
       key: idx,
-      text: (idx < 10 ? `0${idx}` : idx) + ':00',
+      text: `${idx < 10 ? `0${idx}` : idx}:00`,
     };
   });
 

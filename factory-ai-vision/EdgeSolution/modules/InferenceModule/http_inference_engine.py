@@ -24,28 +24,35 @@ class HttpInferenceEngine:
 
         try:
             stream.predict(img)
-            predictions = stream.last_prediction
+            if stream.last_prediction:
+                predictions = stream.last_prediction
+            else:
+                predictions = []
             #logger.info("Predictions %s", predictions)
         except:
             logger.error("Unexpected error: %s", sys.exc_info())
 
         results = []
-        for prediction in predictions:
-            tag_name = prediction["tagName"]
-            confidence = prediction["probability"]
-            box = {
-                "l": prediction["boundingBox"]["left"],
-                "t": prediction["boundingBox"]["top"],
-                "w": prediction["boundingBox"]["width"],
-                "h": prediction["boundingBox"]["height"],
-            }
-            results.append(
-                {
-                    "type": "entity",
-                    "entity": {
-                        "tag": {"value": tag_name, "confidence": confidence},
-                        "box": box,
-                    },
+        if 'ovmsserver' in stream.model.endpoint:
+            for prediction in predictions:
+                results.append(prediction)
+        else:
+            for prediction in predictions:
+                tag_name = prediction["tagName"]
+                confidence = prediction["probability"]
+                box = {
+                    "l": prediction["boundingBox"]["left"],
+                    "t": prediction["boundingBox"]["top"],
+                    "w": prediction["boundingBox"]["width"],
+                    "h": prediction["boundingBox"]["height"],
                 }
-            )
+                results.append(
+                    {
+                        "type": "entity",
+                        "entity": {
+                            "tag": {"value": tag_name, "confidence": confidence},
+                            "box": box,
+                        },
+                    }
+                )
         return results

@@ -14,6 +14,10 @@ import rejectMsgReducer from './rejectedReducer';
 import trainingProjectReducer from './trainingProjectSlice';
 import scenarioReducer from './scenarioSlice';
 import cameraSettingReducer from './cameraSetting/cameraSettingReducer';
+import cascadeReducer from './cascadeSlice';
+
+import intelProjectReducer from './IntelProjectSlice';
+import trainingProjectStatusReducer from './trainingProjectStatusSlice';
 
 export const rootReducer = combineReducers({
   project: projectReducer,
@@ -30,4 +34,7 @@ export const rootReducer = combineReducers({
   trainingProject: trainingProjectReducer,
   scenario: scenarioReducer,
   cameraSetting: cameraSettingReducer,
+  intelProject: intelProjectReducer,
+  cascade: cascadeReducer,
+  trainingProjectStatus: trainingProjectStatusReducer,
 });

@@ -1,10 +1,9 @@
 {
-    "@apiVersion": "1.0",
+    "@apiVersion": "1.1",
     "name": "InferencingWithHttpExtension",
     "properties": {
         "description": "Factory AI Video Pipeline",
-        "parameters": [
-            {
+        "parameters": [{
                 "name": "rtspUrl",
                 "type": "String",
                 "description": "Rtsp source Url address"
@@ -43,7 +42,7 @@
                 "name": "hubSinkOutputName",
                 "type": "String",
                 "description": "Hub sink output name",
-                "default": "iothubsinkoutput"
+                "default": "nosend"
             },
             {
                 "name": "imageScaleMode",
@@ -76,20 +75,19 @@
                 "default": "30"
             },
             {
-                "name": "instanceId",
-                "type": "String",
-                "description": "instance id",
-                "default": "0"
-            },
-            {
                 "name": "recordingDuration",
                 "type": "String",
                 "description": "recording duration",
                 "default": "PT60S"
+            },
+            {
+                "name": "videoOptputName",
+                "type": "String",
+                "description": "Video output name.",
+                "default": "AVAtestVideo"
             }
         ],
-        "sources": [
-            {
+        "sources": [{
                 "@type": "#Microsoft.VideoAnalyzer.RtspSource",
                 "name": "rtspSource",
                 "endpoint": {
@@ -108,12 +106,10 @@
                 "hubInputName": "${hubSourceInput}"
             }
         ],
-        "processors": [
-            {
+        "processors": [{
                 "@type": "#Microsoft.VideoAnalyzer.SignalGateProcessor",
                 "name": "signalGateProcessor",
-                "inputs": [
-                    {
+                "inputs": [{
                         "nodeName": "iotMessageSource"
                     },
                     {
@@ -151,46 +147,42 @@
                     "skipSamplesWithoutAnnotation": "false",
                     "maximumSamplesPerSecond": "${frameRate}"
                 },
-                "inputs": [
-                    {
-                        "nodeName": "rtspSource",
-                        "outputSelectors": [
-                            {
-                                "property": "mediaType",
-                                "operator": "is",
-                                "value": "video"
-                            }
-                        ]
-                    }
-                ]
+                "inputs": [{
+                    "nodeName": "rtspSource",
+                    "outputSelectors": [{
+                        "property": "mediaType",
+                        "operator": "is",
+                        "value": "video"
+                    }]
+                }]
             }
         ],
-        "sinks": [
-            {
+        "sinks": [{
                 "@type": "#Microsoft.VideoAnalyzer.IoTHubMessageSink",
                 "name": "hubSink",
                 "hubOutputName": "${hubSinkOutputName}",
-                "inputs": [
-                    {
-                        "nodeName": "httpExtension"
-                    }
-                ]
+                "inputs": [{
+                    "nodeName": "httpExtension"
+                }]
             },
             {
                 "@type": "#Microsoft.VideoAnalyzer.VideoSink",
                 "name": "videoSink",
-                "videoName": "sampleAssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
+                "videoName": "${videoOptputName}",
                 "videoCreationProperties": {
-                    "title": "sampleAssetFromEVR-avaedge-${instanceId}-${System.Runtime.DateTime}",
+                    "title": "${videoOptputName}",
                     "segmentLength": "${recordingDuration}"
                 },
                 "localMediaCacheMaximumSizeMiB": "2048",
-                "localMediaCachePath": "/var/lib/azuremediaservices/tmp/",
-                "inputs": [
-                    {
-                        "nodeName": "signalGateProcessor"
-                    }
-                ]
+                "localMediaCachePath": "/var/lib/videoanalyzer/tmp/",
+                "inputs": [{
+                    "nodeName": "signalGateProcessor",
+                    "outputSelectors": [{
+                        "property": "mediaType",
+                        "operator": "is",
+                        "value": "video"
+                    }]
+                }]
             }
         ]
     }

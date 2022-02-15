@@ -3,7 +3,11 @@ import { Panel, TextField, Stack, PrimaryButton, DefaultButton, ProgressIndicato
 import * as R from 'ramda';
 import { useDispatch } from 'react-redux';
 
-import { postPart, patchPart } from '../store/partSlice';
+import {
+  // postPart,
+  postPartByProject,
+  patchPart,
+} from '../store/partSlice';
 
 export enum PanelMode {
   Create,
@@ -16,6 +20,7 @@ type AddEditPartPanelProps = {
   mode: PanelMode;
   initialValue?: Form;
   partId?: number;
+  projectId?: number;
 };
 
 type FormData<V> = {
@@ -39,6 +44,7 @@ export const AddEditPartPanel: React.FC<AddEditPartPanelProps> = ({
   mode,
   initialValue = initialForm,
   partId,
+  projectId,
 }) => {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState<Form>(initialValue);
@@ -56,44 +62,85 @@ export const AddEditPartPanel: React.FC<AddEditPartPanelProps> = ({
     return hasError;
   }, [formData]);
 
-  const onConfirm = useCallback(async () => {
+  const onCreate = useCallback(async () => {
     if (validate()) return;
 
     setLoading(true);
-    if (mode === PanelMode.Create) {
-      await dispatch(
-        postPart({
+    await dispatch(
+      postPartByProject({
+        project: projectId,
+        data: {
           name: formData.name.value,
           description: formData.description.value,
-        }),
-      );
-      setFormData(initialForm);
-    } else {
-      await dispatch(
-        patchPart({
-          data: {
-            name: formData.name.value,
-            description: formData.description.value,
-          },
-          id: partId,
-        }),
-      );
-    }
+        },
+      }),
+    );
+    setFormData(initialForm);
     setLoading(false);
     onDissmiss();
-  }, [partId, dispatch, formData.name.value, formData.description.value, mode, onDissmiss, validate]);
+  }, [dispatch, onDissmiss, formData, validate, projectId]);
 
-  const onRenderFooterContent = useCallback(
-    () => (
-      <Stack tokens={{ childrenGap: 5 }} horizontal>
-        <PrimaryButton onClick={onConfirm} disabled={loading}>
-          {mode === PanelMode.Create ? 'Add' : 'Update'}
-        </PrimaryButton>
-        <DefaultButton onClick={onDissmiss}>Cancel</DefaultButton>
-      </Stack>
-    ),
-    [loading, mode, onConfirm, onDissmiss],
-  );
+  const onUpdate = useCallback(async () => {
+    if (validate()) return;
+
+    setLoading(true);
+
+    await dispatch(
+      patchPart({
+        data: {
+          name: formData.name.value,
+          description: formData.description.value,
+        },
+        id: partId,
+      }),
+    );
+
+    setLoading(false);
+    onDissmiss();
+  }, [dispatch, onDissmiss, formData, validate, partId]);
+
+  const onClose = useCallback(() => {
+    setFormData(initialForm);
+    onDissmiss();
+  }, [onDissmiss]);
+
+  // const onConfirm = useCallback(async () => {
+  //   if (validate()) return;
+
+  //   setLoading(true);
+  //   if (mode === PanelMode.Create) {
+  //     await dispatch(
+  //       postPart({
+  //         name: formData.name.value,
+  //         description: formData.description.value,
+  //       }),
+  //     );
+  //     setFormData(initialForm);
+  //   } else {
+  //     await dispatch(
+  //       patchPart({
+  //         data: {
+  //           name: formData.name.value,
+  //           description: formData.description.value,
+  //         },
+  //         id: partId,
+  //       }),
+  //     );
+  //   }
+  //   setLoading(false);
+  //   onDissmiss();
+  // }, [partId, dispatch, formData.name.value, formData.description.value, mode, onDissmiss, validate]);
+
+  // const onRenderFooterContent = useCallback(
+  //   () => (
+  //     <Stack tokens={{ childrenGap: 5 }} horizontal>
+  //       {mode === PanelMode.Create && <PrimaryButton onClick={onCreate} disabled={loading} text="Add" />}
+  //       {mode === PanelMode.Update && <PrimaryButton onClick={onUpdate} disabled={loading} text="Update" />}
+  //       <DefaultButton onClick={onDissmiss}>Cancel</DefaultButton>
+  //     </Stack>
+  //   ),
+  //   [loading, mode, onDissmiss],
+  // );
 
   const onChange = (key: string) => (_, newValue) => {
     setFormData(R.assocPath([key, 'value'], newValue));
@@ -102,10 +149,16 @@ export const AddEditPartPanel: React.FC<AddEditPartPanelProps> = ({
   return (
     <Panel
       isOpen={isOpen}
-      onDismiss={onDissmiss}
+      onDismiss={onClose}
       hasCloseButton
       headerText="Add Object"
-      onRenderFooterContent={onRenderFooterContent}
+      onRenderFooterContent={() => (
+        <Stack tokens={{ childrenGap: 5 }} horizontal>
+          {mode === PanelMode.Create && <PrimaryButton onClick={onCreate} disabled={loading} text="Add" />}
+          {mode === PanelMode.Update && <PrimaryButton onClick={onUpdate} disabled={loading} text="Update" />}
+          <DefaultButton onClick={onClose}>Cancel</DefaultButton>
+        </Stack>
+      )}
       isFooterAtBottom={true}
     >
       <ProgressIndicator progressHidden={!loading} />

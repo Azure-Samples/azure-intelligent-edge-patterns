@@ -107,3 +107,15 @@ def yolo_module_url() -> str:
         # return ip + ":7777/predict"
         return "yolov4module:80/score"
     return "localhost:7777/predict"
+
+
+def model_manager_module_url() -> str:
+    """Get ModelManagerModule Url.
+
+    Returns:
+        str: ModelManagerModule url
+    """
+
+    if is_edge():
+        return "modelmanager:8585"
+    return "localhost:8585"
