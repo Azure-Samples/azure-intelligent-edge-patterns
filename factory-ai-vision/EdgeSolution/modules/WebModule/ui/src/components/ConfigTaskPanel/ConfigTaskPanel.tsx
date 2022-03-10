@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import * as R from 'ramda';
+import { clone, equals } from 'ramda';
 import {
   Panel,
   Stack,
@@ -74,7 +74,7 @@ const useProjectData = (initialProjectData: ProjectData): [ProjectData, OnChange
 
   const onChange: OnChangeType = useCallback(
     (key, value, optional) => {
-      const cloneProject = R.clone(projectData);
+      const cloneProject = clone(projectData);
       cloneProject[key] = value;
 
       if (key === 'trainingProject') {
@@ -171,6 +171,14 @@ const getEditSelectedProjectKey = (projectData: ProjectData) => {
   return projectData.trainingProject;
 };
 
+const isBasicInputValid = (project: ProjectData) => {
+  const { name, cameras, parts, deployment_type } = project;
+
+  if (deployment_type === 'model' && !!name && cameras.length > 0 && parts.length > 0) return false;
+  if (deployment_type === 'cascade' && !!name && cameras.length > 0) return false;
+  return true;
+};
+
 export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
   isOpen,
   onDismiss,
@@ -248,9 +256,14 @@ export const ConfigTaskPanel: React.FC<ConfigTaskPanelProps> = ({
     let deployBtnTxt = 'Deploy';
     if (isEdit) deployBtnTxt = 'Redeploy';
     if (deploying) deployBtnTxt = 'Deploying';
+
+    const disabled = isEdit
+      ? equals(initialProjectData, projectData) || isBasicInputValid(projectData) || deploying
+      : deploying;
+
     return (
       <Stack tokens={{ childrenGap: 5 }} horizontal>
-        <PrimaryButton text={deployBtnTxt} onClick={onDeployClicked} disabled={deploying} />
+        <PrimaryButton text={deployBtnTxt} onClick={onDeployClicked} disabled={disabled} />
         <DefaultButton text="Cancel" onClick={onDismiss} />
       </Stack>
     );
