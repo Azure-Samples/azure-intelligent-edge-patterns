@@ -3,5 +3,5 @@ numpy
 opencv-contrib-python
 requests
 trollius
-Pillow==6.2.0
+Pillow==9.0.1
 tornado==4.5.3
