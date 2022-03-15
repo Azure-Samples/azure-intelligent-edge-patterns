@@ -81,7 +81,7 @@ export const INTEL_CARD_DATA = [
     imageUrl: 'https://docs.openvino.ai/2019_R1/vehicle-attributes-recognition-barrier-0039-1.png',
     inputDescribe: 'Image, name: input, shape: 1, 3, 72, 72 in 1, C, H, W format, where:',
     createdAt: '7/3/2021',
-    tags: [],
+    tags: ['white', 'gray', 'yellow', 'red', 'green', 'blue', 'black', 'car', 'bus', 'truck', 'van'],
     metrics: {
       'Car pose': 'Front facing cars',
       'Occlusion coverage': '<50%',
@@ -106,7 +106,7 @@ export const INTEL_CARD_DATA = [
     imageUrl: 'https://docs.openvino.ai/2019_R1/pedestrian-and-vehicle-detector-adas-0001.png',
     inputDescribe: 'Image, name: input, shape: 1, 3, 384, 672 in B, C, H, W format, where:',
     createdAt: '7/3/2021',
-    tags: [],
+    tags: ['vehicle', 'pedestrian'],
     metrics: {
       'AP for pedestrians': '88%',
       'AP for vehicles': '90%',
