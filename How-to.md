@@ -12,8 +12,8 @@ Setup
 
 ![VoE home](/docs/assets/VoE_1.png)
 
-Let's build the model step-by-step.
------------------------------------
+Let's select our model
+----------------------
 1. Let's first click on the "Go to models" in the 'Create your own project box'. This will lead you to: 
 
 ![VoE model](/docs/assets/VoE_2.png)
@@ -28,19 +28,39 @@ This will pop up the New Model box. Don't worry! We'll be using an existing proj
 
 ![VoE model](/docs/assets/VoE_4.png)
 
-Congratulations, the 'Retail Counting People' is now in your models. When we collect enough images, at least 15, we'll be able to train the model. We have to capture them first and that requires adding a camera. 
+Congratulations, the 'Retail Counting People' is now in your models. When we collect enough images, at least 15, we'll be able to train the model. 
 
-4. Let's do that now by clicking on "Cameras" from the left menu. You'll notice that there are already three cameras with their locations and URLs available.
+Gathering Images
+----------------
+
+We have to capture images and that requires adding a camera. It is possible to use multiple cameras or uploading images which can be very helpful in adding more data for our model which increases its accuracy. For now, we'll use one camera.
+
+1. Let's do that now by clicking on "Cameras" from the left menu. You'll notice that there are already three cameras with their locations and URLs available.
 
 ![VoE model](/docs/assets/V0E_5.png)
 
-5. Select whichever camera you desire. This will bring up the feed from that camera and we're now ready to cature images to train our model. Do that by clicking on "Capture image".
+2. Select whichever camera you desire. This will bring up the feed from that camera and we're now ready to capture images to train our model. Do that by clicking on "Capture image".
 
 ![VoE model](/docs/assets/VoE_6.png)
 
-When you do that you will be led to a dropdown box to choose your model. These are the images where we will 
+When you do that you will be led to a dropdown box to choose your model. 
 
-6. Select the 'Retail Counting People' model. This will lead us to the "Images" window 
+3. Select the 'Retail Counting People' model. This will lead us to the "Images" window. Notice that it has 'Tagged' and 'Untagged' tabs. 
+
+4. Click on the "Capture from camera" button. The capture popup appears with a dropdown to select a camera. 
+
+![VoE model](/docs/assets/VoE_7.png)
+
+5. We only have one camera, so select it and the data will begin to stream.
+
+6. On the right of the popup is the "Capture image" button. Click on it throughout the video. We need at least 15 images, so don't be afraid you'll collect too many. 
+
+Identifying People
+------------------
+
+
+
+Once we capture images from the live stream we can tag them for the objects, in this case people, that we want to identify for the model.
 
 Next Steps
 ----------
