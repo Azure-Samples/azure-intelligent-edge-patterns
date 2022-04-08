@@ -66,9 +66,48 @@ Identifying People
 
 Now it's time to identify for the model the parts of the picture we want it to pay attention to. When you move your mouse into the picture frame the cursor changes. This is to allow you to draw boxes around the people. A good rule of thumb is to capture all the edges without too much background. Detecting edges and shapes is an essential part of the model's algorithm. The more accurate the boxes (called 'bounding boxes'), the more accurate the model.
 
-2. Draw boxes around the people. The boxes display the 'person' tag we assigned. If you don't like the image because it's difficult to draw the boxes, you can delete it with the "delete image" button in the bottom left. Once you finish drawing boxes around the objects, select the "Next" button untill all your images are tagged.
+2. Draw boxes around the people. The boxes display the 'person' tag we assigned. If you don't like the image because it's difficult to draw the boxes, you can delete it with the "delete image" button in the bottom left. Once you finish drawing boxes around the objects, select the "Next" button until all your images are tagged.
+
+Now that the images have been tagged, go to the "Images" page and click on the 'Tagged' tab. You'll see all of your images and tags.
 
 ![VoE model](/docs/assets/VoE_9.png)
+
+Training The Model
+------------------
+
+Now we have gathered our images and identified the people in them. It's time to train the model.
+
+1. Click on "Models" in the left menu and then the "Retail Counting People" model. This will open the "Edit Model" popup where we now have a "Train" button.
+
+![VoE model](/docs/assets/VoE_10.png)
+
+Before we press that button (yep it's really tempting!), pause for a second and consider what you've done so far. You've set up a model, assigned cameras for input, captured images, and tagged them all without code.
+
+2. OK, hit the "Train" button!
+
+You'll see a message that the model is training. This may take a while depending on how much data is evaluated.
+
+3. When the model is trained save it by clicking "Save".
+
+Deploy The Model
+----------------
+
+Now it's time for the payoff. We'll take our model and run it against other video to count the people in the frame.
+
+1. Select "Deployment" from the left menu and "Create new task" from the top menu. A popup will appear with four boxes.
+
+![VoE model](/docs/assets/VoE_11.png)
+
+3. Assign a task name of your choosing in the first box. 
+4. Select the Model, Camera, and Objects from the dropdowns.
+5. Click "Deploy".
+6. Select the camera from the dropdown.
+
+The Deploy screen is displayed and you will see the model's identification of people in white bounding boxes with a percentage indicating the confidence of that identification.
+
+![VoE model](/docs/assets/VoE_12.png)
+
+To the right of the image you'll see the package used, OpenVINO and the time for execution of the model. Below that the inference metrics provide the success rate and the Live Analytics is the count of people in the image.
 
 
 Next Steps
