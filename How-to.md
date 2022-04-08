@@ -113,3 +113,6 @@ To the right of the image you'll see the package used, OpenVINO and the time for
 Next Steps
 ----------
 
+Now that you've built a model in this environment it's time to dig in and understand how you can build your model from scratch. [This][next] tutorial will teach you about the hardware and software requirements to get started. 
+
+[next]:https://github.com/Azure-Samples/azure-intelligent-edge-patterns/blob/master/factory-ai-vision/Tutorial/req_arch.md
