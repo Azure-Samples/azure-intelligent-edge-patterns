@@ -4,8 +4,10 @@
 import logging
 
 from django.db import models
+from django.db.models.signals import pre_save
 
 from ..azure_projects.models import Project
+from ..azure_app_insight.utils import get_app_insight_logger
 
 logger = logging.getLogger(__name__)
 
@@ -44,3 +46,24 @@ class TrainingStatus(models.Model):
             "log": self.log.__repr__(),
         }
         return res.__repr__()
+
+    @staticmethod
+    def pre_save(**kwargs):
+        """pre_save."""
+        instance = kwargs["instance"]
+        if instance.status == "Success" or instance.status == "Failed":
+            az_logger = get_app_insight_logger()
+            properties = {
+                "training_status": {
+                    "project": instanc.project.name,
+                    "status": instance.status,
+                    "log": instance.log,
+                    }
+            }
+            az_logger.warning(
+                "training_status",
+                extra=properties,
+            )
+
+
+pre_save.connect(Camera.pre_save, Camera, dispatch_uid="Training_status_pre")

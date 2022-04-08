@@ -19,6 +19,7 @@ from rest_framework.exceptions import APIException
 from ..azure_iot.utils import prediction_module_url
 from ..azure_settings.exceptions import SettingCustomVisionAccessFailed
 from ..azure_settings.models import Setting
+from ..azure_app_insight.utils import get_app_insight_logger
 from .exceptions import (
     ProjectAlreadyTraining,
     ProjectCannotChangeDemoError,
@@ -197,6 +198,20 @@ class Project(models.Model):
             instance.name,
         )
         logger.info("Project pre_save end")
+
+        az_logger = get_app_insight_logger()
+        tag_list = trainer.get_tags(customvision_id)
+        properties = {
+            "create_project": {
+                "name": instance.name,
+                "project_type": instance.project_type,
+                "tags": tag_list,
+                }
+        }
+        az_logger.warning(
+            "project",
+            extra=properties,
+        )
 
     def dequeue_iterations(self, max_iterations: int = 2):
         """dequeue_iterations.

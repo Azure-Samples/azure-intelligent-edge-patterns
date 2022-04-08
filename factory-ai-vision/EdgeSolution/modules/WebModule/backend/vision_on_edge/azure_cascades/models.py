@@ -5,6 +5,7 @@ import json
 from django.db import models
 from django.db.models.signals import post_save
 from ..azure_iot.utils import model_manager_module_url
+from ..azure_app_insight.utils import get_app_insight_logger
 
 logger = logging.getLogger(__name__)
 
@@ -65,6 +66,19 @@ class Cascade(models.Model):
             instance.save()
         else:
             pass
+
+        # sending info to app-insight
+        az_logger = get_app_insight_logger()
+        properties = {
+            "create_cascade": {
+                "name": instance.name,
+                }
+        }
+        az_logger.warning(
+            "cascade",
+            extra=properties,
+        )
+
 
 
 post_save.connect(Cascade.post_create, Cascade, dispatch_uid="Cascade_post")

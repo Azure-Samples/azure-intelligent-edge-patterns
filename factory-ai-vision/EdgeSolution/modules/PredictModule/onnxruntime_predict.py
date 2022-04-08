@@ -32,7 +32,11 @@ class ONNXRuntimeObjectDetection(ObjectDetection):
             #         providers=onnxruntime.get_available_providers())
             #     self.session.set_providers(['OpenVINOExecutionProvider'], [{'device_type' : "VAD-M_FP16"}])
             # else:
-            self.session = onnxruntime.InferenceSession(temp)
+
+            
+            # providers = ['CUDAExecutionProvider']
+            # self.session = onnxruntime.InferenceSession(temp, providers=providers)
+            self.session = onnxruntime.InferenceSession(temps)
         self.input_name = self.session.get_inputs()[0].name
         self.is_fp16 = self.session.get_inputs()[0].type == 'tensor(float16)'
 
