@@ -32,15 +32,15 @@ Congratulations, the 'Retail Counting People' is now in your models. When we col
 
 4. Let's do that now by clicking on "Cameras" from the left menu. You'll notice that there are already three cameras with their locations and URLs available.
 
-![VoE model](/docs/assets/VoE_5.png)
+![VoE model](/docs/assets/V0E_5.png)
 
 5. Select whichever camera you desire. This will bring up the feed from that camera and we're now ready to cature images to train our model. Do that by clicking on "Capture image".
 
 ![VoE model](/docs/assets/VoE_6.png)
 
-When you do that you will be led to a dropdown box to choose your model. 
+When you do that you will be led to a dropdown box to choose your model. These are the images where we will 
 
-6. Select the 'Retail Counting People' model.
+6. Select the 'Retail Counting People' model. This will lead us to the "Images" window 
 
 Next Steps
 ----------
