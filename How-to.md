@@ -55,12 +55,21 @@ When you do that you will be led to a dropdown box to choose your model.
 
 6. On the right of the popup is the "Capture image" button. Click on it throughout the video. We need at least 15 images, so don't be afraid you'll collect too many. 
 
+As soon as we started gathering images, the "Go to tagging" button appeared. Now that we have enough images we can identify the objects of interest for our model and use case.
+
+![VoE model](/docs/assets/VoE_8.png)
+
 Identifying People
 ------------------
 
+1. Click the "Go to tagging button". At the top right we enter a name for our object. It's a good idea to choose something simple and descriptive like 'person'. 
 
+Now it's time to identify for the model the parts of the picture we want it to pay attention to. When you move your mouse into the picture frame the cursor changes. This is to allow you to draw boxes around the people. A good rule of thumb is to capture all the edges without too much background. Detecting edges and shapes is an essential part of the model's algorithm. The more accurate the boxes (called 'bounding boxes'), the more accurate the model.
 
-Once we capture images from the live stream we can tag them for the objects, in this case people, that we want to identify for the model.
+2. Draw boxes around the people. The boxes display the 'person' tag we assigned. If you don't like the image because it's difficult to draw the boxes, you can delete it with the "delete image" button in the bottom left. Once you finish drawing boxes around the objects, select the "Next" button untill all your images are tagged.
+
+![VoE model](/docs/assets/VoE_9.png)
+
 
 Next Steps
 ----------
