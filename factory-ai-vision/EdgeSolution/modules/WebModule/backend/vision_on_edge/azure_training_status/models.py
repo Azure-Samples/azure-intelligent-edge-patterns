@@ -66,4 +66,4 @@ class TrainingStatus(models.Model):
             )
 
 
-pre_save.connect(Camera.pre_save, Camera, dispatch_uid="Training_status_pre")
+pre_save.connect(TrainingStatus.pre_save, TrainingStatus, dispatch_uid="Training_status_pre")
