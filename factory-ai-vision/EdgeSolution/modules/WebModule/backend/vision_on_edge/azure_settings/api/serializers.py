@@ -43,6 +43,7 @@ class SettingSerializer(serializers.ModelSerializer):
 class ListProjectProjectSerializer(serializers.Serializer):
     id = serializers.CharField()
     name = serializers.CharField()
+    exportable = serializers.BooleanField()
 
 
 class ListProjectSerializer(serializers.Serializer):
