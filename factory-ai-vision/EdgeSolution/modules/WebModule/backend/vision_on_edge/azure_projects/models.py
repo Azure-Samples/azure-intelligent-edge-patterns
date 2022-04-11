@@ -191,7 +191,7 @@ class Project(models.Model):
                 instance.is_trained = False        
 
         except Exception:
-           tag_list = []
+            tag_list = []
             instance.customvision_id = ""
         logger.info(
             "Project (id, customvision_id, name): (%s, %s, %s)",
