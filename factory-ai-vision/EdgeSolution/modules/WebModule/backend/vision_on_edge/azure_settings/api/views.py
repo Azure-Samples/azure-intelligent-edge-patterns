@@ -51,12 +51,17 @@ class SettingViewSet(viewsets.ModelViewSet):
                 raise SettingEmptyEndpointError
             result = {"projects": []}
             project_list = setting_obj.get_projects()
+            domain_table = {}
             for project in project_list:
+                if project.settings.domain_id not in domain_table:
+                    domain_id = project.settings.domain_id
+                    domain_table[domain_id] = trainer.get_domain(domain_id)
+                    
                 result["projects"].append(
                     {
                         "id": project.id, 
                         "name": project.name,
-                        "exportable": trainer.get_domain(project.settings.domain_id).exportable
+                        "exportable": domain_table[domain_id].exportable
                     }
                 )
             serializer = ListProjectSerializer(data=result)
