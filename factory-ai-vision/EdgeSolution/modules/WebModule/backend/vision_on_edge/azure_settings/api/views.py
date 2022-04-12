@@ -53,10 +53,10 @@ class SettingViewSet(viewsets.ModelViewSet):
             project_list = setting_obj.get_projects()
             domain_table = {}
             for project in project_list:
-                if project.settings.domain_id not in domain_table:
-                    domain_id = project.settings.domain_id
+                domain_id = project.settings.domain_id
+                if domain_id not in domain_table:
                     domain_table[domain_id] = trainer.get_domain(domain_id)
-                    
+
                 result["projects"].append(
                     {
                         "id": project.id, 
