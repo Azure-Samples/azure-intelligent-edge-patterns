@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState, useMemo } from 'react';
 import { compose } from 'ramda';
-import { useHistory } from 'react-router-dom';
+import { useHistory, generatePath } from 'react-router-dom';
 import {
   Stack,
   PrimaryButton,
@@ -44,7 +44,7 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
   const { trainingProjectList } = props;
 
   const [isIntelProjectClick, setIsIntelProjectClick] = useState(true);
-  const [isOwnProject, setIsOwnProject] = useState(true);
+  const [isCVPModel, setIsCVPModel] = useState(true);
   const [selectedProjectId, setSelectedProjectId] = useState(null);
 
   const modelId = parseInt(useQuery().get('modelId'), 10);
@@ -76,11 +76,11 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
       {
         key: 'addBtn',
         text: 'Your Models',
-        iconProps: isOwnProject ? openIcon : closeIcon,
-        onClick: () => setIsOwnProject((prev) => !prev),
+        iconProps: isCVPModel ? openIcon : closeIcon,
+        onClick: () => setIsCVPModel((prev) => !prev),
       },
     ],
-    [isOwnProject, setIsOwnProject],
+    [isCVPModel, setIsCVPModel],
   );
 
   return (
@@ -115,15 +115,23 @@ const BaseModel: React.FC<ModelsProps> = (props) => {
             items={ownCommandBarItems}
             styles={{ root: { borderBottom: `solid 1px ${theme.palette.neutralLight}` } }}
           />
-          {isOwnProject && (
+          {isCVPModel && (
             <Stack horizontal tokens={{ childrenGap: '10px' }} wrap>
               {ownProjectList.map((project, i) => (
                 <ModelCardContainer
                   key={i}
                   project={project}
                   onSelectedProject={() => {
-                    history.push(`${Url.MODELS}?modelId=${project.id}`);
-                    setSelectedProjectId(project.id);
+                    // history.push(`${Url.MODELS}?modelId=${project.id}`);
+                    // setSelectedProjectId(project.id);
+                    // history.push(`${Url.MODELS_DETAIL}`)
+                    history.push(
+                      generatePath(Url.MODELS_CV_MODEL, {
+                        id: project.id,
+                        key: 'trainingImages',
+                        // trainingImages
+                      }),
+                    );
                   }}
                   onDismiss={() => {
                     setSelectedProjectId(null);

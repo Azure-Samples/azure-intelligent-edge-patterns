@@ -27,7 +27,7 @@ export const RootRouter: FC = () => {
     <Switch>
       <Route path={Url.DEPLOYMENT} component={DeploymentPage} />
       <Route path={Url.CASCADES} component={Cascades} />
-      <Route path={Url.MODELS_DETAIL} component={ModelDetail} />
+      <Route path={Url.MODELS_CV_MODEL} component={ModelDetail} />
       <Route path={Url.MODELS} component={Models} />
       <Route path={Url.CAMERAS_DETAIL} component={CameraDetails} />
       <Route path={Url.CAMERAS} component={Cameras} />

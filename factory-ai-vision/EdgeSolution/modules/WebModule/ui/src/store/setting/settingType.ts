@@ -2,7 +2,7 @@ import { ThunkAction } from 'redux-thunk';
 import { Action } from 'redux';
 import type { State } from 'RootStateType';
 
-export type CVProject = { id: string; name: string };
+export type CVProject = { id: string; name: string, exportable: boolean };
 
 type SettingData = {
   id: number;

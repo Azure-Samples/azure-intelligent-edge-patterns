@@ -25,7 +25,7 @@ import {
 import { removeAnnotation } from '../../store/annotationSlice';
 import { labelPageAnnoSelector } from '../../store/annotationSlice';
 import { Annotation } from '../../store/type';
-import { selectPartEntities, Part } from '../../store/partSlice';
+import { selectPartEntities, Part, getParts } from '../../store/partSlice';
 import { deleteImage, thunkGoNextImage, thunkGoPrevImage } from '../../store/actions';
 import { PartPicker } from './PartPicker';
 import { timeStampConverter } from '../../utils/timeStampConverter';
@@ -130,6 +130,7 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
 
   const closeDialog = useCallback(() => {
     dispatch(closeLabelingPage());
+    dispatch(getParts());
     setWorkState(WorkState.None);
   }, [dispatch]);
 
@@ -309,8 +310,8 @@ const LabelingPage: FC<LabelingPageProps> = ({ onSaveAndGoCaptured, projectId })
       );
 
     const isLastImg = index === imageIds.length - 1;
-    const previousDisabled = index === 0 || workState === WorkState.Creating  || loading;
-    const nextDisabled = isLastImg || noAnno || workState === WorkState.Creating  || loading;
+    const previousDisabled = index === 0 || workState === WorkState.Creating || loading;
+    const nextDisabled = isLastImg || noAnno || workState === WorkState.Creating || loading;
     return (
       <Stack horizontal verticalAlign="center" tokens={{ childrenGap: 10 }}>
         <DefaultButton text="Delete Image" onClick={onDeleteImage} disabled={deleteDisabled} />

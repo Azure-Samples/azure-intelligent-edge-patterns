@@ -23,15 +23,15 @@ const navLinks: INavLink[] = [
       },
     },
   },
-  {
-    name: 'Images',
-    url: Url.IMAGES,
-    iconProps: {
-      imageProps: {
-        src: '/icons/images.svg',
-      },
-    },
-  },
+  // {
+  //   name: 'Images',
+  //   url: Url.IMAGES,
+  //   iconProps: {
+  //     imageProps: {
+  //       src: '/icons/images.svg',
+  //     },
+  //   },
+  // },
   // {
   //   name: 'Objects',
   //   url: Url.PARTS,
