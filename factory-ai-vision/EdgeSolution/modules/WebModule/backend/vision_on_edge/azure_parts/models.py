@@ -105,7 +105,14 @@ class Part(models.Model):
         az_logger = get_app_insight_logger()
         az_logger.warning(
             "create_part",
-            extra={"custom_dimensions": {"name": instance.name, "project": instance.project.name}},
+            extra={
+                "custom_dimensions": {
+                    "create_part": {
+                        "name": instance.name, 
+                        "project": instance.project.name
+                    }
+                }
+            },
         )
 
 

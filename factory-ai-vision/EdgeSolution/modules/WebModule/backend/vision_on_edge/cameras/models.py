@@ -54,14 +54,16 @@ class Camera(models.Model):
             raise CameraRtspInvalid
         az_logger = get_app_insight_logger()
         properties = {
-            "create_camera": {
-                "name": instance.name,
-                "rtsp_url": instance.rtsp,
-                "location": instance.location.name,
+            "custom_dimensions": {
+                "create_camera": {
+                    "name": instance.name,
+                    "rtsp_url": instance.rtsp,
+                    "location": instance.location.name,
                 }
+            }
         }
         az_logger.warning(
-            "camera",
+            "create_camera",
             extra=properties,
         )
 

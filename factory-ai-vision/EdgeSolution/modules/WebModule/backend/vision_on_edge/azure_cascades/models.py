@@ -70,12 +70,14 @@ class Cascade(models.Model):
         # sending info to app-insight
         az_logger = get_app_insight_logger()
         properties = {
-            "create_cascade": {
-                "name": instance.name,
+            "custom_dimensions": {
+                "create_cascade": {
+                    "name": instance.name,
                 }
+            }
         }
         az_logger.warning(
-            "cascade",
+            "create_cascade",
             extra=properties,
         )
 

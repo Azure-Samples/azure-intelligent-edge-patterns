@@ -203,14 +203,16 @@ class Project(models.Model):
 
         az_logger = get_app_insight_logger()
         properties = {
-            "create_project": {
-                "name": instance.name,
-                "project_type": instance.project_type,
-                "tags": tag_list,
+            "custom_dimensions": {
+                "create_project": {
+                    "name": instance.name,
+                    "project_type": instance.project_type,
+                    "tags": tag_list,
                 }
+            }
         }
         az_logger.warning(
-            "project",
+            "create_project",
             extra=properties,
         )
 

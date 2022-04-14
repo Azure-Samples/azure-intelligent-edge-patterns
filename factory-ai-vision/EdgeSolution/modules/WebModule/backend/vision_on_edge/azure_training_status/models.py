@@ -54,11 +54,13 @@ class TrainingStatus(models.Model):
         if instance.status == "Success" or instance.status == "Failed":
             az_logger = get_app_insight_logger()
             properties = {
-                "training_status": {
-                    "project": instanc.project.name,
-                    "status": instance.status,
-                    "log": instance.log,
+                "custom_dimensions": {
+                    "training_status": {
+                        "project": instanc.project.name,
+                        "status": instance.status,
+                        "log": instance.log,
                     }
+                }
             }
             az_logger.warning(
                 "training_status",
