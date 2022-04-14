@@ -67,6 +67,9 @@
               },
               "DF_PD_VIDEO_SOURCE": {
                 "value": "opencv"
+              },
+              "APPLICATIONINSIGHTS_INSTRUMENTATION_KEY": {
+                "value": "$APPLICATIONINSIGHTS_INSTRUMENTATION_KEY"
               }
             },
             "settings": {
