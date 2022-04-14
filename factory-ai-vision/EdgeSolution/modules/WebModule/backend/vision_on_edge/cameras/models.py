@@ -2,6 +2,7 @@
 """
 
 import logging
+import json
 
 from django.db import models
 from django.db.models.signals import pre_save
@@ -55,11 +56,11 @@ class Camera(models.Model):
         az_logger = get_app_insight_logger()
         properties = {
             "custom_dimensions": {
-                "create_camera": {
+                "create_camera": json.dumps({
                     "name": instance.name,
                     "rtsp_url": instance.rtsp,
                     "location": instance.location.name,
-                }
+                })
             }
         }
         az_logger.warning(

@@ -71,9 +71,9 @@ class Cascade(models.Model):
         az_logger = get_app_insight_logger()
         properties = {
             "custom_dimensions": {
-                "create_cascade": {
+                "create_cascade": json.dumps({
                     "name": instance.name,
-                }
+                })
             }
         }
         az_logger.warning(

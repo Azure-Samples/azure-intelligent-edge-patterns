@@ -2,6 +2,7 @@
 """
 
 import logging
+import json
 
 from django.db import models
 from django.db.models.signals import pre_save
@@ -107,10 +108,10 @@ class Part(models.Model):
             "create_part",
             extra={
                 "custom_dimensions": {
-                    "create_part": {
+                    "create_part": json.dumps({
                         "name": instance.name, 
                         "project": instance.project.name
-                    }
+                    })
                 }
             },
         )

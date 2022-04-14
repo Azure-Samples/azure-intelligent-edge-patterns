@@ -7,6 +7,7 @@ import os
 import threading
 import time
 import subprocess
+import json
 
 from azure.cognitiveservices.vision.customvision.training.models import (
     CustomVisionErrorException,
@@ -204,11 +205,11 @@ class Project(models.Model):
         az_logger = get_app_insight_logger()
         properties = {
             "custom_dimensions": {
-                "create_project": {
+                "create_project": json.dumps({
                     "name": instance.name,
                     "project_type": instance.project_type,
                     "tags": tag_list,
-                }
+                })
             }
         }
         az_logger.warning(

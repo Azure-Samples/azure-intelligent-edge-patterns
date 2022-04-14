@@ -2,6 +2,7 @@
 """
 
 import logging
+import json
 
 from django.db import models
 from django.db.models.signals import pre_save
@@ -55,11 +56,11 @@ class TrainingStatus(models.Model):
             az_logger = get_app_insight_logger()
             properties = {
                 "custom_dimensions": {
-                    "training_status": {
+                    "training_status": json.dumps({
                         "project": instanc.project.name,
                         "status": instance.status,
                         "log": instance.log,
-                    }
+                    })
                 }
             }
             az_logger.warning(
