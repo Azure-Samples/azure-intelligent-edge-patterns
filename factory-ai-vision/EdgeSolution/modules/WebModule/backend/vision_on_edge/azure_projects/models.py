@@ -185,7 +185,8 @@ class Project(models.Model):
             # check is_trained
             trainer = instance.get_trainer_obj()    
             iterations = trainer.get_iterations(instance.customvision_id)
-            tag_list = trainer.get_tags(instance.customvision_id)
+            tags_ = trainer.get_tags(instance.customvision_id)
+            tag_list = [i.name for i in tags_]
             if len(iterations) > 0:
                 instance.is_trained = True
             else:
