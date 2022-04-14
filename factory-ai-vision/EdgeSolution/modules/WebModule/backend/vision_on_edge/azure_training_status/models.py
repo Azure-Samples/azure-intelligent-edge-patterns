@@ -57,7 +57,7 @@ class TrainingStatus(models.Model):
             properties = {
                 "custom_dimensions": {
                     "training_status": json.dumps({
-                        "project": instanc.project.name,
+                        "project": instance.project.name,
                         "status": instance.status,
                         "log": instance.log,
                     })
