@@ -28,6 +28,7 @@ class Camera(models.Model):
     )
     is_demo = models.BooleanField(default=False)
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
+    media_type = models.CharField(max_length=1000, blank=True)
 
     def tasks(self):
         try:
