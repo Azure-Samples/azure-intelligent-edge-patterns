@@ -29,6 +29,7 @@ class CameraSerializer(serializers.ModelSerializer):
             "danger_zones",
             "is_demo",
             "location",
+            "media_type",
             "media_source",
         ]
         extra_kwargs = {"media_source": {"write_only": True, "required": False}}
