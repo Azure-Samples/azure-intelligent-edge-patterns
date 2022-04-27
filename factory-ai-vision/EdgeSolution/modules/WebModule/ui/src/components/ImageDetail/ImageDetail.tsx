@@ -161,7 +161,6 @@ const ImageDetail: React.FC = () => {
   );
 
   const [cameraItems, filteredCameras] = useFilterItems(selectNonDemoCameras);
-  // const [partItems, filteredParts] = useFilterItems(selectNonDemoPart);
   const [partItems, filteredParts] = useFilterItems(selectProjectPartsFactory(parseInt(projectId, 10)));
 
   const commandBarFarItems: ICommandBarItemProps[] = useMemo(

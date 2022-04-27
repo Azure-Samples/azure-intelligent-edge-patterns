@@ -22,7 +22,7 @@ const AddCustomVisionContainer: React.FC<Props> = (props) => {
   const customVisionProjectOptions: IDropdownOption[] = customVisionProject.map((e) => ({
     key: e.id,
     text: e.name,
-    disabled: customVisionTrainingProject.map((cv) => cv.customVisionId).includes(e.id),
+    disabled: customVisionTrainingProject.map((cv) => cv.customVisionId).includes(e.id) || !e.exportable,
   }));
 
   return (

@@ -41,7 +41,7 @@ export const postPart = createWrappedAsync<any, CreatePartPayload, { state: Stat
   'parts/post',
   async (payload) => {
     // const trainingProject = getState().trainingProject.nonDemo[0];
-    const response = await Axios.post(`/api/parts/`, { ...payload });
+    const response = await Axios.post(`/api/parts/`, payload);
     return { ...response.data, trainingProject: response.data.project };
   },
 );

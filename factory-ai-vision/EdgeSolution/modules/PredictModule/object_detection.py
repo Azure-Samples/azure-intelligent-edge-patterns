@@ -95,8 +95,14 @@ class ObjectDetection(object):
         #         providers=onnxruntime.get_available_providers())
         #     self.session.set_providers(['OpenVINOExecutionProvider'], [{'device_type' : "VAD-M_FP16"}])
         # else:
+
+
+        
+        # providers = ['CUDAExecutionProvider']
+        # self.session = onnxruntime.InferenceSession(
+        #     str(str(model_dir) + str('/') + str(self.model_filename)), providers=providers)
         self.session = onnxruntime.InferenceSession(
-            str(str(model_dir) + str('/') + str(self.model_filename)))
+            str(str(model_dir) + str('/') + str(self.model_filename)))    
 
         # Reading input width & height from onnx model file
         self.model_inp_width = self.session.get_inputs()[0].shape[2]

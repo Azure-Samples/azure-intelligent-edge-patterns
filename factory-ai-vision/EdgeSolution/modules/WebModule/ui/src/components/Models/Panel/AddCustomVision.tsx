@@ -28,6 +28,7 @@ import { ProjectInfo } from '../../../store/shared/DemoSliceUtils';
 import { CreateCustomVisionForm } from '../type';
 
 import Tag from '../Tag';
+import { theme } from '../../../constant';
 
 const getClasses = () =>
   mergeStyleSets({
@@ -248,6 +249,16 @@ const AddModelPanel: React.FC<Props> = (props) => {
               selectedKey={formData.selectedCustomVisionId}
               calloutProps={{ calloutMaxHeight: 300 }}
               errorMessage={errorMsg}
+              onRenderLabel={(props) => (
+                <Stack styles={{ root: { padding: '5px 0' } }}>
+                  <Label styles={{ root: { padding: 0 } }} required>
+                    {props.label}
+                  </Label>
+                  <span style={{ color: theme.palette.redDark }}>
+                    Only models with general compact domain can be added.
+                  </span>
+                </Stack>
+              )}
             />
           ) : (
             <TextField

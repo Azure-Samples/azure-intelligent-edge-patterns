@@ -42,6 +42,7 @@ class SettingViewSet(viewsets.ModelViewSet):
         """list_projects."""
         queryset = self.get_queryset()
         setting_obj = drf_get_object_or_404(queryset, pk=pk)
+        trainer = setting_obj.get_trainer_obj()
 
         try:
             if not setting_obj.training_key:
@@ -50,8 +51,19 @@ class SettingViewSet(viewsets.ModelViewSet):
                 raise SettingEmptyEndpointError
             result = {"projects": []}
             project_list = setting_obj.get_projects()
+            domain_table = {}
             for project in project_list:
-                result["projects"].append({"id": project.id, "name": project.name})
+                domain_id = project.settings.domain_id
+                if domain_id not in domain_table:
+                    domain_table[domain_id] = trainer.get_domain(domain_id)
+
+                result["projects"].append(
+                    {
+                        "id": project.id, 
+                        "name": project.name,
+                        "exportable": domain_table[domain_id].exportable
+                    }
+                )
             serializer = ListProjectSerializer(data=result)
             serializer.is_valid(raise_exception=True)
             return Response(serializer.validated_data)

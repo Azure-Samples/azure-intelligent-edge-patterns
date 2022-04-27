@@ -2,6 +2,7 @@
 """
 
 import logging
+import json
 
 from django.db import models
 from django.db.models.signals import pre_save
@@ -10,6 +11,7 @@ from rest_framework.exceptions import APIException
 from ..azure_projects.models import Project
 from .constants import OBJECTDETECTION_LEAST_IMAGE_TO_TRAIN, CASSIFICATION_LEAST_IMAGE_TO_TRAIN
 from .exceptions import PartNotEnoughImagesToTrain
+from ..azure_app_insight.utils import get_app_insight_logger
 
 logger = logging.getLogger(__name__)
 CUSTOMVISION_LEAST_IMAGE_TO_TRAIN = 15
@@ -99,6 +101,20 @@ class Part(models.Model):
         """pre_save."""
         instance = kwargs["instance"]
         instance.name_lower = str(instance.name).lower()
+        local_image_count = instance.get_tagged_images_count_local()
+        remote_image_count = instance.get_tagged_images_count_remote()
+        az_logger = get_app_insight_logger()
+        az_logger.warning(
+            "create_part",
+            extra={
+                "custom_dimensions": {
+                    "create_part": json.dumps({
+                        "name": instance.name, 
+                        "project": instance.project.name
+                    })
+                }
+            },
+        )
 
 
 pre_save.connect(Part.pre_save, Part, dispatch_uid="Part_pre")

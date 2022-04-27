@@ -20,6 +20,7 @@ const Tag: React.FC<Props> = (props) => {
         lineHeight: '20px',
         padding: '8px 4px',
         borderRadius: '2px',
+        height: '34px',
       }}
       horizontal
       tokens={{ childrenGap: 5 }}
