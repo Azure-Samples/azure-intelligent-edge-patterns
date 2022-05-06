@@ -199,18 +199,18 @@ if [ "$isCfg" != true ]; then
     fi
 
     # ############################## Get APP Insight #####################################
-    while true; do
-      read -p "Do you want to use Azure Application Insights? (y or n): " -n 1 -r; echo
-      case $REPLY in
-          [Yy]* ) appinsight="yes"; break;;
-          [Nn]* ) appinsight="no"; break;;
-          * ) echo "Please answer yes or no.";;
-      esac
-    done
+    # while true; do
+    #   read -p "Do you want to use Azure Application Insights? (y or n): " -n 1 -r; echo
+    #   case $REPLY in
+    #       [Yy]* ) appinsight="yes"; break;;
+    #       [Nn]* ) appinsight="no"; break;;
+    #       * ) echo "Please answer yes or no.";;
+    #   esac
+    # done
 
-    if [ "$appinsight" == "yes" ]; then
-        read -p "Please enter your Application Insights Instrumentation key: " appInstrumentationKey; echo
-    fi
+    # if [ "$appinsight" == "yes" ]; then
+    #     read -p "Please enter your Application Insights Instrumentation key: " appInstrumentationKey; echo
+    # fi
 
     # ############################## Get IoT Hub #####################################
 
@@ -415,7 +415,7 @@ do
     prtline=${prtline//'<create option 01>'/$createOptions01}
     prtline=${prtline//'$IOTHUB_CONNECTION_STRING'/$iotHubConnectionString}
     prtline=${prtline//'$AVA_PROVISIONING_TOKEN'/$avaProvisioningToken}
-    prtline=${prtline//'$APPLICATIONINSIGHTS_INSTRUMENTATION_KEY'/$appInstrumentationKey}
+    # prtline=${prtline//'$APPLICATIONINSIGHTS_INSTRUMENTATION_KEY'/$appInstrumentationKey}
     echo $prtline
 done < "$input" > ./$edgeDeployJson
 
@@ -432,7 +432,7 @@ if [ "$isCfg" != true ]; then
     echo iotHubName='"'$iotHubName'"' >> $factoryaiConfigName
     echo iotHubConnectionString='"'$iotHubConnectionString'"' >> $factoryaiConfigName
     echo avaProvisioningToken='"'$avaProvisioningToken'"' >> $factoryaiConfigName
-    echo appInstrumentationKey='"'$appInstrumentationKey'"' >> $factoryaiConfigName
+    # echo appInstrumentationKey='"'$appInstrumentationKey'"' >> $factoryaiConfigName
     echo edgeDeviceId='"'$edgeDeviceId'"' >> $factoryaiConfigName
 fi
 
