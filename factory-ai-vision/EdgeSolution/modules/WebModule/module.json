@@ -13,7 +13,7 @@
         "arm64v8.debug": "./dockerfiles/Dockerfile.arm64v8.debug"
       }
     },
-    "buildOptions": ["--build-arg GIT_LOG=$(git rev-parse HEAD)"],
+    "buildOptions": ["--build-arg GIT_LOG=$(git rev-parse HEAD) --build-arg APPLICATIONINSIGHTS_INSTRUMENTATION_KEY=$APPLICATIONINSIGHTS_INSTRUMENTATION_KEY"],
     "contextPath": "./"
   },
   "language": "python"

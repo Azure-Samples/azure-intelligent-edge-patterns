@@ -33,6 +33,9 @@ FROM backend-base as backend-production
 
 WORKDIR /app
 
+ARG APPLICATIONINSIGHTS_INSTRUMENTATION_KEY
+ENV APPLICATIONINSIGHTS_INSTRUMENTATION_KEY=$APPLICATIONINSIGHTS_INSTRUMENTATION_KEY
+
 RUN python -m pip install --upgrade pip
 
 COPY backend/requirements/core.txt requirements/core.txt

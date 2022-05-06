@@ -92,9 +92,6 @@
               },
               "DBPASS": {
                 "value": "vision_on_edge"
-              },
-              "APPLICATIONINSIGHTS_INSTRUMENTATION_KEY": {
-                "value": "$APPLICATIONINSIGHTS_INSTRUMENTATION_KEY"
               }
             },
             "settings": {
