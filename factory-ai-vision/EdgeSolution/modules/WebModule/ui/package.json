@@ -22,7 +22,7 @@
     "@types/react-router-dom": "^5.1.5",
     "@uifabric/react-cards": "^0.111.2",
     "@uifabric/react-hooks": "^7.9.1",
-    "axios": "^0.19.2",
+    "axios": "^0.21.2",
     "date-fns": "^2.16.1",
     "dom-to-image": "^2.6.0",
     "konva": "^6.0.0",
