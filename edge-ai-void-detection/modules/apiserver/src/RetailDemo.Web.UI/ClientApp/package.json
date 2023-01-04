@@ -44,7 +44,7 @@
     "react-router": "5.0.0",
     "react-router-bootstrap": "0.25.0",
     "react-router-dom": "5.0.0",
-    "react-scripts": "2.1.8",
+    "react-scripts": "5.0.1",
     "reactstrap": "8.0.0",
     "rimraf": "^2.6.3"
   },
