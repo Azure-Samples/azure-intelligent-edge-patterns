@@ -16,7 +16,7 @@
     "@uifabric/icons": "^7.5.18",
     "axios": "^0.21.1",
     "chart.js": "^2.9.4",
-    "luxon": "^1.25.0",
+    "luxon": "^2.5.2",
     "react": "^17.0.1",
     "react-chartjs-2": "^2.11.1",
     "react-dom": "^17.0.1",
