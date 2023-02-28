@@ -1,6 +1,6 @@
 # Notice
 Thank you for your interesed in the samples contained here! **This repository is being archived, and not being actively mantained!**
-If you are looking for project **Vision on Edge (VoE)**, please refer to project [KAN](https://techcommunity.microsoft.com/t5/internet-of-things-blog/introducing-kan-an-oss-project-for-creation-and-management-of/ba-p/3725276) instead.
+If you are looking for project **Vision on Edge (VoE)**, please refer to project [KubeAI Application Nucleus for edge - KAN](https://github.com/Azure/KAN) instead. For more details please refer to this [Tech Community](https://techcommunity.microsoft.com/t5/internet-of-things-blog/introducing-kan-an-oss-project-for-creation-and-management-of/ba-p/3725276) blog.
 
 # Azure Intelligent Edge Patterns
 
