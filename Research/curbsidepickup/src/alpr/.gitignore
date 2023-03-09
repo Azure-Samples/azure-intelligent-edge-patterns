@@ -1,0 +1,8 @@
+#*.pth
+*Deployment.json
+*.yml
+*.so
+0*
+*.ipynb
+.env
+Untitled*

@@ -1,0 +1,186 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "namePrefix": {
+            "metadata": {
+                "description": "Used to qualify the names of all of the resources created in this template."
+            },
+            "defaultValue": "lvasample",
+            "type": "string",
+            "minLength": 3,
+            "maxLength": 13
+        },
+        "location": {
+            "metadata": {
+                "description": "By default, the resources will be created in the same location as the resource group."
+            },
+            "defaultValue": "[resourceGroup().location]",
+            "type": "string"
+        },
+        "resourceTags": {
+            "type": "object",
+            "defaultValue": {
+                "sample": "lva"
+            }
+        }
+    },
+    "variables": {
+        "storageAccountName": "[concat(parameters('namePrefix'),uniqueString(resourceGroup().id))]",
+        "amsAccountName": "[concat(parameters('namePrefix'),uniqueString(resourceGroup().id))]",
+        "hubName": "[concat(parameters('namePrefix'),'hub',uniqueString(resourceGroup().id))]",
+        "registryName": "[concat(parameters('namePrefix'),'registry',uniqueString(resourceGroup().id))]",
+        "hubApiVersion": "2019-11-04",
+        "bastionName": "[concat(parameters('namePrefix'),'-bastion')]",
+        "vnetName": "[concat(parameters('namePrefix'),'-vnet')]",
+        "pipName": "[concat(parameters('namePrefix'),'-bastion-pip')]"
+    },
+    "resources": [
+        {
+            "type": "Microsoft.Storage/storageAccounts",
+            "comments": "A storage account is required to set up a Media Services account",
+            "apiVersion": "2019-04-01",
+            "name": "[variables('storageAccountName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard_LRS"
+            },
+            "kind": "StorageV2",
+            "properties": {
+                "accessTier": "Hot"
+            },
+            "tags": "[parameters('resourceTags')]"
+        },
+        {
+            "type": "Microsoft.Media/mediaServices",
+            "comments": "LVA requires a Media Services account",
+            "apiVersion": "2018-07-01",
+            "name": "[variables('amsAccountName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]"
+            ],
+            "properties": {
+                "storageAccounts": [
+                    {
+                        "id": "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+                        "type": "Primary"
+                    }
+                ]
+            },
+            "tags": "[parameters('resourceTags')]"
+        },
+        {
+            "type": "Microsoft.Devices/IotHubs",
+            "comments": "LVA is hosted on an IoT Edge device. The host device is managed through an IoT Hub. The keys for accessing the hub are in the template's output.",
+            "apiVersion": "[variables('hubApiVersion')]",
+            "name": "[variables('hubName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "S1",
+                "capacity": 1
+            },
+            "properties": {
+            },
+            "tags": "[parameters('resourceTags')]"
+        },
+        {
+            "type": "Microsoft.ContainerRegistry/registries",
+            "comments": "The basic sample scenarios do not require a registry. However, this will be used for more advanced scenarios.",
+            "apiVersion": "2019-05-01",
+            "name": "[variables('registryName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Basic"
+            },
+            "properties": {
+                "adminUserEnabled": true
+            },
+            "tags": "[parameters('resourceTags')]"
+        },
+        {
+            "type": "Microsoft.Network/virtualNetworks",
+            "comments": "This vnet will host the IoT Edge device. The configuration in this template is to support an Azure Bastion connection to the VM.",
+            "apiVersion": "2019-06-01",
+            "name": "[variables('vnetName')]",
+            "location": "[parameters('location')]",
+            "properties": {
+                "addressSpace": {
+                    "addressPrefixes": [
+                        "10.0.0.0/26"
+                    ]
+                },
+                "subnets": [
+                    {
+                        "name": "default",
+                        "properties": {
+                            "addressPrefix": "10.0.0.0/27"
+                        }
+                    },
+                    {
+                        "name": "AzureBastionSubnet",
+                        "properties": {
+                            "addressPrefix": "10.0.0.32/27"
+                        }
+                    }
+                ]
+            },
+            "tags": "[parameters('resourceTags')]"
+        },
+        {
+            "type": "Microsoft.Network/publicIpAddresses",
+            "comments": "This is the IP address used by Azure Bastion.",
+            "apiVersion": "2019-06-01",
+            "name": "[variables('pipName')]",
+            "location": "[parameters('location')]",
+            "sku": {
+                "name": "Standard"
+            },
+            "properties": {
+                "publicIPAllocationMethod": "Static"
+            },
+            "tags": "[parameters('resourceTags')]"
+        },
+        {
+            "type": "Microsoft.Network/bastionHosts",
+            "comments": "Azure Bastion provides a secure mechanism for connecting to the IoT Edge VM. It is accessible in the portal on the VM's blade by clicking 'Connect'.",
+            "apiVersion": "2019-06-01",
+            "name": "[variables('bastionName')]",
+            "location": "[parameters('location')]",
+            "dependsOn": [
+                "[variables('pipName')]",
+                "[variables('vnetName')]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "IpConf",
+                        "properties": {
+                            "subnet": {
+                                "id": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('vnetName'), 'AzureBastionSubnet')]"
+                            },
+                            "publicIPAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('pipName'))]"
+                            }
+                        }
+                    }
+                ]
+            },
+            "tags": "[parameters('resourceTags')]"
+        }
+    ],
+    "outputs": {
+        "storageAccountName": {
+            "type": "string",
+            "value": "[variables('storageAccountName')]"
+        },
+        "hubKeys": {
+            "value": "[listKeys(resourceId('Microsoft.Devices/IotHubs',variables('hubName')), variables('hubApiVersion'))]",
+            "type": "object"
+        },
+        "roleName": {
+            "type": "string",
+            "value": "[concat(parameters('namePrefix'),'-role-',uniqueString(subscription().id))]"
+        }
+    }
+}

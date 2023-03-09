@@ -1,0 +1,110 @@
+{
+  "modulesContent": {
+    "$edgeAgent": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "runtime": {
+          "type": "docker",
+          "settings": {
+            "minDockerVersion": "v1.25",
+            "loggingOptions": "",
+            "registryCredentials": {
+              "mhregistry:55000": {
+                "username": "$CONTAINER_REGISTRY_USERNAME_myacr",
+                "password": "$CONTAINER_REGISTRY_PASSWORD_myacr",
+                "address": "mhregistry:55000"
+              }
+            }
+          }
+        },
+        "systemModules": {
+          "edgeAgent": {
+            "type": "docker",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-agent:1.0",
+              "createOptions": "{}"
+            }
+          },
+          "edgeHub": {
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/azureiotedge-hub:1.0",
+              "createOptions": "{\"HostConfig\":{\"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}]}}}"
+            }
+          }
+        },
+        "modules": {
+          "lvaEdge": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/media/live-video-analytics:1",
+              "createOptions": "{\"HostConfig\":{\"LogConfig\":{\"Type\":\"\",\"Config\":{\"max-size\":\"10m\",\"max-file\":\"10\"}}}}"
+            }
+          },
+          "mhlva01aimodule": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mhregistry:55000/mhlva01aimodule:v0.1.14",
+              "createOptions": "{\"HostConfig\":{\"runtime\": \"nvidia\", \"PortBindings\":{\"5671/tcp\":[{\"HostPort\":\"5671\"}],\"8883/tcp\":[{\"HostPort\":\"8883\"}],\"443/tcp\":[{\"HostPort\":\"443\"}], \"5001/tcp\":[{\"HostPort\":\"5001\"}]}, \"DeviceCgroupRules\":[\"c 189:* rwm\"],\"Binds\":[\"/dev/bus/usb:/dev/bus/usb\",  \"/home/athena/lva_output/:/var/media/\", \"/tmp/aix_debug_cam:/debug_path\"],\"Privileged\":true, \"LogConfig\":{\"Config\": {\"max-size\": \"100m\",\"max-file\": \"10\"}}}}"
+            },
+            "env": {
+              "Debug": {
+                "value": "True"
+              },
+              "DebugOutputFolder": {
+                "value": "/debugoutput"
+              }
+            }
+          },
+          "rtspsim": {
+            "version": "1.0",
+            "type": "docker",
+            "status": "running",
+            "restartPolicy": "always",
+            "settings": {
+              "image": "mcr.microsoft.com/lva-utilities/rtspsim-live555:1.2",
+              "createOptions": "{\"HostConfig\":{\"Binds\":[\"/lvafolders/input:/live/mediaServer/media\"]}}"
+            }
+          }
+        }
+      }
+    },
+    "$edgeHub": {
+      "properties.desired": {
+        "schemaVersion": "1.0",
+        "routes": {
+          "LVAToHub": "FROM /messages/modules/lvaEdge/outputs/* INTO $upstream"
+        },
+        "storeAndForwardConfiguration": {
+          "timeToLiveSecs": 7200
+        }
+      }
+    },
+    "lvaEdge": {
+      "properties.desired": {
+        "applicationDataDirectory": "/var/lib/azuremediaservices",
+        "azureMediaServicesArmId": "/subscriptions/35c2594a-23da-4fce-b59c-f6fb9513eeeb/resourceGroups/mhlvasample1ec8ea/providers/microsoft.media/mediaservices/mhlvasample1ec8eaams",
+        "aadTenantId": "72f988bf-86f1-41af-91ab-2d7cd011db47",
+        "aadServicePrincipalAppId": "1b0777d6-eeef-4a6e-b336-71d99b6277b2",
+        "aadServicePrincipalSecret": "076dee63-089b-4c3f-9426-7bf3f4d69b4f",
+        "aadEndpoint": "https://login.microsoftonline.com",
+        "aadResourceId": "https://management.core.windows.net/",
+        "armEndpoint": "https://management.azure.com/",
+        "diagnosticsEventsOutputName": "AmsDiagnostics",
+        "operationalEventsOutputName": "AmsOperational",
+        "logLevel": "Information",
+        "logCategories": "Application,Events",
+        "allowUnsecuredEndpoints": true,
+        "telemetryOptOut": false
+      }
+    }
+  }
+}

@@ -1,0 +1,42 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+
+        {
+            "name": "Cloud to Device - Console App",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-c2d-console-app",
+           "program": "${workspaceFolder}/Research/lva-ase-sample/src/cloud-to-device-console-app/bin/Debug/netcoreapp3.1/c2d-console-app.dll",
+           "args": [],
+           "cwd": "${workspaceFolder}/Research/lva-ase-sample/src/cloud-to-device-console-app",
+           "stopAtEntry": false,
+           "console": "integratedTerminal",
+           "internalConsoleOptions": "neverOpen"
+       },
+       
+       {
+            "name": "AMS Asset Player - ASP .NET core",
+            "type": "coreclr",
+            "request": "launch",
+            "preLaunchTask": "build-ams-asset-player",
+            "program": "${workspaceFolder}/Research/lva-ase-sample/src/ams-asset-player/bin/Debug/netcoreapp3.1/ams-asset-player.dll",
+            "args": [],
+            "cwd": "${workspaceFolder}/Research/lva-ase-sample/src/ams-asset-player",
+            "stopAtEntry": false,
+            "serverReadyAction": {
+                "action": "openExternally",
+                "pattern": "^\\s*Now listening on:\\s+(https?://\\S+)"
+            },
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development"
+            },
+            "sourceFileMap": {
+                "/Views": "${workspaceFolder}/Research/lva-ase-sample/src/ams-asset-player/Views"
+            }
+        }
+    ]
+}
