@@ -16,7 +16,7 @@ itsdangerous==1.1.0
 janus==0.5.0
 numpy==1.18.4
 paho-mqtt==1.5.0
-protobuf==3.12.4
+protobuf==3.18.3
 pyzmq
 requests-unixsocket==0.2.0
 requests==2.23.0
