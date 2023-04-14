@@ -58,10 +58,12 @@ def update_app_insight_counter(
                 "training",
                 extra={
                     "custom_dimensions": {
-                        "train": train,
-                        "images": images_now - images_last_train,
-                        "parts": parts_now - parts_last_train,
-                        "retrain": retrain,
+                        "training": json.dumps({
+                            "train": train,
+                            "images": images_now - images_last_train,
+                            "parts": parts_now - parts_last_train,
+                            "retrain": retrain,
+                        })
                     }
                 },
             )

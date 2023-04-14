@@ -29,6 +29,7 @@ class CameraSerializer(serializers.ModelSerializer):
             "danger_zones",
             "is_demo",
             "location",
+            "media_type",
             "media_source",
         ]
         extra_kwargs = {"media_source": {"write_only": True, "required": False}}
@@ -39,7 +40,7 @@ class CameraSerializer(serializers.ModelSerializer):
             name=validated_data["name"],
             location=validated_data["location"],
         )
-        for attr in ["area", "lines", "danger_zones", "is_demo"]:
+        for attr in ["area", "lines", "danger_zones", "is_demo", "media_type"]:
             if attr in validated_data:
                 setattr(camera, attr, validated_data[attr])
         if "media_source" in validated_data:

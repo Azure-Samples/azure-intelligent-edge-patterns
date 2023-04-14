@@ -2,6 +2,7 @@
 """
 
 import logging
+import json
 
 from django.db import models
 from django.db.models.signals import pre_save
@@ -10,6 +11,7 @@ from ..locations.models import Location
 from .constants import gen_default_lines, gen_default_zones
 from .exceptions import CameraRtspInvalid
 from .utils import verify_rtsp
+from ..azure_app_insight.utils import get_app_insight_logger
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +28,7 @@ class Camera(models.Model):
     )
     is_demo = models.BooleanField(default=False)
     location = models.ForeignKey(Location, on_delete=models.SET_NULL, null=True)
+    media_type = models.CharField(max_length=1000, blank=True)
 
     def tasks(self):
         try:
@@ -51,6 +54,20 @@ class Camera(models.Model):
             raise CameraRtspInvalid
         if not verify_rtsp(rtsp=instance.rtsp):
             raise CameraRtspInvalid
+        az_logger = get_app_insight_logger()
+        properties = {
+            "custom_dimensions": {
+                "create_camera": json.dumps({
+                    "name": instance.name,
+                    "rtsp_url": instance.rtsp,
+                    "location": instance.location.name,
+                })
+            }
+        }
+        az_logger.warning(
+            "create_camera",
+            extra=properties,
+        )
 
 
 pre_save.connect(Camera.pre_save, Camera, dispatch_uid="Camera_pre")

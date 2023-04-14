@@ -16,7 +16,7 @@ import {
 
 import { TrainingProject } from '../../../store/trainingProjectSlice';
 import { trainingProjectPartsSelectorFactory } from '../../../store/partSlice';
-import { deleteCustomProject } from '../../../store/trainingProjectSlice';
+import { deleteTrainingProject } from '../../../store/trainingProjectSlice';
 import { Status } from '../../../store/trainingProjectStatusSlice';
 import { Url } from '../../../constant';
 import { NO_LIMIT_TRAIN_STATUS } from '../type';
@@ -98,7 +98,7 @@ const ModelCard: React.FC<Props> = (props) => {
 
   const onDeleteModel = useCallback(async () => {
     await dispatch(
-      deleteCustomProject({
+      deleteTrainingProject({
         id: project.id,
         resolve: () => {
           history.push(Url.MODELS);

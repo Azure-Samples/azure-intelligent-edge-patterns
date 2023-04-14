@@ -38,15 +38,17 @@ export type Handler = {
 };
 
 const convertOpenVinoName = (project: TrainingProject) => {
-  if (project.category !== 'openvino') return project.name;
-
+  if (project.category === 'openvino' && project.name === 'face_detection') return 'Face Detection';
+  if (project.category === 'openvino' && project.name === 'emotion_recognition') return 'Emotion Recognition';
   if (project.category === 'openvino' && project.name === 'age_gender_recognition')
     return 'Age / Gender Recognition';
+  if (project.category === 'openvino' && project.name === 'pedestrian_and_vehicle_detector')
+    return 'Pedestrian and Vehicle Detection';
+  if (project.category === 'openvino' && project.name === 'vehicle_attributes_recognition')
+    return 'Vehicle Attribute Recognition';
+  if (project.category === 'openvino' && project.name === 'person_detection') return 'Person Detection';
 
-  return project.name
-    .split('_')
-    .map((s) => s.charAt(0).toUpperCase() + s.slice(1))
-    .join(' ');
+  return project.name;
 };
 
 export type TrainingProject = {
@@ -218,7 +220,7 @@ export const updateCustomProject = createWrappedAsync<any, any, { state: State }
   },
 );
 
-export const deleteCustomProject = createWrappedAsync<any, { id: number; resolve: () => void }>(
+export const deleteTrainingProject = createWrappedAsync<any, { id: number; resolve: () => void }>(
   'trainingSlice/DeleteCustom',
   async ({ id, resolve }) => {
     await Axios.delete(`/api/projects/${id}/`);
@@ -266,7 +268,7 @@ const slice = createSlice({
       .addCase(refreshTrainingProject.fulfilled, entityAdapter.setAll)
       .addCase(createCustomProject.fulfilled, entityAdapter.upsertOne)
       .addCase(updateCustomProject.fulfilled, entityAdapter.upsertOne)
-      .addCase(deleteCustomProject.fulfilled, entityAdapter.removeOne)
+      .addCase(deleteTrainingProject.fulfilled, entityAdapter.removeOne)
       .addCase(getSelectedProjectInfo.fulfilled, (state, action) => {
         const { payload } = action;
 

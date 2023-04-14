@@ -7,6 +7,7 @@ import os
 import threading
 import time
 import subprocess
+import json
 
 from azure.cognitiveservices.vision.customvision.training.models import (
     CustomVisionErrorException,
@@ -19,6 +20,7 @@ from rest_framework.exceptions import APIException
 from ..azure_iot.utils import prediction_module_url
 from ..azure_settings.exceptions import SettingCustomVisionAccessFailed
 from ..azure_settings.models import Setting
+from ..azure_app_insight.utils import get_app_insight_logger
 from .exceptions import (
     ProjectAlreadyTraining,
     ProjectCannotChangeDemoError,
@@ -183,12 +185,15 @@ class Project(models.Model):
             # check is_trained
             trainer = instance.get_trainer_obj()    
             iterations = trainer.get_iterations(instance.customvision_id)
+            tags_ = trainer.get_tags(instance.customvision_id)
+            tag_list = [i.name for i in tags_]
             if len(iterations) > 0:
                 instance.is_trained = True
             else:
                 instance.is_trained = False        
 
         except Exception:
+            tag_list = []
             instance.customvision_id = ""
         logger.info(
             "Project (id, customvision_id, name): (%s, %s, %s)",
@@ -197,6 +202,21 @@ class Project(models.Model):
             instance.name,
         )
         logger.info("Project pre_save end")
+
+        az_logger = get_app_insight_logger()
+        properties = {
+            "custom_dimensions": {
+                "create_project": json.dumps({
+                    "name": instance.name,
+                    "project_type": instance.project_type,
+                    "tags": tag_list,
+                })
+            }
+        }
+        az_logger.warning(
+            "create_project",
+            extra=properties,
+        )
 
     def dequeue_iterations(self, max_iterations: int = 2):
         """dequeue_iterations.
@@ -235,7 +255,7 @@ class Project(models.Model):
                 obj_detection_domain = next(domain for domain in self.setting.get_trainer_obj().get_domains() if domain.type == project_type and domain.name == "General (compact)")
                 project = self.setting.create_project(project_name=self.name, domain_id=obj_detection_domain.id)
             elif project_type == 'Classification':
-                obj_detection_domain = next(domain for domain in self.setting.get_trainer_obj().get_domains() if domain.type == project_type)
+                obj_detection_domain = next(domain for domain in self.setting.get_trainer_obj().get_domains() if domain.type == project_type and domain.name == "General (compact)")
                 project = self.setting.create_project(project_name=self.name, domain_id=obj_detection_domain.id, classification_type=classification_type)   
             else:
                 project = self.setting.create_project(project_name=self.name)

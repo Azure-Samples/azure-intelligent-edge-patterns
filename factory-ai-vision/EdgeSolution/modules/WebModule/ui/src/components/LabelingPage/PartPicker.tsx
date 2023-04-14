@@ -1,12 +1,23 @@
-import React, { useEffect, useState, useMemo, useCallback } from 'react';
-import { DetailsList, SelectionMode, CheckboxVisibility, Text, TextField } from '@fluentui/react';
+import React, {
+  useEffect,
+  //  useState,
+  useMemo,
+  useCallback,
+} from 'react';
+import { DetailsList, SelectionMode, CheckboxVisibility, Text } from '@fluentui/react';
 import { useSelector, useDispatch } from 'react-redux';
 
-import { Part, getParts, postPart, trainingProjectPartsSelectorFactory } from '../../store/partSlice';
+import {
+  Part,
+  getParts,
+  //  postPart,
+  trainingProjectPartsSelectorFactory,
+} from '../../store/partSlice';
 import { changePartId } from '../../store/labelingPageSlice';
 import { TrainingProject } from '../../store/trainingProjectSlice';
 import { createClassification, updateAnnotation } from '../../store/annotationSlice';
 import { Annotation } from '../../store/type';
+import { theme } from '../../constant/theme';
 
 interface Props {
   trainingProject: TrainingProject;
@@ -25,22 +36,22 @@ export const PartPicker: React.FC<Props> = (props) => {
 
   const dispatch = useDispatch();
 
-  const [newPartName, setNewPartName] = useState('');
+  // const [newPartName, setNewPartName] = useState('');
 
   useEffect(() => {
     dispatch(getParts());
   }, [dispatch]);
 
-  const onTextFieldChange = (_, newValue: string) => {
-    setNewPartName(newValue);
-  };
+  // const onTextFieldChange = (_, newValue: string) => {
+  //   setNewPartName(newValue);
+  // };
 
-  const onTextFieldEnter = async (evt: React.KeyboardEvent) => {
-    if (evt.nativeEvent.code === 'Enter') {
-      await dispatch(postPart({ name: newPartName, description: '', project: trainingProject.id }));
-      setNewPartName('');
-    }
-  };
+  // const onTextFieldEnter = async (evt: React.KeyboardEvent) => {
+  //   if (evt.nativeEvent.code === 'Enter') {
+  //     await dispatch(postPart({ name: newPartName, description: '', project: trainingProject.id }));
+  //     setNewPartName('');
+  //   }
+  // };
 
   const onChangePart = useCallback(
     (item: Part) => {
@@ -108,13 +119,22 @@ export const PartPicker: React.FC<Props> = (props) => {
 
   return (
     <div>
-      <TextField
-        label="What is this?"
-        placeholder="Enter an object name"
-        value={newPartName}
-        onChange={onTextFieldChange}
-        onKeyDown={onTextFieldEnter}
-      />
+      <Text
+        styles={{
+          root: {
+            fontWeight: 600,
+            lineHeight: '20px',
+            fontSize: '16px',
+            backgroundColor: theme.palette.neutralLighter,
+            minHeight: '50px',
+            display: 'flex',
+            alignItems: 'center',
+            paddingLeft: '10px',
+          },
+        }}
+      >
+        Select a part
+      </Text>
       {renderPartList()}
     </div>
   );

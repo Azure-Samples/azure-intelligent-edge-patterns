@@ -72,7 +72,8 @@ export const PartDetails: React.FC = () => {
           if (!confirm('Sure you want to delete?')) return;
 
           await dispatch(deletePart(partId));
-          history.push(`${Url.MODELS_DETAIL}?modelId=${project.id}`);
+          // history.push(`${Url.MODELS_CV_DETAIL}?modelId=${project.id}`);
+          // history.push(`${Url.MODELS_CV_DETAIL}?modelId=${project.id}`);
         })();
       },
     },
@@ -101,7 +102,7 @@ export const PartDetails: React.FC = () => {
       href: '/models',
       onClick: (ev, item) => {
         ev.preventDefault();
-        history.push(`${Url.MODELS_DETAIL}?modelId=${project.id}`);
+        // history.push(`${Url.MODELS_CV_DETAIL}?modelId=${project.id}`);
       },
     },
     { key: part.name, text: part.name },
