@@ -3,7 +3,7 @@ FastAPI
 Jinja2==2.11.2
 MarkupSafe==1.1.1
 Pillow
-Werkzeug==1.0.1
+Werkzeug==2.2.3
 azure-iot-device==2.0.1
 azure-iot-hub==2.2.2rc0
 certifi # certifi should always be latest
