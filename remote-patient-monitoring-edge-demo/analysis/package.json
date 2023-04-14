@@ -30,7 +30,7 @@
     "@ahryman40k/ts-fhir-types": "^4.0.34",
     "axios": "^0.21.1",
     "dotenv": "^8.2.0",
-    "express": "^4.17.1",
+    "express": "^4.17.3",
     "faker": "5.3.1",
     "luxon": "1.25.0",
     "@types/node": "14.14.25"
